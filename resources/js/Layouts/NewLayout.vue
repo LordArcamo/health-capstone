@@ -60,7 +60,7 @@ import { Link } from '@inertiajs/vue3';
             <div class="border-container">
                 <img src={} alt="logo">
                 <i class="fa-solid fa-house"></i>
-                <button onclick="document.location='#'"> Home</button>
+                <button onclick="document.location='#'">Dashboard</button>
                 <button onclick="document.location='#'">Patients</button>
                 <button onclick="document.location='#'">Check Up</button>
                 <button onclick="document.location='#'">Mortality</button>
@@ -68,7 +68,9 @@ import { Link } from '@inertiajs/vue3';
                 <h2>Account Details</h2>
                 <button onclick="document.location='#'">Accounts</button>
                 <button onclick="document.location='#'">Settings</button>
-                <button onclick="document.location='#'">Sign Out</button>
+                <ResponsiveNavLink :href="route('logout')" method="post" as="button">
+                                Sign Out
+                            </ResponsiveNavLink>
 
             </div>
         </div>
