@@ -1,4 +1,4 @@
-<script src>
+<script setup>
 import { ref } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
@@ -19,15 +19,13 @@ import { Link } from '@inertiajs/vue3';
         width: 20%;
     }
     .content{
-        background-color: green;
-        color: white;
         width: 80%;
     }
     .border-container{
         height: 100vh;
         background-color: white;
         border-radius: 20px;
-        margin:20px 10px 20px 10px;
+        margin:0px 10px 20px 10px;
         padding: 40px;
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
         display: flex;
@@ -49,6 +47,11 @@ import { Link } from '@inertiajs/vue3';
         color: white;
         background-color: rgb(188, 188, 188);
     }
+    h2{
+        padding:20px;
+        font-weight: bolder;
+    }
+
 </style>
 
 <template>
@@ -56,11 +59,16 @@ import { Link } from '@inertiajs/vue3';
         <div class="main">
             <div class="border-container">
                 <img src={} alt="logo">
-                <button  onclick="document.location='//www.pinayflixtv.com/'">Home</button>
-                <button>Patients</button>
-                <button>Check Up</button>
-                <button>Patient Records</button>
+                <i class="fa-solid fa-house"></i>
+                <button onclick="document.location='#'"> Home</button>
+                <button onclick="document.location='#'">Patients</button>
+                <button onclick="document.location='#'">Check Up</button>
+                <button onclick="document.location='#'">Mortality</button>
 
+                <h2>Account Details</h2>
+                <button onclick="document.location='#'">Accounts</button>
+                <button onclick="document.location='#'">Settings</button>
+                <button onclick="document.location='#'">Sign Out</button>
 
             </div>
         </div>
