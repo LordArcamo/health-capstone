@@ -60,9 +60,9 @@ import { Link } from '@inertiajs/vue3';
             <div class="border-container">
                 <img src={} alt="logo">
                 <i class="fa-solid fa-house"></i>
-                <button onclick="document.location='#'">Dashboard</button>
+                <button onclick="document.location='/dashboard'">Dashboard</button>
                 <button onclick="document.location='#'">Patients</button>
-                <button onclick="document.location='#'">Check Up</button>
+                <button onclick="document.location='/checkup'">Check Up</button>
                 <button onclick="document.location='#'">Mortality</button>
 
                 <h2>Account Details</h2>
