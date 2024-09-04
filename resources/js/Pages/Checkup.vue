@@ -5,8 +5,7 @@
 
         <div class="mt-4 mx-4">
             <div class="flex justify-between">
-                <h5>Check Up</h5>
-                <link :href="('checkup.create')">New Check Up<link/>
+                <h5>Check Up asdasd</h5>
 
             </div>
         </div>

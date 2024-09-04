@@ -14,7 +14,24 @@ class CheckUp extends Model
     protected $fillable = [
         'fname',
         'lname',
+        'mname',
+        'suffix',
+        'address',
         'age',
-        'sex'
+        'dob',
+        'contact_num',
+        'sex',
+        'date_of_consult',
+        'time_of_consult',
+        'bp',
+        'height',
+        'weight',
+        'temperature',
+        'attendname',
+        'nature_visit',
+        'type_consult',
+        'diagnosis',
+        'treatment',
+        'nurse',
     ];
 }
