@@ -1,6 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
+
 </script>
 
 <style>
@@ -64,7 +65,9 @@ import { Head } from '@inertiajs/vue3';
                <div class="container">
                     <div class="cases-card">
                          <h1>Cases</h1>
+                         <p class="text-sm text-red-600">TEST</p>
                     </div>
+
                     
                </div>
         </div>

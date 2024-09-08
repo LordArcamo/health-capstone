@@ -17,6 +17,12 @@ Route::get('/', function () {
 
 Route::resource('/checkup', CheckUpController::class);
 
+
+Route::get('/mortality', function () {
+    return Inertia::render('Mortality');
+})->middleware(['auth', 'verified'])->name('mortality');
+
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
