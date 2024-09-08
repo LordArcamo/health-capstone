@@ -5,14 +5,11 @@ import { Head } from '@inertiajs/vue3';
 </script>
 
 <style>
-     .container{
-          display: flex;
-          flex-direction: row;
+      /* .container{
           background-color: white;
-          color: black;
           padding: 20px;
           gap: 50px;
-     }
+     }  */
      .patient-card{
           display: flex;
           flex-direction: column;
@@ -52,7 +49,7 @@ import { Head } from '@inertiajs/vue3';
 
    <NewLayout>
         <div>
-               <div class="container">
+               <div class="container gap-4 my-10 px-10 flex flex-row">
                     <div class="patient-card">
                          <h1>Total Patients</h1>
                          <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 448 512"><path fill="#ffffff" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>100,000</p>
@@ -62,13 +59,12 @@ import { Head } from '@inertiajs/vue3';
                          <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 448 512"><path fill="#ffffff" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/></svg>100,000</p>
                     </div>
                </div>
-               <div class="container">
+               <div class="container px-10">
                     <div class="cases-card">
                          <h1>Cases</h1>
                          <p class="text-sm text-red-600">TEST</p>
                     </div>
 
-                    
                </div>
         </div>
    </NewLayout>

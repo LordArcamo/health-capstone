@@ -22,14 +22,9 @@ import { Link } from '@inertiajs/vue3';
         width: 80%;
     }
     .border-container{
-        height: 100vh;
         background-color: white;
-        border-radius: 20px;
-        margin:0px 10px 20px 10px;
         padding: 40px;
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-        display: flex;
-        flex-direction: column;
         align-items: start;
         gap: 20px;
     }
@@ -79,7 +74,7 @@ import { Link } from '@inertiajs/vue3';
 <template>
     <div class="row-container"> 
         <div class="main">
-            <div class="border-container">
+            <div class="container flex flex-col border-container">
                 <img src={} alt="logo">
                 <i class="fa-solid fa-house"></i>
                 <button onclick="document.location='/dashboard'">Dashboard</button>
