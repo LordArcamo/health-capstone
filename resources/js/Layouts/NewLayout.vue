@@ -72,7 +72,7 @@ import { Link } from '@inertiajs/vue3';
 </style>
 
 <template>
-    <div class="row-container"> 
+    <div class="row-container bg-gray-100"> 
         <div class="main">
             <div class="container flex flex-col border-container">
                 <img src={} alt="logo">
