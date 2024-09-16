@@ -1,15 +1,15 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import Form from '../Components/CheckupForm.vue';
+import Patient from '../Components/PatientTable.vue';
+
 
 </script>
 
 <template>
-    <Head title="Check Up" />
-
+    <Head title="Patient Records" />
     <NewLayout>
-      <Form />
+      <Patient />
     </NewLayout>
 
 </template>
