@@ -76,9 +76,9 @@ p {
                </div>
 
                <div class="container gap-10 my-10 px-10 flex flex-col overflow-x-auto">
-                    <longbox>
+                    <!-- <longbox>
                          <chart />
-                    </longbox>
+                    </longbox> -->
 
                     <Box>
                          <linechart />
