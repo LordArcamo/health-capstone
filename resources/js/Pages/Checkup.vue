@@ -6,10 +6,11 @@ import Form from '../Components/CheckupForm.vue';
 </script>
 
 <template>
-    <Head title="Check Up" />
 
-    <NewLayout>
-      <Form />
-    </NewLayout>
+  <Head title="Check Up" />
+
+  <NewLayout>
+    <Form />
+  </NewLayout>
 
 </template>
