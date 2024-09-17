@@ -46,19 +46,6 @@ const toggleSidebar = () => {
           :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
           Mortality
         </inertia-link>
-        <inertia-link href="{{ route('profile') }}"
-          class="block py-2.5 px-4 rounded hover:bg-gray-100 transition duration-200"
-          :class="{ 'bg-gray-100': $page.component === 'Profile' }">
-          Profile
-        </inertia-link>
-        <inertia-link href="{{ route('settings') }}"
-          class="block py-2.5 px-4 rounded hover:bg-gray-100 transition duration-200"
-          :class="{ 'bg-gray-100': $page.component === 'Settings' }">
-          Settings
-        </inertia-link>
-        <form method="POST" action="{{ route('logout') }}" class="block py-2.5 mt-10 transition duration-200">
-          <button type="submit" class="w-full text-left hover:bg-red-600 text-red-600">Sign Out</button>
-        </form>
       </nav>
     </div>
 
