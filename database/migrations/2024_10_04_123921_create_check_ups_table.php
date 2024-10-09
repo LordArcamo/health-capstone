@@ -13,27 +13,28 @@ return new class extends Migration
     {
         Schema::create('check_ups', function (Blueprint $table) {
             $table->id();
-            $table->string('fname');
-            $table->string('lname');
-            $table->string('mname');
+            $table->string('firstName');
+            $table->string('lastName');
+            $table->string('middleName');
             $table->string('suffix');
             $table->string('address');
             $table->integer('age');
-            $table->date('dob');
-            $table->integer('contact_num');
+            $table->date('birthdate');
+            $table->string('contact');
             $table->string('sex');
-            $table->date('date_of_consult');
-            $table->time('time_of_consult');
-            $table->integer('bp');
+            $table->date('consultationDate');
+            $table->time('consultationTime');
+            $table->string('modeOfTransaction');
+            $table->string('bloodPressure');
+            $table->double('temperature');
             $table->integer('height');
-            $table->float('weight');
-            $table->integer('temperature');
-            $table->string('attendname');
-            $table->string('nature_visit');
-            $table->string('type_consult');
+            $table->double('weight');
+            $table->string('providerName');
+            $table->string('natureOfVisit');
+            $table->string('visitType');
+            $table->string('chiefComplaints');
             $table->string('diagnosis');
-            $table->string('treatment');
-            $table->string('nurse');
+            $table->string('medication');
             $table->timestamps();
         });
     }

@@ -2,8 +2,11 @@
   <div class="container mx-auto py-8">
     <h2 class="text-2xl sm:text-3xl font-bold mb-4">Patient Records</h2>
 
+    <!-- Check if patients prop is empty -->
+    <p v-if="!patients || patients.length === 0">No patient records available.</p>
+
     <!-- Search input -->
-    <div class="mb-4">
+    <div v-else class="mb-4">
       <input v-model="searchQuery" type="text" placeholder="Search by name, age, address, or diagnosis"
         class="border border-gray-300 p-2 rounded w-full" />
     </div>
@@ -13,8 +16,8 @@
       <table class="min-w-full table-auto bg-white shadow-md rounded-lg">
         <thead>
           <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-            <th class="py-3 px-6 text-left">Last Name</th>
             <th class="py-3 px-6 text-left">First Name</th>
+            <th class="py-3 px-6 text-left">Last Name</th>
             <th class="py-3 px-6 text-left">Middle Name</th>
             <th class="py-3 px-6 text-left">Age</th>
             <th class="py-3 px-6 text-left">Address</th>
@@ -29,6 +32,7 @@
         </thead>
         <tbody class="text-gray-600 text-sm font-light">
           <tr v-for="patient in filteredPatients" :key="patient.id" class="border-b border-gray-200 hover:bg-gray-100">
+
             <td class="py-3 px-6 text-left whitespace-nowrap">{{ patient.lastName }}</td>
             <td class="py-3 px-6 text-left">{{ patient.firstName }}</td>
             <td class="py-3 px-6 text-left">{{ patient.middleName }}</td>
@@ -66,17 +70,14 @@
     <!-- Modal -->
     <div v-if="isModalOpen" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
-        <!-- Close Button -->
         <button @click="closeModal"
           class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
           &times;
         </button>
 
-        <h2 class="text-xl sm:text-2xl font-bold mb-4">Details for {{ selectedPatient.firstName }} {{
-          selectedPatient.lastName }}</h2>
+        <h2 class="text-xl sm:text-2xl font-bold mb-4">Details for {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</h2>
         <ul>
-          <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{
-            selectedPatient.lastName }}</li>
+          <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}</li>
           <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
           <li><strong>Address:</strong> {{ selectedPatient.address }}</li>
           <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
@@ -99,100 +100,19 @@
 
 <script>
 export default {
+  props: {
+    patients: {
+      type: Array,
+      default: () => [] // Default to empty array to prevent errors
+    }
+  },
   data() {
     return {
-      patients: [
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        // Sample patient data
-      ],
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: 5,
       isModalOpen: false,
-      selectedPatient: {}, // Modal patient data
+      selectedPatient: {},
     };
   },
   computed: {
@@ -245,9 +165,10 @@ export default {
         this.currentPage -= 1;
       }
     },
-  },
-};
+  }
+}
 </script>
+
 
 <style scoped>
 .container {

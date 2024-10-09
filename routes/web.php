@@ -15,8 +15,12 @@ Route::get('/', function () {
     ]);
 });
 
-Route::resource('/checkup', CheckUpController::class);
-
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('/checkup', CheckUpController::class);
+    Route::post('/checkup/store', [CheckUpController::class, 'store'])->name('checkup.store');
+    Route::get('/checkup', [CheckUpController::class, 'create'])->name('checkup.create'); // corrected 'patiens' to 'patients'
+    Route::get('/patients', [CheckUpController::class, 'index'])->name('patients.index');
+});
 
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');
@@ -26,10 +30,6 @@ Route::get('/mortality', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/patients', function () {
-    return Inertia::render('Patients');
-})->middleware(['auth', 'verified'])->name('patients');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

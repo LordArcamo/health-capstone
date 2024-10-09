@@ -8,30 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class CheckUp extends Model
 {
     use HasFactory;
-
     protected $table = 'check_ups';
 
     protected $fillable = [
-        'fname',
-        'lname',
-        'mname',
-        'suffix',
-        'address',
-        'age',
-        'dob',
-        'contact_num',
-        'sex',
-        'date_of_consult',
-        'time_of_consult',
-        'bp',
-        'height',
-        'weight',
-        'temperature',
-        'attendname',
-        'nature_visit',
-        'type_consult',
-        'diagnosis',
-        'treatment',
-        'nurse',
+        'firstName', 'lastName', 'middleName', 'suffix', 'address',
+        'age', 'birthdate', 'contact', 'sex', 'consultationDate',
+        'consultationTime', 'modeOfTransaction', 'bloodPressure',
+        'temperature', 'height', 'weight', 'providerName',
+        'natureOfVisit', 'visitType', 'chiefComplaints',
+        'diagnosis', 'medication'
     ];
+
+    protected $hidden = ['created_at', 'updated_at'];
 }

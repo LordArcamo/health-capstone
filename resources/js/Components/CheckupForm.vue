@@ -9,28 +9,28 @@
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName" class="input" required />
+              <label class="block">First Name:</label>
+              <input type="text" v-model="form.firstName " class="input"required/>
             </div>
             <div>
-              <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" class="input" required />
+              <label class="block">Last Name:</label>
+              <input type="text" v-model="form.lastName " class="input" required />
             </div>
             <div>
               <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName" class="input" />
+              <input type="text" v-model="form.middleName " class="input" required/>
             </div>
             <div>
               <label class="block">Suffix:</label>
-              <input type="text" v-model="form.suffix" class="input" />
-            </div>
-            <div>
-              <label class="block">Age:</label>
-              <input type="number" v-model="form.age" class="input" required />
+              <input type="text" v-model="form.suffix" class="input"/>
             </div>
             <div>
               <label class="block">Residential Address:</label>
               <input type="text" v-model="form.address" class="input" required />
+            </div>
+            <div>
+              <label class="block">Age:</label>
+              <input type="number" v-model="computedAge" class="input" readonly />
             </div>
             <div>
               <label class="block">Birthdate:</label>
@@ -51,11 +51,10 @@
           <h3 class="text-lg font-semibold mb-4">Consultation Details</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block">Mode of Transaction:</label>
-              <select v-model="form.modeOfTransaction" class="input" required>
-                <option>Walk-in</option>
-                <option>Visited</option>
-                <option>Referral</option>
+              <label class="block">Gender</label>
+              <select v-model="form.sex" class="input" required>
+                <option>Male</option>
+                <option>Female</option>
               </select>
             </div>
             <div>
@@ -65,6 +64,14 @@
             <div>
               <label class="block">Consultation Time:</label>
               <input type="time" v-model="form.consultationTime" class="input" required />
+            </div>
+            <div>
+              <label class="block">Mode of Transaction:</label>
+              <select v-model="form.modeOfTransaction" class="input" required>
+                <option>Walk-in</option>
+                <option>Visited</option>
+                <option>Referral</option>
+              </select>
             </div>
             <!-- <div>
               <label class="block">Referred From</label>
@@ -90,10 +97,6 @@
               <label class="block">Weight (kg):</label>
               <input type="number" v-model="form.weight" class="input" />
             </div>
-            <div>
-              <label class="block">Name of Attending Provider:</label>
-              <input type="text" v-model="form.providerName" class="input" />
-            </div>
           </div>
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
@@ -105,6 +108,10 @@
         <div v-if="step === 3">
           <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
           <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block">Name of Attending Provider:</label>
+              <input type="text" v-model="form.providerName" class="input" />
+            </div>
             <div>
               <label class="block">Nature of Visit:</label>
               <select v-model="form.natureOfVisit" class="input" required>
@@ -141,10 +148,6 @@
               <label class="block">Medication/Treatment:</label>
               <textarea v-model="form.medication" class="input"></textarea>
             </div>
-            <div>
-              <label class="block">Waistline (cm):</label>
-              <input type="number" v-model="form.waistline" class="input" />
-            </div>
           </div>
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
@@ -152,28 +155,32 @@
           </div>
         </div>
       </form>
+      <div v-if="successMessage" class="mt-4 text-green-600 text-center">
+        {{ successMessage }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  props: ['onSubmit'],
   data() {
     return {
       step: 1,
       form: {
-        lastName: '',
         firstName: '',
+        lastName: '',
         middleName: '',
         suffix: '',
-        age: '',
         address: '',
+        age: '',
         birthdate: '',
         contact: '',
-        modeOfTransaction: '',
+        sex: '',
         consultationDate: '',
         consultationTime: '',
-        reasonForReferral: '',
+        modeOfTransaction: '',
         bloodPressure: '',
         temperature: '',
         height: '',
@@ -183,23 +190,46 @@ export default {
         visitType: '',
         chiefComplaints: '',
         diagnosis: '',
-        medication: '',
-        waistline: ''
+        medication: ''
       },
+      successMessage: '',
     };
   },
-  methods: {
-    nextStep() {
-      if (this.step < 3) this.step++;
-    },
-    prevStep() {
-      if (this.step > 1) this.step--;
-    },
-    submitForm() {
-      alert('Form submitted');
-      console.log(this.form);
+  computed: {
+    computedAge() {
+      return this.calculateAge();
     },
   },
+  methods: {
+    calculateAge() {
+      if (!this.form.birthdate) return '';
+      const birthdate = new Date(this.form.birthdate);
+      const today = new Date();
+      let age = today.getFullYear() - birthdate.getFullYear();
+      const monthDiff = today.getMonth() - birthdate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+        age--;
+      }
+      this.form.age = age;
+      return age;
+    },
+    submitForm() {
+      console.log('Submitting form with data:', this.form); // Debugging
+      this.onSubmit(this.form).catch(error => {
+        console.error('Submission error:', error); // Log error if it occurs
+      });
+    },
+    nextStep() {
+      if (this.step < 3) {
+        this.step++;
+      }
+    },
+    prevStep() {
+      if (this.step > 1) {
+        this.step--;
+      }
+    },
+  }
 };
 </script>
 
