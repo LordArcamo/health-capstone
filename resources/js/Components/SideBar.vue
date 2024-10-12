@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 
+
 // Use the Vue 3 Composition API with 'ref'
 const sidebarOpen = ref(false);
 
@@ -41,11 +42,11 @@ const toggleSidebar = () => {
           :class="{ 'bg-gray-100': $page.component === 'Checkup' }">
         Checkup
         </Link>
-        <inertia-link href="{{ route('mortality') }}"
+        <Link href="{{'/mortality' }}"
           class="block py-2.5 px-4 rounded hover:bg-gray-100 transition duration-200"
           :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
           Mortality
-        </inertia-link>
+        </Link>
       </nav>
     </div>
 

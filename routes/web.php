@@ -16,12 +16,16 @@ Route::get('/', function () {
     ]);
 });
 
-Route::resource('/checkup', CheckUpController::class);
-
 // routes/web.php
 
 Route::get('/patients', [PatientController::class, 'index']);
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('/checkup', CheckUpController::class);
+    Route::post('/checkup/store', [CheckUpController::class, 'store'])->name('checkup.store');
+    Route::get('/checkup', [CheckUpController::class, 'create'])->name('checkup.create'); // corrected 'patiens' to 'patients'
+    Route::get('/patients', [CheckUpController::class, 'index'])->name('patients.index');
+});
 
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');
