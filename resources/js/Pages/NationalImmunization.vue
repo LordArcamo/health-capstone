@@ -1,7 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import Modal from '../Components/WelcomeModal.vue';
+import NationalImmunizationForm from '../Components/NationalImmunizationProgramForm.vue';
 
 </script>
 
@@ -10,7 +10,7 @@ import Modal from '../Components/WelcomeModal.vue';
   <Head title="Check Up" />
 
   <NewLayout>
-    <Modal/>
+    <NationalImmunizationForm/>
   </NewLayout>
 
 </template>

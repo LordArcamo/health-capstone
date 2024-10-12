@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "@harv46/vue-table": "^0.1.2",
+        "@headlessui/vue": "^1.7.23",
         "chart.js": "^4.4.4",
         "primevue": "^4.0.6",
         "vue-chartjs": "^5.3.1"

@@ -1,7 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import Modal from '../Components/WelcomeModal.vue';
+import PreNatalForm from '../Components/PrenatalForm.vue';
 
 </script>
 
@@ -10,7 +10,7 @@ import Modal from '../Components/WelcomeModal.vue';
   <Head title="Check Up" />
 
   <NewLayout>
-    <Modal/>
+    <PreNatalForm/>
   </NewLayout>
 
 </template>

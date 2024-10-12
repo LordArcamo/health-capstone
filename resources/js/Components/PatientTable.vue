@@ -4,8 +4,12 @@
 
     <!-- Search input -->
     <div class="mb-4">
-      <input v-model="searchQuery" type="text" placeholder="Search by name, age, address, or diagnosis"
-        class="border border-gray-300 p-2 rounded w-full" />
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search by name, age, address, or diagnosis"
+        class="border border-gray-300 p-2 rounded w-full"
+      />
     </div>
 
     <!-- Responsive Table Wrapper -->
@@ -52,13 +56,11 @@
 
     <!-- Pagination controls -->
     <div class="mt-4 flex justify-center">
-      <button @click="prevPage" :disabled="currentPage === 1"
-        class="bg-gray-300 text-gray-700 px-4 py-2 mx-1 rounded hover:bg-gray-400">
+      <button @click="prevPage" :disabled="currentPage === 1" class="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-semibold py-2 px-4 rounded shadow hover:from-red-700 hover:to-orange-500 transition-colors duration-300">
         Previous
       </button>
       <span class="mx-2">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages"
-        class="bg-gray-300 text-gray-700 px-4 py-2 mx-1 rounded hover:bg-gray-400">
+      <button @click="nextPage" :disabled="currentPage === totalPages" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
         Next
       </button>
     </div>
@@ -67,16 +69,13 @@
     <div v-if="isModalOpen" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
         <!-- Close Button -->
-        <button @click="closeModal"
-          class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
+        <button @click="closeModal" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
           &times;
         </button>
 
-        <h2 class="text-xl sm:text-2xl font-bold mb-4">Details for {{ selectedPatient.firstName }} {{
-          selectedPatient.lastName }}</h2>
+        <h2 class="text-xl sm:text-2xl font-bold mb-4">Details for {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</h2>
         <ul>
-          <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{
-            selectedPatient.lastName }}</li>
+          <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}</li>
           <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
           <li><strong>Address:</strong> {{ selectedPatient.address }}</li>
           <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
@@ -99,100 +98,22 @@
 
 <script>
 export default {
+  props: {
+    patients: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  mounted() {
+    console.log(this.patients); // Check if patients are being received
+  },
   data() {
     return {
-      patients: [
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        {
-          id: 2,
-          lastName: 'Smith',
-          firstName: 'Jane',
-          middleName: 'B.',
-          age: 40,
-          address: '456 Oak St',
-          contact: '555-555-6666',
-          consultationDate: '2024-09-10',
-          temperature: '36.5°C',
-          height: '160 cm',
-          weight: '60 kg',
-          diagnosis: 'Cold',
-        },
-        // Sample patient data
-      ],
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: 5,
       isModalOpen: false,
-      selectedPatient: {}, // Modal patient data
+      selectedPatient: {},
     };
   },
   computed: {
@@ -227,6 +148,16 @@ export default {
     },
   },
   methods: {
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
     openModal(patient) {
       this.selectedPatient = patient;
       this.isModalOpen = true;
@@ -235,37 +166,10 @@ export default {
       this.isModalOpen = false;
       this.selectedPatient = {};
     },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage += 1;
-      }
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage -= 1;
-      }
-    },
   },
 };
 </script>
 
 <style scoped>
-.container {
-  padding: 0 1rem;
-}
-
-.table-auto {
-  width: 100%;
-}
-
-@media (min-width: 640px) {
-  .table-auto {
-    display: table;
-  }
-}
-
-.modal-content {
-  max-width: 100%;
-  width: 100%;
-}
+/* Add any necessary styling here */
 </style>
