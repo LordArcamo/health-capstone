@@ -51,13 +51,11 @@
 
     <!-- Pagination controls -->
     <div class="mt-4 flex justify-center">
-      <button @click="prevPage" :disabled="currentPage === 1"
-        class="bg-gray-300 text-gray-700 px-4 py-2 mx-1 rounded hover:bg-gray-400">
+      <button @click="prevPage" :disabled="currentPage === 1" class="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-semibold py-2 px-4 rounded shadow hover:from-red-700 hover:to-orange-500 transition-colors duration-300">
         Previous
       </button>
       <span class="mx-2">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages"
-        class="bg-gray-300 text-gray-700 px-4 py-2 mx-1 rounded hover:bg-gray-400">
+      <button @click="nextPage" :disabled="currentPage === totalPages" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
         Next
       </button>
     </div>
@@ -166,6 +164,16 @@ export default {
     },
   },
   methods: {
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
     openModal(patient) {
       this.selectedPatient = patient;
       this.isModalOpen = true;
@@ -189,6 +197,7 @@ export default {
 </script>
 
 <style scoped>
+<<<<<<< HEAD
 .container {
   padding: 0 1rem;
 }
@@ -207,4 +216,7 @@ export default {
   max-width: 100%;
   width: 100%;
 }
+=======
+/* Add any necessary styling here */
+>>>>>>> 0119c26d5707c567c266a009327c2b8bb0835d70
 </style>

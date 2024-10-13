@@ -25,11 +25,11 @@ export default {
     data() {
         return {
             chartData: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [
                     {
                         label: 'Disease A (Male)',
-                        data: [30, 45, 50, 70, 40, 60, 80],
+                        data: [30, 45, 50, 70, 40, 60, 80,90, 9,10,11,12],
                         fill: false,
                         borderColor: '#36A2EB',
                         tension: 0.1,
