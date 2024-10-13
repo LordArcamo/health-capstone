@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\CheckUp;
+use App\Models\PersonalInformation;
 
 
 class CheckUpController extends Controller
@@ -14,8 +15,10 @@ class CheckUpController extends Controller
      */
     public function index()
     {
-        $checkUps = CheckUp::all(); // Fetch data from the database
+        $personalInformation = PersonalInformation::all(); // Fetch data from the database
+        $checkUps = CheckUp::all();
         return Inertia::render('Patients', [
+            'personalInformation' => $personalInformation,
             'checkUps' => $checkUps, // Pass patients data to the view
         ]);
     }
@@ -33,7 +36,7 @@ class CheckUpController extends Controller
      */
     public function store(Request $request)
     {
-        $validateData = $request->validate([
+        $validatedData = $request->validate([
             'firstName' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
             'middleName' => 'required|string|max:255',
@@ -43,6 +46,22 @@ class CheckUpController extends Controller
             'birthdate' => 'required|date',
             'contact' => 'required|string|max:255',
             'sex' => 'required|string|max:255',
+        ]);
+
+        $general_information = new PersonalInformation();
+        $general_information->firstName = $validatedData['firstName'];
+        $general_information->lastName = $validatedData['lastName'];
+        $general_information->middleName = $validatedData['middleName'];
+        $general_information->suffix = $validatedData['suffix'];
+        $general_information->address = $validatedData['address'];
+        $general_information->age = $validatedData['age'];
+        $general_information->birthdate = $validatedData['birthdate'];
+        $general_information->contact = $validatedData['contact'];
+        $general_information->sex = $validatedData['sex'];
+        $general_information->save();
+
+
+        $validatedData = $request->validate([
             'consultationDate' => 'required|date',
             'consultationTime' => 'required|date_format:H:i',
             'modeOfTransaction' => 'required|string|max:255',
@@ -57,8 +76,24 @@ class CheckUpController extends Controller
             'diagnosis' => 'required|string|max:255',
             'medication' => 'required|string|max:255',
         ]);
+        
 
-        CheckUp::create($validateData);
+        $check_ups = new CheckUp();
+        $check_ups->consultationDate = $validatedData['consultationDate'];
+        $check_ups->consultationTime = $validatedData['consultationTime'];
+        $check_ups->modeOfTransaction = $validatedData['modeOfTransaction'];
+        $check_ups->bloodPressure = $validatedData['bloodPressure'];
+        $check_ups->temperature = $validatedData['temperature'];
+        $check_ups->height = $validatedData['height'];
+        $check_ups->weight = $validatedData['weight'];
+        $check_ups->providerName = $validatedData['providerName'];
+        $check_ups->natureOfVisit = $validatedData['natureOfVisit'];
+        $check_ups->visitType = $validatedData['visitType'];
+        $check_ups->chiefComplaints = $validatedData['chiefComplaints'];
+        $check_ups->diagnosis = $validatedData['diagnosis'];
+        $check_ups->medication = $validatedData['medication'];
+        $check_ups->save();
+
 
         return back()->with('Success');
     }

@@ -18,7 +18,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/checkup', CheckUpController::class);
     Route::post('/checkup/store', [CheckUpController::class, 'store'])->name('checkup.store');
-    Route::get('/checkup', [CheckUpController::class, 'create'])->name('checkup.create'); // corrected 'patiens' to 'patients'
+    Route::get('/checkup', [CheckUpController::class, 'create'])->name('checkup.create');
     Route::get('/patients', [CheckUpController::class, 'index'])->name('patients.index');
 });
 
