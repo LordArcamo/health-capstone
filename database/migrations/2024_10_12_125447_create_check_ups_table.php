@@ -13,15 +13,6 @@ return new class extends Migration
     {
         Schema::create('check_ups', function (Blueprint $table) {
             $table->id();
-            $table->string('firstName');
-            $table->string('lastName');
-            $table->string('middleName');
-            $table->string('suffix');
-            $table->string('address');
-            $table->integer('age');
-            $table->date('birthdate');
-            $table->string('contact');
-            $table->string('sex');
             $table->date('consultationDate');
             $table->time('consultationTime');
             $table->string('modeOfTransaction');

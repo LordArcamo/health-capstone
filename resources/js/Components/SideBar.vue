@@ -42,7 +42,7 @@ const toggleSidebar = () => {
           :class="{ 'bg-gray-100': $page.component === 'Checkup' }">
         Checkup
         </Link>
-        <Link href="{{'/mortality' }}"
+        <Link href="/mortality"
           class="block py-2.5 px-4 rounded hover:bg-gray-100 transition duration-200"
           :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
           Mortality
