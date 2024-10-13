@@ -25,11 +25,8 @@
               <input type="text" v-model="form.suffix" class="input"/>
             </div>
             <div>
-              <label class="block">Gender</label>
-              <select v-model="form.gender" class="input" required>
-                <option>Male</option>
-                <option>Female</option>
-              </select>
+              <label class="block">Residential Address:</label>
+              <input type="text" v-model="form.address" class="input" required />
             </div>
             <div>
               <label class="block">Age:</label>
@@ -44,12 +41,8 @@
               <input type="text" v-model="form.contact" class="input" required />
             </div>
           </div>
-          <div class="my-5">
-              <label class="block">Residential Address:</label>
-              <input type="text" v-model="form.address" class="input" required />
-            </div>
           <div class="mt-6 flex justify-center text-right">
-            <button @click="nextStep" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">Next</button>
+            <button @click="nextStep" class="btn">Next</button>
           </div>
         </div>
 
@@ -106,9 +99,8 @@
             </div>
           </div>
           <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-semibold py-2 px-4 rounded shadow hover:from-red-700 hover:to-orange-500 transition-colors duration-300"
-            >Back</button>
-            <button @click="nextStep" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">Next</button>
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="nextStep" class="btn">Next</button>
           </div>
         </div>
 
@@ -158,9 +150,8 @@
             </div>
           </div>
           <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-semibold py-2 px-4 rounded shadow hover:from-red-700 hover:to-orange-500 transition-colors duration-300"
-            >Back</button>
-            <button type="submit" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">Submit</button>
+            <button @click="prevStep" class="btn">Back</button>
+            <button type="submit" class="btn">Submit</button>
           </div>
         </div>
       </form>
