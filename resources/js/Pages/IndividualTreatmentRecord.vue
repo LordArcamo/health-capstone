@@ -2,10 +2,11 @@
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import ITR from '../Components/ITRForm.vue';
+import { Inertia } from '@inertiajs/inertia';
 
 function submitForm(form) {
   console.log('Submitting from parent:', form); // Debugging
-  Inertia.post('/checkup/store', form)
+  Inertia.post('/itr/store', form)
     .then(response => {
       console.log('Response:', response); // Check the response
     })
