@@ -3,14 +3,22 @@ import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import ITR from '../Components/ITRForm.vue';
 
+function submitForm(form) {
+  console.log('Submitting from parent:', form); // Debugging
+  Inertia.post('/checkup/store', form)
+    .then(response => {
+      console.log('Response:', response); // Check the response
+    })
+    .catch(error => {
+      console.error('Error during submission:', error); // Log any errors
+    });
+}
+
 </script>
-
 <template>
+  <Head title="Individual Treatment Record Up" />
 
-  <Head title="Check Up" />
-
-  <NewLayout>
-    <ITR/>
+<NewLayout>
+    <ITR :onSubmit="submitForm" /> 
   </NewLayout>
-
 </template>

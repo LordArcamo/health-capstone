@@ -1,15 +1,9 @@
-<template>
-  <NewLayout>
-    <Head title="Check Up" />
-    <FormComponent :onSubmit="submitForm" />
-  </NewLayout>
-</template>
-
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import FormComponent from '@/Components/CheckupForm.vue';
-import { Inertia } from '@inertiajs/inertia';
+import Modal from '../Components/WelcomeModal.vue';
+// import FormComponent from '@/Components/CheckupForm.vue';
+
 
 function submitForm(form) {
   console.log('Submitting from parent:', form); // Debugging
@@ -22,3 +16,12 @@ function submitForm(form) {
     });
 }
 </script>
+
+<template>
+  <NewLayout>
+    <Head title="Check Up" />
+  <Modal/>
+<!-- </NewLayout>
+    <FormComponent :onSubmit="submitForm" /> -->
+  </NewLayout>
+</template>

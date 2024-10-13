@@ -5,13 +5,13 @@
         <p class="text-gray-700 mb-6 items-center">What type of Check-Up do we have today?</p>
         <div class="flex justify-center space-x-4">
           <!-- Using Inertia Link component for navigation -->
-          <Link href="/itr" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
+          <Link :href="route('itr')" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
             Individual Treatment Record
           </Link>
-          <Link href="/prenatal" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
+          <Link :href="route('prenatal')" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
             Prenatal & Postpartum Checkup
           </Link>
-          <Link href="/nationalimmunization" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
+          <Link :href="route('nationalimmunizationprogram')"  class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">
             National Immunization Program
           </Link>
         </div>

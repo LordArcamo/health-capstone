@@ -20,12 +20,35 @@ Route::get('/', function () {
 
 Route::get('/patients', [PatientController::class, 'index']);
 
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::resource('/checkup', CheckUpController::class);
+//     Route::post('/checkup/store', [CheckUpController::class, 'store'])->name('checkup.store');
+//     Route::get('/checkup', [CheckUpController::class, 'create'])->name('checkup.create'); // corrected 'patiens' to 'patients'
+//     Route::get('/patients', [CheckUpController::class, 'index'])->name('patients.index');
+// });
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('/checkup', CheckUpController::class);
-    Route::post('/checkup/store', [CheckUpController::class, 'store'])->name('checkup.store');
-    Route::get('/checkup', [CheckUpController::class, 'create'])->name('checkup.create'); // corrected 'patiens' to 'patients'
-    Route::get('/patients', [CheckUpController::class, 'index'])->name('patients.index');
+    Route::resource('/itr', CheckUpController::class);
+    Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
+    Route::get('/itr', [CheckUpController::class, 'create'])->name('itr.create'); // corrected 'patiens' to 'patients'
+    Route::get('/patients', [CheckUpController::class, 'index'])->name('itr.index');
 });
+
+Route::get('/checkup', function () {
+    return Inertia::render('Checkup');
+})->middleware(['auth', 'verified'])->name('checkup');
+
+Route::get('/checkup/itr', function () {
+    return Inertia::render('IndividualTreatmentRecord');
+})->name('itr');
+
+Route::get('/checkup/nationalimmunizationprogram', function () {
+    return Inertia::render('NationalImmunization');
+})->name('nationalimmunizationprogram');
+
+Route::get('/checkup/prenatal', function () {
+    return Inertia::render('PreNatal');
+})->name('prenatal');
 
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');
@@ -39,18 +62,6 @@ Route::get('/dashboard', function () {
 Route::get('/patients', function () {
     return Inertia::render('Patients');
 })->middleware(['auth', 'verified'])->name('patients');
-
-Route::get('/itr', function () {
-    return Inertia::render('IndividualTreatmentRecord');
-})->middleware(['auth', 'verified'])->name('itr');
-
-Route::get('/prenatal', function () {
-    return Inertia::render('PreNatal');
-})->middleware(['auth', 'verified'])->name('prenatal');
-
-Route::get('/nationalimmunization', function () {
-    return Inertia::render('NationalImmunization');
-})->middleware(['auth', 'verified'])->name('nationalimmunization');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
