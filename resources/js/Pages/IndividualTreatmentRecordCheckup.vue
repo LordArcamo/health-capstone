@@ -1,13 +1,12 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import Modal from '../Components/WelcomeModal.vue';
-// import FormComponent from '@/Components/CheckupForm.vue';
-
+import ITR from '../Components/ITRForm.vue';
+import { Inertia } from '@inertiajs/inertia';
 
 function submitForm(form) {
   console.log('Submitting from parent:', form); // Debugging
-  Inertia.post('/checkup/store', form)
+  Inertia.post('/itr/store', form)
     .then(response => {
       console.log('Response:', response); // Check the response
     })
@@ -15,13 +14,12 @@ function submitForm(form) {
       console.error('Error during submission:', error); // Log any errors
     });
 }
-</script>
 
+</script>
 <template>
-  <NewLayout>
-    <Head title="Check Up" />
-  <Modal/>
-<!-- </NewLayout>
-    <FormComponent :onSubmit="submitForm" /> -->
+  <Head title="Individual Treatment Record Up" />
+
+<NewLayout>
+    <ITR :onSubmit="submitForm" /> 
   </NewLayout>
 </template>
