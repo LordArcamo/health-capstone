@@ -2,7 +2,7 @@
   <Head title="National Immunization" />
 
   <NewLayout>
-    <NationalImmunizationTable :onSubmit="submitForm" />
+    <NationalImmunizationTable />
   </NewLayout>
 </template>
 

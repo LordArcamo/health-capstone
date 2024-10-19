@@ -1,7 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import ITR from '../Components/ITRForm.vue';
+import ITR from '@/Components/ITRForm.vue';
 import { Inertia } from '@inertiajs/inertia';
 
 function submitForm(form) {
