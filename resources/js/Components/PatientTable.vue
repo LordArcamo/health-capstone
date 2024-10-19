@@ -197,7 +197,6 @@ export default {
 </script>
 
 <style scoped>
-<<<<<<< HEAD
 .container {
   padding: 0 1rem;
 }
@@ -216,7 +215,4 @@ export default {
   max-width: 100%;
   width: 100%;
 }
-=======
-/* Add any necessary styling here */
->>>>>>> 0119c26d5707c567c266a009327c2b8bb0835d70
 </style>

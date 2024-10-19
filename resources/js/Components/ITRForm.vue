@@ -40,6 +40,13 @@
               <label class="block">Contact Number:</label>
               <input type="text" v-model="form.contact" class="input" required />
             </div>
+            <div>
+              <label class="block">Gender</label>
+              <select v-model="form.sex" class="input" required>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </div>
           </div>
           <div class="mt-6 flex justify-center text-right">
             <button @click="nextStep" class="btn">Next</button>
@@ -50,13 +57,6 @@
         <div v-if="step === 2">
           <h3 class="text-lg font-semibold mb-4">Consultation Details</h3>
           <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block">Gender</label>
-              <select v-model="form.sex" class="input" required>
-                <option>Male</option>
-                <option>Female</option>
-              </select>
-            </div>
             <div>
               <label class="block">Consultation Date:</label>
               <input type="date" v-model="form.consultationDate" class="input" required />
@@ -215,6 +215,7 @@ export default {
     },
     submitForm() {
       console.log('Submitting form with data:', this.form); // Debugging
+      alert('Form submitted');
       this.onSubmit(this.form).catch(error => {
         console.error('Submission error:', error); // Log error if it occurs
       });

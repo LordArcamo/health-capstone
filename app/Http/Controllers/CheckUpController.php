@@ -28,7 +28,7 @@ class CheckUpController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Checkup');
+        return Inertia::render('IndividualTreatmentRecord');
     }
 
     /**

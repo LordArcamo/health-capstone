@@ -1,11 +1,12 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import ITR from '../Components/ITRForm.vue';
+import ITR from '@/Components/ITRForm.vue';
+import { Inertia } from '@inertiajs/inertia';
 
 function submitForm(form) {
   console.log('Submitting from parent:', form); // Debugging
-  Inertia.post('/checkup/store', form)
+  Inertia.post('/itr/store', form)
     .then(response => {
       console.log('Response:', response); // Check the response
     })
@@ -16,7 +17,7 @@ function submitForm(form) {
 
 </script>
 <template>
-  <Head title="Individual Treatment Record Up" />
+  <Head title="Individual Treatment Record" />
 
 <NewLayout>
     <ITR :onSubmit="submitForm" /> 

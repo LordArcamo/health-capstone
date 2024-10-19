@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CheckUpController;
+use App\Http\Controllers\NationalImmunizationProgramController;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\PatientController;
 use Illuminate\Support\Facades\Route;
@@ -20,31 +21,22 @@ Route::get('/', function () {
 
 Route::get('/patients', [PatientController::class, 'index']);
 
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::resource('/checkup', CheckUpController::class);
-//     Route::post('/checkup/store', [CheckUpController::class, 'store'])->name('checkup.store');
-//     Route::get('/checkup', [CheckUpController::class, 'create'])->name('checkup.create'); // corrected 'patiens' to 'patients'
-//     Route::get('/patients', [CheckUpController::class, 'index'])->name('patients.index');
-// });
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
-    Route::get('/itr', [CheckUpController::class, 'create'])->name('itr.create'); // corrected 'patiens' to 'patients'
+    Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); // corrected 'patiens' to 'patients'
     Route::get('/patients', [CheckUpController::class, 'index'])->name('itr.index');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('/nationalimmunizationprogram', NationalImmunizationProgramController::class);
+    Route::get('/checkup/nationalimmunizationprogram', [NationalImmunizationProgramController::class, 'create'])->name('nationalimmunizationprogram');
+    Route::post('/nationalimmunizationprogram/store', [NationalImmunizationProgramController::class, 'store'])->name('nationalimmunizationprogram.store');
 });
 
 Route::get('/checkup', function () {
     return Inertia::render('Checkup');
 })->middleware(['auth', 'verified'])->name('checkup');
-
-Route::get('/checkup/itr', function () {
-    return Inertia::render('IndividualTreatmentRecord');
-})->name('itr');
-
-Route::get('/checkup/nationalimmunizationprogram', function () {
-    return Inertia::render('NationalImmunization');
-})->name('nationalimmunizationprogram');
 
 Route::get('/checkup/prenatal', function () {
     return Inertia::render('PreNatal');
@@ -58,10 +50,6 @@ Route::get('/mortality', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/patients', function () {
-    return Inertia::render('Patients');
-})->middleware(['auth', 'verified'])->name('patients');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
