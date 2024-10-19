@@ -38,8 +38,6 @@ Route::get('/checkup', function () {
     return Inertia::render('Checkup');
 })->middleware(['auth', 'verified'])->name('checkup');
 
-<<<<<<< HEAD
-=======
 Route::get('/checkup/itr', function () {
     return Inertia::render('IndividualTreatmentRecordCheckup');
 })->name('itr');
@@ -60,7 +58,6 @@ Route::get('/checkup/nationalimmunizationprogram', function () {
     return Inertia::render('NationalImmunizationCheckup');
 })->name('nationalimmunizationprogram');
 
->>>>>>> d157683049fd015b37059832b49ca82f03b28dcf
 Route::get('/checkup/prenatal', function () {
     return Inertia::render('PreNatalCheckup');
 })->name('prenatal');
