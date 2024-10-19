@@ -39,15 +39,27 @@ Route::get('/checkup', function () {
 })->middleware(['auth', 'verified'])->name('checkup');
 
 Route::get('/checkup/itr', function () {
-    return Inertia::render('IndividualTreatmentRecord');
+    return Inertia::render('IndividualTreatmentRecordCheckup');
 })->name('itr');
 
-Route::get('/checkup/nationalimmunizationprogram', function () {
+Route::get('/patients/itrtable', function () {
+    return Inertia::render('IndividualTreatmentRecord');
+})->name('itrtable');
+
+Route::get('/patients/prenatal-postpartum', function () {
+    return Inertia::render('PreNatal');
+})->name('prenatal-postpartum');
+
+Route::get('/patients/epi-records', function () {
     return Inertia::render('NationalImmunization');
+})->name('epirecords');
+
+Route::get('/checkup/nationalimmunizationprogram', function () {
+    return Inertia::render('NationalImmunizationCheckup');
 })->name('nationalimmunizationprogram');
 
 Route::get('/checkup/prenatal', function () {
-    return Inertia::render('PreNatal');
+    return Inertia::render('PreNatalCheckup');
 })->name('prenatal');
 
 Route::get('/mortality', function () {

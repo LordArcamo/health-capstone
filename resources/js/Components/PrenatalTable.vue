@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto py-8 px-4">
-    <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">Patient Records</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">Prenatal Records</h2>
 
     <!-- Check if personalInformation prop is empty -->
     <p v-if="!personalInformation || personalInformation.length === 0" class="text-center text-gray-500">
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Responsive Table Wrapper with Background and Padding -->
-    <div class="overflow-x-auto bg-gray-100 p-6 ">
+    <div class="overflow-x-auto bg-gray-100 p-6 rounded-lg shadow-lg">
       <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 via-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
