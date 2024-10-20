@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class CheckUp extends Model
 {
     use HasFactory;
-    protected $table = 'check_ups';
+    protected $table = 'itr';
 
     protected $fillable = [
         'firstName', 'lastName', 'middleName', 'suffix', 'address',

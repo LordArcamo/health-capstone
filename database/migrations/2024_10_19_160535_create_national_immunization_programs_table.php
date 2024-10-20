@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('national_immunization_programs', function (Blueprint $table) {
             $table->id();
+            $table->string('firstName');
+            $table->string('lastName');
+            $table->string('middleName');
+            $table->string('suffix');
+            $table->string('address');
+            $table->integer('age');
+            $table->date('birthdate');
+            $table->string('contact');
+            $table->string('sex');
             $table->string('birthplace');
             $table->string('bloodtype');
             $table->string('mothername');

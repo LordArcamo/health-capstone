@@ -12,6 +12,8 @@ class NationalImmunizationProgram extends Model
 
     protected $fillable = [
 
+        'firstName', 'lastName', 'middleName', 'suffix', 'address',
+        'age', 'birthdate', 'contact', 'sex',
         'birthplace', 'bloodtype', 'mothername', 'dswdNhts', 'facilityHouseholdno', 'houseHoldno',
         'fourpsmember', 'PCBMember', 'philhealthMember', 'statusType', 'philhealthNo', 'ifMember', 
         'familyMember', 'ttstatus', 'dateAssesed', 'date', 'place', 'guardian'

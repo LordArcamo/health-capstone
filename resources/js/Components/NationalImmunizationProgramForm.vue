@@ -244,7 +244,6 @@ function calculateAge() {
 function submitForm() {
   try {
     console.log('Submitting form with data:', form.value);
-    alert('Form submitted');
     props.onSubmit(form.value); // Pass all form data to the parent
   } catch (error) {
     console.error('Unexpected error during form submission:', error);

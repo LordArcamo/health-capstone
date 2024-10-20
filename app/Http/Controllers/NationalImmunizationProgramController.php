@@ -14,7 +14,10 @@ class NationalImmunizationProgramController extends Controller
      */
     public function index()
     {
-        //
+        $Immunization = NationalImmunizationProgram::all();
+        return Inertia::render('NationalImmunization', [
+            'Immunization' => $Immunization, // Pass patients data to the view
+        ]);
     }
 
     /**
@@ -22,7 +25,7 @@ class NationalImmunizationProgramController extends Controller
      */
     public function create()
     {
-        return Inertia::render('NationalImmunization');
+        return Inertia::render('NationalImmunizationCheckup');
     }
 
     /**
@@ -40,22 +43,6 @@ class NationalImmunizationProgramController extends Controller
             'birthdate' => 'required|date',
             'contact' => 'required|string|max:255',
             'sex' => 'required|string|max:255',
-        ]);
-
-        $general_information = new PersonalInformation();
-        $general_information->firstName = $validatedData['firstName'];
-        $general_information->lastName = $validatedData['lastName'];
-        $general_information->middleName = $validatedData['middleName'];
-        $general_information->suffix = $validatedData['suffix'];
-        $general_information->address = $validatedData['address'];
-        $general_information->age = $validatedData['age'];
-        $general_information->birthdate = $validatedData['birthdate'];
-        $general_information->contact = $validatedData['contact'];
-        $general_information->sex = $validatedData['sex'];
-        $general_information->save();
-
-
-        $validatedData = $request->validate([
             'birthplace' => 'required|string|max:255',
             'bloodtype' => 'required|string|max:255',
             'mothername' => 'required|string|max:255',
@@ -73,11 +60,19 @@ class NationalImmunizationProgramController extends Controller
             'dateAssesed' => 'required|date',
             'date' => 'required|date',
             'place' => 'required|string|max:255',
-            'guardian' => 'required|string|max:255',
+            'guardian' => 'required|string|max:255'
         ]);
-        
 
         $national_immunization_programs = new NationalImmunizationProgram();
+        $national_immunization_programs->firstName = $validatedData['firstName'];
+        $national_immunization_programs->lastName = $validatedData['lastName'];
+        $national_immunization_programs->middleName = $validatedData['middleName'];
+        $national_immunization_programs->suffix = $validatedData['suffix'];
+        $national_immunization_programs->address = $validatedData['address'];
+        $national_immunization_programs->age = $validatedData['age'];
+        $national_immunization_programs->birthdate = $validatedData['birthdate'];
+        $national_immunization_programs->contact = $validatedData['contact'];
+        $national_immunization_programs->sex = $validatedData['sex'];
         $national_immunization_programs->birthplace = $validatedData['birthplace'];
         $national_immunization_programs->bloodtype = $validatedData['bloodtype'];
         $national_immunization_programs->mothername = $validatedData['mothername'];

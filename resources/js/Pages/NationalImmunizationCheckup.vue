@@ -7,7 +7,6 @@
 </template>
 
 <script setup>
-import NationalImmunizationTable from '@/Components/NationalImmunizationTable.vue';
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import NationalImmunizationForm from '@/Components/NationalImmunizationProgramForm.vue';

@@ -2,7 +2,7 @@
   <Head title="National Immunization" />
 
   <NewLayout>
-    <NationalImmunizationTable :onSubmit="submitForm" />
+    <NationalImmunizationTable :patients = "props.Immunization" />
   </NewLayout>
 </template>
 
@@ -12,7 +12,6 @@ import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({
-  personalInformation: Array,
-  checkUps: Array // Declare the checkUps prop coming from the server
-});
+  Immunization: Array // Declare the checkUps prop coming from the server
+  });
 </script>

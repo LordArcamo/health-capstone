@@ -4,7 +4,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CheckUpController;
 use App\Http\Controllers\NationalImmunizationProgramController;
 use Illuminate\Foundation\Application;
-use App\Http\Controllers\PatientController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,38 +24,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
     Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); // corrected 'patiens' to 'patients'
-    Route::get('/patients', [CheckUpController::class, 'index'])->name('itr.index');
+    Route::get('//patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/nationalimmunizationprogram', NationalImmunizationProgramController::class);
     Route::get('/checkup/nationalimmunizationprogram', [NationalImmunizationProgramController::class, 'create'])->name('nationalimmunizationprogram');
     Route::post('/nationalimmunizationprogram/store', [NationalImmunizationProgramController::class, 'store'])->name('nationalimmunizationprogram.store');
+    Route::get('/patients/epi-records', [NationalImmunizationProgramController::class, 'index'])->name('nationalimmunizationprogram.index');
 });
 
 Route::get('/checkup', function () {
     return Inertia::render('Checkup');
 })->middleware(['auth', 'verified'])->name('checkup');
 
-Route::get('/checkup/itr', function () {
-    return Inertia::render('IndividualTreatmentRecordCheckup');
-})->name('itr');
-
-Route::get('/patients/itrtable', function () {
-    return Inertia::render('IndividualTreatmentRecord');
-})->name('itrtable');
 
 Route::get('/patients/prenatal-postpartum', function () {
     return Inertia::render('PreNatal');
 })->name('prenatal-postpartum');
-
-Route::get('/patients/epi-records', function () {
-    return Inertia::render('NationalImmunization');
-})->name('epirecords');
-
-Route::get('/checkup/nationalimmunizationprogram', function () {
-    return Inertia::render('NationalImmunizationCheckup');
-})->name('nationalimmunizationprogram');
 
 Route::get('/checkup/prenatal', function () {
     return Inertia::render('PreNatalCheckup');

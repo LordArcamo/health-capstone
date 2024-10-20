@@ -15,10 +15,8 @@ class CheckUpController extends Controller
      */
     public function index()
     {
-        $personalInformation = PersonalInformation::all(); // Fetch data from the database
         $checkUps = CheckUp::all();
-        return Inertia::render('Patients', [
-            'personalInformation' => $personalInformation,
+        return Inertia::render('IndividualTreatmentRecord', [
             'checkUps' => $checkUps, // Pass patients data to the view
         ]);
     }
@@ -28,7 +26,7 @@ class CheckUpController extends Controller
      */
     public function create()
     {
-        return Inertia::render('IndividualTreatmentRecord');
+        return Inertia::render('IndividualTreatmentRecordCheckup');
     }
 
     /**
@@ -36,6 +34,7 @@ class CheckUpController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate all fields in a single validation step
         $validatedData = $request->validate([
             'firstName' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
@@ -46,22 +45,6 @@ class CheckUpController extends Controller
             'birthdate' => 'required|date',
             'contact' => 'required|string|max:255',
             'sex' => 'required|string|max:255',
-        ]);
-
-        $general_information = new PersonalInformation();
-        $general_information->firstName = $validatedData['firstName'];
-        $general_information->lastName = $validatedData['lastName'];
-        $general_information->middleName = $validatedData['middleName'];
-        $general_information->suffix = $validatedData['suffix'];
-        $general_information->address = $validatedData['address'];
-        $general_information->age = $validatedData['age'];
-        $general_information->birthdate = $validatedData['birthdate'];
-        $general_information->contact = $validatedData['contact'];
-        $general_information->sex = $validatedData['sex'];
-        $general_information->save();
-
-
-        $validatedData = $request->validate([
             'consultationDate' => 'required|date',
             'consultationTime' => 'required|date_format:H:i',
             'modeOfTransaction' => 'required|string|max:255',
@@ -76,27 +59,39 @@ class CheckUpController extends Controller
             'diagnosis' => 'required|string|max:255',
             'medication' => 'required|string|max:255',
         ]);
-        
-
-        $check_ups = new CheckUp();
-        $check_ups->consultationDate = $validatedData['consultationDate'];
-        $check_ups->consultationTime = $validatedData['consultationTime'];
-        $check_ups->modeOfTransaction = $validatedData['modeOfTransaction'];
-        $check_ups->bloodPressure = $validatedData['bloodPressure'];
-        $check_ups->temperature = $validatedData['temperature'];
-        $check_ups->height = $validatedData['height'];
-        $check_ups->weight = $validatedData['weight'];
-        $check_ups->providerName = $validatedData['providerName'];
-        $check_ups->natureOfVisit = $validatedData['natureOfVisit'];
-        $check_ups->visitType = $validatedData['visitType'];
-        $check_ups->chiefComplaints = $validatedData['chiefComplaints'];
-        $check_ups->diagnosis = $validatedData['diagnosis'];
-        $check_ups->medication = $validatedData['medication'];
-        $check_ups->save();
 
 
-        return back()->with('Success');
+        $itr = new CheckUp();
+
+        // Assign all the validated data to the model
+        $itr->firstName = $validatedData['firstName'];
+        $itr->lastName = $validatedData['lastName'];
+        $itr->middleName = $validatedData['middleName'];
+        $itr->suffix = $validatedData['suffix'];
+        $itr->address = $validatedData['address'];
+        $itr->age = $validatedData['age'];
+        $itr->birthdate = $validatedData['birthdate'];
+        $itr->contact = $validatedData['contact'];
+        $itr->sex = $validatedData['sex'];
+        $itr->consultationDate = $validatedData['consultationDate'];
+        $itr->consultationTime = $validatedData['consultationTime'];
+        $itr->modeOfTransaction = $validatedData['modeOfTransaction'];
+        $itr->bloodPressure = $validatedData['bloodPressure'];
+        $itr->temperature = $validatedData['temperature'];
+        $itr->height = $validatedData['height'];
+        $itr->weight = $validatedData['weight'];
+        $itr->providerName = $validatedData['providerName'];
+        $itr->natureOfVisit = $validatedData['natureOfVisit'];
+        $itr->visitType = $validatedData['visitType'];
+        $itr->chiefComplaints = $validatedData['chiefComplaints'];
+        $itr->diagnosis = $validatedData['diagnosis'];
+        $itr->medication = $validatedData['medication'];
+        $itr->save();
+
+        // Redirect back with success message
+        return back()->with('Success', 'Data saved successfully!');
     }
+
 
     /**
      * Display the specified resource.

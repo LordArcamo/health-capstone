@@ -3,7 +3,7 @@
     <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">National Immunization Records</h2>
 
     <!-- Check if personalInformation prop is empty -->
-    <p v-if="!personalInformation || personalInformation.length === 0" class="text-center text-gray-500">
+    <p v-if="!patients || patients.length === 0" class="text-center text-gray-500">
       No patient records available.
     </p>
 
@@ -109,15 +109,24 @@
           <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
           <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
           <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
-          <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
-          <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
-          <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
-          <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
-          <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
-          <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
-          <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
-          <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
-          <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
+          <li><strong>Birth Place:</strong> {{ selectedPatient.birthplace }}</li>
+          <li><strong>Blood Type:</strong> {{ selectedPatient.bloodtype }}</li>
+          <li><strong>Mother's Name:</strong> {{ selectedPatient.mothername }}</li>
+          <li><strong>DSWD NHTS:</strong> {{ selectedPatient.dswdNhts }}</li>
+          <li><strong>Facility Household No.:</strong> {{ selectedPatient.facilityHouseholdno }}</li>
+          <li><strong>Household No.:</strong> {{ selectedPatient.houseHoldno }}</li>
+          <li><strong>4Ps Member?:</strong> {{ selectedPatient.fourpsmember }}</li>
+          <li><strong>Primary Care Benefit (PCB) Member?:</strong> {{ selectedPatient.PCBMember }}</li>
+          <li><strong>Philhealth Member:</strong> {{ selectedPatient.philhealthMember }}</li>
+          <li><strong>Status Type:</strong> {{ selectedPatient.statusType }}</li>
+          <li><strong>Philhealth No.:</strong> {{ selectedPatient.philhealthNo }}</li>
+          <li><strong>If Member, please indicate category:</strong> {{ selectedPatient.ifMember }}</li>
+          <li><strong>Family Member:</strong> {{ selectedPatient.familyMember }}</li>
+          <li><strong>TT Status of Mother:</strong> {{ selectedPatient.ttstatus }}</li>
+          <li><strong>Date Assesed:</strong> {{ selectedPatient.dateAssesed }}</li>
+          <li><strong>Date:</strong> {{ selectedPatient.date }}</li>
+          <li><strong>Place:</strong> {{ selectedPatient.place }}</li>
+          <li><strong>Guardiant:</strong> {{ selectedPatient.guardian }}</li>
         </ul>
       </div>
     </div>
@@ -128,10 +137,6 @@
 <script>
 export default {
   props: {
-    personalInformation: {
-      type: Array,
-      default: () => [] // Default to an empty array to prevent errors
-    },
     patients: {
       type: Array,
       default: () => [] // Default to empty array to prevent errors
@@ -149,7 +154,7 @@ export default {
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.personalInformation
+      return this.patients
         .filter((patient) => {
           return (
             patient.firstName.toLowerCase().includes(query) ||
@@ -169,7 +174,7 @@ export default {
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      const filteredLength = this.personalInformation.filter((patient) => {
+      const filteredLength = this.patients.filter((patient) => {
         const query = this.searchQuery.toLowerCase();
         return (
           patient.firstName.toLowerCase().includes(query) ||

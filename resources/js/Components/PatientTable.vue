@@ -2,8 +2,8 @@
   <div class="container mx-auto py-8 px-4">
     <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">Patient Records</h2>
 
-    <!-- Check if personalInformation prop is empty -->
-    <p v-if="!personalInformation || personalInformation.length === 0" class="text-center text-gray-500">
+    <!-- Check if Patients prop is empty -->
+    <p v-if="!patients || patients.length === 0" class="text-center text-gray-500">
       No patient records available.
     </p>
 
@@ -128,10 +128,6 @@
 <script>
 export default {
   props: {
-    personalInformation: {
-      type: Array,
-      default: () => [] // Default to an empty array to prevent errors
-    },
     patients: {
       type: Array,
       default: () => [] // Default to empty array to prevent errors
@@ -149,7 +145,7 @@ export default {
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.personalInformation
+      return this.patients
         .filter((patient) => {
           return (
             patient.firstName.toLowerCase().includes(query) ||
@@ -169,7 +165,7 @@ export default {
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      const filteredLength = this.personalInformation.filter((patient) => {
+      const filteredLength = this.patients.filter((patient) => {
         const query = this.searchQuery.toLowerCase();
         return (
           patient.firstName.toLowerCase().includes(query) ||
