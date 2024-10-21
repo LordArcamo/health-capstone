@@ -34,7 +34,7 @@ const togglePatientsDropdown = () => {
       <!-- Logo -->
       <div class="flex text-bold items-center justify-center mb-10">
         <img :src="Logo" alt="RHU Logo" class="h-12 w-auto" />
-        <span>RHU ADMIN</span>
+        <span class="font-bold text-lg">RHU ADMIN</span>
       </div>
 
       <!-- Navigation -->

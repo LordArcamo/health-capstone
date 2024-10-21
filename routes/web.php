@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CheckUpController;
 use App\Http\Controllers\NationalImmunizationProgramController;
+use App\Http\Controllers\PreNatalController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -34,18 +35,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patients/epi-records', [NationalImmunizationProgramController::class, 'index'])->name('nationalimmunizationprogram.index');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('/prenatal', PreNatalController::class);
+    Route::get('/checkup/prenatal', [PreNatalController::class, 'create'])->name('prenatal'); // corrected 'patiens' to 'patients'
+});
+
+
 Route::get('/checkup', function () {
     return Inertia::render('Checkup');
 })->middleware(['auth', 'verified'])->name('checkup');
 
-
 Route::get('/patients/prenatal-postpartum', function () {
-    return Inertia::render('PreNatal');
+    return Inertia::render('Table/PreNatal');
 })->name('prenatal-postpartum');
-
-Route::get('/checkup/prenatal', function () {
-    return Inertia::render('PreNatalCheckup');
-})->name('prenatal');
 
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');

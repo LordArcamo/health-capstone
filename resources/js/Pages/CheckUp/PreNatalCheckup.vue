@@ -1,7 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import PreNatalForm from '../Components/PrenatalForm.vue';
+import PreNatalForm from '@/Components/PrenatalForm.vue';
 
 </script>
 
