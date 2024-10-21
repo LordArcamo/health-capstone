@@ -9,28 +9,28 @@
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block">Last Name:</label>
-              <input type="text" v-model="form.firstName " class="input"required/>
-            </div>
-            <div>
               <label class="block">First Name:</label>
               <input type="text" v-model="form.lastName " class="input" required />
+            </div>
+            <div>
+              <label class="block">Last Name:</label>
+              <input type="text" v-model="form.firstName " class="input"required/>
             </div>
             <div>
               <label class="block">Middle Name:</label>
               <input type="text" v-model="form.middleName " class="input" required/>
             </div>
             <div>
-              <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input" required />
+              <label class="block">Residential Address:</label>
+              <input type="textarea" v-model="form.residentialaddress" class="input" required />
             </div>
             <div>
               <label class="block">Age</label>
               <input type="number" v-model="form.age" class="input" required />
             </div>
             <div>
-              <label class="block">Residential Address:</label>
-              <input type="textarea" v-model="form.residentialaddress" class="input" required />
+              <label class="block">Birthdate:</label>
+              <input type="date" v-model="form.birthdate" class="input" required />
             </div>
           </div>
           <div class="mt-6 flex justify-center text-right">

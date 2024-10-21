@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\CheckUp;
-use App\Models\PersonalInformation;
 
 
 class CheckUpController extends Controller
@@ -16,7 +15,7 @@ class CheckUpController extends Controller
     public function index()
     {
         $checkUps = CheckUp::all();
-        return Inertia::render('IndividualTreatmentRecord', [
+        return Inertia::render('Table/IndividualTreatmentRecord', [
             'checkUps' => $checkUps, // Pass patients data to the view
         ]);
     }
@@ -26,7 +25,7 @@ class CheckUpController extends Controller
      */
     public function create()
     {
-        return Inertia::render('IndividualTreatmentRecordCheckup');
+        return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup');
     }
 
     /**

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\NationalImmunizationProgram;
-use App\Models\PersonalInformation;
 
 class NationalImmunizationProgramController extends Controller
 {
@@ -15,7 +14,7 @@ class NationalImmunizationProgramController extends Controller
     public function index()
     {
         $Immunization = NationalImmunizationProgram::all();
-        return Inertia::render('NationalImmunization', [
+        return Inertia::render('Table/NationalImmunization', [
             'Immunization' => $Immunization, // Pass patients data to the view
         ]);
     }
@@ -25,7 +24,7 @@ class NationalImmunizationProgramController extends Controller
      */
     public function create()
     {
-        return Inertia::render('NationalImmunizationCheckup');
+        return Inertia::render('CheckUp/NationalImmunizationCheckup');
     }
 
     /**
