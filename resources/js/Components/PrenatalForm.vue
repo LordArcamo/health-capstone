@@ -10,11 +10,11 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block">First Name:</label>
-              <input type="text" v-model="form.lastName " class="input" required />
+              <input type="text" v-model="form.firstName" class="input" required />
             </div>
             <div>
               <label class="block">Last Name:</label>
-              <input type="text" v-model="form.firstName " class="input"required/>
+              <input type="text" v-model="form.lastName " class="input"required/>
             </div>
             <div>
               <label class="block">Middle Name:</label>
@@ -22,11 +22,11 @@
             </div>
             <div>
               <label class="block">Residential Address:</label>
-              <input type="textarea" v-model="form.residentialaddress" class="input" required />
+              <input type="text" v-model="form.address" class="input" required />
             </div>
             <div>
               <label class="block">Age</label>
-              <input type="number" v-model="form.age" class="input" required />
+              <input type="number" v-model="computedAge" class="input" readonly />
             </div>
             <div>
               <label class="block">Birthdate:</label>
@@ -80,15 +80,19 @@
             </div>
             <div>
               <label class="block">Name of Attending Provider:</label>
-              <input v-model="form.reasonForReferral" class="input"></input>
+              <input type="text" v-model="form.providerName" class="input"></input>
             </div> 
             <div>
               <label class="block">Name of Spouse:</label>
-              <input v-model="form.nameofspouse" class="input"></input>
+              <input type="text" v-model="form.nameOfSpouse" class="input"></input>
+            </div> 
+            <div>
+              <label class="block">Emergency Contact Number:</label>
+              <input type="text" v-model="form.emergencyContact" class="input"></input>
             </div> 
             <div>
               <label class="block">4ps?:</label>
-              <select v-model="form.fourpeacemember" class="input" required>
+              <select v-model="form.fourMember" class="input" required>
                 <option>Yes</option>
                 <option>No</option>
               </select>
@@ -115,7 +119,6 @@
                 v-model="form.philhealthId" 
                 type="text" 
                 class="input border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
-                required 
                 placeholder="Enter ID number"
               />
             </div>
@@ -133,27 +136,27 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block">Menarche:</label>
-        <input v-model="form.menarche" type="text" class="input" placeholder="Enter age at menarche" required />
+        <input type="text" v-model="form.menarche" class="input" placeholder="Enter age at menarche" required />
       </div>
 
       <div>
         <label class="block">Onset of Sexual Intercourse:</label>
-        <input v-model="form.sexualOnset" type="text" class="input" placeholder="Enter age" />
+        <input type="text" v-model="form.sexualOnset" class="input" placeholder="Enter age" />
       </div>
 
       <div>
         <label class="block">Period/Duration:</label>
-        <input v-model="form.periodDuration" type="text" class="input" placeholder="e.g., 5-7 days" required />
+        <input type="text" v-model="form.periodDuration" class="input" placeholder="e.g., 5-7 days" required />
       </div>
 
       <div>
         <label class="block">Birth Control Method:</label>
-        <input v-model="form.birthControl" type="text" class="input" placeholder="Enter method" />
+        <input type="text" v-model="form.birthControl" class="input" placeholder="Enter method" />
       </div>
 
       <div>
         <label class="block">Interval/Cycle:</label>
-        <input v-model="form.intervalCycle" type="text" class="input" placeholder="e.g., 28 days" required />
+        <input type="text" v-model="form.intervalCycle" class="input" placeholder="e.g., 28 days" required />
       </div>
 
       <div>
@@ -166,12 +169,12 @@
 
       <div>
         <label class="block">LMP (Last Menstrual Period):</label>
-        <input v-model="form.lmp" type="date" class="input" required />
+        <input type="date" v-model="form.lmp" class="input" required />
       </div>
 
       <div>
         <label class="block">EDC (Estimated Date of Confinement):</label>
-        <input v-model="form.edc" type="date" class="input" required />
+        <input type="date"  v-model="form.edc"class="input" required />
       </div>
     </div>
 
@@ -218,32 +221,32 @@
         <div class="grid grid-cols-3 gap-4">
           <div>
             <label class="block">Gravidity:</label>
-            <input v-model.number="form.gravidity" type="number" class="input" required />
+            <input type="text" v-model="form.gravidity" class="input" required />
           </div>
 
           <div>
             <label class="block">Parity:</label>
-            <input v-model.number="form.parity" type="number" class="input" required />
+            <input type="text" v-model="form.parity" class="input" required />
           </div>
 
           <div>
             <label class="block">Term:</label>
-            <input v-model.number="form.term" type="number" class="input" />
+            <input type="text" v-model="form.term" class="input" />
           </div>
 
           <div>
             <label class="block">Preterm:</label>
-            <input v-model.number="form.preterm" type="number" class="input" />
+            <input type="text" v-model="form.preterm" class="input" />
           </div>
 
           <div>
             <label class="block">Abortion:</label>
-            <input v-model.number="form.abortion" type="number" class="input" />
+            <input type="text" v-model="form.abortion" class="input" />
           </div>
 
           <div>
             <label class="block">Living:</label>
-            <input v-model.number="form.living" type="number" class="input" />
+            <input type="text" v-model="form.living" class="input" />
           </div>
         </div>
 
@@ -276,21 +279,21 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="block">Hemoglobin (gm/100ml):</label>
-        <input v-model.number="form.hemoglobin" type="number" step="0.1" class="input" required />
+        <input type="number" v-model="form.hemoglobin" step="0.1" class="input" required />
       </div>
 
       <div>
         <label class="block">Hematocrit (vol %):</label>
-        <input v-model.number="form.hematocrit" type="number" step="0.1" class="input" required />
+        <input type="number" v-model="form.hematocrit" step="0.1" class="input" required />
       </div>
 
       <div>
         <label class="block">Urinalysis:</label>
-        <input v-model="form.urinalysis" type="text" class="input" />
+        <input type="text" v-model="form.urinalysis" class="input" />
       </div>
       <div>
         <label class="block">TT Status:</label>
-        <input v-model="form.ttStatus" type="text" class="input" />
+        <input type="text" v-model="form.ttStatus" class="input" />
       </div>
     </div>
 
@@ -298,7 +301,7 @@
 
       <div>
         <label class="block">TD (Date Given):</label>
-        <input v-model="form.tdDate" type="date" class="input" />
+        <input type="date"v-model="form.tdDate" class="input" />
       </div>
    
     <div class="mt-6 flex justify-between">
@@ -308,16 +311,18 @@
       </div>
 
       </form>
-      <div v-if="successMessage" class="mt-4 text-green-600 text-center">
-        {{ successMessage }}
-      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['onSubmit'],
+  props: {
+    onSubmit: {
+      type: Function,
+      required: true,
+    },
+  },
   data() {
     return {
       step: 1,
@@ -329,23 +334,41 @@ export default {
         address: '',
         age: '',
         birthdate: '',
-        contact: '',
-        sex: '',
+        modeOfTransaction: '',
         consultationDate: '',
         consultationTime: '',
-        modeOfTransaction: '',
         bloodPressure: '',
         temperature: '',
         height: '',
         weight: '',
         providerName: '',
-        natureOfVisit: '',
-        visitType: '',
-        chiefComplaints: '',
-        diagnosis: '',
-        medication: ''
+        nameOfSpouse: '',
+        emergencyContact: '',
+        fourMember: '',
+        philhealthStatus: '',
+        philhealthId: '',
+        menarche: '',
+        sexualOnset: '',
+        periodDuration: '',
+        birthControl: '',
+        intervalCycle: '',
+        menopause: '',
+        lmp: '',
+        edc: '',
+        gravidity: '',
+        parity: '',
+        term: '',
+        preterm: '',
+        abortion: '',
+        living: '',
+        syphilisResult: '',
+        penicillin: '',
+        hemoglobin: '',
+        hematocrit: '',
+        urinalysis: '',
+        ttStatus: '',
+        tdDate: '',
       },
-      successMessage: '',
     };
   },
   computed: {
@@ -363,26 +386,21 @@ export default {
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
         age--;
       }
-      this.form.age = age;
+      this.form.age = age; // Set age in the reactive form
       return age;
     },
     submitForm() {
-      console.log('Submitting form with data:', this.form); // Debugging
-      this.onSubmit(this.form).catch(error => {
-        console.error('Submission error:', error); // Log error if it occurs
-      });
+      console.log('Submitting form with data:', this.form);
+      alert('Form submitted');
+      this.onSubmit(this.form); // Pass form data to parent
     },
     nextStep() {
-      if (this.step < 5) {
-        this.step++;
-      }
+      if (this.step < 5) this.step++;
     },
     prevStep() {
-      if (this.step > 1) {
-        this.step--;
-      }
+      if (this.step > 1) this.step--;
     },
-  }
+  },
 };
 </script>
 

@@ -3,7 +3,7 @@
     <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">Prenatal Records</h2>
 
     <!-- Check if personalInformation prop is empty -->
-    <p v-if="!personalInformation || personalInformation.length === 0" class="text-center text-gray-500">
+    <p v-if="!patients || patients.length === 0" class="text-center text-gray-500">
       No patient records available.
     </p>
 
@@ -25,12 +25,10 @@
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">First Name</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Last Name</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Middle Name</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Suffix</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Address</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Age</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Birthday</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Contact #</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Gender</th>
+            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Emergency Contact Number</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200"></th>
           </tr>
         </thead>
@@ -44,12 +42,10 @@
             <td class="py-3 px-6">{{ patient.firstName }}</td>
             <td class="py-3 px-6">{{ patient.lastName }}</td>
             <td class="py-3 px-6">{{ patient.middleName }}</td>
-            <td class="py-3 px-6">{{ patient.suffix }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
             <td class="py-3 px-6">{{ patient.birthdate }}</td>
-            <td class="py-3 px-6">{{ patient.contact }}</td>
-            <td class="py-3 px-6">{{ patient.sex }}</td>
+            <td class="py-3 px-6">{{ patient.emergencyContact }}</td>
             <td class="py-3 px-6">
               <button
                 @click="openModal(patient)"
@@ -103,21 +99,43 @@
             <strong>Full Name:</strong>
             {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
           </li>
-          <li><strong>Suffix:</strong> {{ selectedPatient.suffix }}</li>
           <li><strong>Address:</strong> {{ selectedPatient.address }}</li>
           <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
           <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
-          <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
-          <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
-          <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
-          <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
           <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
+          <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
+          <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
           <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
           <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
           <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
           <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
           <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
-          <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
+          <li><strong>Name of Spouse:</strong> {{ selectedPatient.nameOfSpouse }}</li>
+          <li><strong>Emergency Contact Number:</strong> {{ selectedPatient.emergencyContact }}</li>
+          <li><strong>4ps?::</strong> {{ selectedPatient.fourMember }}</li>
+          <li><strong>Philhealth Status:</strong> {{ selectedPatient.philhealthStatus }}</li>
+          <li><strong>Philhealth ID Number:</strong> {{ selectedPatient.philhealthId }}</li>
+          <li><strong>Menarche:</strong> {{ selectedPatient.menarche }}</li>
+          <li><strong>Onset of Sexual Intercourse:</strong> {{ selectedPatient.sexualOnset }}</li>
+          <li><strong>Period/Duration:</strong> {{ selectedPatient.periodDuration }}</li>
+          <li><strong>Birth Control Method:</strong> {{ selectedPatient.birthControl }}</li>
+          <li><strong>Interval/Cycle:</strong> {{ selectedPatient.intervalCycle }}</li>
+          <li><strong>Menopause? (Yes/No):</strong> {{ selectedPatient.menopause }}</li>
+          <li><strong>LMP (Last Menstrual Period):</strong> {{ selectedPatient.lmp }}</li>
+          <li><strong>EDC (Estimated Date of Confinement):</strong> {{ selectedPatient.edc }}</li>
+          <li><strong>Gravidity:</strong> {{ selectedPatient.gravidity }}</li>
+          <li><strong>Parity:</strong> {{ selectedPatient.parity }}</li>
+          <li><strong>Term:</strong> {{ selectedPatient.term }}</li>
+          <li><strong>Preterm:</strong> {{ selectedPatient.preterm }}</li>
+          <li><strong>Abortion:</strong> {{ selectedPatient.abortion }}</li>
+          <li><strong>Living:</strong> {{ selectedPatient.living }}</li>
+          <li><strong>Syphilis Test Result:</strong> {{ selectedPatient.syphilisResult }}</li>
+          <li><strong>Penicillin Given:</strong> {{ selectedPatient.penicillin }}</li>
+          <li><strong>Hemoglobin (gm/100ml):</strong> {{ selectedPatient.hemoglobin }}</li>
+          <li><strong>Hematocrit (vol %):</strong> {{ selectedPatient.hematocrit }}</li>
+          <li><strong>Urinalysis:</strong> {{ selectedPatient.urinalysis }}</li>
+          <li><strong>TT Status:</strong> {{ selectedPatient.ttStatus }}</li>
+          <li><strong>TD (Date Given):</strong> {{ selectedPatient.tdDate }}</li>
         </ul>
       </div>
     </div>
@@ -128,10 +146,6 @@
 <script>
 export default {
   props: {
-    personalInformation: {
-      type: Array,
-      default: () => [] // Default to an empty array to prevent errors
-    },
     patients: {
       type: Array,
       default: () => [] // Default to empty array to prevent errors
@@ -149,19 +163,16 @@ export default {
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.personalInformation
+      return this.patients
         .filter((patient) => {
           return (
             patient.firstName.toLowerCase().includes(query) ||
             patient.lastName.toLowerCase().includes(query) ||
             patient.middleName.toLowerCase().includes(query) ||
-            patient.suffix.toString().includes(query) ||
             patient.address.toLowerCase().includes(query) ||
             patient.age.toString().includes(query) ||
-            patient.birthdate.toLowerCase().includes(query) ||
-            patient.contact.toLowerCase().includes(query) ||
-            patient.height.toLowerCase().includes(query) ||
-            patient.sex.toLowerCase().includes(query)
+            patient.birthdate.toLowerCase().includes(query)
+
             
 
           );
@@ -169,18 +180,15 @@ export default {
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      const filteredLength = this.personalInformation.filter((patient) => {
+      const filteredLength = this.patients.filter((patient) => {
         const query = this.searchQuery.toLowerCase();
         return (
           patient.firstName.toLowerCase().includes(query) ||
           patient.lastName.toLowerCase().includes(query) ||
           patient.middleName.toLowerCase().includes(query) ||
-          patient.suffix.toString().includes(query) ||
           patient.address.toLowerCase().includes(query) ||
           patient.age.toString().includes(query) ||
-          patient.birthdate.toLowerCase().includes(query) ||
-          patient.contact.toLowerCase().includes(query) ||
-          patient.sex.toLowerCase().includes(query)
+          patient.birthdate.toLowerCase().includes(query)
         );
       }).length;
       return Math.ceil(filteredLength / this.itemsPerPage);

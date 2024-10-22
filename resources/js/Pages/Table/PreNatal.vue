@@ -1,7 +1,7 @@
 <template>
   <Head title="Patient Records" />
   <NewLayout>
-    <PrenatalTable :personalInformation="props.personalInformation" :patients="props.checkUps" />
+    <PrenatalTable :patients="props.Prenatal" />
   </NewLayout>
 </template>
 
@@ -11,7 +11,6 @@ import { Head } from '@inertiajs/vue3';
 import PrenatalTable from '@/Components/PrenatalTable.vue';
 
 const props = defineProps({
-  personalInformation: Array,
-  checkUps: Array // Declare the checkUps prop coming from the server
+  Prenatal: Array // Declare the checkUps prop coming from the server
 });
 </script>

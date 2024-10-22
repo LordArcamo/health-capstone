@@ -22,7 +22,17 @@
             </div>
             <div>
               <label class="block">Suffix:</label>
-              <input type="text" v-model="form.suffix" class="input"/>
+              <select v-model="form.suffix" class="input">
+                <option value="">Select Suffix</option>
+                <option value="Jr.">Jr.</option>
+                <option value="Sr.">Sr.</option>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+                <option value="V">V</option>
+                <option value="None">None</option>
+              </select>
             </div>
             <div>
               <label class="block">Residential Address:</label>
@@ -63,8 +73,18 @@
             </div>
             <div>
               <label class="block">Blood Type:</label>
-              <input type="text" v-model="form.bloodtype" class="input" required />
-            </div>
+              <select v-model="form.bloodtype" class="input" required>
+              <option value="">Select Blood Type</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
             <div>
               <label class="block">Mother's Name:</label>
               <input type="text" v-model="form.mothername" class="input" required />
@@ -244,6 +264,7 @@ function calculateAge() {
 function submitForm() {
   try {
     console.log('Submitting form with data:', form.value);
+    alert('Form submitted');
     props.onSubmit(form.value); // Pass all form data to the parent
   } catch (error) {
     console.error('Unexpected error during form submission:', error);
@@ -258,6 +279,7 @@ function prevStep() {
   if (step.value > 1) step.value--;
 }
 </script>
+
 
 <style>
 .input {

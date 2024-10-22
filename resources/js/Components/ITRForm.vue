@@ -22,7 +22,17 @@
             </div>
             <div>
               <label class="block">Suffix:</label>
-              <input type="text" v-model="form.suffix" class="input"/>
+              <select v-model="form.suffix" class="input">
+                <option value="">Select Suffix</option>
+                <option value="Jr.">Jr.</option>
+                <option value="Sr.">Sr.</option>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+                <option value="V">V</option>
+                <option value="None">None</option>
+              </select>
             </div>
             <div>
               <label class="block">Residential Address:</label>
@@ -214,11 +224,9 @@ export default {
       return age;
     },
     submitForm() {
-      console.log('Submitting form with data:', this.form); // Debugging
+      console.log('Submitting form with data:', this.form);
       alert('Form submitted');
-      this.onSubmit(this.form).catch(error => {
-        console.error('Submission error:', error); // Log error if it occurs
-      });
+      this.onSubmit(this.form); // Pass form data to parent
     },
     nextStep() {
       if (this.step < 3) {
