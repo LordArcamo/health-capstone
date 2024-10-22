@@ -24,7 +24,7 @@ Route::get('/patients', [PatientController::class, 'index']);
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
-    Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); // corrected 'patiens' to 'patients'
+    Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); 
     Route::get('//patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
 });
 
@@ -37,7 +37,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/prenatal', PreNatalController::class);
-    Route::get('/checkup/prenatal', [PreNatalController::class, 'create'])->name('prenatal'); // corrected 'patiens' to 'patients'
+    Route::get('/checkup/prenatal', [PreNatalController::class, 'create'])->name('prenatal');
+    Route::post('/prenatal/store', [PreNatalController::class, 'store'])->name('prenatal.store');
+    Route::get('/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
 });
 
 
@@ -45,9 +47,6 @@ Route::get('/checkup', function () {
     return Inertia::render('Checkup');
 })->middleware(['auth', 'verified'])->name('checkup');
 
-Route::get('/patients/prenatal-postpartum', function () {
-    return Inertia::render('Table/PreNatal');
-})->name('prenatal-postpartum');
 
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');

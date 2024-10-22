@@ -15,7 +15,7 @@ class NationalImmunizationProgramController extends Controller
     {
         $Immunization = NationalImmunizationProgram::all();
         return Inertia::render('Table/NationalImmunization', [
-            'Immunization' => $Immunization, // Pass patients data to the view
+            'Immunization' => $Immunization, // Pass immunization data to the view
         ]);
     }
 
@@ -46,7 +46,7 @@ class NationalImmunizationProgramController extends Controller
             'bloodtype' => 'required|string|max:255',
             'mothername' => 'required|string|max:255',
             'dswdNhts' => 'required|string|max:255',
-            'facilityHouseholdno'  => 'required|string|max:255',
+            'facilityHouseholdno' => 'required|string|max:255',
             'houseHoldno' => 'required|string|max:255',
             'fourpsmember' => 'required|string|max:255',
             'PCBMember' => 'required|string|max:255',
@@ -59,41 +59,14 @@ class NationalImmunizationProgramController extends Controller
             'dateAssesed' => 'required|date',
             'date' => 'required|date',
             'place' => 'required|string|max:255',
-            'guardian' => 'required|string|max:255'
+            'guardian' => 'required|string|max:255',
         ]);
 
-        $national_immunization_programs = new NationalImmunizationProgram();
-        $national_immunization_programs->firstName = $validatedData['firstName'];
-        $national_immunization_programs->lastName = $validatedData['lastName'];
-        $national_immunization_programs->middleName = $validatedData['middleName'];
-        $national_immunization_programs->suffix = $validatedData['suffix'];
-        $national_immunization_programs->address = $validatedData['address'];
-        $national_immunization_programs->age = $validatedData['age'];
-        $national_immunization_programs->birthdate = $validatedData['birthdate'];
-        $national_immunization_programs->contact = $validatedData['contact'];
-        $national_immunization_programs->sex = $validatedData['sex'];
-        $national_immunization_programs->birthplace = $validatedData['birthplace'];
-        $national_immunization_programs->bloodtype = $validatedData['bloodtype'];
-        $national_immunization_programs->mothername = $validatedData['mothername'];
-        $national_immunization_programs->dswdNhts = $validatedData['dswdNhts'];
-        $national_immunization_programs->facilityHouseholdno = $validatedData['facilityHouseholdno'];
-        $national_immunization_programs->houseHoldno = $validatedData['houseHoldno'];
-        $national_immunization_programs->fourpsmember = $validatedData['fourpsmember'];
-        $national_immunization_programs->PCBMember = $validatedData['PCBMember'];
-        $national_immunization_programs->philhealthMember = $validatedData['philhealthMember'];
-        $national_immunization_programs->statusType = $validatedData['statusType'];
-        $national_immunization_programs->philhealthNo = $validatedData['philhealthNo'];
-        $national_immunization_programs->ifMember = $validatedData['ifMember'];
-        $national_immunization_programs->familyMember = $validatedData['familyMember'];
-        $national_immunization_programs->ttstatus = $validatedData['ttstatus'];
-        $national_immunization_programs->dateAssesed = $validatedData['dateAssesed'];
-        $national_immunization_programs->date = $validatedData['date'];
-        $national_immunization_programs->place = $validatedData['place'];
-        $national_immunization_programs->guardian = $validatedData['guardian'];
-        $national_immunization_programs->save();
+        // Create a new instance and fill it with validated data
+        $nationalImmunizationProgram = NationalImmunizationProgram::create($validatedData);
 
-
-        return back()->with('Success');
+        // Redirect back with success message
+        return back()->with('Success', 'Data saved successfully!');
     }
 
     /**
@@ -101,7 +74,7 @@ class NationalImmunizationProgramController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // Logic to show a specific resource
     }
 
     /**
@@ -109,7 +82,7 @@ class NationalImmunizationProgramController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        // Logic to show edit form for a specific resource
     }
 
     /**
@@ -117,7 +90,7 @@ class NationalImmunizationProgramController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Logic to update a specific resource
     }
 
     /**
@@ -125,6 +98,6 @@ class NationalImmunizationProgramController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Logic to delete a specific resource
     }
 }

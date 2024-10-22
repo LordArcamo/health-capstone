@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\CheckUp;
 
-
 class CheckUpController extends Controller
 {
     /**
@@ -16,7 +15,7 @@ class CheckUpController extends Controller
     {
         $checkUps = CheckUp::all();
         return Inertia::render('Table/IndividualTreatmentRecord', [
-            'checkUps' => $checkUps, // Pass patients data to the view
+            'checkUps' => $checkUps, // Pass check-up data to the view
         ]);
     }
 
@@ -33,71 +32,46 @@ class CheckUpController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate all fields in a single validation step
+       
         $validatedData = $request->validate([
-            'firstName' => 'required|string|max:255',
-            'lastName' => 'required|string|max:255',
-            'middleName' => 'required|string|max:255',
-            'suffix' => 'required|string|max:255',
+            'firstName' => 'required|string|max:100',
+            'lastName' => 'required|string|max:100',
+            'middleName' => 'required|string|max:100',
+            'suffix' => 'required|string|max:10', 
             'address' => 'required|string|max:255',
-            'age' => 'required|numeric',
+            'age' => 'required|numeric', 
             'birthdate' => 'required|date',
-            'contact' => 'required|string|max:255',
-            'sex' => 'required|string|max:255',
+            'contact' => 'required|string|max:15',
+            'sex' => 'required|string|max:10', 
             'consultationDate' => 'required|date',
             'consultationTime' => 'required|date_format:H:i',
-            'modeOfTransaction' => 'required|string|max:255',
-            'bloodPressure' => 'required|string|max:255',
-            'temperature'  => 'required|numeric',
-            'height' => 'required|numeric',
-            'weight' => 'required|numeric',
-            'providerName' => 'required|string|max:255',
-            'natureOfVisit' => 'required|string|max:255',
-            'visitType' => 'required|string|max:255',
+            'modeOfTransaction' => 'required|string|max:50',
+            'bloodPressure' => 'required|string|max:20', 
+            'temperature' => 'required|numeric|between:0,100', 
+            'height' => 'required|numeric|between:0,300',
+            'weight' => 'required|numeric|between:0,500', 
+            'providerName' => 'required|string|max:100',
+            'natureOfVisit' => 'required|string|max:100',
+            'visitType' => 'required|string|max:50',
             'chiefComplaints' => 'required|string|max:255',
             'diagnosis' => 'required|string|max:255',
             'medication' => 'required|string|max:255',
         ]);
+        
 
-
-        $itr = new CheckUp();
-
-        // Assign all the validated data to the model
-        $itr->firstName = $validatedData['firstName'];
-        $itr->lastName = $validatedData['lastName'];
-        $itr->middleName = $validatedData['middleName'];
-        $itr->suffix = $validatedData['suffix'];
-        $itr->address = $validatedData['address'];
-        $itr->age = $validatedData['age'];
-        $itr->birthdate = $validatedData['birthdate'];
-        $itr->contact = $validatedData['contact'];
-        $itr->sex = $validatedData['sex'];
-        $itr->consultationDate = $validatedData['consultationDate'];
-        $itr->consultationTime = $validatedData['consultationTime'];
-        $itr->modeOfTransaction = $validatedData['modeOfTransaction'];
-        $itr->bloodPressure = $validatedData['bloodPressure'];
-        $itr->temperature = $validatedData['temperature'];
-        $itr->height = $validatedData['height'];
-        $itr->weight = $validatedData['weight'];
-        $itr->providerName = $validatedData['providerName'];
-        $itr->natureOfVisit = $validatedData['natureOfVisit'];
-        $itr->visitType = $validatedData['visitType'];
-        $itr->chiefComplaints = $validatedData['chiefComplaints'];
-        $itr->diagnosis = $validatedData['diagnosis'];
-        $itr->medication = $validatedData['medication'];
-        $itr->save();
+        // Create and fill the model in one step
+        $checkUp = CheckUp::create($validatedData);
 
         // Redirect back with success message
         return back()->with('Success', 'Data saved successfully!');
     }
-
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        // Logic to show a specific resource
     }
 
     /**
@@ -105,7 +79,7 @@ class CheckUpController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        // Logic to show edit form for a specific resource
     }
 
     /**
@@ -113,7 +87,7 @@ class CheckUpController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Logic to update a specific resource
     }
 
     /**
@@ -121,6 +95,6 @@ class CheckUpController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Logic to delete a specific resource
     }
 }
