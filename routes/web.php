@@ -7,6 +7,7 @@ use App\Http\Controllers\PreNatalController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\PatientController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -16,6 +17,8 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');
 
 // routes/web.php
 

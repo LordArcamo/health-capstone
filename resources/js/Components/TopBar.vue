@@ -9,7 +9,9 @@ import { Link } from '@inertiajs/vue3';
 import Search from './SearchBar.vue';
 
 const showingNavigationDropdown = ref(false);
+
 </script>
+
 
 <template>
     <div>
@@ -27,9 +29,8 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
                             </div> -->
                         </div>
-
-                        <Search/>
-
+            
+                        
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
                             <!-- Settings Dropdown -->
                             <div class="ms-3 relative">

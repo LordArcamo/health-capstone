@@ -1,37 +1,61 @@
 <template>
   <div class="container mx-auto py-8 px-4">
-    <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">Patient Records</h2>
+    <!-- <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">Patient Records</h2> -->
 
-    <!-- Check if Patients prop is empty -->
-    <p v-if="!patients || patients.length === 0" class="text-center text-gray-500">
-      No patient records available.
-    </p>
-
-    <!-- Search input -->
-    <div v-else class="mb-6">
+    <!-- Search and Filter Section -->
+    <div class="mb-6 flex flex-col md:flex-row gap-4">
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="Search by name, age, address, or diagnosis"
-        class="border border-gray-300 p-3 rounded w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        placeholder="Search by name, diagnosis, or visit type"
+        class="border border-gray-300 p-3 rounded w-full md:w-2/3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
+      <div class="flex gap-4 w-full md:w-1/3">
+        <select
+          v-model="filterPrk"
+          class="border border-gray-300 p-3 rounded w-1/2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+        >
+          <option value="">All Purok</option>
+          <option v-for="purok in purokOptions" :key="purok" :value="purok">
+            {{ purok }}
+          </option>
+        </select>
+        <select
+          v-model="filterBarangay"
+          class="border border-gray-300 p-3 rounded w-1/2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+        >
+          <option value="">All Barangay</option>
+          <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
+            {{ barangay }}
+          </option>
+        </select>
+      </div>
     </div>
 
-    <!-- Responsive Table Wrapper with Background and Padding -->
-    <div class="overflow-x-auto bg-gray-100 p-6 ">
+    <!-- Generate Report Button -->
+    <div class="mb-6">
+      <button
+        @click="generateReport"
+        class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 hover:text-black transition-colors"
+      >
+        Generate Report
+      </button>
+    </div>
+
+    <!-- Responsive Table -->
+    <div class="overflow-x-auto bg-gray-100 rounded-lg">
       <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
         <thead>
-          <tr class="bg-gradient-to-r from-green-500 via-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">First Name</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Last Name</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Middle Name</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Suffix</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Address</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Age</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Birthday</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Contact #</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Gender</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200"></th>
+          <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
+            <th class="py-4 px-6 text-left border-b border-indigo-200">First Name</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Last Name</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Purok</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Barangay</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Nature of Visit</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Visit Type</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Gender</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Actions</th>
           </tr>
         </thead>
 
@@ -43,17 +67,16 @@
           >
             <td class="py-3 px-6">{{ patient.firstName }}</td>
             <td class="py-3 px-6">{{ patient.lastName }}</td>
-            <td class="py-3 px-6">{{ patient.middleName }}</td>
-            <td class="py-3 px-6">{{ patient.suffix }}</td>
-            <td class="py-3 px-6">{{ patient.address }}</td>
+            <td class="py-3 px-6">{{ patient.purok }}</td>
+            <td class="py-3 px-6">{{ patient.barangay }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.birthdate }}</td>
-            <td class="py-3 px-6">{{ patient.contact }}</td>
+            <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
+            <td class="py-3 px-6">{{ patient.visitType }}</td>
             <td class="py-3 px-6">{{ patient.sex }}</td>
             <td class="py-3 px-6">
               <button
                 @click="openModal(patient)"
-                class="bg-blue-500 text-white py-2 px-3 rounded hover:bg-blue-700 transition-colors"
+                class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black"
               >
                 View More
               </button>
@@ -63,8 +86,8 @@
       </table>
     </div>
 
-    <!-- Pagination controls -->
-    <div class="mt-6 flex justify-center items-center space-x-4">
+    <!-- Pagination -->
+    <div class="mt-6 flex justify-center space-x-4">
       <button
         @click="prevPage"
         :disabled="currentPage === 1"
@@ -82,9 +105,9 @@
       </button>
     </div>
 
-    <!-- Modal -->
-    <div
-      v-if="isModalOpen"
+  <!-- Modal -->
+  <div
+      v-if="showModal"
       class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4"
     >
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
@@ -98,7 +121,8 @@
         <h2 class="text-xl sm:text-2xl font-bold mb-4">
           Details for {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}
         </h2>
-        <ul class="space-y-2">
+        <ul class="flex gap-20">
+         <div class="flex flex-col gap-1">
           <li>
             <strong>Full Name:</strong>
             {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
@@ -114,6 +138,9 @@
           <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
           <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
           <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
+         </div>
+         
+         <div class="flex flex-col gap-1">
           <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
           <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
           <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
@@ -122,6 +149,7 @@
           <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
           <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
           <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
+         </div>
         </ul>
       </div>
     </div>
@@ -134,16 +162,18 @@ export default {
   props: {
     patients: {
       type: Array,
-      default: () => [] // Default to empty array to prevent errors
-    }
+      default: () => [],
+    },
   },
   data() {
     return {
       searchQuery: '',
+      filterPrk: '',
+      filterBarangay: '',
       currentPage: 1,
       itemsPerPage: 5,
-      isModalOpen: false,
-      selectedPatient: {},
+      showModal: false,
+      selectedPatient: null,
     };
   },
   computed: {
@@ -151,42 +181,32 @@ export default {
       const query = this.searchQuery.toLowerCase();
       return this.patients
         .filter((patient) => {
-          return (
+          const matchesQuery =
             patient.firstName.toLowerCase().includes(query) ||
             patient.lastName.toLowerCase().includes(query) ||
-            patient.middleName.toLowerCase().includes(query) ||
-            patient.suffix.toString().includes(query) ||
-            patient.address.toLowerCase().includes(query) ||
-            patient.age.toString().includes(query) ||
-            patient.birthdate.toLowerCase().includes(query) ||
-            patient.contact.toLowerCase().includes(query) ||
-            patient.height.toLowerCase().includes(query) ||
-            patient.sex.toLowerCase().includes(query)
-            
+            patient.natureOfVisit.toLowerCase().includes(query) ||
+            patient.visitType.toLowerCase().includes(query);
 
-          );
+          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
+          const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
+
+          return matchesQuery && matchesPrk && matchesBarangay;
         })
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      const filteredLength = this.patients.filter((patient) => {
-        const query = this.searchQuery.toLowerCase();
-        return (
-          patient.firstName.toLowerCase().includes(query) ||
-          patient.lastName.toLowerCase().includes(query) ||
-          patient.middleName.toLowerCase().includes(query) ||
-          patient.suffix.toString().includes(query) ||
-          patient.address.toLowerCase().includes(query) ||
-          patient.age.toString().includes(query) ||
-          patient.birthdate.toLowerCase().includes(query) ||
-          patient.contact.toLowerCase().includes(query) ||
-          patient.sex.toLowerCase().includes(query)
-        );
-      }).length;
-      return Math.ceil(filteredLength / this.itemsPerPage);
+      return Math.ceil(this.patients.length / this.itemsPerPage);
     },
   },
   methods: {
+    openModal(patient) {
+      this.selectedPatient = patient;
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.selectedPatient = null;
+    },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
@@ -197,45 +217,36 @@ export default {
         this.currentPage--;
       }
     },
-    openModal(patient) {
-      this.selectedPatient = patient;
-      this.isModalOpen = true;
+    generateReport() {
+      const data = this.filteredPatients.map((patient) => ({
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        purok: patient.purok,
+        barangay: patient.barangay,
+        age: patient.age,
+        natureOfVisit: patient.natureOfVisit,
+        visitType: patient.visitType,
+        gender: patient.sex,
+      }));
+
+      const csvContent =
+        'data:text/csv;charset=utf-8,' +
+        ['First Name,Last Name,Purok,Barangay,Age,Nature of Visit,Visit Type,Gender']
+          .concat(
+            data.map((row) =>
+              `${row.firstName},${row.lastName},${row.purok},${row.barangay},${row.age},${row.natureOfVisit},${row.visitType},${row.gender}`
+            )
+          )
+          .join('\n');
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'patient_report.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
-    closeModal() {
-      this.isModalOpen = false;
-      this.selectedPatient = {};
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage += 1;
-      }
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage -= 1;
-      }
-    },
-  }
-}
+  },
+};
 </script>
-
-<style scoped>
-.container {
-  padding: 0 1rem;
-}
-
-.table-auto {
-  width: 100%;
-}
-
-@media (min-width: 640px) {
-  .table-auto {
-    display: table;
-  }
-}
-
-.modal-content {
-  max-width: 100%;
-  width: 100%;
-}
-</style>

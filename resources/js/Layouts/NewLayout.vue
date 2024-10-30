@@ -3,7 +3,7 @@ import TopBar from '../Components/TopBar.vue';
 import Sidebar from '../Components/SideBar.vue';
 </script>
 
-<style>
+<style scope>
     .row-container {
         display: flex;
         flex-direction: row;

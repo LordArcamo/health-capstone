@@ -1,24 +1,47 @@
 <template>
   <div class="container mx-auto py-8 px-4">
-    <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">National Immunization Records</h2>
-
-    <!-- Check if personalInformation prop is empty -->
-    <p v-if="!patients || patients.length === 0" class="text-center text-gray-500">
-      No patient records available.
-    </p>
-
-    <!-- Search input -->
-    <div v-else class="mb-6">
+    <div class="mb-6 flex flex-col md:flex-row gap-4">
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="Search by name, age, address, or diagnosis"
-        class="border border-gray-300 p-3 rounded w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        placeholder="Search by name, diagnosis, or visit type"
+        class="border border-gray-300 p-3 rounded w-full md:w-2/3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
+      <div class="flex gap-4 w-full md:w-1/3">
+        <select
+          v-model="filterPrk"
+          class="border border-gray-300 p-3 rounded w-1/2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+        >
+          <option value="">All Purok</option>
+          <option v-for="purok in purokOptions" :key="purok" :value="purok">
+            {{ purok }}
+          </option>
+        </select>
+        <select
+          v-model="filterBarangay"
+          class="border border-gray-300 p-3 rounded w-1/2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+        >
+          <option value="">All Barangay</option>
+          <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
+            {{ barangay }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Generate Report Button -->
+    <div class="mb-6">
+      <button
+        @click="generateReport"
+        class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 hover:text-black transition-colors"
+      >
+        Generate Report
+      </button>
     </div>
 
     <!-- Responsive Table Wrapper with Background and Padding -->
-    <div class="overflow-x-auto bg-gray-100 p-6 rounded-lg shadow-lg">
+     <!-- Responsive Table -->
+     <div class="overflow-x-auto bg-gray-100 rounded-lg">
       <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 via-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
@@ -28,7 +51,6 @@
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Suffix</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Address</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Age</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Birthday</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Contact #</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Gender</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200"></th>
@@ -47,13 +69,12 @@
             <td class="py-3 px-6">{{ patient.suffix }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.birthdate }}</td>
             <td class="py-3 px-6">{{ patient.contact }}</td>
             <td class="py-3 px-6">{{ patient.sex }}</td>
             <td class="py-3 px-6">
               <button
                 @click="openModal(patient)"
-                class="bg-blue-500 text-white py-2 px-3 rounded hover:bg-blue-700 transition-colors"
+                class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black"
               >
                 View More
               </button>
@@ -98,12 +119,13 @@
         <h2 class="text-xl sm:text-2xl font-bold mb-4">
           Details for {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}
         </h2>
-        <ul class="space-y-2">
-          <li>
+        <ul class="space-y-2 flex gap-10">
+          <div>
+            <li>
             <strong>Full Name:</strong>
             {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
           </li>
-          <li><strong>Suffix:</strong> {{ selectedPatient.suffix }}</li>
+            <li><strong>Suffix:</strong> {{ selectedPatient.suffix }}</li>
           <li><strong>Address:</strong> {{ selectedPatient.address }}</li>
           <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
           <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
@@ -114,7 +136,10 @@
           <li><strong>Mother's Name:</strong> {{ selectedPatient.mothername }}</li>
           <li><strong>DSWD NHTS:</strong> {{ selectedPatient.dswdNhts }}</li>
           <li><strong>Facility Household No.:</strong> {{ selectedPatient.facilityHouseholdno }}</li>
-          <li><strong>Household No.:</strong> {{ selectedPatient.houseHoldno }}</li>
+          </div>
+          
+          <div>
+            <li><strong>Household No.:</strong> {{ selectedPatient.houseHoldno }}</li>
           <li><strong>4Ps Member?:</strong> {{ selectedPatient.fourpsmember }}</li>
           <li><strong>Primary Care Benefit (PCB) Member?:</strong> {{ selectedPatient.PCBMember }}</li>
           <li><strong>Philhealth Member:</strong> {{ selectedPatient.philhealthMember }}</li>
@@ -127,6 +152,7 @@
           <li><strong>Date:</strong> {{ selectedPatient.date }}</li>
           <li><strong>Place:</strong> {{ selectedPatient.place }}</li>
           <li><strong>Guardiant:</strong> {{ selectedPatient.guardian }}</li>
+          </div>
         </ul>
       </div>
     </div>
@@ -219,6 +245,36 @@ export default {
       if (this.currentPage > 1) {
         this.currentPage -= 1;
       }
+    },
+    generateReport() {
+      const data = this.filteredPatients.map((patient) => ({
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        purok: patient.purok,
+        barangay: patient.barangay,
+        age: patient.age,
+        natureOfVisit: patient.natureOfVisit,
+        visitType: patient.visitType,
+        gender: patient.sex,
+      }));
+
+      const csvContent =
+        'data:text/csv;charset=utf-8,' +
+        ['First Name,Last Name,Purok,Barangay,Age,Nature of Visit,Visit Type,Gender']
+          .concat(
+            data.map((row) =>
+              `${row.firstName},${row.lastName},${row.purok},${row.barangay},${row.age},${row.natureOfVisit},${row.visitType},${row.gender}`
+            )
+          )
+          .join('\n');
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'patient_report.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
   }
 }
