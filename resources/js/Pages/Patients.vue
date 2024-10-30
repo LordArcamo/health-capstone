@@ -1,17 +1,29 @@
 <template>
-  <Head title="Patient Records" />
-  <NewLayout>
-    <PatientTable :personalInformation="props.personalInformation" :patients="props.checkUps" />
-  </NewLayout>
+  <div>
+    <WelcomeModal :patients="patients" />
+  </div>
 </template>
 
-<script setup>
-import NewLayout from '@/Layouts/NewLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import PatientTable from '../Components/PatientTable.vue';
+<script>
+import WelcomeModal from './WelcomeModal.vue';
+import { Inertia } from '@inertiajs/inertia';
 
-const props = defineProps({
-  personalInformation: Array,
-  checkUps: Array // Declare the checkUps prop coming from the server
-});
+export default {
+  components: {
+    WelcomeModal,
+  },
+  data() {
+    return {
+      patients: [], // Initialize patients as an empty array
+    };
+  },
+  mounted() {
+    // Fetch initial patients if needed or leave empty for now
+    Inertia.get(route('patients.index'), {
+      onSuccess: (page) => {
+        this.patients = page.props.patients; // Assuming you get initial patients here
+      },
+    });
+  },
+};
 </script>

@@ -10,7 +10,7 @@
           type="text"
           v-model="searchQuery"
           @input="searchPatients"
-          placeholder="Enter patient name or ID"
+          placeholder="Enter patient Lastname or ID"
           class="border p-2 rounded w-full mb-4"
         />
 
@@ -22,7 +22,7 @@
             @click="selectPatient(patient)"
             class="p-2 cursor-pointer hover:bg-gray-200 rounded"
           >
-            {{ patient.name }} ({{ patient.id }})
+            {{ patient.id }} ({{ patient.lastName }})
           </li>
         </ul>
 

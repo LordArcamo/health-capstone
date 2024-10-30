@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
+use App\Models\PersonalInformation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,13 +12,13 @@ class PatientController extends Controller
         $query = $request->input('query');
 
         // Fetch patients based on search query (name or ID)
-        $patients = Patient::where('name', 'like', "%$query%")
+        $patients  = PersonalInformation::where('lastName', 'like', "%$query%")
             ->orWhere('id', 'like', "%$query%")
             ->get();
 
         // Return patients data through Inertia
         return Inertia::render('WelcomeModal', [
-            'patients' => $patients,
+            'patients ' => $patients ,
         ]);
     }
 }
