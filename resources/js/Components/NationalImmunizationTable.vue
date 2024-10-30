@@ -177,7 +177,7 @@ export default {
       selectedPatient: {},
     };
   },
-  computed: {
+    computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
       return this.patients
@@ -186,13 +186,11 @@ export default {
             patient.firstName.toLowerCase().includes(query) ||
             patient.lastName.toLowerCase().includes(query) ||
             patient.middleName.toLowerCase().includes(query) ||
-            patient.suffix.toString().includes(query) ||
             patient.address.toLowerCase().includes(query) ||
             patient.age.toString().includes(query) ||
             patient.birthdate.toLowerCase().includes(query) ||
-            patient.contact.toLowerCase().includes(query) ||
-            patient.height.toLowerCase().includes(query) ||
-            patient.sex.toLowerCase().includes(query)
+            patient.sex.toString().includes(query)
+
             
 
           );
