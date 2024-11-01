@@ -41,19 +41,19 @@
       </button>
     </div>
 
-    <!-- Responsive Table Wrapper with Background and Padding -->
-    <div class="overflow-x-auto rounded-lg">
+    <!-- Responsive Table -->
+    <div class="overflow-x-auto bg-gray-100 rounded-lg">
       <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
         <thead>
-          <tr class="bg-gradient-to-r from-green-500 via-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">First Name</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Last Name</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Middle Name</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Address</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Age</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Birthday</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Emergency Contact Number</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200"></th>
+          <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
+            <th class="py-4 px-6 text-left border-b border-indigo-200">First Name</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Last Name</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Purok</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Barangay</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Birthday</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Emergency Contact Number</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Actions</th>
           </tr>
         </thead>
 
@@ -65,24 +65,32 @@
           >
             <td class="py-3 px-6">{{ patient.firstName }}</td>
             <td class="py-3 px-6">{{ patient.lastName }}</td>
-            <td class="py-3 px-6">{{ patient.middleName }}</td>
-            <td class="py-3 px-6">{{ patient.address }}</td>
+            <td class="py-3 px-6">{{ patient.purok }}</td>
+            <td class="py-3 px-6">{{ patient.barangay }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
             <td class="py-3 px-6">{{ patient.birthdate }}</td>
             <td class="py-3 px-6">{{ patient.emergencyContact }}</td>
             <td class="py-3 px-6">
-              <button
+              <div class="flex gap-1">
+                <button
                 @click="openModal(patient)"
-                class="bg-blue-500 text-white py-2 px-3 rounded hover:bg-blue-700 transition-colors"
+                class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black"
               >
                 View More
               </button>
+              <button @click="openTrimesterModal" class="bg-blue-500 text-white px-3 py-1  rounded-md hover:bg-blue-600">
+                Trimester
+              </button>
+              
+              <!-- Trimester Modal Component -->
+              <TrimesterModal :show="showTrimesterModal" @close="closeTrimesterModal" @confirm="confirmTrimesterSelection" />
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-
+    
     <!-- Pagination controls -->
     <div class="mt-6 flex justify-center items-center space-x-4">
       <button
@@ -172,7 +180,12 @@
 
 
 <script>
+import TrimesterModal from "@/Components/TrimesterModal.vue";
+
 export default {
+  components: {
+    TrimesterModal,
+  },
   props: {
     patients: {
       type: Array,
@@ -181,6 +194,7 @@ export default {
   },
   data() {
     return {
+      showTrimesterModal: false,
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: 5,
@@ -200,9 +214,6 @@ export default {
             patient.address.toLowerCase().includes(query) ||
             patient.age.toString().includes(query) ||
             patient.birthdate.toLowerCase().includes(query)
-
-            
-
           );
         })
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
@@ -223,15 +234,17 @@ export default {
     },
   },
   methods: {
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
+    openTrimesterModal() {
+      console.log("Opening Trimester Modal");
+      this.showTrimesterModal = true;
     },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+    closeTrimesterModal() {
+      console.log("Closing Trimester Modal");
+      this.showTrimesterModal = false;
+    },
+    confirmTrimesterSelection() {
+      console.log("Confirming Trimester Selection");
+      this.closeTrimesterModal();
     },
     openModal(patient) {
       this.selectedPatient = patient;
@@ -243,47 +256,18 @@ export default {
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
-        this.currentPage += 1;
+        this.currentPage++;
       }
     },
     prevPage() {
       if (this.currentPage > 1) {
-        this.currentPage -= 1;
+        this.currentPage--;
       }
     },
-    generateReport() {
-      const data = this.filteredPatients.map((patient) => ({
-        firstName: patient.firstName,
-        lastName: patient.lastName,
-        purok: patient.purok,
-        barangay: patient.barangay,
-        age: patient.age,
-        natureOfVisit: patient.natureOfVisit,
-        visitType: patient.visitType,
-        gender: patient.sex,
-      }));
-
-      const csvContent =
-        'data:text/csv;charset=utf-8,' +
-        ['First Name,Last Name,Purok,Barangay,Age,Nature of Visit,Visit Type,Gender']
-          .concat(
-            data.map((row) =>
-              `${row.firstName},${row.lastName},${row.purok},${row.barangay},${row.age},${row.natureOfVisit},${row.visitType},${row.gender}`
-            )
-          )
-          .join('\n');
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'patient_report.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    },
-  }
-}
+  },
+};
 </script>
+
 
 <style scoped>
 /* Add any necessary styling here */
