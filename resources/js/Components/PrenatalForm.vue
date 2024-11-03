@@ -21,18 +21,22 @@
               <input type="text" v-model="form.middleName " class="input" required/>
             </div>
             <div>
-              <label class="block">Residential Address:</label>
-              <input type="text" v-model="form.address" class="input" required />
+              <label class="block">Purok:</label>
+              <input type="text" v-model="form.purok" class="input" required />
+            </div>
+            <div>
+              <label class="block">Barangay:</label>
+              <input type="text" v-model="form.barangay" class="input" required />
             </div>
             <div>
               <label class="block">Age</label>
               <input type="number" v-model="computedAge" class="input" readonly />
             </div>
-            <div>
+          </div>
+          <div class="mt-5">
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" class="input" required />
             </div>
-          </div>
           <div class="mt-6 flex justify-center text-right">
             <button @click="nextStep" class="btn">Next</button>
           </div>
@@ -97,9 +101,7 @@
                 <option>No</option>
               </select>
             </div>
-
-          </div>
-          <div class="form-group">
+            <div class="form-group">
             <label for="philhealthStatus" class="block font-medium text-gray-700">Philhealth Status:</label>
             <select 
               id="philhealthStatus" 
@@ -123,6 +125,9 @@
               />
             </div>
           </div>
+
+          </div>
+
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
             <button @click="nextStep" class="btn">Next</button>
@@ -331,7 +336,8 @@ export default {
         lastName: '',
         middleName: '',
         suffix: '',
-        address: '',
+        purok: '',
+        barangay: '',
         age: '',
         birthdate: '',
         modeOfTransaction: '',
@@ -404,7 +410,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .input {
   width: 100%;
   padding: 0.5rem;
@@ -414,7 +420,7 @@ export default {
 }
 
 .btn {
-  background-color: #1d72b8;
+  background-color: #007523;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
