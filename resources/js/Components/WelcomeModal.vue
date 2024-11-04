@@ -6,10 +6,10 @@ export default {
   components: { Link },
   data() {
     return {
-      step: 1, // Track the current step
+      step: 1,
       searchQuery: '',
-      patients: [], // Store search results
-      selectedPatient: null, // Store the selected patient
+      patients: [],
+      selectedPatient: null,
     };
   },
   methods: {
@@ -19,11 +19,9 @@ export default {
         return;
       }
 
-      // Make Inertia request to fetch patients based on search query
       Inertia.get(route('patients.search'), { query: this.searchQuery }, {
-        preserveState: true, // Keep the modal state intact
+        preserveState: true,
         onSuccess: (page) => {
-          // Access the results from Inertia response and update patients list
           this.patients = page.props.patients;
         },
       });
@@ -34,7 +32,7 @@ export default {
     },
     addNewPatient() {
       // Set a new patient as selected
-      this.selectedPatient = { id: 'new', lastName: this.searchQuery }; // Simulate a new patient
+      this.selectedPatient = { personalId: 'new', lastName: this.searchQuery }; // Simulate a new patient
       this.step = 2; // Move to the next step (check-up selection)
     },
     goBackToCheckup() {
@@ -66,7 +64,7 @@ export default {
         <input
           type="text"
           v-model="searchQuery"
-          @keyup.enter="searchPatients"
+          @input="searchPatients"
           placeholder="Enter patient Lastname or ID"
           class="border p-3 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-200"
         />
@@ -75,11 +73,11 @@ export default {
           <ul v-if="patients.length">
             <li 
               v-for="patient in patients" 
-              :key="patient.id" 
+              :key="patient.personalId"
               @click="selectPatient(patient)"
               class="p-3 cursor-pointer hover:bg-gray-200 rounded transition duration-200"
             >
-              {{ patient.id }} ({{ patient.lastName }})
+              {{ patient.personalId }} ({{ patient.lastName }})
             </li>
           </ul>
           <p v-else-if="searchQuery" class="text-sm text-gray-500">No patients found.</p>
@@ -104,7 +102,7 @@ export default {
         <p class="text-gray-700 mb-6 text-lg">What type of Check-Up do we have today?</p>
         <div class="flex justify-center space-x-4 mb-4">
           <Link 
-            :href="route('itr', { patient_id: selectedPatient.id })"
+            :href="route('itr', { patient_personalId: selectedPatient.personalId })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             Individual Treatment Record
@@ -116,7 +114,7 @@ export default {
             Prenatal & Postpartum Checkup
           </Link>
           <Link 
-            :href="route('nationalimmunizationprogram', { patient_id: selectedPatient.id })"
+            :href="route('nationalimmunizationprogram', { patient_personalId: selectedPatient.personalId })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             National Immunization Program

@@ -37,6 +37,14 @@
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" class="input" required />
             </div>
+<<<<<<< HEAD
+            <div>
+              <label class="block">Contact Number:</label>
+              <input type="text" v-model="form.contact" class="input" required />
+            </div>
+          </div>
+=======
+>>>>>>> 0a502d7956f46d881de06dc6dcaf32d3ab1a61ad
           <div class="mt-6 flex justify-center text-right">
             <button @click="nextStep" class="btn">Next</button>
           </div>
@@ -316,18 +324,16 @@
       </div>
 
       </form>
+      <div v-if="successMessage" class="mt-4 text-green-600 text-center">
+        {{ successMessage }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    onSubmit: {
-      type: Function,
-      required: true,
-    },
-  },
+  props: ['onSubmit'],
   data() {
     return {
       step: 1,
@@ -340,6 +346,7 @@ export default {
         barangay: '',
         age: '',
         birthdate: '',
+        contact: '',
         modeOfTransaction: '',
         consultationDate: '',
         consultationTime: '',
@@ -375,6 +382,7 @@ export default {
         ttStatus: '',
         tdDate: '',
       },
+      successMessage: '',
     };
   },
   computed: {
@@ -392,7 +400,7 @@ export default {
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
         age--;
       }
-      this.form.age = age; // Set age in the reactive form
+      this.form.age = age;
       return age;
     },
     submitForm() {

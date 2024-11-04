@@ -1,7 +1,5 @@
 <template>
   <div class="container mx-auto py-8 px-4">
-    <!-- <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center">Patient Records</h2> -->
-
     <!-- Search and Filter Section -->
     <div class="mb-6 flex flex-col md:flex-row gap-4">
       <input
@@ -58,11 +56,10 @@
             <th class="py-4 px-6 text-left border-b border-indigo-200">Actions</th>
           </tr>
         </thead>
-
         <tbody class="text-gray-600 text-sm">
           <tr
             v-for="patient in filteredPatients"
-            :key="patient.id"
+            :key="patient.personalId"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
           >
             <td class="py-3 px-6">{{ patient.firstName }}</td>
@@ -105,9 +102,9 @@
       </button>
     </div>
 
-  <!-- Modal -->
-  <div
-      v-if="showModal"
+    <!-- Modal -->
+    <div
+      v-if="showModal && selectedPatient"
       class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4"
     >
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
@@ -122,44 +119,47 @@
           Details for {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}
         </h2>
         <ul class="flex gap-20">
-         <div class="flex flex-col gap-1">
-          <li>
-            <strong>Full Name:</strong>
-            {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
-          </li>
-          <li><strong>Suffix:</strong> {{ selectedPatient.suffix }}</li>
-          <li><strong>Address:</strong> {{ selectedPatient.address }}</li>
-          <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
-          <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
-          <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
-          <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
-          <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
-          <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
-          <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
-          <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
-          <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
-         </div>
-         
-         <div class="flex flex-col gap-1">
-          <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
-          <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
-          <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
-          <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
-          <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
-          <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
-          <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
-          <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
-         </div>
+          <div class="flex flex-col gap-1">
+            <li>
+              <strong>Full Name:</strong>
+              {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
+            </li>
+            <li><strong>Suffix:</strong> {{ selectedPatient.suffix }}</li>
+            <li><strong>Address:</strong> {{ selectedPatient.purok }} {{ selectedPatient.barangay }}</li>
+            <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
+            <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
+            <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
+            <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
+            <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
+            <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
+            <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
+            <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
+            <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
+            <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
+            <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
+            <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
+            <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
+            <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
+            <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
+            <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
+          </div>
         </ul>
       </div>
     </div>
   </div>
 </template>
 
-
 <script>
 export default {
   props: {
+    personalInfo: {
+      type: Array,
+      default: () => [],
+    },
     patients: {
       type: Array,
       default: () => [],
@@ -171,7 +171,7 @@ export default {
       filterPrk: '',
       filterBarangay: '',
       currentPage: 1,
-      itemsPerPage: 5,
+      itemsPerPage: 5, 
       showModal: false,
       selectedPatient: null,
     };
@@ -179,7 +179,7 @@ export default {
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.patients
+      return this.personalInfo
         .filter((patient) => {
           const matchesQuery =
             patient.firstName.toLowerCase().includes(query) ||
@@ -195,18 +195,28 @@ export default {
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      return Math.ceil(this.patients.length / this.itemsPerPage);
+      return Math.ceil(this.personalInfo.length / this.itemsPerPage);
+    },
+    purokOptions() {
+      const puroks = new Set(this.personalInfo.map((patient) => patient.purok));
+      return Array.from(puroks);
+    },
+    barangayOptions() {
+      const barangays = new Set(this.personalInfo.map((patient) => patient.barangay));
+      return Array.from(barangays);
     },
   },
   methods: {
     openModal(patient) {
-      this.selectedPatient = patient;
-      this.showModal = true;
-    },
+    this.selectedPatient = patient;
+    console.log("Selected Patient: ", patient); // Log patient data
+    this.showModal = true;
+  },
     closeModal() {
       this.showModal = false;
-      this.selectedPatient = null;
+      this.selectedPatient = null; // Reset selectedPatient when closing the modal
     },
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
@@ -217,6 +227,7 @@ export default {
         this.currentPage--;
       }
     },
+    
     generateReport() {
       const data = this.filteredPatients.map((patient) => ({
         firstName: patient.firstName,
@@ -249,4 +260,5 @@ export default {
     },
   },
 };
+
 </script>

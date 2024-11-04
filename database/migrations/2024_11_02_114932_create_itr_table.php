@@ -12,16 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('itr', function (Blueprint $table) {
-            $table->id();
-            $table->string('firstName', 100);
-            $table->string('lastName', 100);
-            $table->string('middleName', 100);
-            $table->string('suffix', 10); 
-            $table->string('address', 255);
-            $table->integer('age'); 
-            $table->date('birthdate');
-            $table->string('contact', 15); 
-            $table->string('sex', 10); 
+            $table->bigIncrements('itrId'); // Primary key for ITR table
+            $table->unsignedBigInteger('personalId'); // Foreign key referencing personal_information
             $table->date('consultationDate');
             $table->time('consultationTime');
             $table->string('modeOfTransaction', 50);
@@ -35,10 +27,17 @@ return new class extends Migration
             $table->string('chiefComplaints', 255);
             $table->string('diagnosis', 255);
             $table->string('medication', 255);
-            
+
             $table->timestamps();
+
+            // Add foreign key constraint for personalId
+            $table->foreign('personalId')
+                ->references('personalId')
+                ->on('personal_information')
+                ->onDelete('cascade'); // Optional: delete ITR record if related personal information is deleted
         });
     }
+
 
     /**
      * Reverse the migrations.
