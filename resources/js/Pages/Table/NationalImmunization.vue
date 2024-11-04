@@ -2,7 +2,7 @@
   <Head title="National Immunization" />
 
   <NewLayout>
-    <NationalImmunizationTable :patients = "props.Immunization" />
+    <NationalImmunizationTable :personalInfo="props.personal_information" :patients = "props.Immunization" />
   </NewLayout>
 </template>
 
@@ -12,6 +12,7 @@ import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({
+  personal_information: Array,
   Immunization: Array // Declare the checkUps prop coming from the server
   });
 </script>

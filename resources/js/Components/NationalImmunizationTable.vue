@@ -49,7 +49,8 @@
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Last Name</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Middle Name</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Suffix</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Address</th>
+            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Purok</th>
+            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Barangay</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Age</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Contact #</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Gender</th>
@@ -67,7 +68,8 @@
             <td class="py-3 px-6">{{ patient.lastName }}</td>
             <td class="py-3 px-6">{{ patient.middleName }}</td>
             <td class="py-3 px-6">{{ patient.suffix }}</td>
-            <td class="py-3 px-6">{{ patient.address }}</td>
+            <td class="py-3 px-6">{{ patient.purok }}</td>
+            <td class="py-3 px-6">{{ patient.barangay }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
             <td class="py-3 px-6">{{ patient.contact }}</td>
             <td class="py-3 px-6">{{ patient.sex }}</td>
@@ -163,6 +165,10 @@
 <script>
 export default {
   props: {
+    personalInfo: {
+      type: Array,
+      default: () => [],
+    },
     patients: {
       type: Array,
       default: () => [] // Default to empty array to prevent errors
@@ -171,48 +177,42 @@ export default {
   data() {
     return {
       searchQuery: '',
+      filterPrk: '',
+      filterBarangay: '',
       currentPage: 1,
       itemsPerPage: 5,
       isModalOpen: false,
       selectedPatient: {},
     };
   },
-    computed: {
+  computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.patients
+      return this.personalInfo
         .filter((patient) => {
-          return (
+          const matchesQuery =
             patient.firstName.toLowerCase().includes(query) ||
             patient.lastName.toLowerCase().includes(query) ||
-            patient.middleName.toLowerCase().includes(query) ||
-            patient.address.toLowerCase().includes(query) ||
-            patient.age.toString().includes(query) ||
-            patient.birthdate.toLowerCase().includes(query) ||
-            patient.sex.toString().includes(query)
+            patient.natureOfVisit.toLowerCase().includes(query) ||
+            patient.visitType.toLowerCase().includes(query);
 
-            
+          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
+          const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
 
-          );
+          return matchesQuery && matchesPrk && matchesBarangay;
         })
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      const filteredLength = this.patients.filter((patient) => {
-        const query = this.searchQuery.toLowerCase();
-        return (
-          patient.firstName.toLowerCase().includes(query) ||
-          patient.lastName.toLowerCase().includes(query) ||
-          patient.middleName.toLowerCase().includes(query) ||
-          patient.suffix.toString().includes(query) ||
-          patient.address.toLowerCase().includes(query) ||
-          patient.age.toString().includes(query) ||
-          patient.birthdate.toLowerCase().includes(query) ||
-          patient.contact.toLowerCase().includes(query) ||
-          patient.sex.toLowerCase().includes(query)
-        );
-      }).length;
-      return Math.ceil(filteredLength / this.itemsPerPage);
+      return Math.ceil(this.personalInfo.length / this.itemsPerPage);
+    },
+    purokOptions() {
+      const puroks = new Set(this.personalInfo.map((patient) => patient.purok));
+      return Array.from(puroks);
+    },
+    barangayOptions() {
+      const barangays = new Set(this.personalInfo.map((patient) => patient.barangay));
+      return Array.from(barangays);
     },
   },
   methods: {

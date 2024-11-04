@@ -14,11 +14,12 @@ class PreNatalController extends Controller
      */
     public function index()
     {
-        $Prenatal = PreNatal::all();
         $personalInformation = PersonalInformation::all();
+        $Prenatal = PreNatal::all();
         return Inertia::render('Table/PreNatal', [
-            'Prenatal' => $Prenatal, // Pass check-up data to the view
             'personal_information' => $personalInformation,
+            'Prenatal' => $Prenatal, // Pass check-up data to the view
+
         ]);
     }
 

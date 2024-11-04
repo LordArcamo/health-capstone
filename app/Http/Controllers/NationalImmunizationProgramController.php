@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\NationalImmunizationProgram;
+use App\Models\PersonalInformation;
 
 class NationalImmunizationProgramController extends Controller
 {
@@ -13,9 +14,13 @@ class NationalImmunizationProgramController extends Controller
      */
     public function index()
     {
+        $personalInformation = PersonalInformation::all();
         $Immunization = NationalImmunizationProgram::all();
+
         return Inertia::render('Table/NationalImmunization', [
+            'personal_information' => $personalInformation, 
             'Immunization' => $Immunization, // Pass immunization data to the view
+
         ]);
     }
 
@@ -32,42 +37,85 @@ class NationalImmunizationProgramController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate request data
         $validatedData = $request->validate([
-            'firstName' => 'required|string|max:255',
-            'lastName' => 'required|string|max:255',
-            'middleName' => 'required|string|max:255',
-            'suffix' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
+            'firstName' => 'required|string|max:100',
+            'lastName' => 'required|string|max:100',
+            'middleName' => 'required|string|max:100',
+            'suffix' => 'nullable|string|max:10',
+            'purok' => 'nullable|string|max:100',
+            'barangay' => 'nullable|string|max:100',
             'age' => 'required|numeric',
             'birthdate' => 'required|date',
-            'contact' => 'required|string|max:255',
-            'sex' => 'required|string|max:255',
-            'birthplace' => 'required|string|max:255',
-            'bloodtype' => 'required|string|max:255',
-            'mothername' => 'required|string|max:255',
-            'dswdNhts' => 'required|string|max:255',
-            'facilityHouseholdno' => 'required|string|max:255',
-            'houseHoldno' => 'required|string|max:255',
-            'fourpsmember' => 'required|string|max:255',
-            'PCBMember' => 'required|string|max:255',
-            'philhealthMember' => 'required|string|max:255',
-            'statusType' => 'required|string|max:255',
-            'philhealthNo' => 'required|string|max:255',
-            'ifMember' => 'required|string|max:255',
-            'familyMember' => 'required|string|max:255',
-            'ttstatus' => 'required|string|max:255',
+            'contact' => 'required|string|max:15',
+            'sex' => 'required|string|max:10',
+            'birthplace' => 'required|string|max:100',
+            'bloodtype' => 'required|string|max:5',
+            'mothername' => 'required|string|max:100',
+            'dswdNhts' => 'required|string|max:100',
+            'facilityHouseholdno' => 'required|string|max:100',
+            'houseHoldno' => 'required|string|max:100',
+            'fourpsmember' => 'required|string|max:100',
+            'PCBMember' => 'required|string|max:100',
+            'philhealthMember' => 'required|string|max:100',
+            'statusType' => 'required|string|max:50',
+            'philhealthNo' => 'required|string|max:15',
+            'ifMember' => 'required|string|max:100',
+            'familyMember' => 'required|string|max:100',
+            'ttstatus' => 'required|string|max:10',
             'dateAssesed' => 'required|date',
             'date' => 'required|date',
-            'place' => 'required|string|max:255',
-            'guardian' => 'required|string|max:255',
+            'place' => 'required|string|max:100',
+            'guardian' => 'required|string|max:100',
         ]);
 
-        // Create a new instance and fill it with validated data
-        $nationalImmunizationProgram = NationalImmunizationProgram::create($validatedData);
+        // Split validated data for PersonalInformation
+        $personalData = [
+            'firstName' => $validatedData['firstName'],
+            'lastName' => $validatedData['lastName'],
+            'middleName' => $validatedData['middleName'],
+            'suffix' => $validatedData['suffix'],
+            'purok' => $validatedData['purok'],
+            'barangay' => $validatedData['barangay'],
+            'age' => $validatedData['age'],
+            'birthdate' => $validatedData['birthdate'],
+            'contact' => $validatedData['contact'],
+            'sex' => $validatedData['sex'],
+        ];
 
-        // Redirect back with success message
+        // Save personal data to PersonalInformation table
+        $personalInfo = PersonalInformation::create($personalData);
+
+        // Prepare data for NationalImmunizationProgram table
+        $immunizationData = [
+            'personalId' => $personalInfo->personalId, // Link to personal information record
+            'birthplace' => $validatedData['birthplace'],
+            'bloodtype' => $validatedData['bloodtype'],
+            'mothername' => $validatedData['mothername'],
+            'dswdNhts' => $validatedData['dswdNhts'],
+            'facilityHouseholdno' => $validatedData['facilityHouseholdno'],
+            'houseHoldno' => $validatedData['houseHoldno'],
+            'fourpsmember' => $validatedData['fourpsmember'],
+            'PCBMember' => $validatedData['PCBMember'],
+            'philhealthMember' => $validatedData['philhealthMember'],
+            'statusType' => $validatedData['statusType'],
+            'philhealthNo' => $validatedData['philhealthNo'],
+            'ifMember' => $validatedData['ifMember'],
+            'familyMember' => $validatedData['familyMember'],
+            'ttStatus' => $validatedData['ttstatus'],
+            'dateAssesed' => $validatedData['dateAssesed'],
+            'date' => $validatedData['date'],
+            'place' => $validatedData['place'],
+            'guardian' => $validatedData['guardian'],
+        ];
+
+        // Save immunization data to NationalImmunizationProgram table
+        $immunization = NationalImmunizationProgram::create($immunizationData);
+
+        // Redirect back with a success message
         return back()->with('Success', 'Data saved successfully!');
     }
+
 
     /**
      * Display the specified resource.
