@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pre_natals', function (Blueprint $table) {
-            $table->id();
-            $table->string('firstName', 100);        
-            $table->string('lastName', 100);
-            $table->string('middleName', 100);
-            $table->string('address');               
-            $table->integer('age');                 
-            $table->date('birthdate');              
+        Schema::create('prenatal', function (Blueprint $table) {
+            $table->bigIncrements('prenatalId'); // Renamed the ID to prenatalId
+            $table->unsignedBigInteger('personalId'); // Change to unsignedBigInteger for foreign key
             $table->string('modeOfTransaction', 50); 
             $table->date('consultationDate');        
             $table->time('consultationTime');        
@@ -54,6 +49,9 @@ return new class extends Migration
             $table->string('ttStatus', 10);          
             $table->date('tdDate');
             $table->timestamps();
+
+            // Set foreign key constraint
+            $table->foreign('personalId')->references('personalId')->on('personal_information')->onDelete('cascade');
         });
     }
 
@@ -62,6 +60,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pre_natals');
+        Schema::table('prenatal', function (Blueprint $table) {
+            $table->dropForeign(['personalId']); // Drop foreign key constraint
+        });
+        
+        Schema::dropIfExists('prenatal');
     }
 };

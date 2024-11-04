@@ -8,10 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class PreNatal extends Model
 {
     use HasFactory;
-    protected $table = 'pre_natals';
+
+    protected $table = 'prenatal';
+
+    protected $primaryKey = 'prenatalId'; // Set the primary key
+
+    public $incrementing = true; // Indicates that the ID is incrementing
+    protected $keyType = 'int'; // Set the key type
 
     protected $fillable = [
-        'firstName', 'lastName', 'middleName', 'address', 'age', 'birthdate',
+        'personalId', // Added personalId as a fillable field
         'modeOfTransaction', 'consultationDate', 'consultationTime', 'bloodPressure',
         'temperature', 'height', 'weight', 'providerName', 'nameOfSpouse',
         'emergencyContact', 'fourMember', 'philhealthStatus', 'philhealthId',
@@ -22,4 +28,10 @@ class PreNatal extends Model
     ];
 
     protected $hidden = ['created_at', 'updated_at'];
+
+    // Define the relationship with the PersonalInformation model
+    public function personalInformation()
+    {
+        return $this->belongsTo(PersonalInformation::class, 'personalId', 'personalId');
+    }
 }

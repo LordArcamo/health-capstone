@@ -35,8 +35,12 @@
               </select>
             </div>
             <div>
-              <label class="block">Residential Address:</label>
-              <input type="text" v-model="form.address" class="input" required />
+              <label class="block">Purok:</label>
+              <input type="text" v-model="form.purok" class="input" required />
+            </div>
+            <div>
+              <label class="block">Barangay:</label>
+              <input type="text" v-model="form.barangay" class="input" required />
             </div>
             <div>
               <label class="block">Age:</label>
@@ -183,7 +187,8 @@ export default {
         lastName: '',
         middleName: '',
         suffix: '',
-        address: '',
+        purok: '',
+        barangay: '',
         age: '',
         birthdate: '',
         contact: '',

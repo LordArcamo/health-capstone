@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\PreNatal;
+use App\Models\PersonalInformation;
 
 class PreNatalController extends Controller
 {
@@ -14,8 +15,10 @@ class PreNatalController extends Controller
     public function index()
     {
         $Prenatal = PreNatal::all();
+        $personalInformation = PersonalInformation::all();
         return Inertia::render('Table/PreNatal', [
             'Prenatal' => $Prenatal, // Pass check-up data to the view
+            'personal_information' => $personalInformation,
         ]);
     }
 
@@ -32,18 +35,21 @@ class PreNatalController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate request data
         $validatedData = $request->validate([
             'firstName' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
             'middleName' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
+            'purok' => 'nullable|string|max:100',
+            'barangay' => 'nullable|string|max:100',
             'age' => 'required|numeric',
             'birthdate' => 'required|date',
+            'contact' => 'required|string|max:15',
             'modeOfTransaction' => 'required|string|max:255',
             'consultationDate' => 'required|date',
             'consultationTime' => 'required|date_format:H:i',
             'bloodPressure' => 'required|string|max:255',
-            'temperature'  => 'required|numeric|between:0,999.99',
+            'temperature' => 'required|numeric|between:0,999.99',
             'height' => 'required|numeric|between:0,999.99',
             'weight' => 'required|numeric|between:0,999.99',
             'providerName' => 'required|string|max:255',
@@ -75,12 +81,67 @@ class PreNatalController extends Controller
             'tdDate' => 'required|date',
         ]);
 
-        // Create a new instance of PreNatal
-        $pre_natal = PreNatal::create($validatedData); // Use mass assignment
+        // Split validated data for PersonalInformation
+        $personalData = [
+            'firstName' => $validatedData['firstName'],
+            'lastName' => $validatedData['lastName'],
+            'middleName' => $validatedData['middleName'],
+            'purok' => $validatedData['purok'],
+            'barangay' => $validatedData['barangay'],
+            'age' => $validatedData['age'],
+            'birthdate' => $validatedData['birthdate'],
+            'contact' => $validatedData['contact'],
+        ];
 
-        // Redirect back with success message
-        return redirect()->route('prenatal.store')->with('Success', 'Data saved successfully!');
+        // Save personal data to PersonalInformation table
+        $personalInfo = PersonalInformation::create($personalData);
+
+        // Prepare data for PreNatal table
+        $prenatalData = [
+            'personalId' => $personalInfo->personalId, // Link to personal information record
+            'modeOfTransaction' => $validatedData['modeOfTransaction'],
+            'consultationDate' => $validatedData['consultationDate'],
+            'consultationTime' => $validatedData['consultationTime'],
+            'bloodPressure' => $validatedData['bloodPressure'],
+            'temperature' => $validatedData['temperature'],
+            'height' => $validatedData['height'],
+            'weight' => $validatedData['weight'],
+            'providerName' => $validatedData['providerName'],
+            'nameOfSpouse' => $validatedData['nameOfSpouse'],
+            'emergencyContact' => $validatedData['emergencyContact'],
+            'fourMember' => $validatedData['fourMember'],
+            'philhealthStatus' => $validatedData['philhealthStatus'],
+            'philhealthId' => $validatedData['philhealthId'],
+            'menarche' => $validatedData['menarche'],
+            'sexualOnset' => $validatedData['sexualOnset'],
+            'periodDuration' => $validatedData['periodDuration'],
+            'birthControl' => $validatedData['birthControl'],
+            'intervalCycle' => $validatedData['intervalCycle'],
+            'menopause' => $validatedData['menopause'],
+            'lmp' => $validatedData['lmp'],
+            'edc' => $validatedData['edc'],
+            'gravidity' => $validatedData['gravidity'],
+            'parity' => $validatedData['parity'],
+            'term' => $validatedData['term'],
+            'preterm' => $validatedData['preterm'],
+            'abortion' => $validatedData['abortion'],
+            'living' => $validatedData['living'],
+            'syphilisResult' => $validatedData['syphilisResult'],
+            'penicillin' => $validatedData['penicillin'],
+            'hemoglobin' => $validatedData['hemoglobin'],
+            'hematocrit' => $validatedData['hematocrit'],
+            'urinalysis' => $validatedData['urinalysis'],
+            'ttStatus' => $validatedData['ttStatus'],
+            'tdDate' => $validatedData['tdDate'],
+        ];
+
+        // Save prenatal data to PreNatal table
+        $prenatal = PreNatal::create($prenatalData);
+
+        // Redirect back with a success message
+        return back()->with('Success', 'Data saved successfully!');
     }
+
 
     /**
      * Display the specified resource.

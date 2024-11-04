@@ -60,7 +60,7 @@
         <tbody class="text-gray-600 text-sm">
           <tr
             v-for="patient in filteredPatients"
-            :key="patient.id"
+            :key="patient.personalId"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
           >
             <td class="py-3 px-6">{{ patient.firstName }}</td>
@@ -187,6 +187,10 @@ export default {
     TrimesterModal,
   },
   props: {
+    personalInfo: {
+      type: Array,
+      default: () => [],
+    },
     patients: {
       type: Array,
       default: () => [] // Default to empty array to prevent errors
@@ -196,6 +200,8 @@ export default {
     return {
       showTrimesterModal: false,
       searchQuery: '',
+      filterPrk: '',
+      filterBarangay: '',
       currentPage: 1,
       itemsPerPage: 5,
       isModalOpen: false,
@@ -205,32 +211,31 @@ export default {
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.patients
+      return this.personalInfo
         .filter((patient) => {
-          return (
+          const matchesQuery =
             patient.firstName.toLowerCase().includes(query) ||
             patient.lastName.toLowerCase().includes(query) ||
-            patient.middleName.toLowerCase().includes(query) ||
-            patient.address.toLowerCase().includes(query) ||
-            patient.age.toString().includes(query) ||
-            patient.birthdate.toLowerCase().includes(query)
-          );
+            patient.natureOfVisit.toLowerCase().includes(query) ||
+            patient.visitType.toLowerCase().includes(query);
+
+          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
+          const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
+
+          return matchesQuery && matchesPrk && matchesBarangay;
         })
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      const filteredLength = this.patients.filter((patient) => {
-        const query = this.searchQuery.toLowerCase();
-        return (
-          patient.firstName.toLowerCase().includes(query) ||
-          patient.lastName.toLowerCase().includes(query) ||
-          patient.middleName.toLowerCase().includes(query) ||
-          patient.address.toLowerCase().includes(query) ||
-          patient.age.toString().includes(query) ||
-          patient.birthdate.toLowerCase().includes(query)
-        );
-      }).length;
-      return Math.ceil(filteredLength / this.itemsPerPage);
+      return Math.ceil(this.personalInfo.length / this.itemsPerPage);
+    },
+    purokOptions() {
+      const puroks = new Set(this.personalInfo.map((patient) => patient.purok));
+      return Array.from(puroks);
+    },
+    barangayOptions() {
+      const barangays = new Set(this.personalInfo.map((patient) => patient.barangay));
+      return Array.from(barangays);
     },
   },
   methods: {
@@ -268,7 +273,3 @@ export default {
 };
 </script>
 
-
-<style scoped>
-/* Add any necessary styling here */
-</style>

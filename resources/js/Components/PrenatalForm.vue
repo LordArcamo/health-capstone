@@ -21,8 +21,12 @@
               <input type="text" v-model="form.middleName " class="input" required/>
             </div>
             <div>
-              <label class="block">Residential Address:</label>
-              <input type="text" v-model="form.address" class="input" required />
+              <label class="block">Purok:</label>
+              <input type="text" v-model="form.purok" class="input" required />
+            </div>
+            <div>
+              <label class="block">Barangay:</label>
+              <input type="text" v-model="form.barangay" class="input" required />
             </div>
             <div>
               <label class="block">Age</label>
@@ -31,6 +35,10 @@
             <div>
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" class="input" required />
+            </div>
+            <div>
+              <label class="block">Contact Number:</label>
+              <input type="text" v-model="form.contact" class="input" required />
             </div>
           </div>
           <div class="mt-6 flex justify-center text-right">
@@ -311,18 +319,16 @@
       </div>
 
       </form>
+      <div v-if="successMessage" class="mt-4 text-green-600 text-center">
+        {{ successMessage }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    onSubmit: {
-      type: Function,
-      required: true,
-    },
-  },
+  props: ['onSubmit'],
   data() {
     return {
       step: 1,
@@ -331,9 +337,11 @@ export default {
         lastName: '',
         middleName: '',
         suffix: '',
-        address: '',
+        purok: '',
+        barangay: '',
         age: '',
         birthdate: '',
+        contact: '',
         modeOfTransaction: '',
         consultationDate: '',
         consultationTime: '',
@@ -369,6 +377,7 @@ export default {
         ttStatus: '',
         tdDate: '',
       },
+      successMessage: '',
     };
   },
   computed: {
@@ -386,7 +395,7 @@ export default {
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
         age--;
       }
-      this.form.age = age; // Set age in the reactive form
+      this.form.age = age;
       return age;
     },
     submitForm() {
