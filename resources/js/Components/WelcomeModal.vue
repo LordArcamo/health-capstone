@@ -110,7 +110,7 @@ export default {
             Individual Treatment Record
           </Link>
           <Link 
-            :href="route('prenatal', { patient_id: selectedPatient.id })"
+            :href="route('prenatalpostpartum', { patient_id: selectedPatient.id })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             Prenatal & Postpartum Checkup

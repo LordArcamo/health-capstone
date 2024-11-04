@@ -38,6 +38,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patients/epi-records', [NationalImmunizationProgramController::class, 'index'])->name('nationalimmunizationprogram.index');
 });
 
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/prenatal', PreNatalController::class);
     Route::get('/checkup/prenatal', [PreNatalController::class, 'create'])->name('prenatal');
@@ -49,6 +51,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/checkup', function () {
     return Inertia::render('Checkup');
 })->middleware(['auth', 'verified'])->name('checkup');
+
+Route::get('/checkup/prenatalpostpartum', function () {
+    return Inertia::render('PrenatalPostpartum');
+})->middleware(['auth', 'verified'])->name('prenatalpostpartum');
+
+Route::get('/checkup/postpartum', function () {
+    return Inertia::render('PostPartumCheckup');
+})->middleware(['auth', 'verified'])->name('postpartum');
 
 
 Route::get('/mortality', function () {

@@ -52,35 +52,51 @@
         </div>
         <div class="flex items-center">
           <input v-model="form.pe_done" type="checkbox" id="pe_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">PE done, TT status assesed</label>
+          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">PE done</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.prenatal_record" type="checkbox" id="prenatal_record" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Prenatal record/book given and filled up</label>
+          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.birth_plan_done" type="checkbox" id="birth_plan_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Birth plan done</label>
+          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Reminded on importance of FBD</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">NKFDA</label>
+          <input v-model="form.health_teachings_given_light_exercise_daily" type="checkbox" id="health_teachings_given_light_exercise_daily" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="health_teachings_given_light_exercise_daily" class="ml-2 text-sm text-gray-600">Health teachings given, light exercise daily</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Health teachings given; danger signs of pregnancy imparted</label>
+          <input v-model="form.reminded_danger_signs_pregnancy" type="checkbox" id="reminded_danger_signs_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="reminded_danger_signs_pregnancy" class="ml-2 text-sm text-gray-600">Reminded on the Dangers Signs of Pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Referred for Urinalysis, HCT - HGB count</label>
+          <input v-model="form.healthy_diet_increase_fluid_intake_encouraged" type="checkbox" id="healthy_diet_increase_fluid_intake_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="healthy_diet_increase_fluid_intake_encouraged" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
+          <input v-model="form.breast_feeding_delivery_encouraged" type="checkbox" id="breast_feeding_delivery_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="breast_feeding_delivery_encouraged" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.nkfda" type="number" id="nkfda" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
+          <input v-model="form.compliance_routine_immunization_encouraged" type="checkbox" id="compliance_routine_immunization_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="compliance_routine_immunization_encouraged" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
+        </div>
+        <div class="flex items-center">
+          <input v-model="form.referred_utz_evaluation_pregnancy" type="checkbox" id="referred_utz_evaluation_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="referred_utz_evaluation_pregnancy" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
+        </div>
+        <div class="flex items-center">
+          <input v-model="form.information_newborn_screening_given" type="checkbox" id="information_newborn_screening_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_newborn_screening_given" class="ml-2 text-sm text-gray-600">Information on Newborn Screening given</label>
+        </div>
+        <div class="flex items-center">
+          <input v-model="form.fes04_folic_acid_given" type="checkbox" id="fes04_folic_acid_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic_acid_given" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid_tabs" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
+        </div>
+        <div class="flex items-center">
+          <input v-model="form.information_on_family_planning_methods" type="checkbox" id="information_on_family_planning_methods" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_on_family_planning_methods" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
         </div>
         <!-- Checkbox Items-->
       </div>

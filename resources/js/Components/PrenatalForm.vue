@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col justify-center items-center bg-gray-100">
     <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Prenatal & Postnatal Checkup</h2>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Prenatal Checkup</h2>
 
       <form @submit.prevent="submitForm">
         <!-- Step 1: Patient Information -->
