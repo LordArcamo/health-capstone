@@ -14,12 +14,12 @@ class CheckUpController extends Controller
      */
     public function index()
     {
-        $checkUps = CheckUp::all();
         $personalInformation = PersonalInformation::all();
+        $checkUps = CheckUp::all();
         
         return Inertia::render('Table/IndividualTreatmentRecord', [
-            'checkUps' => $checkUps,
             'personal_information' => $personalInformation, 
+            'checkUps' => $checkUps,
         ]);
     }
 
@@ -49,7 +49,6 @@ class CheckUpController extends Controller
             'birthdate' => 'required|date',
             'contact' => 'required|string|max:15',
             'sex' => 'required|string|max:10', 
-
             'consultationDate' => 'required|date',
             'consultationTime' => 'required|date_format:H:i',
             'modeOfTransaction' => 'required|string|max:50',

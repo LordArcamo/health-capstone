@@ -206,83 +206,79 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
-
-// Define props
-const props = defineProps({
-  onSubmit: {
-    type: Function,
-    required: true,
+<script>
+export default {
+  props: ['onSubmit'],
+  data() {
+    return {
+      step: 1,
+      form: {
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        purok: '',
+        barangay: '',
+        age: '',
+        birthdate: '',
+        contact: '',
+        sex: '',
+        birthplace: '',
+        bloodtype: '',
+        mothername: '',
+        dswdNhts: '',
+        facilityHouseholdno: '',
+        houseHoldno: '',
+        fourpsmember: '',
+        PCBMember: '',
+        philhealthMember: '',
+        statusType: '',
+        philhealthNo: '',
+        ifMember: '',
+        familyMember: '',
+        ttstatus: '',
+        dateAssesed: '',
+        date: '',
+        place: '',
+        guardian: '',
+      },
+    };
   },
-});
-
-// Reactive form data
-const step = ref(1);
-const form = ref({
-  firstName: '',
-  lastName: '',
-  middleName: '',
-  suffix: '',
-  purok: '',
-  barangay: '',
-  age: '',
-  birthdate: '',
-  contact: '',
-  sex: '',
-  birthplace: '',
-  bloodtype: '',
-  mothername: '',
-  dswdNhts: '',
-  facilityHouseholdno: '',
-  houseHoldno: '',
-  fourpsmember: '',
-  PCBMember: '',
-  philhealthMember: '',
-  statusType: '',
-  philhealthNo: '',
-  ifMember: '',
-  familyMember: '',
-  ttstatus: '',
-  dateAssesed: '',
-  date: '',
-  place: '',
-  guardian: '',
-});
-
-// Computed for age
-const computedAge = computed(() => calculateAge());
-
-function calculateAge() {
-  if (!form.value.birthdate) return '';
-  const birthdate = new Date(form.value.birthdate);
-  const today = new Date();
-  let age = today.getFullYear() - birthdate.getFullYear();
-  const monthDiff = today.getMonth() - birthdate.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
-    age--;
+  computed: {
+    computedAge() {
+      return this.calculateAge();
+    },
+  },
+  methods: {
+    calculateAge() {
+      if (!this.form.birthdate) return '';
+      const birthdate = new Date(this.form.birthdate);
+      const today = new Date();
+      let age = today.getFullYear() - birthdate.getFullYear();
+      const monthDiff = today.getMonth() - birthdate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+        age--;
+      }
+      this.form.age = age;
+      return age;
+    },
+    submitForm() {
+      console.log('Submitting form with data:', this.form);
+      alert('Form submitted');
+      this.onSubmit(this.form); // Pass form data to parent
+    },
+    nextStep() {
+      if (this.step < 3) {
+        this.step++;
+      }
+    },
+    prevStep() {
+      if (this.step > 1) {
+        this.step--;
+      }
+    },
   }
-  form.value.age = age; // Set age in the reactive form
-  return age;
-}
-
-function submitForm() {
-  try {
-    console.log('Submitting form with data:', form.value);
-    alert('Form submitted');
-    props.onSubmit(form.value); // Pass all form data to the parent
-  } catch (error) {
-    console.error('Unexpected error during form submission:', error);
-  }
-}
-
-function nextStep() {
-  if (step.value < 3) step.value++;
-}
-
-function prevStep() {
-  if (step.value > 1) step.value--;
-}
+};
 </script>
 
 
