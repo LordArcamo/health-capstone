@@ -32,15 +32,19 @@
               <label class="block">Age</label>
               <input type="number" v-model="computedAge" class="input" readonly />
             </div>
-            <div>
+          </div>
+          <div class="mt-5">
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" class="input" required />
             </div>
+<<<<<<< HEAD
             <div>
               <label class="block">Contact Number:</label>
               <input type="text" v-model="form.contact" class="input" required />
             </div>
           </div>
+=======
+>>>>>>> 0a502d7956f46d881de06dc6dcaf32d3ab1a61ad
           <div class="mt-6 flex justify-center text-right">
             <button @click="nextStep" class="btn">Next</button>
           </div>
@@ -105,9 +109,7 @@
                 <option>No</option>
               </select>
             </div>
-
-          </div>
-          <div class="form-group">
+            <div class="form-group">
             <label for="philhealthStatus" class="block font-medium text-gray-700">Philhealth Status:</label>
             <select 
               id="philhealthStatus" 
@@ -131,6 +133,9 @@
               />
             </div>
           </div>
+
+          </div>
+
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
             <button @click="nextStep" class="btn">Next</button>
@@ -413,7 +418,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .input {
   width: 100%;
   padding: 0.5rem;
@@ -423,7 +428,7 @@ export default {
 }
 
 .btn {
-  background-color: #1d72b8;
+  background-color: #007523;
   color: white;
   padding: 0.5rem 1rem;
   border: none;

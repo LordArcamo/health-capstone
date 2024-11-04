@@ -78,7 +78,7 @@
               >
                 View More
               </button>
-              <button @click="openTrimesterModal" class="bg-blue-500 text-white px-3 py-1  rounded-md hover:bg-blue-600">
+              <button @click="openTrimesterModal" class="bg-yellow-500 text-white px-3 py-1  rounded-md hover:bg-green-600">
                 Trimester
               </button>
               
