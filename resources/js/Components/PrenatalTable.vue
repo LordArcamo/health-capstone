@@ -215,10 +215,8 @@ export default {
         .filter((patient) => {
           const matchesQuery =
             patient.firstName.toLowerCase().includes(query) ||
-            patient.lastName.toLowerCase().includes(query) ||
-            patient.natureOfVisit.toLowerCase().includes(query) ||
-            patient.visitType.toLowerCase().includes(query);
-
+            patient.lastName.toLowerCase().includes(query);
+            
           const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
           const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
 

@@ -32,7 +32,9 @@
           <input v-model="form.birth_weight" id="birth_weight" type="text" class="input-field" />
         </div>
       </div>
-      <button @click="nextStep" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Next</button>
+      <div class="flex justify-center">
+        <button @click="nextStep" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Next</button>
+      </div>
     </div>
 
     <!-- Step 2: Remaining Information Section -->
@@ -67,9 +69,10 @@
           <input v-model="form.danger_signs_mother" id="danger_signs_mother" type="text" class="input-field" />
         </div>
       </div>
-      
-      <button @click="prevStep" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Back</button>
-      <button @click="submitForm" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit</button>
+      <div class="flex flex-row justify-between">
+        <button @click="prevStep" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Back</button>
+        <button @click="submitForm" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit</button>
+      </div>
     </div>
   </div>
    </div>
