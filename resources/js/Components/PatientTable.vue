@@ -45,6 +45,7 @@
       <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Patient ID</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200">First Name</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200">Last Name</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200">Purok</th>
@@ -62,16 +63,17 @@
             :key="patient.personalId"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
           >
-            <td class="py-3 px-6">{{ patient.firstName }}</td>
-            <td class="py-3 px-6">{{ patient.lastName }}</td>
-            <td class="py-3 px-6">{{ patient.purok }}</td>
-            <td class="py-3 px-6">{{ patient.barangay }}</td>
-            <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
-            <td class="py-3 px-6">{{ patient.visitType }}</td>
-            <td class="py-3 px-6">{{ patient.sex }}</td>
-            <td class="py-3 px-6">
-              <button
+          <td class="py-3 px-6">{{ patient.personalId }}</td>
+          <td class="py-3 px-6">{{ patient.firstName }}</td>
+          <td class="py-3 px-6">{{ patient.lastName }}</td>
+          <td class="py-3 px-6">{{ patient.purok }}</td>
+          <td class="py-3 px-6">{{ patient.barangay }}</td>
+          <td class="py-3 px-6">{{ patient.age }}</td>
+          <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
+          <td class="py-3 px-6">{{ patient.visitType }}</td>
+          <td class="py-3 px-6">{{ patient.sex }}</td>
+          <td class="py-3 px-6">
+            <button
                 @click="openModal(patient)"
                 class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black"
               >
@@ -156,10 +158,6 @@
 <script>
 export default {
   props: {
-    personalInfo: {
-      type: Array,
-      default: () => [],
-    },
     patients: {
       type: Array,
       default: () => [],
@@ -179,7 +177,7 @@ export default {
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.personalInfo
+      return this.patients
         .filter((patient) => {
           const matchesQuery =
             patient.firstName.toLowerCase().includes(query) ||
@@ -195,14 +193,14 @@ export default {
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      return Math.ceil(this.personalInfo.length / this.itemsPerPage);
+      return Math.ceil(this.patients.length / this.itemsPerPage);
     },
     purokOptions() {
-      const puroks = new Set(this.personalInfo.map((patient) => patient.purok));
+      const puroks = new Set(this.patients.map((patient) => patient.purok));
       return Array.from(puroks);
     },
     barangayOptions() {
-      const barangays = new Set(this.personalInfo.map((patient) => patient.barangay));
+      const barangays = new Set(this.patients.map((patient) => patient.barangay));
       return Array.from(barangays);
     },
   },

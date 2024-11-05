@@ -14,12 +14,32 @@ class NationalImmunizationProgramController extends Controller
      */
     public function index()
     {
-        $personalInformation = PersonalInformation::all();
-        $Immunization = NationalImmunizationProgram::all();
 
+        $data = PersonalInformation::join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+            ->select(
+                'personal_information.*',
+                'national_immunization_programs.birthplace',
+                'national_immunization_programs.bloodtype',
+                'national_immunization_programs.mothername',
+                'national_immunization_programs.dswdNhts',
+                'national_immunization_programs.facilityHouseholdno',
+                'national_immunization_programs.houseHoldno',
+                'national_immunization_programs.fourpsmember',
+                'national_immunization_programs.PCBMember',
+                'national_immunization_programs.philhealthMember',
+                'national_immunization_programs.statusType',
+                'national_immunization_programs.philhealthNo',
+                'national_immunization_programs.ifMember',
+                'national_immunization_programs.familyMember',
+                'national_immunization_programs.ttStatus',
+                'national_immunization_programs.dateAssesed',
+                'national_immunization_programs.date',
+                'national_immunization_programs.place',
+                'national_immunization_programs.guardian',
+            )
+            ->get();
         return Inertia::render('Table/NationalImmunization', [
-            'personal_information' => $personalInformation, 
-            'Immunization' => $Immunization, // Pass immunization data to the view
+            'IMMUNIZATION' => $data, 
 
         ]);
     }

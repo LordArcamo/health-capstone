@@ -13,15 +13,33 @@ class CheckUpController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $personalInformation = PersonalInformation::all();
-        $checkUps = CheckUp::all();
-        
-        return Inertia::render('Table/IndividualTreatmentRecord', [
-            'personal_information' => $personalInformation, 
-            'checkUps' => $checkUps,
-        ]);
-    }
+{
+    // Use Eloquent to join the two tables
+    $data = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
+        ->select(
+            'personal_information.*', 
+            'itr.consultationDate',
+            'itr.consultationTime',
+            'itr.modeOfTransaction',
+            'itr.bloodPressure',
+            'itr.temperature',
+            'itr.height',
+            'itr.weight',
+            'itr.providerName',
+            'itr.natureOfVisit',
+            'itr.visitType',
+            'itr.chiefComplaints',
+            'itr.diagnosis',
+            'itr.medication'
+        )
+        ->get();
+
+    // Pass the joined data to the view
+    return Inertia::render('Table/IndividualTreatmentRecord', [
+        'ITR' => $data,
+    ]);
+}
+
 
 
     /**
