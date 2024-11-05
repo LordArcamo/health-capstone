@@ -165,10 +165,6 @@
 <script>
 export default {
   props: {
-    personalInfo: {
-      type: Array,
-      default: () => [],
-    },
     patients: {
       type: Array,
       default: () => [] // Default to empty array to prevent errors
@@ -188,7 +184,7 @@ export default {
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
-      return this.personalInfo
+      return this.patients
         .filter((patient) => {
           const matchesQuery =
             patient.firstName.toLowerCase().includes(query) ||
@@ -204,14 +200,14 @@ export default {
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
     },
     totalPages() {
-      return Math.ceil(this.personalInfo.length / this.itemsPerPage);
+      return Math.ceil(this.patients.length / this.itemsPerPage);
     },
     purokOptions() {
-      const puroks = new Set(this.personalInfo.map((patient) => patient.purok));
+      const puroks = new Set(this.patients.map((patient) => patient.purok));
       return Array.from(puroks);
     },
     barangayOptions() {
-      const barangays = new Set(this.personalInfo.map((patient) => patient.barangay));
+      const barangays = new Set(this.patients.map((patient) => patient.barangay));
       return Array.from(barangays);
     },
   },

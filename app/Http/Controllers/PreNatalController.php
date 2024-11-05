@@ -14,12 +14,48 @@ class PreNatalController extends Controller
      */
     public function index()
     {
-        $personalInformation = PersonalInformation::all();
-        $Prenatal = PreNatal::all();
-        return Inertia::render('Table/PreNatal', [
-            'personal_information' => $personalInformation,
-            'Prenatal' => $Prenatal, // Pass check-up data to the view
+        $data = PersonalInformation::join('prenatal', 'personal_information.personalId', '=', 'prenatal.personalId')
+        ->select(
+            'personal_information.*', 
+            'prenatal.modeOfTransaction',
+            'prenatal.consultationDate',
+            'prenatal.consultationTime',
+            'prenatal.bloodPressure',
+            'prenatal.temperature',
+            'prenatal.height', 
+            'prenatal.weight', 
+            'prenatal.providerName', 
+            'prenatal.nameOfSpouse',
+            'prenatal.emergencyContact', 
+            'prenatal.fourMember', 
+            'prenatal.philhealthStatus', 
+            'prenatal.philhealthId',
+            'prenatal.menarche', 
+            'prenatal.sexualOnset', 
+            'prenatal.periodDuration', 
+            'prenatal.birthControl', 
+            'prenatal.intervalCycle',
+            'prenatal.menopause', 
+            'prenatal.lmp', 
+            'prenatal.edc', 
+            'prenatal.gravidity', 
+            'prenatal.parity', 
+            'prenatal.term', 
+            'prenatal.preterm',
+            'prenatal.abortion', 
+            'prenatal.living', 
+            'prenatal.syphilisResult', 
+            'prenatal.penicillin', 
+            'prenatal.hemoglobin',
+            'prenatal.hematocrit', 
+            'prenatal.urinalysis', 
+            'prenatal.ttStatus', 
+            'prenatal.tdDate',
+        )
+        ->get();
 
+        return Inertia::render('Table/PreNatal', [
+            'PRENATAL' => $data,
         ]);
     }
 
