@@ -1,53 +1,3 @@
-<script>
-import { Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
-
-export default {
-  components: { Link },
-  data() {
-    return {
-      step: 1,
-      searchQuery: '',
-      patients: [],
-      selectedPatient: null,
-    };
-  },
-  methods: {
-    searchPatients() {
-      if (this.searchQuery.trim() === '') {
-        this.patients = [];
-        return;
-      }
-
-      Inertia.get(route('patients.search'), { query: this.searchQuery }, {
-        preserveState: true,
-        onSuccess: (page) => {
-          this.patients = page.props.patients;
-        },
-      });
-    },
-    selectPatient(patient) {
-      this.selectedPatient = patient;
-      this.step = 2; // Move to the next step (check-up selection)
-    },
-    addNewPatient() {
-      // Set a new patient as selected
-      this.selectedPatient = { personalId: 'new', lastName: this.searchQuery }; // Simulate a new patient
-      this.step = 2; // Move to the next step (check-up selection)
-    },
-    goBackToCheckup() {
-      // Navigate back to the Checkup page
-      Inertia.visit(route('checkup')); // Make sure the route name matches your Checkup route
-    },
-  },
-};
-</script>
-
-<style scoped>
-/* Optional: You can add some custom styles here */
-</style>
-
-
 <template>
   <div class="flex justify-center items-center min-h-screen bg-gray-100">
     <div class="bg-white rounded-lg shadow-lg py-12 px-10 text-center max-w-3xl w-full">
@@ -61,38 +11,39 @@ export default {
       <!-- Step 1: Search for a Patient -->
       <div v-if="step === 1">
         <p class="text-gray-700 mb-4 text-lg">Search for a patient to begin:</p>
-        <input
-          type="text"
-          v-model="searchQuery"
-          @input="searchPatients"
-          placeholder="Enter patient Lastname or ID"
-          class="border p-3 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-200"
-        />
-        <!-- Search Results -->
-        <div class="border rounded p-4 max-h-40 overflow-y-auto mb-4">
-          <ul v-if="patients.length">
-            <li 
-              v-for="patient in patients" 
-              :key="patient.personalId"
-              @click="selectPatient(patient)"
-              class="p-3 cursor-pointer hover:bg-gray-200 rounded transition duration-200"
-            >
-              {{ patient.personalId }} ({{ patient.lastName }})
-            </li>
-          </ul>
-          <p v-else-if="searchQuery" class="text-sm text-gray-500">No patients found.</p>
-        </div>
+        <form @submit.prevent="searchPatients">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Enter patient Lastname or ID"
+            class="border p-3 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-200"
+          />
+          <!-- Search Results -->
+          <div class="border rounded p-4 max-h-40 overflow-y-auto mb-4">
+            <ul v-if="patients.length">
+              <li 
+                v-for="patient in patients" 
+                :key="patient.personalId"
+                @click="selectPatient(patient)"
+                class="p-3 cursor-pointer hover:bg-gray-200 rounded transition duration-200"
+              >
+                {{ patient.personalId }} ({{ patient.lastName }})
+              </li>
+            </ul>
+            <p v-else-if="searchQuery" class="text-sm text-gray-500">No patients found.</p>
+          </div>
+        </form>
 
         <!-- Button to Add New Patient -->
         <div class="flex flex-col center" v-if="!patients.length && searchQuery">
           <p class="text-gray-700 mb-4 text-lg">Patient not found. You can add them:</p>
           <div class="flex items-center">
             <button 
-            @click="addNewPatient" 
-            class="bg-green-600 text-white font-semibold py-3 px-6 rounded shadow hover:bg-blue-700 transition-colors duration-300"
-          >
-            Add New Patient
-          </button>
+              @click="addNewPatient" 
+              class="bg-green-600 text-white font-semibold py-3 px-6 rounded shadow hover:bg-blue-700 transition-colors duration-300"
+            >
+              Add New Patient
+            </button>
           </div>
         </div>
       </div>
@@ -107,12 +58,15 @@ export default {
           >
             Individual Treatment Record
           </Link>
-          <Link 
-            :href="route('prenatal', { patient_personalId: selectedPatient.personalId })"
+
+          <!-- Trigger the Modal -->
+          <button 
+            @click="showModal = true"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             Prenatal & Postpartum Checkup
-          </Link>
+          </button>
+
           <Link 
             :href="route('nationalimmunizationprogram', { patient_personalId: selectedPatient.personalId })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
@@ -141,6 +95,82 @@ export default {
           Back to Checkup Page
         </button>
       </div>
+
+      <!-- Prenatal and Postpartum Modal Content -->
+      <div v-if="showModal" class="fixed inset-0 bg-gray-900 bg-opacity-100 flex justify-center items-center">
+        <div class="bg-white rounded-lg shadow-lg py-8 px-6 text-center max-w-md w-full relative">
+          <button 
+            @click="showModal = false" 
+            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-lg"
+          >
+            &times;
+          </button>
+          <h2 class="text-3xl font-bold mb-6">Select Checkup Type</h2>
+          <p class="text-gray-700 mb-6 text-lg">Please select the type of checkup for this patient:</p>
+          
+          <div class="flex flex-col space-y-4">
+            <Link 
+              :href="route('prenatal', { patient_id: selectedPatient.personalId })"
+              @click="addNewPatient"
+              class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
+            >
+              Prenatal Checkup
+            </Link>
+            
+            <Link 
+              :href="route('postpartum', { patient_id: selectedPatient.personalId })"
+              @click="addNewPatient"
+              class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
+            >
+              Postpartum Checkup
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
+<script>
+import { Link } from '@inertiajs/vue3';
+import { Inertia } from '@inertiajs/inertia';
+
+export default {
+  components: { Link },
+  data() {
+    return {
+      step: 1,
+      searchQuery: '',
+      patients: [],
+      selectedPatient: null,
+      showModal: false,
+    };
+  },
+  methods: {
+    searchPatients() {
+      if (this.searchQuery.trim() === '') {
+        this.patients = [];
+        return;
+      }
+
+      Inertia.get(route('patients.search'), { query: this.searchQuery }, {
+        preserveState: true,
+        onSuccess: (page) => {
+          this.patients = page.props.patients;
+        },
+      });
+    },
+    selectPatient(patient) {
+      this.selectedPatient = patient;
+      this.step = 2; // Move to the next step (check-up selection)
+    },
+    addNewPatient() {
+      this.selectedPatient = { personalId: 'new', lastName: this.searchQuery };
+      this.step = 2;
+    },
+    goBackToCheckup() {
+      Inertia.visit(route('checkup'));
+    },
+  },
+};
+</script>

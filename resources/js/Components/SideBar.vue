@@ -18,7 +18,7 @@ const togglePatientsDropdown = () => {
 </script>
 
 <template>
-  <div class="relative flex">
+  <div class="relative flex ">
     <!-- Hamburger Menu (Mobile) -->
     <button @click="toggleSidebar" class="p-4 block lg:hidden fixed top-0 left-0 z-50">
       <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -28,11 +28,11 @@ const togglePatientsDropdown = () => {
 
     <!-- Sidebar -->
     <div
-      class="fixed top-0 left-0 h-screen w-48 bg-white text-gray-800 p-5 transform transition-transform lg:translate-x-0 lg:block"
+      class="fixed top-0 left-0 h-screen w-48 bg-white text-gray-800 pt-5 px-3 transform transition-transform lg:translate-x-0 lg:block"
       :class="{ '-translate-x-full': !sidebarOpen }"
     >
       <!-- Logo -->
-      <div class="flex text-bold items-center justify-center mb-10">
+      <div class="flex text-bold items-center justify-start mb-10">
         <img :src="Logo" alt="RHU Logo" class="h-12 w-auto" />
         <span class="font-bold text-lg">RHU ADMIN</span>
       </div>
@@ -55,10 +55,10 @@ const togglePatientsDropdown = () => {
           </button>
 
           <!-- Collapsible Links -->
-          <div v-if="patientsDropdownOpen" class="pl-6 space-y-2">
+          <div v-if="patientsDropdownOpen" class="pl-3 space-y-2">
             <Link href="/patients/itrtable" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
               :class="{ 'bg-gray-100': $page.component === 'IndividualTreatmentRecord' }">
-              <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> Individual Treatment Record
+              <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> ITR
             </Link>
             <Link href="/patients/prenatal-postpartum" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
               :class="{ 'bg-gray-100': $page.component === 'PrenatalPostpartum' }">
@@ -79,6 +79,11 @@ const togglePatientsDropdown = () => {
         <Link href="/mortality" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
           :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
           <font-awesome-icon :icon="['fas', 'user']" class="mr-3" /> Mortality
+        </Link>
+
+        <Link href="/mortality" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
+          :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
+          <font-awesome-icon :icon="['fas', 'user']" class="mr-3" /> Record Cases
         </Link>
       </nav>
     </div>

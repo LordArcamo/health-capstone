@@ -67,20 +67,20 @@
           <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">NKFDA</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Health teachings given; danger signs of pregnancy imparted</label>
+          <input v-model="form.health_teachings_given_danger_signs_pregnancy" type="checkbox" id="health_teachings_given_danger_signs_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="health_teachings_given_danger_signs_pregnancy" class="ml-2 text-sm text-gray-600">Health teachings given; danger signs of pregnancy imparted</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Referred for Urinalysis, HCT - HGB count</label>
+          <input v-model="form.referred_for_urinalysis_hct_hgb_count" type="checkbox" id="referred_for_urinalysis_hct_hgb_count" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="referred_for_urinalysis_hct_hgb_count" class="ml-2 text-sm text-gray-600">Referred for Urinalysis, HCT - HGB count</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
+          <input v-model="form.healthy_diet_increase_fluid_intake_encouraged" type="checkbox" id="healthy_diet_increase_fluid_intake_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="healthy_diet_increase_fluid_intake_encouraged" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.nkfda" type="number" id="nkfda" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
+          <input v-model="form.fes04_folic_acid_given" type="checkbox" id="fes04_folic_acid_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic_acid_given" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid_tabs" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
         </div>
         <!-- Checkbox Items-->
       </div>
