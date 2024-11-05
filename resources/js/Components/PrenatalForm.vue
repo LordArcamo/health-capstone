@@ -118,7 +118,7 @@
             </select>
 
             <!-- Conditionally Render ID Input -->
-            <div v-if="form.philhealthStatus === 'member'" class="mt-4">
+            <div v-if="form.philhealthStatus === 'Member'" class="mt-4">
               <label for="philhealthId" class="block font-medium text-gray-700">Philhealth ID Number:</label>
               <input 
                 id="philhealthId" 
