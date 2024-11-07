@@ -65,6 +65,10 @@ Route::get('/mortality', function () {
     return Inertia::render('Mortality');
 })->middleware(['auth', 'verified'])->name('mortality');
 
+Route::get('/record-cases', function () {
+    return Inertia::render('Record-Cases');
+})->middleware(['auth', 'verified'])->name('record-cases');
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
