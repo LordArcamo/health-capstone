@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PostpartumController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -47,18 +48,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/checkup/postpartum', [PostpartumController::class, 'create'])->name('postpartum');
+    Route::post('/postpartum/store', [PostpartumController::class, 'store'])->name('postpartum.store');
+});
+
 
 Route::get('/checkup', function () {
     return Inertia::render('Checkup');
 })->middleware(['auth', 'verified'])->name('checkup');
-
-Route::get('/checkup/prenatalpostpartum', function () {
-    return Inertia::render('PrenatalPostpartum');
-})->middleware(['auth', 'verified'])->name('prenatalpostpartum');
-
-Route::get('/checkup/postpartum', function () {
-    return Inertia::render('PostPartumCheckup');
-})->middleware(['auth', 'verified'])->name('postpartum');
 
 
 Route::get('/mortality', function () {

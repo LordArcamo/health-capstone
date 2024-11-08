@@ -1,27 +1,26 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\PersonalInformation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class PatientController extends Controller
 {
-
     public function search(Request $request)
     {
+        // Get the query from the request
         $query = $request->input('query');
 
-        // Fetch patients based on search query (name or ID)
+        // Fetch patients from the database based on the search query
         $patients = PersonalInformation::where('lastName', 'like', "%$query%")
             ->orWhere('personalId', 'like', "%$query%")
-            ->get();
+            ->get(['personalId', 'firstName', 'lastName']); // Only select personalId, firstName, and lastName
 
-
-        // Return patients data through Inertia
-        return Inertia::render('WelcomeModal', [
-            'patients' => $patients,
+        // Return patients data via Inertia
+        return Inertia::render('Checkup', [
+            'patients' => $patients, // Return the filtered patients
         ]);
     }
 }

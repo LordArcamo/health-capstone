@@ -15,7 +15,7 @@
     console.log('Submitting from parent:', form); // Log the form data for debugging
     
     // Post the form data to the backend using Inertia
-    return Inertia.post('/prenatal/store', form, {
+    return Inertia.post('/postpartum/store', form, {
       onSuccess: () => {
         // Handle success (e.g., show a success message or reset form)
         console.log('Data saved successfully!');

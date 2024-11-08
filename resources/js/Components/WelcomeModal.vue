@@ -11,10 +11,10 @@
       <!-- Step 1: Search for a Patient -->
       <div v-if="step === 1">
         <p class="text-gray-700 mb-4 text-lg">Search for a patient to begin:</p>
-        <form @submit.prevent="searchPatients">
           <input
             type="text"
             v-model="searchQuery"
+            @input="searchPatients"
             placeholder="Enter patient Lastname or ID"
             class="border p-3 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-200"
           />
@@ -27,12 +27,11 @@
                 @click="selectPatient(patient)"
                 class="p-3 cursor-pointer hover:bg-gray-200 rounded transition duration-200"
               >
-                {{ patient.personalId }} ({{ patient.lastName }})
+              {{ patient.personalId }} - {{ patient.firstName }} {{ patient.lastName }}
               </li>
             </ul>
             <p v-else-if="searchQuery" class="text-sm text-gray-500">No patients found.</p>
           </div>
-        </form>
 
         <!-- Button to Add New Patient -->
         <div class="flex flex-col center" v-if="!patients.length && searchQuery">
@@ -156,10 +155,12 @@ export default {
       Inertia.get(route('patients.search'), { query: this.searchQuery }, {
         preserveState: true,
         onSuccess: (page) => {
+          console.log("Patients data:", page.props.patients);
           this.patients = page.props.patients;
         },
       });
     },
+
     selectPatient(patient) {
       this.selectedPatient = patient;
       this.step = 2; // Move to the next step (check-up selection)

@@ -45,6 +45,7 @@
       <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 via-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
+            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Patient ID</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">First Name</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Last Name</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Middle Name</th>
@@ -52,7 +53,7 @@
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Purok</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Barangay</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Age</th>
-            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Contact #</th>
+            <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Contact Number</th>
             <th class="py-4 px-6 text-left tracking-wider border-b border-indigo-200">Gender</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200"></th>
           </tr>
@@ -64,6 +65,7 @@
             :key="patient.id"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
           >
+          <td class="py-3 px-6">{{ patient.personalId }}</td>
             <td class="py-3 px-6">{{ patient.firstName }}</td>
             <td class="py-3 px-6">{{ patient.lastName }}</td>
             <td class="py-3 px-6">{{ patient.middleName }}</td>
@@ -149,7 +151,7 @@
           <li><strong>Philhealth No.:</strong> {{ selectedPatient.philhealthNo }}</li>
           <li><strong>If Member, please indicate category:</strong> {{ selectedPatient.ifMember }}</li>
           <li><strong>Family Member:</strong> {{ selectedPatient.familyMember }}</li>
-          <li><strong>TT Status of Mother:</strong> {{ selectedPatient.ttstatus }}</li>
+          <li><strong>TT Status of Mother:</strong> {{ selectedPatient.ttStatus }}</li>
           <li><strong>Date Assesed:</strong> {{ selectedPatient.dateAssesed }}</li>
           <li><strong>Date:</strong> {{ selectedPatient.date }}</li>
           <li><strong>Place:</strong> {{ selectedPatient.place }}</li>
