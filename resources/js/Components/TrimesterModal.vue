@@ -63,7 +63,7 @@
         <button v-if="step === 1" @click="confirmSelection" :disabled="!selectedTrimester" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
           Next
         </button>
-        <button v-if="step === 2" @click="submitForm" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
+        <button v-if="step === 2" @click="submitForm" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
           Submit
         </button>
         <button @click="close" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Close</button>
@@ -125,9 +125,9 @@ export default {
         this.step = 2; // Move to Step 2 to show form
       }
     },
-    submitForm() {
-      this.step = 3; // Move to Step 3 to show submission message
-    },
+    // submitForm() {
+    //   this.step = 3; // Move to Step 3 to show submission message
+    // },
     goBack() {
       this.step = 1; // Return to Step 1
     },

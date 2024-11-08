@@ -76,14 +76,14 @@ const togglePatientsDropdown = () => {
           <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-3" /> Checkup
         </Link>
 
-        <Link href="/mortality" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
-          <font-awesome-icon :icon="['fas', 'user']" class="mr-3" /> Mortality
+        <Link href="/record-cases" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
+          :class="{ 'bg-gray-100': $page.component === 'Record-Cases' }">
+          <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> Record Cases
         </Link>
 
         <Link href="/mortality" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
           :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
-          <font-awesome-icon :icon="['fas', 'user']" class="mr-3" /> Record Cases
+          <font-awesome-icon :icon="['fas', 'user']" class="mr-3" /> Mortality
         </Link>
       </nav>
     </div>

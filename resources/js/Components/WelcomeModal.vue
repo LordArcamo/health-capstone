@@ -96,7 +96,7 @@
       </div>
 
       <!-- Prenatal and Postpartum Modal Content -->
-      <div v-if="showModal" class="fixed inset-0 bg-gray-900 bg-opacity-100 flex justify-center items-center">
+      <div v-if="showModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex justify-center items-center">
         <div class="bg-white rounded-lg shadow-lg py-8 px-6 text-center max-w-md w-full relative">
           <button 
             @click="showModal = false" 
@@ -110,7 +110,6 @@
           <div class="flex flex-col space-y-4">
             <Link 
               :href="route('prenatal', { patient_id: selectedPatient.personalId })"
-              @click="addNewPatient"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
             >
               Prenatal Checkup
@@ -118,7 +117,6 @@
             
             <Link 
               :href="route('postpartum', { patient_id: selectedPatient.personalId })"
-              @click="addNewPatient"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
             >
               Postpartum Checkup
@@ -146,11 +144,10 @@ export default {
     };
   },
   methods: {
-    searchPatients() {
-      if (this.searchQuery.trim() === '') {
-        this.patients = [];
-        return;
-      }
+  searchPatients() {
+    if (this.searchQuery.trim() === '') {
+      return;
+    }
 
       Inertia.get(route('patients.search'), { query: this.searchQuery }, {
         preserveState: true,

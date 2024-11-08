@@ -1,7 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import Box from '../Components/Box.vue';
+import Box from '@/Components/Box.vue';
 import longbox from '../Components/LongBox.vue';
 import chart from '../Components/BarChart.vue';
 import linechart from '../Components/LineChart.vue'
@@ -57,7 +57,7 @@ p {
           <div class="overflow-y-auto">
                <div class="container gap-4 my-10 px-10 flex flex-row">
 
-                    <Box>
+                    <Box >
                          <h1 class="text-green">Total Patients</h1>
                          <p class="text-black text-lg"><svg xmlns="http://www.w3.org/2000/svg" height="20px"
                                    viewBox="0 0 448 512">
@@ -65,7 +65,7 @@ p {
                                         d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
                               </svg>100,000</p>
                     </Box>
-                    <Box>
+                    <Box padding="p-6" bgColor="bg-blue-100" borderColor="border-blue-500" rounded="rounded-xl" shadow="shadow-lg">
                          <h1>Date</h1>
                          <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 448 512">
                                    <path fill="#ffffff"
@@ -75,7 +75,7 @@ p {
 
                </div>
 
-               <div class="container gap-10 my-10 px-10 flex flex-col overflow-x-auto">
+               <div class="container flex flex-col gap-10 my-10 px-10">
                     <!-- <longbox>
                          <chart />
                     </longbox> -->
