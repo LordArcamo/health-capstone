@@ -11,27 +11,36 @@
       <!-- Step 1: Search for a Patient -->
       <div v-if="step === 1">
         <p class="text-gray-700 mb-4 text-lg">Search for a patient to begin:</p>
+        <div class="flex space-x-2 mb-4">
           <input
             type="text"
             v-model="searchQuery"
-            @input="searchPatients"
             placeholder="Enter patient Lastname or ID"
-            class="border p-3 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-200"
+            class="border p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-200"
           />
-          <!-- Search Results -->
-          <div class="border rounded p-4 max-h-40 overflow-y-auto mb-4">
-            <ul v-if="patients.length">
-              <li 
-                v-for="patient in patients" 
-                :key="patient.personalId"
-                @click="selectPatient(patient)"
-                class="p-3 cursor-pointer hover:bg-gray-200 rounded transition duration-200"
-              >
+          <!-- Search Button -->
+          <button 
+            @click="searchPatients"
+            class="bg-green-600 text-white font-semibold py-3 px-6 rounded shadow hover:bg-green-700 transition-colors duration-300"
+          >
+            Search
+          </button>
+        </div>
+        
+        <!-- Search Results -->
+        <div class="border rounded p-4 max-h-40 overflow-y-auto mb-4">
+          <ul v-if="patients.length">
+            <li 
+              v-for="patient in patients" 
+              :key="patient.personalId"
+              @click="selectPatient(patient)"
+              class="p-3 cursor-pointer hover:bg-gray-200 rounded transition duration-200"
+            >
               {{ patient.personalId }} - {{ patient.firstName }} {{ patient.lastName }}
-              </li>
-            </ul>
-            <p v-else-if="searchQuery" class="text-sm text-gray-500">No patients found.</p>
-          </div>
+            </li>
+          </ul>
+          <p v-else-if="searchQuery && !patients.length" class="text-sm text-gray-500">No patients found.</p>
+        </div>
 
         <!-- Button to Add New Patient -->
         <div class="flex flex-col center" v-if="!patients.length && searchQuery">
@@ -144,23 +153,22 @@ export default {
     };
   },
   methods: {
-  searchPatients() {
-    if (this.searchQuery.trim() === '') {
-      return;
-    }
+    searchPatients() {
+      if (this.searchQuery.trim() === '') {
+        this.patients = []; // Clear results if input is empty
+        return;
+      }
 
       Inertia.get(route('patients.search'), { query: this.searchQuery }, {
         preserveState: true,
         onSuccess: (page) => {
-          console.log("Patients data:", page.props.patients);
           this.patients = page.props.patients;
         },
       });
     },
-
     selectPatient(patient) {
       this.selectedPatient = patient;
-      this.step = 2; // Move to the next step (check-up selection)
+      this.step = 2;
     },
     addNewPatient() {
       this.selectedPatient = { personalId: 'new', lastName: this.searchQuery };
