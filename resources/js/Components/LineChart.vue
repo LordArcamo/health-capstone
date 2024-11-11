@@ -1,6 +1,30 @@
 <template>
-    <div class="w-full h-96">
-        <Line :data="chartData" :options="chartOptions" />
+    <div class="">
+        <h2 class="text-2xl font-bold text-center mb-4">Disease Cases by Gender and Month</h2>
+        
+        <!-- Filters for Year and Month -->
+        <div class="flex justify-between items-center mb-4">
+            <!-- Year Filter -->
+            <div class="flex items-center space-x-2">
+                <label for="year" class="font-semibold text-gray-700">Year:</label>
+                <select v-model="selectedYear" @change="filterData" class="border rounded px-2 py-1">
+                    <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+                </select>
+            </div>
+            
+            <!-- Month Filter -->
+            <div class="flex items-center space-x-2">
+                <label for="month" class="font-semibold text-gray-700">Month:</label>
+                <select v-model="selectedMonth" @change="filterData" class="border rounded px-2 py-1">
+                    <option value="">All</option>
+                    <option v-for="(month, index) in months" :key="index" :value="month">{{ month }}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="h-80"> <!-- Fixed height for chart container -->
+            <Line :data="filteredChartData" :options="chartOptions" />
+        </div>
     </div>
 </template>
 
@@ -24,78 +48,46 @@ export default {
     components: { Line },
     data() {
         return {
+            years: [2022, 2023, 2024],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            selectedYear: 2023,
+            selectedMonth: '',
             chartData: {
                 labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
                 datasets: [
                     {
                         label: 'Disease A (Male)',
-                        data: [30, 45, 50, 70, 40, 60, 80,90, 9,10,11,12],
-                        fill: false,
+                        data: [30, 45, 50, 70, 40, 60, 80, 90, 9, 10, 11, 12],
+                        fill: true,
                         borderColor: '#36A2EB',
-                        tension: 0.1,
-                        backgroundColor: '#36A2EB',
-                        pointBackgroundColor: '#36A2EB',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.4,
                     },
                     {
                         label: 'Disease A (Female)',
-                        data: [50, 35, 55, 65, 70, 85, 95],
-                        fill: false,
+                        data: [50, 35, 55, 65, 70, 85, 95, 30, 50, 60, 70, 80],
+                        fill: true,
                         borderColor: '#FF6384',
-                        tension: 0.1,
-                        backgroundColor: '#FF6384',
-                        pointBackgroundColor: '#FF6384',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#FF6384',
-                    },
-                    {
-                        label: 'Disease B (Male)',
-                        data: [20, 30, 25, 50, 60, 75, 65],
-                        fill: false,
-                        borderColor: '#FFCE56',
-                        tension: 0.1,
-                        backgroundColor: '#FFCE56',
-                        pointBackgroundColor: '#FFCE56',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#FFCE56',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.4,
                     },
                     {
                         label: 'Disease B (Female)',
-                        data: [40, 55, 35, 45, 80, 65, 85],
-                        fill: false,
-                        borderColor: '#4BC0C0',
-                        tension: 0.1,
-                        backgroundColor: '#4BC0C0',
-                        pointBackgroundColor: '#4BC0C0',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#4BC0C0',
+                        data: [50, 35, 55, 65, 70, 85, 95, 30, 50, 60, 70, 1000],
+                        fill: true,
+                        borderColor: '#FF6389',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.4,
                     },
                 ],
+                
             },
             chartOptions: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += `${context.parsed.y}`;
-                                }
-                                return label;
-                            },
-                        },
+                        position: 'bottom',
                     },
                 },
                 scales: {
@@ -116,9 +108,32 @@ export default {
             },
         };
     },
+    computed: {
+        filteredChartData() {
+            if (this.selectedMonth) {
+                const monthIndex = this.months.indexOf(this.selectedMonth);
+                return {
+                    labels: [this.selectedMonth],
+                    datasets: this.chartData.datasets.map(dataset => ({
+                        ...dataset,
+                        data: [dataset.data[monthIndex]],
+                    })),
+                };
+            }
+            return this.chartData;
+        },
+    },
+    methods: {
+        filterData() {
+            // Triggers data update for the chart based on selected filters
+        },
+    },
 };
 </script>
 
 <style scoped>
-/* Custom styles if needed */
+/* Keep chart height consistent without stretching */
+.h-80 {
+    max-height: 320px;
+}
 </style>
