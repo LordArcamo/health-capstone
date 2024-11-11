@@ -51,36 +51,36 @@
           <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.reminded_importance_fbd" type="checkbox" id="reminded_importance_fbd" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="reminded_importance_fbd" class="ml-2 text-sm text-gray-600">Reminded on importance of FBD</label>
+          <input v-model="form.reminded_importance" type="checkbox" id="reminded_importance" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="reminded_importance" class="ml-2 text-sm text-gray-600">Reminded on importance of FBD</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.health_teachings_given" type="checkbox" id="health_teachings_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="health_teachings_given" class="ml-2 text-sm text-gray-600">Health teachings given</label>
+          <input v-model="form.health_teachings" type="checkbox" id="health_teachings" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="health_teachings" class="ml-2 text-sm text-gray-600">Health teachings given</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.reminded_dangers_pregnancy" type="checkbox" id="reminded_dangers_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="reminded_dangers_pregnancy" class="ml-2 text-sm text-gray-600">Reminded on the Dangers Signs of Pregnancy</label>
+          <input v-model="form.reminded_dangers" type="checkbox" id="reminded_dangers" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="reminded_dangers" class="ml-2 text-sm text-gray-600">Reminded on the Dangers Signs of Pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.healthy_diet_increase_fluid_intake" type="checkbox" id="healthy_diet_increase_fluid_intake" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="healthy_diet_increase_fluid_intake" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
+          <input v-model="form.healthy_diet" type="checkbox" id="healthy_diet" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="healthy_diet" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.breast_feeding_delivery" type="checkbox" id="breast_feeding_delivery" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="breast_feeding_delivery" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
+          <input v-model="form.breast_feeding" type="checkbox" id="breast_feeding" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="breast_feeding" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.compliane_routine_immunization" type="checkbox" id="compliane_routine_immunization" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="compliane_routine_immunization" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
+          <input v-model="form.compliane_routine" type="checkbox" id="compliane_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="compliane_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.referred_utz_evaluation_pregnancy" type="checkbox" id="referred_utz_evaluation_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="referred_utz_evaluation_pregnancy" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
+          <input v-model="form.referred_utz" type="checkbox" id="referred_utz" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="referred_utz" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.fes04_folic_acid_given" type="checkbox" id="fes04_folic_acid_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fes04_folic_acid_given" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid_tabs" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
+          <input v-model="form.fes04_folic" type="checkbox" id="fes04_folic" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
         </div>
         <!-- Checkbox Items-->
       </div>
@@ -106,8 +106,16 @@ export default {
       aog_months: '',
       aog_days: '',
       trimester: '',
-      prenatal_checkup: false,
-      birth_plan_done: false,
+      prenatal_record: '',
+      reminded_importance: '',
+      health_teachings: '',
+      reminded_dangers: '',
+      healthy_diet: '',
+      breast_feeding: '',
+      compliane_routine: '',
+      referred_utz: '',
+      fes04_folic: '',
+      folic_acid: '',
     });
 
     const submitForm = () => {
