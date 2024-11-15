@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PostpartumController;
+use App\Http\Controllers\Trimester1Controller;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -51,6 +52,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkup/postpartum', [PostpartumController::class, 'create'])->name('postpartum');
     Route::post('/postpartum/store', [PostpartumController::class, 'store'])->name('postpartum.store');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/trimester/store', [Trimester1Controller::class, 'store'])->name('trimester.store');
 });
 
 

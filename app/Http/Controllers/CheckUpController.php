@@ -125,7 +125,6 @@ class CheckUpController extends Controller
     }
 
 
-
     /**
      * Display the specified resource.
      */

@@ -52,51 +52,51 @@
         </div>
         <div class="flex items-center">
           <input v-model="form.pe_done" type="checkbox" id="pe_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">PE done</label>
+          <label for="pe_done" class="ml-2 text-sm text-gray-600">PE done</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.prenatal_record" type="checkbox" id="prenatal_record" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
+          <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.birth_plan_done" type="checkbox" id="birth_plan_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Reminded on importance of FBD</label>
+          <input v-model="form.reminded_importance" type="checkbox" id="reminded_importance" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="reminded_importance" class="ml-2 text-sm text-gray-600">Reminded on importance of FBD</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.health_teachings_given_light_exercise_daily" type="checkbox" id="health_teachings_given_light_exercise_daily" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="health_teachings_given_light_exercise_daily" class="ml-2 text-sm text-gray-600">Health teachings given, light exercise daily</label>
+          <input v-model="form.health_teachings" type="checkbox" id="health_teachings" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="health_teachings" class="ml-2 text-sm text-gray-600">Health teachings given, light exercise daily</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.reminded_danger_signs_pregnancy" type="checkbox" id="reminded_danger_signs_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="reminded_danger_signs_pregnancy" class="ml-2 text-sm text-gray-600">Reminded on the Dangers Signs of Pregnancy</label>
+          <input v-model="form.reminded_danger" type="checkbox" id="reminded_danger" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="reminded_danger" class="ml-2 text-sm text-gray-600">Reminded on the Dangers Signs of Pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.healthy_diet_increase_fluid_intake_encouraged" type="checkbox" id="healthy_diet_increase_fluid_intake_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="healthy_diet_increase_fluid_intake_encouraged" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
+          <input v-model="form.healthy_diet" type="checkbox" id="healthy_diet" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="healthy_diet" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.breast_feeding_delivery_encouraged" type="checkbox" id="breast_feeding_delivery_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="breast_feeding_delivery_encouraged" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
+          <input v-model="form.breast_feeding" type="checkbox" id="breast_feeding" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="breast_feeding" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.compliance_routine_immunization_encouraged" type="checkbox" id="compliance_routine_immunization_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="compliance_routine_immunization_encouraged" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
+          <input v-model="form.compliance_routine" type="checkbox" id="compliance_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="compliance_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.referred_utz_evaluation_pregnancy" type="checkbox" id="referred_utz_evaluation_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="referred_utz_evaluation_pregnancy" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
+          <input v-model="form.referred_utz" type="checkbox" id="referred_utz" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="referred_utz" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.information_newborn_screening_given" type="checkbox" id="information_newborn_screening_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="information_newborn_screening_given" class="ml-2 text-sm text-gray-600">Information on Newborn Screening given</label>
+          <input v-model="form.information_newborn" type="checkbox" id="information_newborn" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_newborn" class="ml-2 text-sm text-gray-600">Information on Newborn Screening given</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.fes04_folic_acid_given" type="checkbox" id="fes04_folic_acid_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fes04_folic_acid_given" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid_tabs" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
+          <input v-model="form.fes04_folic" type="checkbox" id="fes04_folic" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.information_on_family_planning_methods" type="checkbox" id="information_on_family_planning_methods" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="information_on_family_planning_methods" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
+          <input v-model="form.information_family" type="checkbox" id="information_family" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_family" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
         </div>
         <!-- Checkbox Items-->
       </div>
@@ -141,12 +141,23 @@ export default {
       aog_months: '',
       aog_days: '',
       trimester: '',
-      prenatal_checkup: false,
-      birth_plan_done: false,
+      prenatal_checkup: '',
+      pe_done: '',
+      prenatal_record: '',
+      birth_plan_done: '',
+      health_teachings: '',
+      reminded_dangers: '',
+      healthy_diet: '',
+      breast_feeding: '',
+      compliance_routine: '',
+      referred_utz: '',
+      information_newborn: '',
+      fes04_folic: '',
+      folic_acid: '',
       fhb: '',
       position: '',
       presentation: '',
-      fundal_height: '',
+      fundal_height: ''
     });
 
     const submitForm = () => {

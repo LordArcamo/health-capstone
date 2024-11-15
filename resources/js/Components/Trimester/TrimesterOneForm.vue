@@ -84,7 +84,7 @@
         </div>
         <div class="flex items-center">
           <input v-model="form.fes04_folic_acid_given" type="checkbox" id="fes04_folic_acid_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fes04_folic_acid_given" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid_tabs" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" > -given</input></label>
+          <label for="fes04_folic_acid_given" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" > -given</input></label>
         </div>
       </div>
 
@@ -122,22 +122,22 @@ export default {
     return {
       form: {
         date_of_visit: '',
-        weight: null,
+        weight: '',
         bp: '',
-        heart_rate: null,
-        aog_months: null,
-        aog_days: null,
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
         trimester: '',
-        prenatal_checkup: false,
-        pe_done: false,
-        prenatal_record: false,
-        birth_plan_done: false,
-        nkfda: false,
-        health_teachings_given_danger_signs_pregnancy: false,
-        referred_for_urinalysis_hct_hgb_count: false,
-        healthy_diet_increase_fluid_intake_encouraged: false,
-        fes04_folic_acid_given: false,
-        folic_acid_tabs: null,
+        prenatal_checkup: '',
+        pe_done: '',
+        prenatal_record: '',
+        birth_plan_done: '',
+        nkfda: '',
+        health_teachings: '',
+        referred_for: '',
+        healthy_diet: '',
+        fes04_folic: '',
+        folic_acid: '',
         fhb: '',
         position: '',
         presentation: '',
@@ -181,22 +181,22 @@ export default {
     resetForm() {
       this.form = {
         date_of_visit: '',
-        weight: null,
+        weight: '',
         bp: '',
-        heart_rate: null,
-        aog_months: null,
-        aog_days: null,
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
         trimester: '',
-        prenatal_checkup: false,
-        pe_done: false,
-        prenatal_record: false,
-        birth_plan_done: false,
-        nkfda: false,
-        health_teachings_given_danger_signs_pregnancy: false,
-        referred_for_urinalysis_hct_hgb_count: false,
-        healthy_diet_increase_fluid_intake_encouraged: false,
-        fes04_folic_acid_given: false,
-        folic_acid_tabs: null,
+        prenatal_checkup: '',
+        pe_done: '',
+        prenatal_record: '',
+        birth_plan_done: '',
+        nkfda: '',
+        health_teachings: '',
+        referred_for: '',
+        healthy_diet: '',
+        fes04_folic: '',
+        folic_acid: '',
         fhb: '',
         position: '',
         presentation: '',
@@ -208,5 +208,14 @@ export default {
 </script>
 
 <style scoped>
-/* Add any additional styles here */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
 </style> 

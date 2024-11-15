@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('weight', 5, 2);
             $table->string('bp', 20);
             $table->unsignedSmallInteger('heart_rate');
-            $table->unsignedTinyInteger('aog_months')
+            $table->unsignedTinyInteger('aog_months');
             $table->unsignedTinyInteger('aog_days'); 
             $table->string('trimester', 10);
             $table->timestamps();
