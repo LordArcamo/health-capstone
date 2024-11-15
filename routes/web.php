@@ -55,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::post('/trimester/store', [Trimester1Controller::class, 'store'])->name('trimester.store');
+    Route::post('/trimester1/store', [Trimester1Controller::class, 'store'])->name('trimester1.store');
 });
 
 

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use App\Models\GeneralTrimester;
+use App\Models\CheckBox1;
 
 class Trimester1Controller extends Controller
 {

@@ -71,20 +71,20 @@
           <label for="nkfda" class="ml-2 text-sm text-gray-600">NKFDA</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.health_teachings_given_danger_signs_pregnancy" type="checkbox" id="health_teachings_given_danger_signs_pregnancy" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="health_teachings_given_danger_signs_pregnancy" class="ml-2 text-sm text-gray-600">Health teachings given; danger signs of pregnancy imparted</label>
+          <input v-model="form.health_teachings" type="checkbox" id="health_teachings" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="health_teachings" class="ml-2 text-sm text-gray-600">Health teachings given; danger signs of pregnancy imparted</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.referred_for_urinalysis_hct_hgb_count" type="checkbox" id="referred_for_urinalysis_hct_hgb_count" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="referred_for_urinalysis_hct_hgb_count" class="ml-2 text-sm text-gray-600">Referred for Urinalysis, HCT - HGB count</label>
+          <input v-model="form.referred_for" type="checkbox" id="referred_for" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="referred_for" class="ml-2 text-sm text-gray-600">Referred for Urinalysis, HCT - HGB count</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.healthy_diet_increase_fluid_intake_encouraged" type="checkbox" id="healthy_diet_increase_fluid_intake_encouraged" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="healthy_diet_increase_fluid_intake_encouraged" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
+          <input v-model="form.healthy_diet" type="checkbox" id="healthy_diet" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="healthy_diet" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.fes04_folic_acid_given" type="checkbox" id="fes04_folic_acid_given" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fes04_folic_acid_given" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" > -given</input></label>
+          <input v-model="form.fes04_folic" type="checkbox" id="fes04_folic" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" > -given</input></label>
         </div>
       </div>
 
@@ -117,6 +117,8 @@
 </template>
 
 <script>
+import { Inertia } from '@inertiajs/inertia';
+
 export default {
   data() {
     return {
@@ -147,63 +149,88 @@ export default {
     };
   },
   methods: {
-    validateForm() {
-      this.errors = {}; // Reset errors
-      let isValid = true;
+  validateForm() {
+    this.errors = {}; // Reset errors
+    let isValid = true;
 
-      if (!this.form.date_of_visit) {
-        this.errors.date_of_visit = 'Date of Visit is required.';
-        isValid = false;
-      }
-      if (!this.form.weight) {
-        this.errors.weight = 'Weight is required.';
-        isValid = false;
-      }
-      if (!this.form.bp) {
-        this.errors.bp = 'Blood Pressure is required.';
-        isValid = false;
-      }
-      if (!this.form.heart_rate) {
-        this.errors.heart_rate = 'Heart Rate is required.';
-        isValid = false;
-      }
-
-      return isValid;
-    },
-    submitForm() {
-      if (this.validateForm()) {
-        // Form submission logic
-        console.log('Form submitted:', this.form);
-        // Reset form after submission
-        this.resetForm();
-      } 
-    },
-    resetForm() {
-      this.form = {
-        date_of_visit: '',
-        weight: '',
-        bp: '',
-        heart_rate: '',
-        aog_months: '',
-        aog_days: '',
-        trimester: '',
-        prenatal_checkup: '',
-        pe_done: '',
-        prenatal_record: '',
-        birth_plan_done: '',
-        nkfda: '',
-        health_teachings: '',
-        referred_for: '',
-        healthy_diet: '',
-        fes04_folic: '',
-        folic_acid: '',
-        fhb: '',
-        position: '',
-        presentation: '',
-        fundal_height: ''
-      };
+    if (!this.form.date_of_visit) {
+      this.errors.date_of_visit = 'Date of Visit is required.';
+      isValid = false;
     }
+    if (!this.form.weight) {
+      this.errors.weight = 'Weight is required.';
+      isValid = false;
+    }
+    if (!this.form.bp) {
+      this.errors.bp = 'Blood Pressure is required.';
+      isValid = false;
+    }
+    if (!this.form.heart_rate) {
+      this.errors.heart_rate = 'Heart Rate is required.';
+      isValid = false;
+    }
+
+    return isValid;
+  },
+
+  submitForm() {
+    if (this.validateForm()) {
+      console.log('Form submitted with data:', this.form);
+
+      Inertia.post('/trimester1/store', this.form, {
+        onStart: () => {
+          // Optionally show loading indicator or disable submit button
+          this.loading = true;
+        },
+        onFinish: () => {
+          // Optionally hide loading indicator or enable submit button
+          this.loading = false;
+        },
+        onSuccess: () => {
+          // Handle successful form submission
+          console.log('Data saved successfully!');
+          this.resetForm();
+          alert('Form submitted successfully!');
+        },
+        onError: (response) => {
+          // Check for errors from the server and update the errors object
+          console.error('Form submission errors:', response.errors);
+          this.errors = response.errors;  // Handle the error response and populate the errors object
+        }
+      });
+    } else {
+      this.successMessage = 'Please complete all required fields before submitting.';
+    }
+  },
+
+  resetForm() {
+    this.form = {
+      date_of_visit: '',
+      weight: '',
+      bp: '',
+      heart_rate: '',
+      aog_months: '',
+      aog_days: '',
+      trimester: '',
+      prenatal_checkup: '',
+      pe_done: '',
+      prenatal_record: '',
+      birth_plan_done: '',
+      nkfda: '',
+      health_teachings: '',
+      referred_for: '',
+      healthy_diet: '',
+      fes04_folic: '',
+      folic_acid: '',
+      fhb: '',
+      position: '',
+      presentation: '',
+      fundal_height: ''
+    };
+    this.errors = {}; // Reset error messages
+    this.successMessage = ''; // Reset success message
   }
+}
 };
 </script>
 
