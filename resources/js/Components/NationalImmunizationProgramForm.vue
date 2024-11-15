@@ -50,9 +50,23 @@
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" class="input" required />
             </div>
-            <div>
-              <label class="block">Contact Number:</label>
-              <input type="text" v-model="form.contact" class="input" />
+               <!-- Contact Number -->
+               <div>
+              <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
+              <div class="relative">
+                <input
+                  type="tel"
+                  v-model="form.contact"
+                  @input="formatContact"
+                  class="pl-14 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 w-full"
+                  placeholder="Enter 10 digits"
+                  required
+                />
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
+                  +63
+                </span>
+              </div>
+              <span v-if="errors.contact" class="text-red-600 text-sm">{{ errors.contact }}</span>
             </div>
             <div>
               <label class="block">Gender:</label>
@@ -242,6 +256,12 @@ export default {
         place: '',
         guardian: '',
       },
+      form: {
+        contact: '', // Default value with the Philippines country code
+      },
+      errors: {
+        contact: '',
+      },
     };
   },
   computed: {
@@ -276,6 +296,10 @@ export default {
       if (this.step > 1) {
         this.step--;
       }
+    },
+    formatContact() {
+      // Remove non-numeric characters and limit to 10 digits
+      this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
     },
   }
 };
