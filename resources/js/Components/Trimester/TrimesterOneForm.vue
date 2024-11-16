@@ -120,9 +120,17 @@
 import { Inertia } from '@inertiajs/inertia';
 
 export default {
+  props: {
+    prenatalId: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+  },
   data() {
     return {
       form: {
+        prenatalId: this.prenatalId,
         date_of_visit: '',
         weight: '',
         bp: '',
@@ -174,16 +182,19 @@ export default {
   },
 
   submitForm() {
-    if (this.validateForm()) {
-      console.log('Form submitted with data:', this.form);
+  if (this.validateForm()) {
+    // Ensure prenatalId is included in the form data
+      const formData = { ...this.form, prenatalId: this.prenatalId };
 
-      Inertia.post('/trimester1/store', this.form, {
+      console.log('Form submitted with data:', formData);
+
+      Inertia.post('/trimester1/store', formData, {
         onStart: () => {
-          // Optionally show loading indicator or disable submit button
+          // Show loading indicator or disable submit button
           this.loading = true;
         },
         onFinish: () => {
-          // Optionally hide loading indicator or enable submit button
+          // Hide loading indicator or enable submit button
           this.loading = false;
         },
         onSuccess: () => {
@@ -195,11 +206,13 @@ export default {
         onError: (response) => {
           // Check for errors from the server and update the errors object
           console.error('Form submission errors:', response.errors);
-          this.errors = response.errors;  // Handle the error response and populate the errors object
+          this.errors = response.errors; // Update the errors object with server errors
         }
       });
     } else {
+      // If the form validation fails
       this.successMessage = 'Please complete all required fields before submitting.';
+      alert(this.successMessage); // Show an alert with the validation message
     }
   },
 

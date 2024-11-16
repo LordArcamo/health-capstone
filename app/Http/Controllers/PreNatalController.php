@@ -16,6 +16,7 @@ class PreNatalController extends Controller
     {
         $data = PersonalInformation::join('prenatal', 'personal_information.personalId', '=', 'prenatal.personalId')
         ->select(
+            'prenatal.prenatalId',
             'personal_information.*', 
             'prenatal.modeOfTransaction',
             'prenatal.consultationDate',

@@ -78,12 +78,15 @@
               >
                 View More
               </button>
-              <button @click="openTrimesterModal" class="bg-yellow-500 text-white px-3 py-1  rounded-md hover:bg-green-600">
-                Trimester
-              </button>
+              <button 
+                  @click="openTrimesterModal(patient)" 
+                  class="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                >
+                  Trimester
+                </button>
               
               <!-- Trimester Modal Component -->
-              <TrimesterModal :show="showTrimesterModal" @close="closeTrimesterModal" @confirm="confirmTrimesterSelection" />
+              <TrimesterModal :prenatalId="selectedPrenatalId" :show="showTrimesterModal" @close="closeTrimesterModal" @confirm="confirmTrimesterSelection" />
               </div>
             </td>
           </tr>
@@ -202,6 +205,7 @@ export default {
       itemsPerPage: 5,
       isModalOpen: false,
       selectedPatient: {},
+      selectedPrenatalId: 0,
     };
   },
   computed: {
@@ -233,18 +237,25 @@ export default {
     },
   },
   methods: {
-    openTrimesterModal() {
-      console.log("Opening Trimester Modal");
-      this.showTrimesterModal = true;
+    openTrimesterModal(patient) {
+      console.log(patient);  // Log the patient object to ensure it's passed correctly
+      if (patient && patient.prenatalId) {
+        this.selectedPrenatalId = patient.prenatalId;
+        this.showTrimesterModal = true;
+      } else {
+        console.error("No prenatalId found for this patient:", patient);
+      }
     },
-    closeTrimesterModal() {
-      console.log("Closing Trimester Modal");
-      this.showTrimesterModal = false;
-    },
-    confirmTrimesterSelection() {
-      console.log("Confirming Trimester Selection");
-      this.closeTrimesterModal();
-    },
+
+  closeTrimesterModal() {
+    this.showTrimesterModal = false;  // Hide the Trimester modal
+  },
+
+  confirmTrimesterSelection() {
+    console.log("Confirming Trimester Selection");
+    // You can call a method to perform further actions when confirming the trimester selection.
+    this.closeTrimesterModal();
+  },
     openModal(patient) {
       this.selectedPatient = patient;
       this.isModalOpen = true;

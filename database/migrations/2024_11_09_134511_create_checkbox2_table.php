@@ -26,7 +26,7 @@ return new class extends Migration
             $table->boolean('fes04_folic')->default(false);
             
             // Folic acid tabs (if specific tab count is needed)
-            $table->integer('folic_acid_tabs')->nullable();
+            $table->integer('folic_acid')->nullable();
             
             $table->timestamps();
 

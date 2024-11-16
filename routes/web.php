@@ -10,6 +10,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PostpartumController;
 use App\Http\Controllers\Trimester1Controller;
+use App\Http\Controllers\Trimester2Controller;
+use App\Http\Controllers\Trimester3Controller;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -56,6 +58,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/trimester1/store', [Trimester1Controller::class, 'store'])->name('trimester1.store');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/trimester2/store', [Trimester2Controller::class, 'store'])->name('trimester2.store');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/trimester3/store', [Trimester3Controller::class, 'store'])->name('trimester3.store');
 });
 
 

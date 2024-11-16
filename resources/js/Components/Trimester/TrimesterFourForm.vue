@@ -67,7 +67,7 @@
           <label for="health_teachings" class="ml-2 text-sm text-gray-600">Health teachings given, light exercise daily</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.reminded_danger" type="checkbox" id="reminded_danger" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <input v-model="form.reminded_dangers" type="checkbox" id="reminded_danger" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="reminded_danger" class="ml-2 text-sm text-gray-600">Reminded on the Dangers Signs of Pregnancy</label>
         </div>
         <div class="flex items-center">
@@ -122,50 +122,149 @@
       </div>
 
       <!-- Submit Button -->
-      <!-- <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Submit</button> -->
+      <button @click="submitForm" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
+          Submit
+        </button>
     </form>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/inertia-vue3';
+import { Inertia } from '@inertiajs/inertia';
 
 export default {
-  setup() {
-    const form = useForm({
-      date_of_visit: '',
-      weight: '',
-      bp: '',
-      heart_rate: '',
-      aog_months: '',
-      aog_days: '',
-      trimester: '',
-      prenatal_checkup: '',
-      pe_done: '',
-      prenatal_record: '',
-      birth_plan_done: '',
-      health_teachings: '',
-      reminded_dangers: '',
-      healthy_diet: '',
-      breast_feeding: '',
-      compliance_routine: '',
-      referred_utz: '',
-      information_newborn: '',
-      fes04_folic: '',
-      folic_acid: '',
-      fhb: '',
-      position: '',
-      presentation: '',
-      fundal_height: ''
-    });
-
-    const submitForm = () => {
-      form.post(route('prenatal.store'));
-    };
-
-    return { form, submitForm };
+  props: {
+    prenatalId: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
+  data() {
+    return {
+      form: {
+        prenatalId: this.prenatalId,
+        date_of_visit: '',
+        weight: '',
+        bp: '',
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
+        trimester: '',
+        prenatal_checkup: '',
+        pe_done: '',
+        prenatal_record: '',
+        reminded_importance: '',
+        health_teachings: '',
+        reminded_dangers: '',
+        healthy_diet: '',
+        breast_feeding: '',
+        compliance_routine: '',
+        referred_utz: '',
+        information_newborn: '',
+        fes04_folic: '',
+        folic_acid: '',
+        information_family: '',
+        fhb: '',
+        position: '',
+        presentation: '',
+        fundal_height: ''
+      },
+      errors: {}
+    };
+  },
+  methods: {
+  validateForm() {
+    this.errors = {}; // Reset errors
+    let isValid = true;
+
+    if (!this.form.date_of_visit) {
+      this.errors.date_of_visit = 'Date of Visit is required.';
+      isValid = false;
+    }
+    if (!this.form.weight) {
+      this.errors.weight = 'Weight is required.';
+      isValid = false;
+    }
+    if (!this.form.bp) {
+      this.errors.bp = 'Blood Pressure is required.';
+      isValid = false;
+    }
+    if (!this.form.heart_rate) {
+      this.errors.heart_rate = 'Heart Rate is required.';
+      isValid = false;
+    }
+
+    return isValid;
+  },
+
+  submitForm() {
+  if (this.validateForm()) {
+    // Ensure prenatalId is included in the form data
+      const formData = { ...this.form, prenatalId: this.prenatalId };
+
+      console.log('Form submitted with data:', formData);
+
+      Inertia.post('/trimester3/store', formData, {
+        onStart: () => {
+          // Show loading indicator or disable submit button
+          this.loading = true;
+        },
+        onFinish: () => {
+          // Hide loading indicator or enable submit button
+          this.loading = false;
+        },
+        onSuccess: () => {
+          // Handle successful form submission
+          console.log('Data saved successfully!');
+          this.resetForm();
+          alert('Form submitted successfully!');
+        },
+        onError: (response) => {
+          // Check for errors from the server and update the errors object
+          console.error('Form submission errors:', response.errors);
+          this.errors = response.errors; // Update the errors object with server errors
+        }
+      });
+    } else {
+      // If the form validation fails
+      this.successMessage = 'Please complete all required fields before submitting.';
+      alert(this.successMessage); // Show an alert with the validation message
+    }
+  },
+
+    resetForm() {
+      this.form = {
+        date_of_visit: '',
+        weight: '',
+        bp: '',
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
+        trimester: '',
+        prenatal_checkup: '',
+        pe_done: '',
+        prenatal_record: '',
+        reminded_importance: '',
+        health_teachings: '',
+        reminded_dangers: '',
+        healthy_diet: '',
+        breast_feeding: '',
+        compliance_routine: '',
+        referred_utz: '',
+        information_newborn: '',
+        fes04_folic: '',
+        folic_acid: '',
+        information_family: '',
+        fhb: '',
+        position: '',
+        presentation: '',
+        fundal_height: ''
+      };
+      this.errors = {}; // Reset error messages
+      this.successMessage = ''; // Reset success message
+    }
+  }
 };
 </script>
 

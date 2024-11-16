@@ -15,14 +15,12 @@ return new class extends Migration
             $table->bigIncrements('checkbox3ID');
             $table->unsignedBigInteger('generalTrimesterID');
             
-            // Add a column to identify trimester type
-            $table->enum('trimester_type', [3, 4, 5]); // 3 for trimester 3, 4 for trimester 4, and 5 for trimester 5
 
             // Checkbox fields as booleans
             $table->boolean('prenatal_checkup')->default(false);
             $table->boolean('pe_done')->default(false);
             $table->boolean('prenatal_record')->default(false);
-            $table->boolean('birth_plan_done')->default(false);
+            $table->boolean('reminded_importance')->default(false);
             $table->boolean('health_teachings')->default(false);
             $table->boolean('reminded_dangers')->default(false);
             $table->boolean('healthy_diet')->default(false);

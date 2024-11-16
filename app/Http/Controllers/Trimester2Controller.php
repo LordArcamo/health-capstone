@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\GeneralTrimester;
-use App\Models\CheckBox1;
+use App\Models\CheckBox2;
 
-class Trimester1Controller extends Controller
+class Trimester2Controller extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -30,35 +30,31 @@ class Trimester1Controller extends Controller
      */
     public function store(Request $request)
     {
-        // Validate request data
+    // Validate request data
         $validatedData = $request->validate([
             'prenatalId' => 'required|integer',
             'date_of_visit' => 'required|date',
             'weight' => 'required|numeric',
             'bp' => 'required|string|max:20',
             'heart_rate' => 'required|numeric',
-            'aog_months' => 'required|integer',
-            'aog_days' => 'required|integer',
-            'trimester' => 'required|string|max:50',
-            
-            // CheckBox1 data validation
-            'prenatal_checkup' => 'boolean',
-            'pe_done' => 'boolean',
+            'aog_months' => 'nullable|integer',
+            'aog_days' => 'nullable|integer',
+            'trimester' => 'nullable|string|max:50',
+
+            // Checkbox2 data validation
             'prenatal_record' => 'boolean',
-            'birth_plan_done' => 'boolean',
-            'nkfda' => 'boolean',
+            'reminded_importance' => 'boolean',
             'health_teachings' => 'boolean',
-            'referred_for' => 'boolean',
+            'reminded_dangers' => 'boolean',
             'healthy_diet' => 'boolean',
+            'breast_feeding' => 'boolean',
+            'compliane_routine' => 'boolean',
+            'referred_utz' => 'boolean',
             'fes04_folic' => 'boolean',
             'folic_acid' => 'nullable|integer',
-            'fhb' => 'nullable|string|max:50',
-            'position' => 'nullable|string|max:50',
-            'presentation' => 'nullable|string|max:50',
-            'fundal_height' => 'nullable|string|max:50',
         ]);
 
-        // Split validated data for GeneralTrimester
+        // Split general trimester data
         $generalTrimesterData = [
             'prenatalId' => $validatedData['prenatalId'],
             'date_of_visit' => $validatedData['date_of_visit'],
@@ -70,35 +66,31 @@ class Trimester1Controller extends Controller
             'trimester' => $validatedData['trimester'],
         ];
 
-        // Save general trimester data to GeneralTrimester table
+        // Save GeneralTrimester data
         $generalTrimester = GeneralTrimester::create($generalTrimesterData);
 
-        // Prepare data for CheckBox1 table
-        $checkBox1Data = [
+        // Prepare checkbox2 data
+        $checkbox2Data = [
             'generalTrimesterID' => $generalTrimester->generalTrimesterID,
-            'prenatal_checkup' => $validatedData['prenatal_checkup'] ?? false, // Defaults to false if not checked
-            'pe_done' => $validatedData['pe_done'] ?? false,
-            'prenatal_record' => $validatedData['prenatal_record'] ?? false,
-            'birth_plan_done' => $validatedData['birth_plan_done'] ?? false,
-            'nkfda' => $validatedData['nkfda'] ?? false,
+            'prenatal_record' => $validatedData['prenatal_record'] ?? false, // Default to false
+            'reminded_importance' => $validatedData['reminded_importance'] ?? false,
             'health_teachings' => $validatedData['health_teachings'] ?? false,
-            'referred_for' => $validatedData['referred_for'] ?? false,
+            'reminded_dangers' => $validatedData['reminded_dangers'] ?? false,
             'healthy_diet' => $validatedData['healthy_diet'] ?? false,
+            'breast_feeding' => $validatedData['breast_feeding'] ?? false,
+            'compliane_routine' => $validatedData['compliane_routine'] ?? false,
+            'referred_utz' => $validatedData['referred_utz'] ?? false,
             'fes04_folic' => $validatedData['fes04_folic'] ?? false,
             'folic_acid' => $validatedData['folic_acid'],
-            'fhb' => $validatedData['fhb'],
-            'position' => $validatedData['position'],
-            'presentation' => $validatedData['presentation'],
-            'fundal_height' => $validatedData['fundal_height'],
         ];
-        
 
-        // Save CheckBox1 data to CheckBox1 table
-        $checkBox1 = CheckBox1::create($checkBox1Data);
+        // Save checkbox2 data to database
+        CheckBox2::create($checkbox2Data);
 
         // Redirect back with a success message
-        return back()->with('Success', 'Data saved successfully!');
+        return redirect()->back()->with('success', 'Form data saved successfully!');
     }
+
 
     /**
      * Display the specified resource.

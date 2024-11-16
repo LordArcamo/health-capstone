@@ -87,43 +87,133 @@
 
 
       <!-- Submit Button -->
-      <!-- <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700">Submit</button> -->
+      <button @click="submitForm" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
+        Submit
+        </button>
     </form>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/inertia-vue3';
+import { Inertia } from '@inertiajs/inertia';
 
 export default {
-  setup() {
-    const form = useForm({
-      date_of_visit: '',
-      weight: '',
-      bp: '',
-      heart_rate: '',
-      aog_months: '',
-      aog_days: '',
-      trimester: '',
-      prenatal_record: '',
-      reminded_importance: '',
-      health_teachings: '',
-      reminded_dangers: '',
-      healthy_diet: '',
-      breast_feeding: '',
-      compliane_routine: '',
-      referred_utz: '',
-      fes04_folic: '',
-      folic_acid: '',
-    });
-
-    const submitForm = () => {
-      form.post(route('prenatal.store'));
-    };
-
-    return { form, submitForm };
+  props: {
+    prenatalId: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
+  data() {
+    return {
+      form: {
+        prenatalId: this.prenatalId,
+        date_of_visit: '',
+        weight: '',
+        bp: '',
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
+        trimester: '',
+        prenatal_record: '',
+        reminded_importance: '',
+        health_teachings: '',
+        reminded_dangers: '',
+        healthy_diet: '',
+        breast_feeding: '',
+        compliane_routine: '',
+        referred_utz: '',
+        fes04_folic: '',
+        folic_acid: '',
+      },
+      errors: {}
+    };
+  },
+  methods: {
+  validateForm() {
+    this.errors = {}; // Reset errors
+    let isValid = true;
+
+    if (!this.form.date_of_visit) {
+      this.errors.date_of_visit = 'Date of Visit is required.';
+      isValid = false;
+    }
+    if (!this.form.weight) {
+      this.errors.weight = 'Weight is required.';
+      isValid = false;
+    }
+    if (!this.form.bp) {
+      this.errors.bp = 'Blood Pressure is required.';
+      isValid = false;
+    }
+    if (!this.form.heart_rate) {
+      this.errors.heart_rate = 'Heart Rate is required.';
+      isValid = false;
+    }
+
+    return isValid;
+  },
+
+  submitForm() {
+  if (this.validateForm()) {
+    // Ensure prenatalId is included in the form data
+      const formData = { ...this.form, prenatalId: this.prenatalId };
+
+      console.log('Form submitted with data:', formData);
+
+      Inertia.post('/trimester2/store', formData, {
+        onStart: () => {
+          // Show loading indicator or disable submit button
+          this.loading = true;
+        },
+        onFinish: () => {
+          // Hide loading indicator or enable submit button
+          this.loading = false;
+        },
+        onSuccess: () => {
+          // Handle successful form submission
+          console.log('Data saved successfully!');
+          this.resetForm();
+          alert('Form submitted successfully!');
+        },
+        onError: (response) => {
+          // Check for errors from the server and update the errors object
+          console.error('Form submission errors:', response.errors);
+          this.errors = response.errors; // Update the errors object with server errors
+        }
+      });
+    } else {
+      // If the form validation fails
+      this.successMessage = 'Please complete all required fields before submitting.';
+      alert(this.successMessage); // Show an alert with the validation message
+    }
+  },
+
+    resetForm() {
+      this.form = {
+        date_of_visit: '',
+        weight: '',
+        bp: '',
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
+        trimester: '',
+        prenatal_record: '',
+        reminded_importance: '',
+        health_teachings: '',
+        reminded_dangers: '',
+        healthy_diet: '',
+        breast_feeding: '',
+        compliane_routine: '',
+        referred_utz: '',
+        fes04_folic: '',
+        folic_acid: '',
+      };
+      this.errors = {}; // Reset error messages
+      this.successMessage = ''; // Reset success message
+    }
+  }
 };
 </script>
 

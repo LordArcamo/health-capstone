@@ -16,7 +16,7 @@
             <span>Step 3: Submission Complete</span>
           </div>
         </div>
-      </div>
+      </div> 
 
       <!-- Header with Back Button -->
       <header class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
@@ -48,7 +48,7 @@
 
         <!-- Step 2: Show Selected Trimester Form -->
         <div v-else-if="step === 2">
-          <component :is="formComponent" />
+          <component :is="formComponent" :prenatalId="prenatalId" />
         </div>
 
         <!-- Step 3: Submission Complete Message -->
@@ -63,9 +63,9 @@
         <button v-if="step === 1" @click="confirmSelection" :disabled="!selectedTrimester" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
           Next
         </button>
-        <button v-if="step === 2" @click="submitForm" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
+        <!--<button v-if="step === 2" @click="submitForm" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
           Submit
-        </button>
+        </button>-->
         <button @click="close" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Close</button>
       </footer>
     </div>
@@ -81,9 +81,22 @@ import TrimesterFiveForm from '@/Components/Trimester/TrimesterFiveForm.vue';
 
 export default {
   props: {
+    prenatalId: {
+      type: Number,
+      required: true,  // This makes sure that the prop must be passed
+      default: 0,      // Default to 0 if not provided
+    },
     show: {
       type: Boolean,
-      default: false,
+      required: true,
+    },
+    onClose: {
+      type: Function,
+      required: true,
+    },
+    onConfirm: {
+      type: Function,
+      required: true,
     },
   },
   data() {
@@ -101,7 +114,14 @@ export default {
   },
   computed: {
     formComponent() {
-      switch (this.selectedTrimester) {
+      return this.selectedTrimester
+        ? this.getFormComponent(this.selectedTrimester)
+        : null;
+    },
+  },
+  methods: {
+    getFormComponent(trimester) {
+      switch (trimester) {
         case '1': return TrimesterOneForm;
         case '2': return TrimesterTwoForm;
         case '3': return TrimesterThreeForm;
@@ -109,16 +129,6 @@ export default {
         case '5': return TrimesterFiveForm;
         default: return null;
       }
-    },
-  },
-  methods: {
-    close() {
-      this.selectedTrimester = ''; // Reset selection on close
-      this.step = 1; // Reset to step 1 on close
-      this.$emit("close");
-    },
-    onTrimesterSelect() {
-      console.log(`Selected Trimester: ${this.selectedTrimester}`);
     },
     confirmSelection() {
       if (this.selectedTrimester) {
@@ -130,6 +140,9 @@ export default {
     // },
     goBack() {
       this.step = 1; // Return to Step 1
+    },
+    close() {
+      this.onClose(); // Trigger onClose prop function
     },
   },
 };
