@@ -43,7 +43,6 @@
               <span v-if="errors.suffix" class="text-red-600 text-sm">{{ errors.suffix }}</span>
             </div>
 
-
             <div>
               <label class="block">Purok:</label>
               <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />

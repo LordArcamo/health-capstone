@@ -4,44 +4,65 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Prenatal & Postnatal Checkup</h2>
 
       <form @submit.prevent="submitForm">
-        <!-- Step 1: Patient Information -->
-        <div v-if="step === 1">
+   <!-- Step 1: Patient Information -->
+   <div v-if="step === 1">
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" class="input" required />
+              <input type="text" v-model="form.firstName" class="input" placeholder="Example: Juan" required />
               <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName }}</span>
             </div>
             <div>
               <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName " class="input"required/>
+              <input type="text" v-model="form.lastName" class="input" placeholder="Example: Dela Cruz" required />
               <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName }}</span>
             </div>
             <div>
               <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName " class="input" required/>
+              <input type="text" v-model="form.middleName" class="input" placeholder="Example: Penduko" required />
               <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
             </div>
             <div>
+              <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix:</label>
+              <select v-model="form.suffix" class="input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" >
+                <!-- Placeholder option for selecting suffix -->
+                <option value="" disabled selected>Select a Suffix</option>
+
+                <option value="None">None</option>
+                <option value="Jr.">Jr.</option>
+                <option value="Sr.">Sr.</option>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+                <option value="V">V</option>
+              </select>
+
+              <!-- Error message if no suffix is selected -->
+              <span v-if="errors.suffix" class="text-red-600 text-sm">{{ errors.suffix }}</span>
+            </div>
+
+            <div>
               <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" required />
+              <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
               <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
             <div>
               <label class="block">Barangay:</label>
-              <input type="text" v-model="form.barangay" class="input" required />
+              <input type="text" v-model="form.barangay" class="input" placeholder="Example: Gimangpang" required />
               <span v-if="errors.barangay" class="text-red-600 text-sm">{{ errors.barangay }}</span>
+            </div>
+            <div>
+              <label class="block">Age:</label>
+              <input type="number" v-model="computedAge" class="input" readonly />
             </div>
             <div>
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" class="input" required />
               <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
-            <div>
-              <label class="block">Age</label>
-              <input type="number" v-model="computedAge" class="input" readonly />
-            </div>
+  
           </div>
           <div class="mt-6 flex justify-center text-right">
             <button @click="nextStep" class="btn">Next</button>
@@ -55,6 +76,8 @@
             <div>
               <label class="block">Mode of Transaction:</label>
               <select v-model="form.modeOfTransaction" class="input" required>
+                <!-- Placeholder option for selecting suffix -->
+                <option value="" disabled selected>Select a Mode of Transaction</option>
                 <option>Walk-in</option>
                 <option>Visited</option>
                 <option>Referral</option>
@@ -77,27 +100,27 @@
             </div>-->
             <div>
               <label class="block">Blood Pressure:</label>
-              <input type="text" v-model="form.bloodPressure" class="input" />
+              <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80" class="input" />
             </div>
             <div>
               <label class="block">Temperature (°C):</label>
-              <input type="number" v-model="form.temperature" step="0.1" class="input" />
+              <input type="number" v-model="form.temperature" placeholder="Example: 37.5°C" step="0.1" class="input" />
             </div>
             <div>
               <label class="block">Height (cm):</label>
-              <input type="number" v-model="form.height" class="input" />
+              <input type="number" v-model="form.height" placeholder="Example: 180" class="input" />
             </div>
             <div>
               <label class="block">Weight (kg):</label>
-              <input type="number" v-model="form.weight" class="input" />
+              <input type="number" v-model="form.weight" placeholder="Example: 81" class="input" />
             </div>
             <div>
               <label class="block">Name of Attending Provider:</label>
-              <input type="text" v-model="form.providerName" class="input"></input>
+              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Uy Hospital" class="input"></input>
             </div> 
             <div>
               <label class="block">Name of Spouse:</label>
-              <input type="text" v-model="form.nameOfSpouse" class="input"></input>
+              <input type="text" v-model="form.nameOfSpouse" placeholder="Example: Pedro Penduko"class="input"></input>
               <span v-if="errors.nameOfSpouse" class="text-red-600 text-sm">{{ errors.nameofSpouse }}</span>
             </div> 
           <!-- Emergency Contact Number -->
@@ -122,6 +145,7 @@
             <div>
               <label class="block">4ps?:</label>
               <select v-model="form.fourMember" class="input" required>
+                <option value="" disabled selected>Select Yes or No</option>
                 <option>Yes</option>
                 <option>No</option>
               </select>
@@ -134,6 +158,7 @@
               class="input border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
               required
             >
+            <option value="" disabled selected>Select Philhealth Status</option>
               <option value="Member">Member</option>
               <option value="Dependent">Dependent</option>
             </select>
@@ -297,6 +322,8 @@
           <div>
             <label class="block">Syphilis Test Result:</label>
             <select v-model="form.syphilisResult" class="input" required>
+              <!-- Placeholder option for selecting suffix -->
+              <option value="" disabled selected>Select a Result</option>
               <option value="Negative">Negative</option>
               <option value="Positive">Positive</option>
             </select>
@@ -306,6 +333,8 @@
           <div>
             <label class="block">Penicillin Given:</label>
             <select v-model="form.penicillin" class="input" required>
+              <!-- Placeholder option for selecting suffix -->
+              <option value="" disabled selected>Is it already given?</option>
               <option value="Yes">Yes</option>
               <option value="No">No</option>
             </select>
@@ -416,9 +445,6 @@ export default {
         urinalysis: '',
         ttStatus: '',
         tdDate: '',
-      },
-      form: {
-        emergencyContact: '', // Default value for emergency contact
       },
       errors: {
         emergencyContact: '',
