@@ -147,7 +147,7 @@
               <select v-model="form.fourMember" class="input" required>
                 <option value="" disabled selected>Select Yes or No</option>
                 <option>Yes</option>
-                <option>Noo</option>
+                <option>No</option>
               </select>
             </div>
             <div class="form-group">
