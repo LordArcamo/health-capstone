@@ -6,7 +6,7 @@ import { Inertia } from '@inertiajs/inertia';
 
 // Function to handle form submission
 function submitForm(form) {
-  console.log('Submitting from parent:', form);
+  console.log('Submitting from parent:', form); // Log the form data for debugging
 
   // Post the form data to the backend using Inertia
   return Inertia.post('/itr/store', form, {
@@ -22,8 +22,9 @@ function submitForm(form) {
 
 <template>
   <Head title="Individual Treatment Record Up" />
+
   <NewLayout>
-    <!-- Listen to the submitForm event from the child component -->
-    <ITRForm @submitForm="submitForm" />
+    <!-- Pass the submitForm function as a prop to the child component -->
+    <ITR @submitForm="submitForm" /> 
   </NewLayout>
 </template>

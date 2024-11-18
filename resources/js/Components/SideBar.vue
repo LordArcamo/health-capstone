@@ -40,7 +40,7 @@ const togglePatientsDropdown = () => {
       <!-- Navigation -->
       <nav class="flex flex-col space-y-2">
         <Link href="/dashboard" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-gray-100': $page.component === 'Dashboard' }">
+          :class="{ 'bg-green-100': $page.component === 'Dashboard' }">
           <font-awesome-icon :icon="['fas', 'home']" class="mr-3" /> Dashboard
         </Link>
 
@@ -57,32 +57,32 @@ const togglePatientsDropdown = () => {
           <!-- Collapsible Links -->
           <div v-if="patientsDropdownOpen" class="pl-3 space-y-2">
             <Link href="/patients/itrtable" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
-              :class="{ 'bg-gray-100': $page.component === 'IndividualTreatmentRecord' }">
+              :class="{ 'bg-green-100': $page.component === 'IndividualTreatmentRecord' }">
               <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> ITR
             </Link>
             <Link href="/patients/prenatal-postpartum" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
-              :class="{ 'bg-gray-100': $page.component === 'PrenatalPostpartum' }">
+              :class="{ 'bg-green-100': $page.component === 'PrenatalPostpartum' }">
               <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-3" /> Prenatal/Postpartum
             </Link>
             <Link href="/patients/epi-records" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
-              :class="{ 'bg-gray-100': $page.component === 'EPIRecords' }">
+              :class="{ 'bg-green-100': $page.component === 'EPIRecords' }">
               <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> EPI Records
             </Link>
           </div>
         </div>
 
         <Link href="/checkup" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-gray-100': $page.component === 'Checkup' }">
+          :class="{ 'bg-green-100': $page.component === 'Checkup' }">
           <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-3" /> Checkup
         </Link>
 
         <Link href="/record-cases" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-gray-100': $page.component === 'Record-Cases' }">
+          :class="{ 'bg-green-100': $page.component === 'Record-Cases' }">
           <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> Record Cases
         </Link>
 
         <Link href="/mortality" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-gray-100': $page.component === 'Mortality' }">
+          :class="{ 'bg-green-100': $page.component === 'Mortality' }">
           <font-awesome-icon :icon="['fas', 'user']" class="mr-3" /> Mortality
         </Link>
       </nav>

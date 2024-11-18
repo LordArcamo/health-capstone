@@ -4,43 +4,66 @@
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Prenatal & Postnatal Checkup</h2>
 
       <form @submit.prevent="submitForm">
-        <!-- Step 1: Patient Information -->
-        <div v-if="step === 1">
+   <!-- Step 1: Patient Information -->
+   <div v-if="step === 1">
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" class="input" required />
+              <input type="text" v-model="form.firstName" class="input" placeholder="Example: Juan" required />
+              <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName }}</span>
             </div>
             <div>
               <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName " class="input"required/>
+              <input type="text" v-model="form.lastName" class="input" placeholder="Example: Dela Cruz" required />
+              <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName }}</span>
             </div>
             <div>
               <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName " class="input" required/>
+              <input type="text" v-model="form.middleName" class="input" placeholder="Example: Penduko" required />
+              <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
             </div>
             <div>
+              <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix:</label>
+              <select v-model="form.suffix" class="input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" >
+                <!-- Placeholder option for selecting suffix -->
+                <option value="" disabled selected>Select a Suffix</option>
+
+                <option value="None">None</option>
+                <option value="Jr.">Jr.</option>
+                <option value="Sr.">Sr.</option>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+                <option value="V">V</option>
+              </select>
+
+              <!-- Error message if no suffix is selected -->
+              <span v-if="errors.suffix" class="text-red-600 text-sm">{{ errors.suffix }}</span>
+            </div>
+
+            <div>
               <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" required />
+              <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
+              <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
             <div>
               <label class="block">Barangay:</label>
-              <input type="text" v-model="form.barangay" class="input" required />
+              <input type="text" v-model="form.barangay" class="input" placeholder="Example: Gimangpang" required />
+              <span v-if="errors.barangay" class="text-red-600 text-sm">{{ errors.barangay }}</span>
             </div>
             <div>
-              <label class="block">Age</label>
+              <label class="block">Age:</label>
               <input type="number" v-model="computedAge" class="input" readonly />
             </div>
-          </div>
-          <div>
+            <div>
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" class="input" required />
+              <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
-            <div>
-              <label class="block">Contact Number:</label>
-              <input type="text" v-model="form.contact " class="input"required/>
-            </div>
+  
+          </div>
           <div class="mt-6 flex justify-center text-right">
             <button @click="nextStep" class="btn">Next</button>
           </div>
@@ -53,18 +76,23 @@
             <div>
               <label class="block">Mode of Transaction:</label>
               <select v-model="form.modeOfTransaction" class="input" required>
+                <!-- Placeholder option for selecting suffix -->
+                <option value="" disabled selected>Select a Mode of Transaction</option>
                 <option>Walk-in</option>
                 <option>Visited</option>
                 <option>Referral</option>
               </select>
+              <span v-if="errors.modeOfTransaction" class="text-red-600 text-sm">{{ errors.modeOfTransaction }}</span>
             </div>
             <div>
               <label class="block">Date of Consultation:</label>
               <input type="date" v-model="form.consultationDate" class="input" required />
+              <span v-if="errors.consultationDate" class="text-red-600 text-sm">{{ errors.consultationDate }}</span>
             </div>
             <div>
               <label class="block">Consultation Time:</label>
               <input type="time" v-model="form.consultationTime" class="input" required />
+              <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
             </div>
             <!-- <div>
               <label class="block">Referred From</label>
@@ -72,35 +100,52 @@
             </div>-->
             <div>
               <label class="block">Blood Pressure:</label>
-              <input type="text" v-model="form.bloodPressure" class="input" />
+              <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80" class="input" />
             </div>
             <div>
               <label class="block">Temperature (°C):</label>
-              <input type="number" v-model="form.temperature" step="0.1" class="input" />
+              <input type="number" v-model="form.temperature" placeholder="Example: 37.5°C" step="0.1" class="input" />
             </div>
             <div>
               <label class="block">Height (cm):</label>
-              <input type="number" v-model="form.height" class="input" />
+              <input type="number" v-model="form.height" placeholder="Example: 180" class="input" />
             </div>
             <div>
               <label class="block">Weight (kg):</label>
-              <input type="number" v-model="form.weight" class="input" />
+              <input type="number" v-model="form.weight" placeholder="Example: 81" class="input" />
             </div>
             <div>
               <label class="block">Name of Attending Provider:</label>
-              <input type="text" v-model="form.providerName" class="input"></input>
+              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Uy Hospital" class="input"></input>
             </div> 
             <div>
               <label class="block">Name of Spouse:</label>
-              <input type="text" v-model="form.nameOfSpouse" class="input"></input>
+              <input type="text" v-model="form.nameOfSpouse" placeholder="Example: Pedro Penduko"class="input"></input>
+              <span v-if="errors.nameOfSpouse" class="text-red-600 text-sm">{{ errors.nameofSpouse }}</span>
             </div> 
+          <!-- Emergency Contact Number -->
             <div>
-              <label class="block">Emergency Contact Number:</label>
-              <input type="text" v-model="form.emergencyContact" class="input"></input>
-            </div> 
+              <label class="block mb-1 font-medium text-gray-700">Emergency Contact Number:</label>
+              <div class="relative">
+                <input
+                  type="tel"
+                  v-model="form.emergencyContact"
+                  @input="formatEmergencyContact"
+                  class="pl-14 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full"
+                  placeholder="Enter 10 digits"
+                  required
+                />
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
+                  +63
+                </span>
+              </div>
+              <span v-if="errors.emergencyContact" class="text-red-600 text-sm">{{ errors.emergencyContact }}</span>
+            </div>
+
             <div>
               <label class="block">4ps?:</label>
               <select v-model="form.fourMember" class="input" required>
+                <option value="" disabled selected>Select Yes or No</option>
                 <option>Yes</option>
                 <option>No</option>
               </select>
@@ -113,6 +158,7 @@
               class="input border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
               required
             >
+            <option value="" disabled selected>Select Philhealth Status</option>
               <option value="Member">Member</option>
               <option value="Dependent">Dependent</option>
             </select>
@@ -146,26 +192,31 @@
       <div>
         <label class="block">Menarche:</label>
         <input type="text" v-model="form.menarche" class="input" placeholder="Enter age at menarche" required />
+        <span v-if="errors.menarche" class="text-red-600 text-sm">{{ errors.menarche }}</span>
       </div>
 
       <div>
         <label class="block">Onset of Sexual Intercourse:</label>
         <input type="text" v-model="form.sexualOnset" class="input" placeholder="Enter age" />
+        <span v-if="errors.sexualOnset" class="text-red-600 text-sm">{{ errors.sexualOnset }}</span>
       </div>
 
       <div>
         <label class="block">Period/Duration:</label>
         <input type="text" v-model="form.periodDuration" class="input" placeholder="e.g., 5-7 days" required />
+        <span v-if="errors.periodDuration" class="text-red-600 text-sm">{{ errors.periodDuration }}</span>
       </div>
 
       <div>
         <label class="block">Birth Control Method:</label>
         <input type="text" v-model="form.birthControl" class="input" placeholder="Enter method" />
+        <span v-if="errors.birthControl" class="text-red-600 text-sm">{{ errors.birthControl }}</span>
       </div>
 
       <div>
         <label class="block">Interval/Cycle:</label>
         <input type="text" v-model="form.intervalCycle" class="input" placeholder="e.g., 28 days" required />
+        <span v-if="errors.intervalCycle" class="text-red-600 text-sm">{{ errors.intervalCycle }}</span>
       </div>
 
       <div>
@@ -174,16 +225,19 @@
           <option value="Yes">Yes</option>
           <option value="No">No</option>
         </select>
+        <span v-if="errors.menopause" class="text-red-600 text-sm">{{ errors.menopause }}</span>
       </div>
 
       <div>
         <label class="block">LMP (Last Menstrual Period):</label>
         <input type="date" v-model="form.lmp" class="input" required />
+        <span v-if="errors.lmp" class="text-red-600 text-sm">{{ errors.lmp }}</span>
       </div>
 
       <div>
         <label class="block">EDC (Estimated Date of Confinement):</label>
         <input type="date"  v-model="form.edc"class="input" required />
+        <span v-if="errors.edc" class="text-red-600 text-sm">{{ errors.edc }}</span>
       </div>
     </div>
 
@@ -231,21 +285,25 @@
           <div>
             <label class="block">Gravidity:</label>
             <input type="text" v-model="form.gravidity" class="input" required />
+            <span v-if="errors.gravidity" class="text-red-600 text-sm">{{ errors.gravidity }}</span>
           </div>
 
           <div>
             <label class="block">Parity:</label>
             <input type="text" v-model="form.parity" class="input" required />
+            <span v-if="errors.parity" class="text-red-600 text-sm">{{ errors.parity }}</span>
           </div>
 
           <div>
             <label class="block">Term:</label>
             <input type="text" v-model="form.term" class="input" />
+            <span v-if="errors.term" class="text-red-600 text-sm">{{ errors.term }}</span>
           </div>
 
           <div>
             <label class="block">Preterm:</label>
             <input type="text" v-model="form.preterm" class="input" />
+            <span v-if="errors.preterm" class="text-red-600 text-sm">{{ errors.preterm }}</span>
           </div>
 
           <div>
@@ -256,6 +314,7 @@
           <div>
             <label class="block">Living:</label>
             <input type="text" v-model="form.living" class="input" />
+            <span v-if="errors.living" class="text-red-600 text-sm">{{ errors.living }}</span>
           </div>
         </div>
 
@@ -263,17 +322,23 @@
           <div>
             <label class="block">Syphilis Test Result:</label>
             <select v-model="form.syphilisResult" class="input" required>
+              <!-- Placeholder option for selecting suffix -->
+              <option value="" disabled selected>Select a Result</option>
               <option value="Negative">Negative</option>
               <option value="Positive">Positive</option>
             </select>
+            <span v-if="errors.syphilisResult" class="text-red-600 text-sm">{{ errors.syphilisResult }}</span>
           </div>
 
           <div>
             <label class="block">Penicillin Given:</label>
             <select v-model="form.penicillin" class="input" required>
+              <!-- Placeholder option for selecting suffix -->
+              <option value="" disabled selected>Is it already given?</option>
               <option value="Yes">Yes</option>
               <option value="No">No</option>
             </select>
+            <span v-if="errors.penicillin" class="text-red-600 text-sm">{{ errors.penicillin }}</span>
           </div>
           
     </div>
@@ -289,28 +354,31 @@
       <div>
         <label class="block">Hemoglobin (gm/100ml):</label>
         <input type="number" v-model="form.hemoglobin" step="0.1" class="input" required />
+        <span v-if="errors.hemoglobin" class="text-red-600 text-sm">{{ errors.hemoglobin }}</span>
       </div>
 
       <div>
         <label class="block">Hematocrit (vol %):</label>
         <input type="number" v-model="form.hematocrit" step="0.1" class="input" required />
+        <span v-if="errors.hematocrit" class="text-red-600 text-sm">{{ errors.hematocrit }}</span>
       </div>
 
       <div>
         <label class="block">Urinalysis:</label>
         <input type="text" v-model="form.urinalysis" class="input" />
+        <span v-if="errors.urinalysis" class="text-red-600 text-sm">{{ errors.urinalysis }}</span>
       </div>
       <div>
         <label class="block">TT Status:</label>
         <input type="text" v-model="form.ttStatus" class="input" />
+        <span v-if="errors.ttStatus" class="text-red-600 text-sm">{{ errors.ttStatus }}</span>
       </div>
     </div>
-
-   
 
       <div>
         <label class="block">TD (Date Given):</label>
         <input type="date"v-model="form.tdDate" class="input" />
+        <span v-if="errors.tdDate" class="text-red-600 text-sm">{{ errors.tdDate }}</span>
       </div>
    
     <div class="mt-6 flex justify-between">
@@ -343,7 +411,6 @@ export default {
         barangay: '',
         age: '',
         birthdate: '',
-        contact: '',
         modeOfTransaction: '',
         consultationDate: '',
         consultationTime: '',
@@ -379,37 +446,220 @@ export default {
         ttStatus: '',
         tdDate: '',
       },
+      errors: {
+        emergencyContact: '',
+      },
       successMessage: '',
     };
   },
   computed: {
     computedAge() {
-      return this.calculateAge();
+      if (!this.form.birthdate) return '';
+      const birthDate = new Date(this.form.birthdate);
+      const age = new Date().getFullYear() - birthDate.getFullYear();
+      return age;
     },
   },
   methods: {
-    calculateAge() {
-      if (!this.form.birthdate) return '';
-      const birthdate = new Date(this.form.birthdate);
-      const today = new Date();
-      let age = today.getFullYear() - birthdate.getFullYear();
-      const monthDiff = today.getMonth() - birthdate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
-        age--;
-      }
-      this.form.age = age;
-      return age;
+    handleSubmit(event) {
+      // Prevent the default form submission (which reloads the page)
+      event.preventDefault();
+
+      // Now call submitForm logic without reloading the page
+      this.submitForm();
     },
-    submitForm() {
-      console.log('Submitting form with data:', this.form);
-      alert('Form submitted');
-      this.onSubmit(this.form); // Pass form data to parent
+    validateStep1() {
+      this.errors = {};
+      let valid = true;
+
+      // Validate each field
+      if (!this.form.firstName) {
+        this.errors.firstName = 'First name is required.';
+        valid = false;
+      }
+      if (!this.form.lastName) {
+        this.errors.lastName = 'Last name is required.';
+        valid = false;
+      }
+      if (!this.form.middleName) {
+        this.errors.middleName = 'Middle name is required.';
+        valid = false;
+      }
+      if (!this.form.purok) {
+        this.errors.purok = 'Purok is required.';
+        valid = false;
+      }
+      if (!this.form.barangay) {
+        this.errors.barangay = 'Barangay is required.';
+        valid = false;
+      }
+      if (!this.form.birthdate) {
+        this.errors.birthdate = 'Birthdate is required.';
+        valid = false;
+      }
+
+      return valid;
+    },
+    validateStep2() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.modeOfTransaction) {
+        this.errors.modeOfTransaction = 'Mode of Transaction is required.';
+        valid = false;
+      }
+      if (!this.form.consultationTime) {
+        this.errors.consultationTime = 'Consultation time is required.';
+        valid = false;
+      }
+      if (!this.form.nameOfSpouse) {
+        this.errors.nameOfSpouse = 'Name of Spouse is required.';
+        valid = false;
+      }
+      if (!this.form.emergencyContact) {
+        this.errors.emergencyContact = 'Emergency Contact is required.';
+        valid = false;
+      }
+      return valid;
+    },
+    validateStep3() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.menarche) {
+        this.errors.menarche = 'Menarche is required.';
+        valid = false;
+      }
+      if (!this.form.sexualOnset) {
+        this.errors.sexualOnset = 'Sexual Onset of visit is required.';
+        valid = false;
+      }
+      if (!this.form.periodDuration) {
+        this.errors.periodDuration = 'Period Duration is required.';
+        valid = false;
+      }
+      if (!this.form.birthControl) {
+        this.errors.birthControl = 'Birth Control is required.';
+        valid = false;
+      }
+      if (!this.form.intervalCycle) {
+        this.errors.intervalCycle = 'Interval Cycle is required.';
+        valid = false;
+      }
+      if (!this.form.menopause) {
+        this.errors.menopause = 'Menopause is required.';
+        valid = false;
+      }
+      if (!this.form.lmp) {
+        this.errors.lmp = 'LMP is required.';
+        valid = false;
+      }
+      if (!this.form.edc) {
+        this.errors.edc = 'EDC is required.';
+        valid = false;
+      }
+      return valid;
+    },
+    validateStep4() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.gravidity) {
+        this.errors.gravidity = 'Gravidity is required.';
+        valid = false;
+      }
+      if (!this.form.parity) {
+        this.errors.parity = 'Parity is required.';
+        valid = false;
+      }
+      if (!this.form.term) {
+        this.errors.term = 'Term is required.';
+        valid = false;
+      }
+      if (!this.form.preterm) {
+        this.errors.preterm = 'Pre-Term is required.';
+        valid = false;
+      }
+      if (!this.form.living) {
+        this.errors.living = 'Living is required.';
+        valid = false;
+      }
+      if (!this.form.syphilisResult) {
+        this.errors.syphilisResult = 'Syphilis Result is required.';
+        valid = false;
+      }
+      if (!this.form.penicillin) {
+        this.errors.penicillin = 'Penicillin is required.';
+        valid = false;
+      }
+      return valid;
+    },
+    validateStep5() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.hemoglobin) {
+        this.errors.hemoglobin = 'Hemoglobin is required.';
+        valid = false;
+      }
+      if (!this.form.hematocrit) {
+        this.errors.hematocrit = 'Hematocrit is required.';
+        valid = false;
+      }
+      if (!this.form.urinalysis) {
+        this.errors.urinalysis = 'Urinalysis is required.';
+        valid = false;
+      }
+      if (!this.form.ttStatus) {
+        this.errors.ttStatus = 'TT Status is required.';
+        valid = false;
+      }
+      if (!this.form.tdDate) {
+        this.errors.tdDate = 'TD Date is required.';
+        valid = false;
+      }
+      return valid;
     },
     nextStep() {
-      if (this.step < 5) this.step++;
+      if (this.step === 1 && this.validateStep1()) {
+        this.step++;
+      } else if (this.step === 2 && this.validateStep2()) {
+        this.step++;
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.step++;
+      }  else if (this.step === 4 && this.validateStep4()) {
+        this.step++;
+      } else if (this.step === 5 && this.validateStep5()) {
+        this.submitForm();
+      } 
+      
     },
     prevStep() {
-      if (this.step > 1) this.step--;
+      this.step--;
+    },
+    formatEmergencyContact() {
+      // Keep only numeric characters, limit to 10 digits
+      this.form.emergencyContact = this.form.emergencyContact.replace(/[^0-9]/g, '').slice(0, 10);
+    },
+    submitForm() {
+      // Check if all steps are valid
+      if (this.validateStep1() && this.validateStep2() && this.validateStep3() && this.validateStep4() && this.validateStep5()) {
+        // Prepare the form data for submission
+        const formData = { ...this.form };
+
+        // Emit the form data to the parent component via the onSubmit prop
+        this.$emit('submitForm', formData);
+
+        // Display a success message (optional, as the parent may handle success messages)
+        this.successMessage = 'Form submitted successfully!';
+
+        // Don't reset the form, keeping the entered values
+        // Optional: Reset errors if needed
+        this.errors = {};
+      } else {
+        // Handle the error case if validation fails (e.g., show a general error message)
+        this.successMessage = 'Please complete all required fields before submitting.';
+      }
     },
   },
 };
