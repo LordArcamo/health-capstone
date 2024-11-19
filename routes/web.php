@@ -5,6 +5,7 @@ use App\Http\Controllers\CheckUpController;
 use App\Http\Controllers\NationalImmunizationProgramController;
 use App\Http\Controllers\PreNatalController;
 use Illuminate\Foundation\Application;
+use App\Models\PersonalInformation;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PatientController;
@@ -70,9 +71,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 Route::get('/checkup', function () {
-    return Inertia::render('Checkup');
+    // Retrieve all patients from the database
+    $patients = PersonalInformation::all();
+
+    // Pass patients to the Inertia page
+    return Inertia::render('Checkup', [
+        'patients' => $patients, // Pass the patients data
+    ]);
 })->middleware(['auth', 'verified'])->name('checkup');
 
+Route::get('/patients/{personalId}', [PatientController::class, 'show'])->name('patients.show');
 
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');
