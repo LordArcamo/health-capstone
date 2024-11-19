@@ -15,44 +15,48 @@
           <input
             type="text"
             v-model="searchQuery"
-            placeholder="Enter patient Lastname or ID"
+            @input="debouncedSearchPatients"
+            placeholder="Enter patient Firstname, Lastname, or ID"
             class="border p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-200"
           />
-          <!-- Search Button -->
-          <button 
-            @click="searchPatients"
-            class="bg-green-600 text-white font-semibold py-3 px-6 rounded shadow hover:bg-green-700 transition-colors duration-300"
-          >
-            Search
-          </button>
-        </div>
-        
-        <!-- Search Results -->
-        <div class="border rounded p-4 max-h-40 overflow-y-auto mb-4">
-          <ul v-if="patients.length">
-            <li 
-              v-for="patient in patients" 
-              :key="patient.personalId"
-              @click="selectPatient(patient)"
-              class="p-3 cursor-pointer hover:bg-gray-200 rounded transition duration-200"
-            >
-              {{ patient.personalId }} - {{ patient.firstName }} {{ patient.lastName }}
-            </li>
-          </ul>
-          <p v-else-if="searchQuery && !patients.length" class="text-sm text-gray-500">No patients found.</p>
         </div>
 
-        <!-- Button to Add New Patient -->
-        <div class="flex flex-col center" v-if="!patients.length && searchQuery">
-          <p class="text-gray-700 mb-4 text-lg">Patient not found. You can add them:</p>
-          <div class="flex items-center">
-            <button 
-              @click="addNewPatient" 
-              class="bg-green-600 text-white font-semibold py-3 px-6 rounded shadow hover:bg-blue-700 transition-colors duration-300"
+        <!-- Search Results -->
+        <div class="border rounded p-4 max-h-40 overflow-y-auto mb-4 bg-white shadow-md">
+          <ul v-if="filteredPatients.length">
+            <li
+              v-for="patient in filteredPatients"
+              :key="patient.personalId"
+              @click="selectPatient(patient)"
+              class="p-3 cursor-pointer flex justify-between items-center hover:bg-gray-100 rounded transition duration-200"
             >
-              Add New Patient
-            </button>
-          </div>
+              <div>
+                <p class="font-medium text-gray-800">
+                  {{ patient.firstName }} {{ patient.lastName }}
+                </p>
+                <p class="text-sm text-gray-500">ID: {{ patient.personalId }}</p>
+                <p class="text-sm text-gray-500" v-if="patient.email">Email: {{ patient.email }}</p>
+              </div>
+              <span class="text-green-500 font-bold">➔</span>
+            </li>
+          </ul>
+          <p v-else-if="searchQuery" class="text-center text-sm text-gray-500">
+            No patients found for "{{ searchQuery }}".
+          </p>
+          <p v-else class="text-center text-sm text-gray-400">
+            Start typing to search for a patient.
+          </p>
+        </div>
+
+        <!-- Add New Patient -->
+        <div v-if="!filteredPatients.length && searchQuery">
+          <p class="text-gray-700 mb-4 text-lg">Patient not found. You can add them:</p>
+          <button
+            @click="addNewPatient"
+            class="bg-green-600 text-white font-semibold py-3 px-6 rounded shadow hover:bg-green-700 transition-colors duration-300"
+          >
+            Add New Patient
+          </button>
         </div>
       </div>
 
@@ -60,22 +64,21 @@
       <div v-if="step === 2">
         <p class="text-gray-700 mb-6 text-lg">What type of Check-Up do we have today?</p>
         <div class="flex justify-center space-x-4 mb-4">
-          <Link 
+          <Link
             :href="route('itr', { patient_personalId: selectedPatient.personalId })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             Individual Treatment Record
           </Link>
 
-          <!-- Trigger the Modal -->
-          <button 
+          <button
             @click="showModal = true"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             Prenatal & Postpartum Checkup
           </button>
 
-          <Link 
+          <Link
             :href="route('nationalimmunizationprogram', { patient_personalId: selectedPatient.personalId })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
@@ -84,47 +87,34 @@
         </div>
       </div>
 
-      <!-- Proceed Button for Step 1 -->
+      <!-- Proceed Button -->
       <div v-if="step === 1 && selectedPatient" class="mt-6">
-        <button 
-          @click="step = 2" 
+        <button
+          @click="step = 2"
           class="bg-green-500 text-white font-semibold py-3 px-6 rounded shadow hover:bg-green-600 transition-colors duration-300"
         >
           Proceed to Check-Up
         </button>
       </div>
 
-      <!-- Back to Checkup Page -->
-      <div class="mt-6">
-        <button 
-          @click="goBackToCheckup"
-          class="text-gray-600 hover:underline text-lg"
-        >
-          Back to Checkup Page
-        </button>
-      </div>
-
-      <!-- Prenatal and Postpartum Modal Content -->
+      <!-- Modal -->
       <div v-if="showModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex justify-center items-center">
         <div class="bg-white rounded-lg shadow-lg py-8 px-6 text-center max-w-md w-full relative">
-          <button 
-            @click="showModal = false" 
+          <button
+            @click="showModal = false"
             class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-lg"
           >
             &times;
           </button>
           <h2 class="text-3xl font-bold mb-6">Select Checkup Type</h2>
-          <p class="text-gray-700 mb-6 text-lg">Please select the type of checkup for this patient:</p>
-          
           <div class="flex flex-col space-y-4">
-            <Link 
+            <Link
               :href="route('prenatal', { patient_id: selectedPatient.personalId })"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
             >
               Prenatal Checkup
             </Link>
-            
-            <Link 
+            <Link
               :href="route('postpartum', { patient_id: selectedPatient.personalId })"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
             >
@@ -139,33 +129,66 @@
 
 <script>
 import { Link } from '@inertiajs/vue3';
-import { Inertia } from '@inertiajs/inertia';
+import { debounce } from 'lodash';
 
 export default {
   components: { Link },
+  props: {
+    patients: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       step: 1,
       searchQuery: '',
-      patients: [],
       selectedPatient: null,
       showModal: false,
+      filteredPatients: [],
     };
   },
+    watch: {
+    patients: {
+      immediate: true,
+      handler(newPatients) {
+        console.log('Received patients:', newPatients);
+        // Only set the filteredPatients if there's a search query
+        if (this.searchQuery.trim() === '') {
+          this.filteredPatients = []; // Clear patients if search query is empty
+        } else {
+          this.filteredPatients = [...newPatients]; // Otherwise show all patients
+        }
+      },
+    },
+  },
   methods: {
+    debouncedSearchPatients: debounce(function () {
+      this.searchPatients();
+    }, 100),
     searchPatients() {
-      if (this.searchQuery.trim() === '') {
-        this.patients = []; // Clear results if input is empty
-        return;
+      const query = this.searchQuery.trim().toLowerCase();
+      console.log('Search Query:', query);
+
+      // If search query is empty, clear the filtered list
+      if (query === '') {
+        this.filteredPatients = [];
+      } else {
+        // Filter patients only when there's a search query
+        this.filteredPatients = this.patients.filter(patient => {
+          const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+          return (
+            fullName.includes(query) ||
+            patient.firstName.toLowerCase().includes(query) ||
+            patient.lastName.toLowerCase().includes(query) ||
+            patient.personalId.toString().includes(query)
+          );
+        });
       }
 
-      Inertia.get(route('patients.search'), { query: this.searchQuery }, {
-        preserveState: true,
-        onSuccess: (page) => {
-          this.patients = page.props.patients;
-        },
-      });
-    },
+    console.log('Filtered Patients:', this.filteredPatients);
+  },
+
     selectPatient(patient) {
       this.selectedPatient = patient;
       this.step = 2;
@@ -174,9 +197,7 @@ export default {
       this.selectedPatient = { personalId: 'new', lastName: this.searchQuery };
       this.step = 2;
     },
-    goBackToCheckup() {
-      Inertia.visit(route('checkup'));
-    },
   },
 };
 </script>
+
