@@ -9,18 +9,20 @@ use Inertia\Inertia;
 class PatientController extends Controller
 {
     public function search(Request $request)
-    {
-        // Get the query from the request
-        $query = $request->input('query');
+        {
+            $query = $request->input('query');
+            
+            $patients = PersonalInformation::where('lastName', 'like', "%$query%")
+                ->orWhere('personalId', 'like', "%$query%")
+                ->get(['personalId', 'firstName', 'lastName']);
 
-        // Fetch patients from the database based on the search query
-        $patients = PersonalInformation::where('lastName', 'like', "%$query%")
-            ->orWhere('personalId', 'like', "%$query%")
-            ->get(['personalId', 'firstName', 'lastName']); // Only select personalId, firstName, and lastName
+            // Log fetched data for debugging
+            \Log::info('Fetched patients:', $patients->toArray());
 
-        // Return patients data via Inertia
-        return Inertia::render('Checkup', [
-            'patients' => $patients, // Return the filtered patients
-        ]);
-    }
+            // Return the data via Inertia
+            return Inertia::render('Checkup', [
+                'patients' => $patients, // Ensure the patients are passed here correctly
+            ]);
+        }
+
 }

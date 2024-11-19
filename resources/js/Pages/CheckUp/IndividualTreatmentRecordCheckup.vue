@@ -25,6 +25,6 @@ function submitForm(form) {
 
   <NewLayout>
     <!-- Pass the submitForm function as a prop to the child component -->
-    <ITR @submitForm="submitForm" /> 
+    <ITRForm @submitForm="submitForm" /> 
   </NewLayout>
 </template>

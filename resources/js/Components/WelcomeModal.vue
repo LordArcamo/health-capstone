@@ -29,7 +29,7 @@
         
         <!-- Search Results -->
         <div class="border rounded p-4 max-h-40 overflow-y-auto mb-4">
-          <ul v-if="patients.length">
+          <ul v-if="patients.length > 0">
             <li 
               v-for="patient in patients" 
               :key="patient.personalId"
@@ -39,7 +39,9 @@
               {{ patient.personalId }} - {{ patient.firstName }} {{ patient.lastName }}
             </li>
           </ul>
-          <p v-else-if="searchQuery && !patients.length" class="text-sm text-gray-500">No patients found.</p>
+          <p v-else-if="searchQuery.trim() && patients.length === 0" class="text-sm text-gray-500">
+            No patients found.
+          </p>
         </div>
 
         <!-- Button to Add New Patient -->
@@ -154,6 +156,7 @@ export default {
   },
   methods: {
     searchPatients() {
+      console.log('searchPatients method called'); // Debugging line to ensure the method is triggered
       if (this.searchQuery.trim() === '') {
         this.patients = []; // Clear results if input is empty
         return;
@@ -162,10 +165,18 @@ export default {
       Inertia.get(route('patients.search'), { query: this.searchQuery }, {
         preserveState: true,
         onSuccess: (page) => {
-          this.patients = page.props.patients;
+          console.log('Full Inertia page response:', page);  // Log full response
+          console.log('Fetched patients:', page.props.patients); // Log patients data
+          this.patients = page.props.patients || [];  // Set patients
+        },
+        onError: (errors) => {
+          console.error('Error fetching patients:', errors);  // Log any errors
+          this.patients = [];
         },
       });
+
     },
+
     selectPatient(patient) {
       this.selectedPatient = patient;
       this.step = 2;

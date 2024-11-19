@@ -242,14 +242,20 @@ export default {
       successMessage: '',
     };
   },
-  computed: {
-    // This computed property will automatically calculate the age based on the birthdate
-    computedAge() {
-      if (!this.form.birthdate) return '';
-      const birthDate = new Date(this.form.birthdate);
-      const age = new Date().getFullYear() - birthDate.getFullYear();
-      return age;
+    computed: {
+      // This computed property will automatically calculate the age based on the birthdate
+      computedAge() {
+        if (!this.form.birthdate) return '';
+        const birthDate = new Date(this.form.birthdate);
+        const age = new Date().getFullYear() - birthDate.getFullYear();
+        return age;
+      },
     },
+    watch: {
+      // Watch for changes in birthdate and update the age field
+      'form.birthdate': function () {
+        this.form.age = this.computedAge; // Automatically update age when birthdate changes
+      },
     isFormValid() {
       return this.form.contact.length === 10 && this.form.emergencyContact.length === 10;
     },
@@ -342,26 +348,60 @@ export default {
       this.step--;
     },
     formatContact() {
-      // Remove non-numeric characters and limit to 10 digits
-      this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
+      // Ensure the input starts with "09", remove non-numeric characters, and limit to 10 digits
+      if (!this.form.contact.startsWith('0')) {
+        this.form.contact = '0' + this.form.contact.replace(/[^0-9]/g, '');
+      } else {
+        this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
+      }
+
+      // Limit to exactly 10 digits
+      if (this.form.contact.length > 10) {
+        this.form.contact = this.form.contact.slice(0, 10);
+      }
     },
     submitForm() {
-      // Check if all steps are valid
+      // Check if all steps are valid before submitting
       if (this.validateStep1() && this.validateStep2() && this.validateStep3()) {
-        // Prepare the form data for submission
-        const formData = { ...this.form };
+        console.log('Submitting form with data:', this.form);
 
         // Emit the form data to the parent component via the onSubmit prop
-        this.$emit('submitForm', formData);
+        this.$emit('submitForm', this.form);
 
-        // Display a success message (optional, as the parent may handle success messages)
+        // Optional: Display a success message or alert
+        alert('Form submitted');
         this.successMessage = 'Form submitted successfully!';
 
-        // Don't reset the form, keeping the entered values
-        // Optional: Reset errors if needed
+        // Reset the form fields to their initial state
+        this.form = {
+          firstName: '',
+          lastName: '',
+          middleName: '',
+          suffix: '',
+          purok: '',
+          barangay: '',
+          age: '',
+          birthdate: '',
+          contact: '',
+          sex: '',
+          consultationDate: '',
+          consultationTime: '',
+          modeOfTransaction: '',
+          bloodPressure: '',
+          temperature: '',
+          height: '',
+          weight: '',
+          providerName: '',
+          natureOfVisit: '',
+          visitType: '',
+          chiefComplaints: '',
+          diagnosis: '',
+          medication: ''
+        };
+
+        // Reset errors
         this.errors = {};
       } else {
-        // Handle the error case if validation fails (e.g., show a general error message)
         this.successMessage = 'Please complete all required fields before submitting.';
       }
     },
