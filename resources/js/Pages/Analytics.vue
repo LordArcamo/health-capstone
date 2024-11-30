@@ -6,13 +6,13 @@ import { Head } from '@inertiajs/vue3';
 
 
 <template>
-    <Head title="Record Cases" />
+    <Head title="System Analytics" />
 
     <NewLayout>
 
         <div class="mt-4 mx-4">
             <div class="flex justify-between">
-                <h5>Record Cases</h5>
+                <h5>System Analytics</h5>
 
             </div>
         </div>

@@ -1,135 +1,166 @@
 <template>
-   <div class="min-h-screen flex flex-col justify-center items-center bg-gray-100">
-    <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
-    <h2 class="text-2xl font-bold mb-6 text-center">Postpartum Form </h2>
+    <div class="min-h-screen flex flex-col justify-center items-center bg-gray-100 ">
+      <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
+    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <!-- Step Navigation -->
+    <div class="flex justify-between items-center pb-4 border-b">
+      <button
+        v-for="(step, index) in steps"
+        :key="index"
+        type="button"
+        class="px-4 py-2 rounded-md text-sm font-semibold"
+        :class="{
+          'bg-blue-600 text-white': currentStep === index,
+          'bg-gray-200 text-gray-800': currentStep !== index,
+        }"
+        @click="currentStep = index"
+      >
+        {{ step.title }}
+      </button>
+    </div>
 
-    <!-- Step 1: Child Information Section -->
-    <div v-if="step === 1">
-      <h3 class="text-2xl font-bold mb-6">Child Information</h3>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div class="flex flex-col">
-          <label class="font-regular" for="middleName">First Name</label>
-          <input v-model="form.firstName" type="text" class="input-field" />
+    <!-- Dynamic Step Content -->
+    <div v-if="currentStep === 0" class="mt-6 space-y-4">
+      <h2 class="text-lg font-semibold">Prenatal Outcome</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+          <input v-model="form.last_name" type="text" id="last_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="middleName">Last Name</label>
-          <input v-model="form.lastName"  type="text" class="input-field" />
+        <div>
+          <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+          <input v-model="form.first_name" type="text" id="first_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="middleName">Middle Name</label>
-          <input v-model="form.middleName" type="text" class="input-field" />
+        <div>
+          <label for="middle_name" class="block text-sm font-medium text-gray-700">Middle Name</label>
+          <input v-model="form.middle_name" type="text" id="middle_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="sex">Gender</label>
-          <select v-model="form.sex" class="input-field" required>
-                <option>Male</option>
-                <option>Female</option>
-              </select>
+        <div>
+          <label for="sex" class="block text-sm font-medium text-gray-700">Sex (M / F)</label>
+          <select v-model="form.sex" id="sex" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+            <option value="">Select</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="birthLength">Birth Length</label>
-          <input v-model="form.birthLength" type="number" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="birthWeight">Birth Weight</label>
-          <input v-model="form.birthWeight" type="number" class="input-field" />
-        </div>
-      </div>
-      <div class="flex justify-center">
-        <button @click="nextStep" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Next</button>
       </div>
     </div>
 
-    <!-- Step 2: Remaining Information Section -->
-    <div v-if="step === 2">
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div class="flex flex-col">
-          <label class="font-regular" for="prenatalDelivered">Prenatal Delivered</label>
-          <input v-model="form.prenatalDelivered" type="text" class="input-field" />
+    <div v-if="currentStep === 1" class="mt-6 space-y-4">
+      <h2 class="text-lg font-semibold">Delivery Details</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="birth_length" class="block text-sm font-medium text-gray-700">Birth Length</label>
+          <input v-model="form.birth_length" type="number" step="0.01" id="birth_length" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="placeDelivered">Place Delivered</label>
-          <input v-model="form.placeDelivered" type="text" class="input-field" />
+        <div>
+          <label for="birth_weight" class="block text-sm font-medium text-gray-700">Birth Weight</label>
+          <input v-model="form.birth_weight" type="number" step="0.01" id="birth_weight" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="modeOfDelivery">Mode of Delivery</label>
-          <input v-model="form.modeOfDelivery" type="text" class="input-field" />
+        <div>
+          <label for="delivery_date" class="block text-sm font-medium text-gray-700">Delivery Date</label>
+          <input v-model="form.delivery_date" type="date" id="delivery_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="attendantAtBirth">Attendant at Birth</label>
-          <input v-model="form.attendantAtBirth" type="text" class="input-field" />
+        <div>
+          <label for="delivery_time" class="block text-sm font-medium text-gray-700">Delivery Time</label>
+          <input v-model="form.delivery_time" type="time" id="delivery_time" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="deliveryDate">Delivery Date</label>
-          <input v-model="form.deliveryDate" type="date" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="deliveryTime">Delivery Time</label>
-          <input v-model="form.deliveryTime" type="time" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="dangerSignsMother">Danger Signs (Mother)</label>
-          <input v-model="form.dangerSignsMother" type="text" class="input-field" />
-        </div>
-        <div class="flex flex-col">
-          <label class="font-regular" for="dangerSignsBaby">Danger Signs (Baby)</label>
-          <input v-model="form.dangerSignsBaby" type="text" class="input-field" />
-        </div>
-      </div>
-      <div class="flex flex-row justify-between">
-        <button @click="prevStep" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">Back</button>
-        <button @click="submitForm" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit</button>
       </div>
     </div>
+
+    <div v-if="currentStep === 2" class="mt-6 space-y-4">
+      <h2 class="text-lg font-semibold">Breastfeeding</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="date_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Date Initiated Breastfeeding</label>
+          <input v-model="form.date_initiated_breastfeeding" type="date" id="date_initiated_breastfeeding" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+        <div>
+          <label for="time_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Time Initiated Breastfeeding</label>
+          <input v-model="form.time_initiated_breastfeeding" type="time" id="time_initiated_breastfeeding" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+      </div>
+    </div>
+
+    <div v-if="currentStep === 3" class="mt-6 space-y-4">
+      <h2 class="text-lg font-semibold">Postpartum Details</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="date_vitamin_a" class="block text-sm font-medium text-gray-700">Date Vitamin A Given</label>
+          <input v-model="form.date_vitamin_a" type="date" id="date_vitamin_a" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+        <div>
+          <label for="danger_signs_mother" class="block text-sm font-medium text-gray-700">Danger Signs (Mother)</label>
+          <textarea v-model="form.danger_signs_mother" id="danger_signs_mother" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center pt-4 border-t">
+      <button
+        type="button"
+        class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md"
+        :disabled="currentStep === 0"
+        @click="currentStep--"
+      >
+        Previous
+      </button>
+      <button
+        v-if="currentStep < steps.length - 1"
+        type="button"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md"
+        @click="currentStep++"
+      >
+        Next
+      </button>
+      <button
+        v-else
+        type="submit"
+        class="px-4 py-2 bg-green-600 text-white rounded-md"
+      >
+        Submit
+      </button>
+    </div>
+  </form>
   </div>
-   </div>
-
+  </div>
 </template>
 
 <script>
 export default {
-  props: ['onSubmit'],
+  props: {
+    onSubmit: Function,
+  },
   data() {
     return {
-      step: 1,
+      steps: [
+        { title: "Prenatal Outcome" },
+        { title: "Delivery Details" },
+        { title: "Breastfeeding" },
+        { title: "Postpartum Details" },
+      ],
+      currentStep: 0,
       form: {
-        lastName: '',
-        firstName: '',
-        middleName: '',
+        last_name: '',
+        first_name: '',
+        middle_name: '',
         sex: '',
-        birthLength: '',
-        birthWeight: '',
-        prenatalDelivered: '',
-        placeDelivered: '',
-        modeOfDelivery: '',
-        attendantAtBirth: '',
-        deliveryDate: '',
-        deliveryTime: '',
-        dangerSignsMother: '',
-        dangerSignsBaby: '',
-      }
+        birth_length: '',
+        birth_weight: '',
+        delivery_date: '',
+        delivery_time: '',
+        date_initiated_breastfeeding: '',
+        time_initiated_breastfeeding: '',
+        date_vitamin_a: '',
+        danger_signs_mother: '',
+      },
     };
   },
   methods: {
-    nextStep() {
-      this.step = 2;
+    handleSubmit() {
+      this.onSubmit(this.form);
     },
-    prevStep() {
-      this.step = 1;
-    },
-    submitForm() {
-      console.log('Submitting form with data:', this.form);
-      alert('Form submitted');
-      this.onSubmit(this.form); // Pass form data to parent
-    },
-  }
+  },
 };
 </script>
-
-<style scoped>
-.input-field {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-</style>

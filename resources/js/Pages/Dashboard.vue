@@ -2,90 +2,109 @@
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import Box from '@/Components/Box.vue';
-import longbox from '../Components/LongBox.vue';
-import chart from '../Components/BarChart.vue';
-import linechart from '../Components/LineChart.vue'
+import chart from '../Components/TrendingChart.vue';
+import ShortBox from '@/Components/ShortBox.vue';
+import { ref, onMounted } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import DateCard from '@/Components/DateCard.vue';
+import DiseaseCard from '@/Components/DiseaseCard.vue';
+import DonutChart from '@/Components/DonutChart.vue';
+import PatientChart from '@/Components/PatientChart.vue';
 
+// Define the props that will be passed from the backend (Laravel)
+const props = defineProps({
+     totalPatients: Number,  // Assuming 'totalPatients' is a number
+});
 
+// Reactive variable for the date
+const currentDate = ref('');
+
+// Function to update the date in the Philippine timezone
+const updateDate = () => {
+     const options = {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          timeZone: 'Asia/Manila' // Philippine timezone
+     };
+
+     // Get the current date and time in the Philippine timezone
+     const philippinesDate = new Date().toLocaleDateString('en-PH', options);
+
+     // Update the currentDate reactive variable
+     currentDate.value = philippinesDate;
+};
+
+// Update the date when the component is mounted
+onMounted(() => {
+     updateDate(); // Initial date update
+     setInterval(updateDate, 1000 * 60 * 60); // Update every hour
+});
 </script>
-
-<style>
-/* .container{
-          background-color: white;
-          padding: 20px;
-          gap: 50px;
-     }  */
-/* .patient-card{
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          padding: 50px 50px 50px 50px;
-          background-color: black;
-          border-radius: 20px;
-          color: white;
-          width: 50%;
-     }
-     .date-card{
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          padding: 50px 50px 50px 50px;
-          background-color: rgb(85, 57, 222);
-          border-radius: 20px;
-          color: white;
-          width: 50%;
-     }
-     .cases-card{
-          padding: 50px 50px 50px 50px;
-          background-color: rgb(194, 231, 241);
-          border-radius: 20px;
-          color: white;
-          width: 100%;
-     } */
-
-p {
-     display: flex;
-     gap: 10px;
-}
-</style>
 
 <template>
 
      <Head title="Dashboard" />
 
      <NewLayout>
-          <div class="overflow-y-auto">
-               <div class="container gap-4 my-10 px-10 flex flex-row">
+          <div class="overflow-y-auto w-full">
+               <div class=" w-full gap-4 my-10 px-10 flex flex-row">
 
-                    <Box >
-                         <h1 class="text-green">Total Patients</h1>
-                         <p class="text-black text-lg"><svg xmlns="http://www.w3.org/2000/svg" height="20px"
-                                   viewBox="0 0 448 512">
-                                   <path fill="#ffffff"
-                                        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
-                              </svg>100,000</p>
-                    </Box>
-                    <Box padding="p-6" bgColor="bg-blue-100" borderColor="border-blue-500" rounded="rounded-xl" shadow="shadow-lg">
-                         <h1>Date</h1>
-                         <p><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 448 512">
-                                   <path fill="#ffffff"
-                                        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
-                              </svg>100,000</p>
-                    </Box>
+
+                    <Link href="/patients/itrtable" class="block w-full cursor-pointer">
+                    <ShortBox>
+                         <div class="flex flex-col items-start gap-2">
+                              <h1 class="text-green">Total Patients</h1>
+                              <p class="text-black text-lg text-center flex items-center justify-center">
+                                   <font-awesome-icon :icon="['fas', 'user']" class="mr-3 avatar-icon" />
+                                   {{ props.totalPatients }} <!-- Display the dynamic total patients count -->
+                              </p>
+                         </div>
+                    </ShortBox>
+                    </Link>
+
+                    <DateCard />
+
+                    <ShortBox>
+                         <div class="flex flex-col items-start gap-2">
+                              <h1 class="text-green">Referred Patients</h1>
+                              <p class="text-black text-lg text-center flex items-center justify-center">
+                                   <font-awesome-icon :icon="['fas', 'user']" class="mr-3 avatar-icon" />
+                                   10
+                              </p>
+                         </div>
+                    </ShortBox>
+
+                    <DiseaseCard />
 
                </div>
+               <div class="flex w-full gap-10 p-10">
+                    <!-- Left Section (70%) -->
+                    <div class="flex-[7] bg-white p-12 rounded-lg">
+                         <PatientChart />
+                    </div>
 
-               <div class="container flex flex-col gap-10 my-10 px-10">
-                    <!-- <longbox>
+                    <!-- Right Section (30%) -->
+                    <div class="flex-[3] flex bg-white p-6 items-center rounded-lg">
+                         <!-- Add your content here -->
+                         <DonutChart/>
+                    </div>
+               </div>
+
+               <!-- Charts Section -->
+               <div class="container w-full flex flex-col gap-10 my-10 px-10">
+
+                    <Box class="p-10">
                          <chart />
-                    </longbox> -->
-
-                    <Box>
-                         <linechart />
                     </Box>
                </div>
-
-
           </div>
      </NewLayout>
 </template>
+
+<style scoped>
+/* Optional styles for better design */
+.avatar-icon {
+     font-size: 24px;
+}
+</style>

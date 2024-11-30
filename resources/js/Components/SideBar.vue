@@ -2,94 +2,32 @@
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import Logo from '@/Images/RHU Logo.png'; // Import logo
-
-// State management for sidebar and dropdown
-const sidebarOpen = ref(false);
-const patientsDropdownOpen = ref(false);
-
-// Functions to toggle state
-const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value;
-};
-
-const togglePatientsDropdown = () => {
-  patientsDropdownOpen.value = !patientsDropdownOpen.value;
-};
 </script>
 
 <template>
-  <div class="relative flex ">
-    <!-- Hamburger Menu (Mobile) -->
-    <button @click="toggleSidebar" class="p-4 block lg:hidden fixed top-0 left-0 z-50">
-      <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-      </svg>
-    </button>
-
-    <!-- Sidebar -->
+  <div class="relative flex">
+    <!-- Sidebar (Visible only on larger screens) -->
     <div
-      class="fixed top-0 left-0 h-screen w-48 bg-white text-gray-800 pt-5 px-3 transform transition-transform lg:translate-x-0 lg:block"
-      :class="{ '-translate-x-full': !sidebarOpen }"
+      class="fixed top-0 left-0 h-screen w-48 bg-white text-gray-800 pt-5 px-3 "
     >
       <!-- Logo -->
-      <div class="flex text-bold items-center justify-start mb-10">
-        <img :src="Logo" alt="RHU Logo" class="h-12 w-auto" />
-        <span class="font-bold text-lg">RHU ADMIN</span>
+      <div @click="$inertia.visit('/dashboard')" class="cursor-pointer flex text-bold items-center justify-center mb-10">
+        <img :src="Logo" alt="RHU Logo" class=" w-auto" />
+        <!-- <span class="font-bold text-lg">RHU INITAO</span> -->
       </div>
 
       <!-- Navigation -->
       <nav class="flex flex-col space-y-2">
-        <Link href="/dashboard" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-green-100': $page.component === 'Dashboard' }">
-          <font-awesome-icon :icon="['fas', 'home']" class="mr-3" /> Dashboard
+        <Link href="/profile" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
+          :class="{ 'bg-green-100': $page.component === 'Profile' }">
+          <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-3" /> Profile
         </Link>
 
-        <!-- Patients Dropdown -->
-        <div>
-          <button @click="togglePatientsDropdown" class="w-full flex justify-between py-2.5 px-4 rounded hover:bg-green-100 hover:text-black transition duration-200">
-            <div class="flex items-center">
-              <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" />
-              <span :class="{ 'font-semibold': $page.component.startsWith('Patients') }">Patients</span>
-            </div>
-            <font-awesome-icon :icon="['fas', 'chevron-right']" :class="{ 'rotate-90': patientsDropdownOpen }" class="transition-transform" />
-          </button>
-
-          <!-- Collapsible Links -->
-          <div v-if="patientsDropdownOpen" class="pl-3 space-y-2">
-            <Link href="/patients/itrtable" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
-              :class="{ 'bg-green-100': $page.component === 'IndividualTreatmentRecord' }">
-              <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> ITR
-            </Link>
-            <Link href="/patients/prenatal-postpartum" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
-              :class="{ 'bg-green-100': $page.component === 'PrenatalPostpartum' }">
-              <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-3" /> Prenatal/Postpartum
-            </Link>
-            <Link href="/patients/epi-records" class="block py-2.5 px-4 rounded hover:bg-green-100 flex items-center"
-              :class="{ 'bg-green-100': $page.component === 'EPIRecords' }">
-              <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> EPI Records
-            </Link>
-          </div>
-        </div>
-
-        <Link href="/checkup" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-green-100': $page.component === 'Checkup' }">
-          <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-3" /> Checkup
-        </Link>
-
-        <Link href="/record-cases" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-green-100': $page.component === 'Record-Cases' }">
-          <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> Record Cases
-        </Link>
-
-        <Link href="/mortality" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center"
-          :class="{ 'bg-green-100': $page.component === 'Mortality' }">
-          <font-awesome-icon :icon="['fas', 'user']" class="mr-3" /> Mortality
+        <Link :href="route('logout')" method="post" as="button" class="block py-2.5 px-4 rounded hover:bg-gray-100 flex items-center">
+          <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-3" /> Logout
         </Link>
       </nav>
     </div>
-
-    <!-- Overlay (Mobile) -->
-    <div v-if="sidebarOpen" @click="toggleSidebar" class="fixed inset-0 bg-black opacity-50 lg:hidden"></div>
 
     <!-- Main Content -->
     <div class="flex-1 p-5 lg:ml-48">
@@ -99,5 +37,11 @@ const togglePatientsDropdown = () => {
 </template>
 
 <style scoped>
-/* Optional styles */
+/* Hide sidebar on mobile devices */
+@media (max-width: 1024px) {
+  /* Completely hide the sidebar on mobile */
+  div {
+    display: none;
+  }
+}
 </style>

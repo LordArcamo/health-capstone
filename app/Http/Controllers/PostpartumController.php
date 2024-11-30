@@ -21,7 +21,7 @@ class PostpartumController extends Controller
      */
     public function create()
     {
-        return Inertia::render('PostPartumCheckup');
+        return Inertia::render('CheckUp/PostPartumCheckup');
     }
 
     /**

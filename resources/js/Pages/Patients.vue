@@ -1,29 +1,14 @@
 <template>
   <div>
-    <WelcomeModal :patients="patients" />
+    <NewLayout>
+      <PatientTabs/>
+    </NewLayout>
   </div>
 </template>
 
-<script>
-import WelcomeModal from './WelcomeModal.vue';
+<script setup>
+import PatientTabs from '@/Components/PatientTabs.vue';
 import { Inertia } from '@inertiajs/inertia';
+import NewLayout from '@/Layouts/NewLayout.vue';
 
-export default {
-  components: {
-    WelcomeModal,
-  },
-  data() {
-    return {
-      patients: [], // Initialize patients as an empty array
-    };
-  },
-  mounted() {
-    // Fetch initial patients if needed or leave empty for now
-    Inertia.get(route('patients.index'), {
-      onSuccess: (page) => {
-        this.patients = page.props.patients; // Assuming you get initial patients here
-      },
-    });
-  },
-};
 </script>

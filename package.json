@@ -27,6 +27,8 @@
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@inertiajs/progress": "^0.2.7",
         "chart.js": "^4.4.4",
+        "date-fns": "^4.1.0",
+        "flatpickr": "^4.6.13",
         "lodash": "^4.17.21",
         "primevue": "^4.0.6",
         "vue-chartjs": "^5.3.1",

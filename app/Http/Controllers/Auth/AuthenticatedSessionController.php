@@ -14,7 +14,18 @@ use Inertia\Response;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Display the home page with authentication status.
+     */
+    public function index()
+    {
+        // Passing the authentication status to the Home component
+        return Inertia::render('Home', [
+            'isAuthenticated' => auth()->check() // Check if the user is logged in
+        ]);
+    }
+
+    /**
+     * Display the login page.
      */
     public function create(): Response
     {
@@ -30,7 +41,6 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
@@ -42,9 +52,7 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');
