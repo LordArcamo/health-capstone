@@ -1,14 +1,14 @@
 <template>
   <Head title="Patient Records" />
   <NewLayout>
-    <PatientTable :patients="props.ITR" />
+    <ItrTable :patients="props.ITR" />
   </NewLayout>
 </template>
 
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import PatientTable from '@/Components/PatientTable.vue';
+import ItrTable from '@/Components/ItrTable.vue';
 
 const props = defineProps({
   ITR: Array, // Declare the checkUps prop coming from the server

@@ -1,34 +1,37 @@
 <template>
-  <div class="min-h-screen flex flex-col justify-center items-center bg-gray-100">
+  <div class="min-h-screen flex flex-col justify-center items-center">
     <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Individual Treatment Record</h2>
 
-      <form @submit="submitForm">
+      <form @submit="handleSubmit">
         <!-- Step 1: Patient Information -->
         <div v-if="step === 1">
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" class="input" placeholder="Example: Juan" required />
+              <input type="text" v-model="form.firstName" @input="capitalizeName('firstName')" class="input"
+                placeholder="Example: Juan" required />
               <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName }}</span>
             </div>
             <div>
               <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName" class="input" placeholder="Example: Dela Cruz" required />
+              <input type="text" v-model="form.lastName" class="input" @input="capitalizeName('lastName')"
+                placeholder="Example: Dela Cruz" required />
               <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName }}</span>
             </div>
             <div>
               <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName" class="input" placeholder="Example: Penduko" required />
+              <input type="text" v-model="form.middleName" class="input" @input="capitalizeName('middleName')"
+                placeholder="Example: Penduko" required />
               <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
             </div>
             <div>
               <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix:</label>
-              <select v-model="form.suffix" class="input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" >
+              <select v-model="form.suffix"
+                class="input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <!-- Placeholder option for selecting suffix -->
                 <option value="" disabled selected>Select a Suffix</option>
-
                 <option value="None">None</option>
                 <option value="Jr.">Jr.</option>
                 <option value="Sr.">Sr.</option>
@@ -42,6 +45,30 @@
               <!-- Error message if no suffix is selected -->
               <span v-if="errors.suffix" class="text-red-600 text-sm">{{ errors.suffix }}</span>
             </div>
+            <div>
+              <label for="barangay" class="block mb-1">Barangay:</label>
+              <select id="barangay" v-model="form.barangay" class="input" required>
+                <option disabled value="">Select a Barangay</option>
+                <option value="Apas">Apas</option>
+                <option value="Aluna">Aluna</option>
+                <option value="Andales">Andales</option>
+                <option value="Calacapan">Calacapan</option>
+                <option value="Gimangpang">Gimangpang</option>
+                <option value="Jampason">Jampason</option>
+                <option value="Kamelon">Kamelon</option>
+                <option value="Kanitoan">Kanitoan</option>
+                <option value="Oguis">Oguis</option>
+                <option value="Pagahan">Pagahan</option>
+                <option value="Poblacion">Poblacion</option>
+                <option value="Pontacon">Pontacon</option>
+                <option value="San Pedro">San Pedro</option>
+                <option value="Sinalac">Sinalac</option>
+                <option value="Tawantawan">Tawantawan</option>
+                <option value="Tubigan">Tubigan</option>
+              </select>
+              <span v-if="errors.barangay" class="text-red-600 text-sm">{{ errors.barangay }}</span>
+            </div>
+
 
             <div>
               <label class="block">Purok:</label>
@@ -49,39 +76,30 @@
               <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
             <div>
-              <label class="block">Barangay:</label>
-              <input type="text" v-model="form.barangay" class="input" placeholder="Example: Gimangpang" required />
-              <span v-if="errors.barangay" class="text-red-600 text-sm">{{ errors.barangay }}</span>
+              <label class="block">Birthdate:</label>
+              <input type="date" v-model="form.birthdate" class="input" required @input="restrictBirthdateInput"
+                @change="validateBirthdate" />
+              <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
             <div>
               <label class="block">Age:</label>
               <input type="number" v-model="computedAge" class="input" readonly />
             </div>
-            <div>
-              <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input" required />
-              <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
-            </div>
             <!-- Contact Number -->
             <div>
               <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
               <div class="relative">
-                <input
-                  type="tel"
-                  v-model="form.contact"
-                  @input="formatContact"
+                <input type="tel" v-model="form.contact" @input="formatContact"
                   class="pl-14 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 w-full"
-                  placeholder="Enter 10 digits"
-                  required
-                />
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
+                  placeholder="Enter 10 digits" required />
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
                   +63
                 </span>
               </div>
-              <span v-if="errors.contact" class="text-red-600 text-sm">{{ errors.contact }}</span>
             </div>
 
-             <div>
+            <div>
               <label class="block">Gender</label>
               <select v-model="form.sex" class="input" required>
                 <!-- Placeholder option for selecting suffix -->
@@ -113,8 +131,8 @@
             <div>
               <label class="block">Mode of Transaction:</label>
               <select v-model="form.modeOfTransaction" class="input" required>
-                 <!-- Placeholder option for selecting suffix -->
-                 <option value="" disabled selected>Select a Mode of Transaction</option>
+                <!-- Placeholder option for selecting suffix -->
+                <option value="" disabled selected>Select a Mode of Transaction</option>
                 <option>Walk-in</option>
                 <option>Visited</option>
                 <option>Referral</option>
@@ -122,19 +140,49 @@
             </div>
             <div>
               <label class="block">Blood Pressure:</label>
-              <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80" class="input" />
+              <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80"
+                class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                @input="formatBloodPressure" />
             </div>
             <div>
               <label class="block">Temperature (°C):</label>
-              <input type="number" v-model="form.temperature" placeholder="Example: 37.5°C" step="0.1" class="input" />
+              <input type="text" v-model="form.temperature" placeholder="Example: 37.5°C"
+                class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                @input="formatTemperature" />
+
             </div>
             <div>
               <label class="block">Height (cm):</label>
-              <input type="number" v-model="form.height" placeholder="Example: 180" class="input" />
+              <input type="text" v-model="form.height" placeholder="Example: 180" class="input"
+                @input="validateHeight" />
             </div>
             <div>
               <label class="block">Weight (kg):</label>
-              <input type="number" v-model="form.weight" placeholder="Example: 81" class="input" />
+              <input type="text" v-model="form.weight" placeholder="Example: 70" class="input"
+                @input="validateWeight" />
+            </div>
+
+          </div>
+          <div v-if="form.modeOfTransaction === 'Referral'" class="mt-4">
+            <h3 class="text-lg font-semibold mb-4">Referred Transaction Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block">Referred From:</label>
+                <input type="text" v-model="form.referredFrom" class="input" placeholder="Referred From" />
+              </div>
+              <div>
+                <label class="block">Referred To:</label>
+                <input type="text" v-model="form.referredTo" class="input" placeholder="Referred To" />
+              </div>
+              <div>
+                <label class="block">Reasons for Referral:</label>
+                <textarea v-model="form.reasonsForReferral" class="input"
+                  placeholder="Describe reasons for referral"></textarea>
+              </div>
+              <div>
+                <label class="block">Referred By:</label>
+                <input type="text" v-model="form.referredBy" class="input" placeholder="Referred By" />
+              </div>
             </div>
           </div>
           <div class="mt-6 flex justify-between">
@@ -148,14 +196,13 @@
           <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block">Name of Attending Provider:</label>
+              <label class="block">Name of Attending Doctor/Provider:</label>
               <input type="text" v-model="form.providerName" class="input" />
             </div>
             <div>
               <label class="block">Nature of Visit:</label>
               <select v-model="form.natureOfVisit" class="input" required>
-                 <!-- Placeholder option for selecting suffix -->
-                 <option value="" disabled selected>Select a Nature of Visit</option>
+                <option value="" disabled selected>Select a Nature of Visit</option>
                 <option>New Consultation/Case</option>
                 <option>New Admission</option>
                 <option>Follow-up Visit</option>
@@ -163,9 +210,8 @@
             </div>
             <div>
               <label class="block">Type of Consultation/Purpose of Visit:</label>
-              <select v-model="form.visitType" class="input" required>
-                 <!-- Placeholder option for selecting suffix -->
-                 <option value="" disabled selected>Select a Type</option>
+              <select v-model="form.visitType" class="input" @change="checkMentalHealth" required>
+                <option value="" disabled selected>Select a Type</option>
                 <option>General</option>
                 <option>Dental Care</option>
                 <option>Child Care</option>
@@ -177,11 +223,25 @@
                 <option>Child Immunization</option>
                 <option>Sick Children</option>
                 <option>Firecracker Injury</option>
+                <option>Mental Health</option>
               </select>
             </div>
+
+            <!-- Sessions Dropdown for Mental Health -->
+            <div v-if="showSessions">
+              <label class="block">Select Session:</label>
+              <select v-model="form.session" class="input">
+                <option value="" disabled selected>Select a Session</option>
+                <option v-for="session in mentalHealthSessions" :key="session" :value="session">
+                  {{ session }}
+                </option>
+              </select>
+            </div>
+
             <div>
               <label class="block">Chief Complaints:</label>
-              <textarea v-model="form.chiefComplaints" placeholder="Example: Low Bowel Movements etc." class="input"></textarea>
+              <textarea v-model="form.chiefComplaints" placeholder="Example: Low Bowel Movements etc."
+                class="input"></textarea>
             </div>
             <div>
               <label class="block">Diagnosis:</label>
@@ -189,20 +249,60 @@
             </div>
             <div>
               <label class="block">Medication/Treatment:</label>
-              <textarea v-model="form.medication" placeholder="Example: Loperamide"class="input"></textarea>
+              <textarea v-model="form.medication" placeholder="Example: Loperamide" class="input"></textarea>
             </div>
           </div>
           <div class="mt-6 flex justify-between">
-            <button type="button" @click="prevStep" class="btn">Back</button>
-            <button type="submit" @click="submitForm" class="btn">Submit</button>
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="nextStep" class="btn">Next</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Review Submitted Data -->
+        <div v-if="step === 4">
+          <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Loop through form fields to display data -->
+            <div v-for="(value, key) in form" :key="key">
+              <label class="block">{{ formatLabel(key) }}:</label>
+              <p class="input">{{ value || 'Not Provided' }}</p>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-between">
+            <button @click="prevStep" class="btn">Back</button>
+            <button type="button" @click="handleSubmit" class="btn">Submit</button>
           </div>
         </div>
       </form>
-      <div v-if="successMessage" class="mt-4 text-green-600 text-center">
+      <!-- <div v-if="successMessage" class="mt-4 text-green-600 text-center">
         {{ successMessage }}
+      </div> -->
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+      <!-- Modal Content -->
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <!-- Modal Header -->
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Are you sure?</h2>
+        <!-- Modal Body -->
+        <p class="text-gray-600 mb-6">Do you want to submit the form?</p>
+        <!-- Modal Actions -->
+        <div class="flex justify-end space-x-3">
+          <button @click="cancelSubmit"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+            Cancel
+          </button>
+          <button @click="confirmSubmit"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+            Yes, Submit
+          </button>
+        </div>
       </div>
     </div>
+
   </div>
+
 </template>
 
 <script>
@@ -219,6 +319,21 @@ export default {
   },
   data() {
     return {
+      showSessions: false,
+      alertMessage: '',
+      showModal: false, // Tracks modal visibility
+      mentalHealthSessions: [
+        'Initial Assessment',
+        'Counseling Session',
+        'Follow-up Session',
+        'Psychological Evaluation',
+        'Therapeutic Intervention'
+      ],
+      stepTitles: ['Patient Information',
+        'Consultation Details',
+        'Visit Information',
+        'Review Information'
+      ],
       step: 1,
       form: {
         firstName: this.selectedPatient?.firstName || '',
@@ -244,8 +359,16 @@ export default {
         chiefComplaints: '',
         diagnosis: '',
         medication: '',
+        referredFrom: '',
+        referredTo: '',
+        reasonsForReferral: '',
+        referredBy: '',
+        session: '',
       },
-      errors: {},
+      errors: {
+        contact: '',
+        birthdate: '',
+      },
       successMessage: '',
     };
   },
@@ -288,43 +411,118 @@ export default {
     },
   },
   methods: {
-    populateForm(patient) {
-      console.log("Populating form with patient:", patient);
-      this.form = {
-        firstName: this.selectedPatient?.firstName || '',
-        lastName: this.selectedPatient?.lastName || '',
-        middleName: this.selectedPatient?.middleName || '',
-        suffix: this.selectedPatient?.suffix || '',
-        purok: this.selectedPatient?.purok || '',
-        barangay: this.selectedPatient?.barangay || '',
-        age: '',
-        birthdate: this.selectedPatient?.birthdate || '',
-        contact: this.selectedPatient?.contact || '',
-        sex: this.selectedPatient?.sex || '',
-        
-      };
-      this.form.age = this.computedAge;
+    formatLabel(key) {
+      return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    },
+    capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .toLowerCase() // Convert entire string to lowercase first
+          .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+      }
+    },
+    formatBloodPressure(event) {
+      let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
+      if (value.length > 3) {
+        value = `${value.slice(0, 3)}/${value.slice(3, 5)}`; // Insert slash after the third character
+      }
+      this.form.bloodPressure = value;
+    },
+    formatTemperature(event) {
+      let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
 
+      if (value.length > 2) {
+        value = `${value.slice(0, 2)}.${value.slice(2, 3)}`; // Automatically add the decimal after the second digit
+      }
+
+      this.form.temperature = value; // Update the input value
     },
-    formatContact() {
-      // Ensure the input starts with "09", remove non-numeric characters, and limit to 10 digits
-      if (!this.form.contact.startsWith('0')) {
-        this.form.contact = '0' + this.form.contact.replace(/[^0-9]/g, '');
+    validateHeight(event) {
+      let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and a single decimal point
+
+      // Handle multiple decimal points
+      const parts = value.split('.');
+      if (parts.length > 2) {
+        value = `${parts[0]}.${parts[1]}`; // Keep only the first decimal point
+      }
+
+      // Auto-format when the input reaches 4 digits without a decimal
+      if (value.length === 4 && !value.includes('.')) {
+        value = `${value.slice(0, 3)}.${value.slice(3)}`; // Add decimal before the last digit
+      }
+
+      // Limit to 3 digits before the decimal and 1 digit after
+      if (value.includes('.')) {
+        const [integer, decimal] = value.split('.');
+        value = `${integer.slice(0, 3)}.${decimal.slice(0, 1)}`;
+      }
+
+      this.form.height = value; // Update the form value
+    },
+    restrictBirthdateInput(event) {
+      const input = event.target.value;
+
+      // Restrict year part to a maximum of 4 digits
+      const parts = input.split('-');
+      if (parts[0] && parts[0].length > 4) {
+        parts[0] = parts[0].slice(0, 4); // Limit the year to 4 digits
+      }
+
+      // Reassemble the date and update the form value
+      this.form.birthdate = parts.join('-');
+    },
+    validateBirthdate() {
+      this.errors.birthdate = ''; // Reset error message
+
+      if (!this.form.birthdate) {
+        this.errors.birthdate = 'Birthdate is required.';
+        return;
+      }
+
+      const birthDate = new Date(this.form.birthdate);
+      const today = new Date();
+      const maxDate = new Date(today.getFullYear() - 200, today.getMonth(), today.getDate());
+
+      if (birthDate < maxDate) {
+        this.errors.birthdate = 'Please enter a birthdate that is valid.';
+      }
+    },
+    validateWeight(event) {
+      // Retrieve and sanitize the input value
+      let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numeric characters and a single decimal point
+
+      // Ensure there is only one decimal point
+      const parts = value.split('.');
+      if (parts.length > 2) {
+        value = `${parts[0]}.${parts[1]}`; // Combine the first two parts, discarding extra decimals
+      }
+
+      // Auto-format when the input reaches 4 digits without a decimal
+      if (value.length === 4 && !value.includes('.')) {
+        value = `${value.slice(0, 3)}.${value.slice(3)}`; // Add a decimal before the last digit
+      }
+
+      // If a decimal exists, enforce limits on the integer and decimal parts
+      if (value.includes('.')) {
+        const [integer, decimal] = value.split('.');
+        value = `${integer.slice(0, 3)}.${decimal.slice(0, 1)}`; // Limit to 3 digits before and 1 digit after the decimal
       } else {
-        this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 11);
+        // If no decimal, limit the integer part to 3 digits
+        value = value.slice(0, 3);
+      }
+
+      // Update the form weight with the validated value
+      this.form.weight = value;
+    },
+    checkMentalHealth() {
+      this.showSessions = this.form.visitType === 'Mental Health';
+      if (!this.showSessions) {
+        this.form.session = '';
       }
     },
-    nextStep() {
-      if (this.step === 1 && this.validateStep1()) {
-        this.step++;
-      } else if (this.step === 2 && this.validateStep2()) {
-        this.step++;
-      } else if (this.step === 3 && this.validateStep3()) {
-        this.submitForm();
-      }
-    },
-    prevStep() {
-      this.step--;
+    handleSubmit(event) {
+      event.preventDefault();
+      this.triggerSubmit();
     },
     validateStep1() {
       this.errors = {};
@@ -354,9 +552,9 @@ export default {
         this.errors.birthdate = 'Birthdate is required.';
         valid = false;
       }
-      if (this.form.contact.length !== 11) {
-        this.errors.contact = 'Contact number must be exactly 10 digits after +63.';
-        valid = false;
+      if (this.form.contact.length !== 10) {
+      this.errors.contact = 'Contact number must be exactly 10 digits after +63.';
+      valid = false;
       }
       return valid;
     },
@@ -392,109 +590,75 @@ export default {
       }
       return valid;
     },
-    submitForm() {
-
-
-      // Prepare the payload
-      const payload = {
-        personalId: this.selectedPatient?.personalId || null, // Include personalId if it exists
-        firstName: this.form.firstName,
-        lastName: this.form.lastName,
-        middleName: this.form.middleName,
-        suffix: this.form.suffix,
-        purok: this.form.purok,
-        barangay: this.form.barangay,
-        age: this.form.age,
-        birthdate: this.form.birthdate,
-        contact: this.form.contact,
-        sex: this.form.sex,
-        consultationDate: this.form.consultationDate,
-        consultationTime: this.form.consultationTime,
-        modeOfTransaction: this.form.modeOfTransaction,
-        bloodPressure: this.form.bloodPressure,
-        temperature: this.form.temperature,
-        height: this.form.height,
-        weight: this.form.weight,
-        providerName: this.form.providerName,
-        natureOfVisit: this.form.natureOfVisit,
-        visitType: this.form.visitType,
-        chiefComplaints: this.form.chiefComplaints,
-        diagnosis: this.form.diagnosis,
-        medication: this.form.medication,
-    };
-
-      // Add personal information only if the patient is new
-      if (!this.selectedPatient?.personalId) {
-        Object.assign(payload, {
-          firstName: this.form.firstName,
-          lastName: this.form.lastName,
-          middleName: this.form.middleName,
-          suffix: this.form.suffix,
-          purok: this.form.purok,
-          barangay: this.form.barangay,
-          age: this.form.age,
-          birthdate: this.form.birthdate,
-          contact: this.form.contact,
-          sex: this.form.sex,
-        });
+    nextStep() {
+      if (this.step === 1 && this.validateStep1()) {
+        this.step++;
+      } else if (this.step === 2 && this.validateStep2()) {
+        this.step++;
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.step++;
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.step = 4;
       }
+    },
+    prevStep() {
+      this.step--;
+    },
+    navigateToStep(targetStep) {
+      if (targetStep > this.step) {
+        // Validate the current step before proceeding
+        const isCurrentStepValid =
+          (this.step === 1 && this.validateStep1()) ||
+          (this.step === 2 && this.validateStep2()) ||
+          (this.step === 3 && this.validateStep3());
 
-      console.log('Submitting form with payload:', payload);
+        if (!isCurrentStepValid) {
+          this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
 
-      // Emit the form data to the parent component via the onSubmit prop
-      this.$emit('submitForm', payload);
+          // Automatically close the alert after 2 seconds
+          setTimeout(() => {
+            this.alertMessage = '';
+          }, 2000);
 
-      // Optional: Display a success message or alert
-      alert('Form submitted');
-      this.successMessage = 'Form submitted successfully!';
-
-      // Reset the form fields to their initial state
-      this.resetForm();
+          return; // Prevent navigation
+        }
+      }
+      // If validation passes or moving backward, update the step
+      this.step = targetStep;
     },
 
-    resetForm() {
-    this.form = {
-      firstName: '',
-      lastName: '',
-      middleName: '',
-      suffix: '',
-      purok: '',
-      barangay: '',
-      age: '',
-      birthdate: '',
-      contact: '',
-      sex: '',
-      consultationDate: '',
-      consultationTime: '',
-      modeOfTransaction: '',
-      bloodPressure: '',
-      temperature: '',
-      height: '',
-      weight: '',
-      providerName: '',
-      natureOfVisit: '',
-      visitType: '',
-      chiefComplaints: '',
-      diagnosis: '',
-      medication: '',
-    };
-    this.errors = {};
-  },
-  populateForm(patient) {
-    this.form = {
-      ...this.form,
-      ...patient,
-    };
-  },
-},
-  mounted() {
-    console.log('Received personalInfo:', this.personalInfo);
-    if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
-      console.log('Rendering empty form for new patient');
-    } else {
-      console.log('Rendering form for existing patient:', this.selectedPatient);
-      this.populateForm(this.selectedPatient);
-    }
+    closeAlert() {
+      this.alertMessage = ''; // Close the alert
+    },
+    formatContact() {
+      this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
+    },
+    triggerSubmit() {
+      if (this.validateStep1() && this.validateStep2() && this.validateStep3()) {
+        this.showModal = true; // Show confirmation modal
+      } else {
+        this.successMessage = 'Please complete all required fields before submitting.';
+      }
+    },
+    confirmSubmit() {
+      // Prepare the form data and parse weight and height as numbers
+      const formData = {
+        ...this.form,
+        weight: parseFloat(this.form.weight) || null, // Convert to number or null if invalid
+        height: parseFloat(this.form.height) || null, // Convert to number or null if invalid
+      };
+
+      // Emit the parsed form data
+      this.$emit('submitForm', formData);
+
+      // Display success message
+      this.successMessage = 'Form submitted successfully!';
+      this.showModal = false; // Hide modal
+      this.errors = {};
+    },
+    cancelSubmit() {
+      this.showModal = false; // Hide modal
+    },
   },
 };
 </script>

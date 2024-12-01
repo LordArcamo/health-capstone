@@ -1,136 +1,179 @@
 <script setup>
-import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
-import Search from './SearchBar.vue';
+import { ref, watch } from "vue";
+import { usePage } from "@inertiajs/vue3";
+import NavLink from "@/Components/NavLink.vue";
+import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
+import Logo from "@/Images/RHU Logo.png";
 
+// State for dropdown visibility
 const showingNavigationDropdown = ref(false);
+const patientsDropdownOpen = ref(false);
+const profileDropdownOpen = ref(false); // State for profile dropdown
 
+// Access current page/component from Inertia
+const { component } = usePage();
+
+// Toggles dropdowns based on input
+const toggleDropdown = (dropdown) => {
+  if (dropdown === "patients") {
+    patientsDropdownOpen.value = !patientsDropdownOpen.value;
+  } else if (dropdown === "profile") {
+    profileDropdownOpen.value = !profileDropdownOpen.value;
+  }
+};
+
+// Close dropdowns on route/component change
+watch(() => component, () => {
+  showingNavigationDropdown.value = false;
+  patientsDropdownOpen.value = false;
+  profileDropdownOpen.value = false; // Close profile dropdown
+});
 </script>
 
-
 <template>
-    <div>
-        <div class="bg-gray-100">
-            <nav class="bg-white border-b border-gray-100">
-                
-                <!-- Primary Navigation Menu -->
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between h-16">
-                        <div class="flex">
-                            <!-- Navigation Links -->
-                            <!-- <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
-                                </NavLink>
-                            </div> -->
-                        </div>
-            
-                        
-                        <div class="hidden sm:flex sm:items-center sm:ms-6">
-                            <!-- Settings Dropdown -->
-                            <div class="ms-3 relative">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
-                                            >
-                                                {{ $page.props.auth.user.name }}
-
-                                                <svg
-                                                    class="ms-2 -me-0.5 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink :href="route('profile.edit')"> Profile </DropdownLink>
-                                        <DropdownLink :href="route('logout')" method="post" as="button">
-                                            Log Out
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button
-                                @click="showingNavigationDropdown = !showingNavigationDropdown"
-                                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
-                            >
-                                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex': !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex': showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Responsive Navigation Menu -->
-                <div
-                    :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }"
-                    class="sm:hidden"
-                >
-                    <div class="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <!-- Responsive Settings Options -->
-                    <div class="pt-4 pb-1 border-t border-gray-200">
-                        <div class="px-4">
-                            <div class="font-medium text-base text-gray-800">
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="font-medium text-sm text-gray-500">{{ $page.props.auth.user.email }}</div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')"> Profile </ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('logout')" method="post" as="button">
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+  <nav class="bg-white shadow-md border-b border-gray-200">
+    <div class=" mx-auto px-6 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-20 items-center">
+        <!-- Logo Section -->
+        <div @click="$inertia.visit('/dashboard')" class="flex items-center space-x-4 cursor-pointer">
+          <img :src="Logo" alt="RHU Logo" class="h-20 w-auto" />
         </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden sm:flex items-center space-x-6">
+          <NavLink href="/dashboard" :active="component === 'Dashboard'">
+            <font-awesome-icon :icon="['fas', 'home']" class="mr-2" />
+            Dashboard
+          </NavLink>
+
+          <NavLink href="/checkup" :active="component === 'Checkup'">
+            <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-2" />
+            Checkup
+          </NavLink>
+
+          <!-- Services Dropdown -->
+          <div class="relative">
+            <button
+              @click="toggleDropdown('patients')"
+              class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-2" />
+              Services
+              <font-awesome-icon
+                :icon="['fas', 'chevron-down']"
+                :class="{ 'rotate-180': patientsDropdownOpen }"
+                class="ml-2 transition-transform duration-200"
+              />
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div
+              v-if="patientsDropdownOpen"
+              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-60 z-10"
+            >
+              <div class="grid grid-cols-1 gap-4 p-4">
+                <NavLink
+                  href="/services/mental-health"
+                  :active="component === 'MentalHealth'"
+                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
+                >
+                  Mental Health
+                </NavLink>
+                <NavLink
+                  href="/services/patients/itrtable"
+                  :active="component === 'IndividualTreatmentRecord'"
+                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
+                >
+                  ITR
+                </NavLink>
+                <NavLink
+                  href="/services/patients/prenatal-postpartum"
+                  :active="component === 'PrenatalPostpartum'"
+                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
+                >
+                  Prenatal/Postpartum
+                </NavLink>
+                <NavLink
+                  href="/services/patients/epi-records"
+                  :active="component === 'EPIRecords'"
+                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
+                >
+                  EPI Records
+                </NavLink>
+                <NavLink
+                  href="/services/vaccination"
+                  :active="component === 'Vaccination'"
+                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
+                >
+                  Vaccination
+                </NavLink>
+                <NavLink
+                  href="/services/risk-management"
+                  :active="component === 'RiskManagement'"
+                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
+                >
+                  Risk Management
+                </NavLink>
+              </div>
+            </div>
+          </div>
+          <NavLink href="/system-analytics" :active="component === 'Analytics'">
+            <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
+            System Analytics
+          </NavLink>
+
+          <!-- Profile Dropdown -->
+          <div class="relative">
+            <button
+              @click="toggleDropdown('profile')"
+              class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />
+              Profile
+              <font-awesome-icon
+                :icon="['fas', 'chevron-down']"
+                :class="{ 'rotate-180': profileDropdownOpen }"
+                class="ml-2 transition-transform duration-200"
+              />
+            </button>
+            <!-- Dropdown Menu -->
+            <div
+              v-if="profileDropdownOpen"
+              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w- z-10"
+            >
+              <NavLink
+                href="/profile"
+                :active="component === 'Profile'"
+                class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-t"
+              >
+                <font-awesome-icon :icon="['fas', 'cog']" class="mr-2" />
+                Account Settings
+              </NavLink>
+              <NavLink
+                :href="route('logout')"
+                method="post"
+                class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-b"
+              >
+                <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
+                Logout
+              </NavLink>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="sm:hidden flex items-center">
+          <button
+            @click="showingNavigationDropdown = !showingNavigationDropdown"
+            class="p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none"
+          >
+            <font-awesome-icon
+              :icon="showingNavigationDropdown ? 'times' : 'bars'"
+              class="h-6 w-6"
+            />
+          </button>
+        </div>
+      </div>
     </div>
+  </nav>
 </template>

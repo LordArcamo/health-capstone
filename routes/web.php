@@ -13,15 +13,39 @@ use App\Http\Controllers\PostpartumController;
 use App\Http\Controllers\Trimester1Controller;
 use App\Http\Controllers\Trimester2Controller;
 use App\Http\Controllers\Trimester3Controller;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SessionController;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
+//     Route::resource('/mental-health', SessionController::class);
+
+//     // Optionally, you can add custom routes if needed, though it's usually unnecessary if using resourceful routes
+//     // Custom route for storing a session (can be used for custom logic if necessary)
+//     // Route::post('/mental-health/sessions/store', [SessionController::class, 'store'])->name('mental-health.sessions.store');
+
+//     // If you want to show a session list for a specific page (usually the 'index' is already handled by resource route)
+//     // Route::get('/services/mental-health/session', [SessionController::class, 'index'])->name('mental-health.sessions.index');
+// });
+
+
+
+Route::get('/', [AuthenticatedSessionController::class, 'index'])->name('home');
+
+Route::get('/login', function () {
+    return Inertia::render('Login', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+// Route::get('/', function () {
+//     return Inertia::render('Home');
+// })->name('home');
+
 
 Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');
 
@@ -33,15 +57,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
     Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); 
-    Route::get('/patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
-    
+    Route::get('/services/patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/nationalimmunizationprogram', NationalImmunizationProgramController::class);
     Route::get('/checkup/nationalimmunizationprogram', [NationalImmunizationProgramController::class, 'create'])->name('nationalimmunizationprogram');
     Route::post('/nationalimmunizationprogram/store', [NationalImmunizationProgramController::class, 'store'])->name('nationalimmunizationprogram.store');
-    Route::get('/patients/epi-records', [NationalImmunizationProgramController::class, 'index'])->name('nationalimmunizationprogram.index');
+    Route::get('/services/patients/epi-records', [NationalImmunizationProgramController::class, 'index'])->name('nationalimmunizationprogram.index');
 });
 
 
@@ -50,10 +73,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/prenatal', PreNatalController::class);
     Route::get('/checkup/prenatal', [PreNatalController::class, 'create'])->name('prenatal');
     Route::post('/prenatal/store', [PreNatalController::class, 'store'])->name('prenatal.store');
-    Route::get('/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
+    Route::get('/services/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('/postpartum', PostpartumController::class);
     Route::get('/checkup/postpartum', [PostpartumController::class, 'create'])->name('postpartum');
     Route::post('/postpartum/store', [PostpartumController::class, 'store'])->name('postpartum.store');
 });
@@ -87,14 +111,31 @@ Route::get('/mortality', function () {
     return Inertia::render('Mortality');
 })->middleware(['auth', 'verified'])->name('mortality');
 
-Route::get('/record-cases', function () {
-    return Inertia::render('Record-Cases');
-})->middleware(['auth', 'verified'])->name('record-cases');
 
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/system-analytics', function () {
+    return Inertia::render('Analytics');
+})->middleware(['auth', 'verified'])->name('system-analytics');
+
+Route::get('/services/mental-health', function () {
+    return Inertia::render('Services/MentalHealth');
+})->middleware(['auth', 'verified'])->name('mental-health');
+
+Route::get('/services/vaccination', function () {
+    return Inertia::render('Services/Vaccination');
+})->middleware(['auth', 'verified'])->name('vaccination');
+
+Route::get('/services/risk-management', function () {
+    return Inertia::render('Services/RiskManagement');
+})->middleware(['auth', 'verified'])->name('risk-management');
+
+Route::get('/patient', function () {
+    return Inertia::render('Patients');
+})->middleware(['auth', 'verified'])->name('patient');
+
+Route::get('/dashboard', [PatientController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

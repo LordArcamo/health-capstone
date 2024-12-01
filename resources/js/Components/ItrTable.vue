@@ -1,5 +1,6 @@
 <template>
-  <div class=" mx-auto py-3 px-10">
+  <div class="mx-auto py-3 px-10">
+
     <!-- Search and Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <!-- Search Bar -->
@@ -21,44 +22,118 @@
 
     <!-- Collapsible Filter Panel -->
     <div v-if="isFilterPanelOpen" class="mt-4 mb-4 border border-gray-300 rounded-lg p-6 shadow-md bg-white">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        <!-- Age Range Slider -->
-        <div>
-          <label class="block text-base font-semibold mb-2">Age Range</label>
-          <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500">0</span>
-            <input type="range" v-model="filterAgeRange" min="0" max="100" step="5" class="w-full accent-green-500" />
-            <span class="text-sm text-gray-500">100+</span>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Gender Filter -->
+    <div>
+      <label class="block text-base font-semibold mb-2">Gender</label>
+      <div class="flex flex-col gap-3">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <div class="w-5 h-5 border-2 border-green-500 rounded-full flex items-center justify-center">
+            <input
+              type="checkbox"
+              value="Male"
+              v-model="filterGender"
+              class="appearance-none w-4 h-4"
+            />
+            <div
+              v-if="filterGender.includes('Male')"
+              class="w-2.5 h-2.5 bg-green-500 rounded-full"
+            ></div>
           </div>
-          <div class="text-sm text-gray-700 mt-1">Selected: {{ filterAgeRange }}+</div>
-        </div>
-
-        <!-- Purok Filter -->
-        <div>
-          <label class="block text-base font-semibold mb-2">Purok</label>
-          <select v-model="filterPrk"
-            class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-            <option value="">All Purok</option>
-            <option v-for="purok in purokOptions" :key="purok" :value="purok">
-              {{ purok }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Barangay Filter -->
-        <div>
-          <label class="block text-base font-semibold mb-2">Barangay</label>
-          <select v-model="filterBarangay"
-            class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-            <option value="">All Barangay</option>
-            <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
-              {{ barangay }}
-            </option>
-          </select>
-        </div>
+          <span class="text-gray-700">Male</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <div class="w-5 h-5 border-2 border-green-500 rounded-full flex items-center justify-center">
+            <input
+              type="checkbox"
+              value="Female"
+              v-model="filterGender"
+              class="appearance-none w-4 h-4"
+            />
+            <div
+              v-if="filterGender.includes('Female')"
+              class="w-2.5 h-2.5 bg-green-500 rounded-full"
+            ></div>
+          </div>
+          <span class="text-gray-700">Female</span>
+        </label>
       </div>
     </div>
+
+    <!-- Age Range Slider -->
+    <div>
+      <label class="block text-base font-semibold mb-2">Age Range</label>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-gray-500">0</span>
+        <input
+          type="range"
+          v-model="filterAgeRange"
+          min="0"
+          max="100"
+          step="5"
+          class="w-full accent-green-500"
+        />
+        <span class="text-sm text-gray-500">100+</span>
+      </div>
+      <div class="text-sm text-gray-700 mt-1">Selected: {{ filterAgeRange }}+</div>
+    </div>
+
+    <!-- Purok Filter -->
+    <div>
+      <label class="block text-base font-semibold mb-2">Purok</label>
+      <select
+        v-model="filterPrk"
+        class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+      >
+        <option value="">All Purok</option>
+        <option v-for="purok in purokOptions" :key="purok" :value="purok">
+          {{ purok }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Barangay Filter -->
+    <div>
+      <label class="block text-base font-semibold mb-2">Barangay</label>
+      <select
+        v-model="filterBarangay"
+        class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+      >
+        <option value="">All Barangay</option>
+        <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
+          {{ barangay }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Diagnosis Filter -->
+    <div>
+      <label class="block text-base font-semibold mb-2">Diagnosis</label>
+      <div class="flex flex-wrap gap-3">
+        <label
+          v-for="diagnosis in diagnosisOptions"
+          :key="diagnosis"
+          class="flex items-center gap-2 cursor-pointer"
+        >
+          <div class="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
+            <input
+              type="checkbox"
+              :value="diagnosis"
+              v-model="filterDiagnosis"
+              class="appearance-none w-4 h-4"
+            />
+            <div
+              v-if="filterDiagnosis.includes(diagnosis)"
+              class="w-3 h-3 bg-red-500 rounded"
+            ></div>
+          </div>
+          <span class="text-gray-700">{{ diagnosis }}</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <!-- Generate Report Button -->
     <div class="mb-6">
@@ -66,6 +141,8 @@
         class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 hover:text-black transition-colors">
         Generate Report
       </button>
+
+      <h1 class="text-2xl font-bold text-start mt-6 mb-4">Individual Treatment Records</h1>
     </div>
 
     <!-- Responsive Table -->
@@ -76,39 +153,34 @@
             <th class="py-4 px-6 text-left border-b border-indigo-200">Full Name</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200">Address</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Contact Number</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">TT Status</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Nature of Visit</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Visit Type</th>
+            <th class="py-4 px-6 text-left border-b border-indigo-200">Gender</th>
             <th class="py-4 px-6 text-left border-b border-indigo-200">Actions</th>
           </tr>
         </thead>
-
         <tbody class="text-gray-600 text-sm">
-          <tr v-for="patient in filteredPatients" :key="patient.id"
+          <tr v-for="patient in filteredPatients" :key="patient.personalId"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
             <td class="py-3 px-6">{{ patient.fullName }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.contact }}</td>
-            <td class="py-3 px-6">{{ patient.ttStatus }}</td>
+            <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
+            <td class="py-3 px-6">{{ patient.visitType }}</td>
+            <td class="py-3 px-6">{{ patient.sex }}</td>
             <td class="py-3 px-6">
-              <div class="flex gap-1">
-                <button @click="openModal(patient)"
-                  class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black">
-                  View More
-                </button>
-                <button @click="openTrimesterModal(patient)"
-                  class="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-green-600">
-                  Trimester
-                </button>
-              </div>
+              <button @click="openModal(patient)"
+                class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black">
+                View More
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Pagination controls -->
-    <div class="mt-6 flex justify-center items-center space-x-4">
+    <!-- Pagination -->
+    <div class="mt-6 flex justify-center space-x-4">
       <button @click="prevPage" :disabled="currentPage === 1"
         class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-red-600 disabled:opacity-50">
         Previous
@@ -121,78 +193,55 @@
     </div>
 
     <!-- Modal -->
-    <div v-if="isModalOpen" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div v-if="showModal && selectedPatient"
+      class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
         <button @click="closeModal"
           class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
           &times;
         </button>
+
         <h2 class="text-xl sm:text-2xl font-bold mb-4">
           Details for {{ selectedPatient.fullName }}
         </h2>
-        <ul class="space-y-2 flex gap-10">
-          <div>
+        <ul class="flex gap-20">
+          <div class="flex flex-col gap-1">
             <li>
               <strong>Full Name:</strong>
               {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
             </li>
+            <li><strong>Suffix:</strong> {{ selectedPatient.suffix }}</li>
             <li><strong>Address:</strong> {{ selectedPatient.purok }} {{ selectedPatient.barangay }}</li>
             <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
             <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
-            <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
-            <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
+            <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
+            <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
             <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
+            <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
+            <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
             <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
             <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
+          </div>
+
+          <div class="flex flex-col gap-1">
             <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
             <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
             <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
-            <li><strong>Name of Spouse:</strong> {{ selectedPatient.nameOfSpouse }}</li>
-            <li><strong>Emergency Contact Number:</strong> {{ selectedPatient.emergencyContact }}</li>
-            <li><strong>4ps?::</strong> {{ selectedPatient.fourMember }}</li>
-            <li><strong>Philhealth Status:</strong> {{ selectedPatient.philhealthStatus }}</li>
-            <li><strong>Philhealth ID Number:</strong> {{ selectedPatient.philhealthId }}</li>
-            <li><strong>Menarche:</strong> {{ selectedPatient.menarche }}</li>
-            <li><strong>Onset of Sexual Intercourse:</strong> {{ selectedPatient.sexualOnset }}</li>
-            <li><strong>Period/Duration:</strong> {{ selectedPatient.periodDuration }}</li>
-            <li><strong>Birth Control Method:</strong> {{ selectedPatient.birthControl }}</li>
-          </div>
-          <div>
-            <li><strong>Interval/Cycle:</strong> {{ selectedPatient.intervalCycle }}</li>
-            <li><strong>Menopause? (Yes/No):</strong> {{ selectedPatient.menopause }}</li>
-            <li><strong>LMP (Last Menstrual Period):</strong> {{ selectedPatient.lmp }}</li>
-            <li><strong>EDC (Estimated Date of Confinement):</strong> {{ selectedPatient.edc }}</li>
-            <li><strong>Gravidity:</strong> {{ selectedPatient.gravidity }}</li>
-            <li><strong>Parity:</strong> {{ selectedPatient.parity }}</li>
-            <li><strong>Term:</strong> {{ selectedPatient.term }}</li>
-            <li><strong>Preterm:</strong> {{ selectedPatient.preterm }}</li>
-            <li><strong>Abortion:</strong> {{ selectedPatient.abortion }}</li>
-            <li><strong>Living:</strong> {{ selectedPatient.living }}</li>
-            <li><strong>Syphilis Test Result:</strong> {{ selectedPatient.syphilisResult }}</li>
-            <li><strong>Penicillin Given:</strong> {{ selectedPatient.penicillin }}</li>
-            <li><strong>Hemoglobin (gm/100ml):</strong> {{ selectedPatient.hemoglobin }}</li>
-            <li><strong>Hematocrit (vol %):</strong> {{ selectedPatient.hematocrit }}</li>
-            <li><strong>Urinalysis:</strong> {{ selectedPatient.urinalysis }}</li>
-            <li><strong>TT Status:</strong> {{ selectedPatient.ttStatus }}</li>
-            <li><strong>TD (Date Given):</strong> {{ selectedPatient.tdDate }}</li>
+            <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
+            <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
+            <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
+            <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
+            <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
           </div>
         </ul>
 
       </div>
     </div>
-
-    <!-- Trimester Modal -->
-    <TrimesterModal :patient="selectedPatient" :show="showTrimesterModal" @close="closeTrimesterModal"
-      @confirm="confirmTrimesterSelection" />
   </div>
 </template>
 
-<script>import TrimesterModal from "@/Components/TrimesterModal.vue";
-
+<script>
 export default {
-  components: {
-    TrimesterModal,
-  },
   props: {
     patients: {
       type: Array,
@@ -209,7 +258,7 @@ export default {
       filterDiagnosis: [], // Array for selected diagnoses
       currentPage: 1, // Current page for pagination
       itemsPerPage: 5, // Number of items per page
-      showTrimesterModal: false, // Modal visibility flag
+      showModal: false, // Modal visibility flag
       selectedPatient: null, // Selected patient for modal display
       isFilterPanelOpen: false, // Toggle filter panel visibility
     };
@@ -224,6 +273,7 @@ export default {
           address: `${patient.purok}, ${patient.barangay}`, // Combine purok and barangay for address
         }))
         .filter((patient) => {
+          // Match against full name, nature of visit, visit type, address, and diagnosis
           const matchesQuery =
             patient.fullName.toLowerCase().includes(query) ||
             patient.natureOfVisit.toLowerCase().includes(query) ||
@@ -231,6 +281,7 @@ export default {
             patient.address.toLowerCase().includes(query) ||
             (patient.diagnosis && patient.diagnosis.toLowerCase().includes(query));
 
+          // Match filters for purok, barangay, and age range
           const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
           const matchesBarangay =
             !this.filterBarangay || patient.barangay === this.filterBarangay;
@@ -244,6 +295,7 @@ export default {
               (isNaN(maxAge) || patientAge <= maxAge);
           }
 
+          // Match filters for gender and diagnosis
           const matchesGender =
             this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
           const matchesDiagnosis =
@@ -263,65 +315,64 @@ export default {
           this.currentPage * this.itemsPerPage
         );
     },
-    totalPages() {
-      return Math.ceil(this.patients.length / this.itemsPerPage);
-    },
+    // Unique purok options
     purokOptions() {
-      const puroks = new Set(this.patients.map((patient) => patient.purok));
-      return Array.from(puroks);
+      return Array.from(new Set(this.patients.map((p) => p.purok)));
     },
+    // Unique barangay options
     barangayOptions() {
-      const barangays = new Set(this.patients.map((patient) => patient.barangay));
-      return Array.from(barangays);
+      return Array.from(new Set(this.patients.map((p) => p.barangay)));
+    },
+    // Unique diagnosis options
+    diagnosisOptions() {
+      return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
     },
   },
   methods: {
+    // Toggle filter panel visibility
     toggleFilterPanel() {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
-    openTrimesterModal(patient) {
-      this.selectedPatient = patient;
-      this.showTrimesterModal = true;
-    },
-    closeTrimesterModal() {
-      this.showTrimesterModal = false;
-    },
-    confirmTrimesterSelection() {
-      console.log("Trimester confirmed for:", this.selectedPatient);
-      this.closeTrimesterModal();
-    },
+    // Open the modal with selected patient details
     openModal(patient) {
       this.selectedPatient = patient;
-      this.isModalOpen = true;
+      this.showModal = true;
     },
+    // Close the modal
     closeModal() {
-      this.isModalOpen = false;
-      this.selectedPatient = {};
+      this.showModal = false;
+      this.selectedPatient = null;
     },
+    // Go to the next page
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
+    // Go to the previous page
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
+    // Generate a CSV report of filtered patients
     generateReport() {
       const data = this.filteredPatients.map((patient) => ({
         fullName: patient.fullName,
         address: patient.address,
         age: patient.age,
-        contact: patient.contact,
+        natureOfVisit: patient.natureOfVisit,
+        visitType: patient.visitType,
+        gender: patient.sex,
+        diagnosis: patient.diagnosis || 'N/A', // Include diagnosis if available
       }));
 
       const csvContent =
         'data:text/csv;charset=utf-8,' +
-        ['Full Name,Address,Age,Contact']
+        ['Full Name,Address,Age,Nature of Visit,Visit Type,Gender,Diagnosis']
           .concat(
             data.map((row) =>
-              `${row.fullName},${row.address},${row.age},${row.contact}`
+              `${row.fullName},${row.address},${row.age},${row.natureOfVisit},${row.visitType},${row.gender},${row.diagnosis}`
             )
           )
           .join('\n');
@@ -337,8 +388,3 @@ export default {
   },
 };
 </script>
-
-
-<style scoped>
-/* Add any necessary styles */
-</style>

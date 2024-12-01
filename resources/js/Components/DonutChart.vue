@@ -1,66 +1,75 @@
 <template>
-    <div class="w-full h-96">
-      <Doughnut :data="chartData" :options="chartOptions" />
-    </div>
-  </template>
+  <div class="max-w-xs mx-auto relative">
+    <!-- Donut Chart -->
+    <ChartjsDonut :data="chartData" :options="chartOptions" />
   
-  <script>
-  import { Doughnut } from 'vue-chartjs';
-  import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale } from 'chart.js';
-  
-  ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale);
-  
-  export default {
-    name: 'DoughnutChart',
-    components: { Doughnut },
-    data() {
-      return {
-        chartData: {
-          labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-          datasets: [
-            {
-              label: 'My Dataset',
-              data: [12, 19, 3, 5, 2, 3],
-              backgroundColor: [
-                '#FF6384',
-                '#36A2EB',
-                '#FFCE56',
-                '#4BC0C0',
-                '#9966FF',
-                '#FF9F40'
-              ],
-              hoverOffset: 4
+  </div>
+</template>
+
+<script>
+import { defineComponent } from 'vue';
+import { Doughnut } from 'vue-chartjs';
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+
+ChartJS.register(Title, Tooltip, Legend, ArcElement);
+
+export default defineComponent({
+  components: {
+    ChartjsDonut: Doughnut
+  },
+  data() {
+    return {
+      chartData: {
+        labels: ['Bronchitis', 'Dengue X', 'Flu', 'Pneumonia', 'Asthma'],
+        datasets: [
+          {
+            data: [1200, 850, 1500, 950, 1300], // Example data for the diseases
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.5)', // Low-opacity green
+              '#FF8D1A',
+              '#FFB74D',
+              '#F57C00',
+              '#2196F3'
+            ],
+            hoverBackgroundColor: [
+              'rgba(75, 192, 192, 0.8)',
+              '#FF7A13',
+              '#FF9C38',
+              '#F56A00',
+              '#1976D2'
+            ]
+          }
+        ]
+      },
+      chartOptions: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                size: 14
+              }
             }
-          ]
-        },
-        chartOptions: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'top'
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  let label = context.dataset.label || '';
-                  if (label) {
-                    label += ': ';
-                  }
-                  if (context.parsed !== null) {
-                    label += `${context.parsed}`;
-                  }
-                  return label;
-                }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(tooltipItem) {
+                return `${tooltipItem.label}: ${tooltipItem.raw} cases`;
               }
             }
           }
-        }
+        },
+        cutout: '70%', // Makes it a donut chart with a larger hole
       }
-    }
+    };
   }
-  </script>
-  
-  <style scoped>
-  /* Custom styles if needed */
-  </style>
-  
+});
+</script>
+
+<style scoped>
+/* Adjust the center text */
+.text-lg {
+  font-size: 1.125rem;
+}
+</style>

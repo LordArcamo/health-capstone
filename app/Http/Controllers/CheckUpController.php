@@ -49,6 +49,34 @@ class CheckUpController extends Controller
         return Inertia::render('Table/IndividualTreatmentRecord', [
             'ITR' => $data,
         ]);
+
+    // Query the CheckUp model to get the data needed for the chart
+    $checkups = CheckUp::selectRaw('
+            MONTH(consultationDate) as month, 
+            YEAR(consultationDate) as year, 
+            sex, 
+            count(*) as case_count
+        ')
+        ->groupByRaw('MONTH(consultationDate), YEAR(consultationDate), sex')
+        ->get();
+
+    // Organize data for chart
+    $chartData = [
+        'months' => ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        'years' => $checkups->pluck('year')->unique()->sort(),
+        'data' => $checkups->groupBy('year')->map(function ($yearData) {
+            return $yearData->groupBy('month')->map(function ($monthData) {
+                return [
+                    'male' => $monthData->where('sex', 'Male')->sum('case_count'),
+                    'female' => $monthData->where('sex', 'Female')->sum('case_count'),
+                ];
+            });
+        }),
+    ];
+
+    return Inertia::render('ChartPage', [
+        'chartData' => $chartData,
+    ]);
     }
     
 
