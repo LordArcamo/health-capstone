@@ -17,7 +17,17 @@ class NationalImmunizationProgramController extends Controller
 
         $data = PersonalInformation::join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
             ->select(
-                'personal_information.*',
+                'personal_information.personalId',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
                 'national_immunization_programs.birthplace',
                 'national_immunization_programs.bloodtype',
                 'national_immunization_programs.mothername',
@@ -37,6 +47,7 @@ class NationalImmunizationProgramController extends Controller
                 'national_immunization_programs.place',
                 'national_immunization_programs.guardian',
             )
+            ->distinct()
             ->get();
         return Inertia::render('Table/NationalImmunization', [
             'IMMUNIZATION' => $data, 
@@ -47,9 +58,25 @@ class NationalImmunizationProgramController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('CheckUp/NationalImmunizationCheckup');
+        $personalId = $request->get('patient_personalId');
+
+        if ($personalId === 'new') {
+            return Inertia::render('CheckUp/NationalImmunizationCheckup', [
+                'personalInfo' => null, // No existing patient
+            ]);
+        }
+
+        $personalInfo = $personalId ? PersonalInformation::find($personalId) : null;
+
+        if (!$personalInfo) {
+            return back()->withErrors(['error' => 'Patient not found']);
+        }
+
+        return Inertia::render('CheckUp/NationalImmunizationCheckup', [
+            'personalInfo' => $personalInfo,
+        ]);
     }
 
     /**
@@ -57,18 +84,25 @@ class NationalImmunizationProgramController extends Controller
      */
     public function store(Request $request)
     {
+        // Log the incoming request
+        \Log::info('Incoming request data:', $request->all());
+
         // Validate request data
         $validatedData = $request->validate([
-            'firstName' => 'required|string|max:100',
-            'lastName' => 'required|string|max:100',
-            'middleName' => 'required|string|max:100',
+            // Personal Information
+            'personalId' => 'nullable|exists:personal_information,personalId',
+            'firstName' => 'required_without:personalId|string|max:100',
+            'lastName' => 'required_without:personalId|string|max:100',
+            'middleName' => 'nullable|string|max:100',
             'suffix' => 'nullable|string|max:10',
             'purok' => 'nullable|string|max:100',
             'barangay' => 'nullable|string|max:100',
-            'age' => 'required|numeric',
-            'birthdate' => 'required|date',
-            'contact' => 'required|string|max:15',
-            'sex' => 'required|string|max:10',
+            'age' => 'nullable|numeric',
+            'birthdate' => 'nullable|date',
+            'contact' => 'nullable|string|max:15',
+            'sex' => 'nullable|string|max:10',
+
+            // Additional ITR Data
             'birthplace' => 'required|string|max:100',
             'bloodtype' => 'required|string|max:5',
             'mothername' => 'required|string|max:100',
@@ -89,25 +123,47 @@ class NationalImmunizationProgramController extends Controller
             'guardian' => 'required|string|max:100',
         ]);
 
-        // Split validated data for PersonalInformation
-        $personalData = [
-            'firstName' => $validatedData['firstName'],
-            'lastName' => $validatedData['lastName'],
-            'middleName' => $validatedData['middleName'],
-            'suffix' => $validatedData['suffix'],
-            'purok' => $validatedData['purok'],
-            'barangay' => $validatedData['barangay'],
-            'age' => $validatedData['age'],
-            'birthdate' => $validatedData['birthdate'],
-            'contact' => $validatedData['contact'],
-            'sex' => $validatedData['sex'],
-        ];
+        $personalInfo = null;
 
-        // Save personal data to PersonalInformation table
-        $personalInfo = PersonalInformation::create($personalData);
+        // Check if the patient exists
+        if (isset($validatedData['personalId'])) {
+            $personalInfo = PersonalInformation::find($validatedData['personalId']);
 
-        // Prepare data for NationalImmunizationProgram table
-        $immunizationData = [
+            if ($personalInfo) {
+                // Update existing personal information
+                $personalInfo->update([
+                    'firstName' => $validatedData['firstName'] ?? $personalInfo->firstName,
+                    'lastName' => $validatedData['lastName'] ?? $personalInfo->lastName,
+                    'middleName' => $validatedData['middleName'] ?? $personalInfo->middleName,
+                    'suffix' => $validatedData['suffix'] ?? $personalInfo->suffix,
+                    'purok' => $validatedData['purok'] ?? $personalInfo->purok,
+                    'barangay' => $validatedData['barangay'] ?? $personalInfo->barangay,
+                    'age' => $validatedData['age'] ?? $personalInfo->age,
+                    'birthdate' => $validatedData['birthdate'] ?? $personalInfo->birthdate,
+                    'contact' => $validatedData['contact'] ?? $personalInfo->contact,
+                    'sex' => $validatedData['sex'] ?? $personalInfo->sex,
+                ]);
+            } else {
+                return back()->withErrors(['error' => 'Patient not found.']);
+            }
+        } else {
+            // Create new personal information
+            $personalInfo = PersonalInformation::create([
+                'firstName' => $validatedData['firstName'],
+                'lastName' => $validatedData['lastName'],
+                'middleName' => $validatedData['middleName'],
+                'suffix' => $validatedData['suffix'],
+                'purok' => $validatedData['purok'],
+                'barangay' => $validatedData['barangay'],
+                'age' => $validatedData['age'],
+                'birthdate' => $validatedData['birthdate'],
+                'contact' => $validatedData['contact'],
+                'sex' => $validatedData['sex'],
+            ]);
+        }
+
+        // Save the immunization data
+        NationalImmunizationProgram::create([
             'personalId' => $personalInfo->personalId, // Link to personal information record
             'birthplace' => $validatedData['birthplace'],
             'bloodtype' => $validatedData['bloodtype'],
@@ -127,13 +183,17 @@ class NationalImmunizationProgramController extends Controller
             'date' => $validatedData['date'],
             'place' => $validatedData['place'],
             'guardian' => $validatedData['guardian'],
-        ];
+        ]);
 
-        // Save immunization data to NationalImmunizationProgram table
-        $immunization = NationalImmunizationProgram::create($immunizationData);
+        // Log success and return response
+        \Log::info('Data saved successfully for personalId:', [
+            'personalId' => $personalInfo->personalId,
+        ]);
 
-        // Redirect back with a success message
-        return back()->with('Success', 'Data saved successfully!');
+        return back()->with([
+            'success' => 'Data saved successfully!',
+            'personalId' => $personalInfo->personalId,
+        ]);
     }
 
 

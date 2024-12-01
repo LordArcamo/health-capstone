@@ -1,7 +1,12 @@
 <template>
   <Head title="Prenatal Check Up" />
   <NewLayout>
-    <PrenatalForm :onSubmit="submitForm" />
+    
+    <PrenatalForm 
+      v-if="personalInfo !== undefined" 
+      :selectedPatient="personalInfo || {}"
+      @submitForm="submitForm" 
+    />
   </NewLayout>
 </template>
 
@@ -10,18 +15,40 @@ import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import PrenatalForm from '@/Components/PrenatalForm.vue';
 import { Inertia } from '@inertiajs/inertia';
+import { ref, watch } from 'vue';
 
-function submitForm(form) {
-  console.log('Submitting from parent:', form); // Log the form data for debugging
-  
-  // Post the form data to the backend using Inertia
-  return Inertia.post('/prenatal/store', form, {
-    onSuccess: () => {
-      // Handle success (e.g., show a success message or reset form)
+
+const props = defineProps({
+  personalInfo: {
+      type: Object,
+      required: false,
+      default: () => ({}), // Default to an empty object
+    },
+});
+
+watch(() => props.personalInfo, (newVal) => {
+  if (!newVal || Object.keys(newVal).length === 0) {
+    console.error('No valid personalInfo provided.');
+  }
+});
+
+function submitForm(payload) {
+  console.log('Submitting from parent:', payload);
+
+  Inertia.post('/prenatal/store', payload, {
+    onSuccess: (response) => {
       console.log('Data saved successfully!');
+
+      // Check if the server returns a new personalId
+      if (response.props.personalId) {
+        payload.personalId = response.props.personalId; // Update the payload with the new personalId
+        console.log('Updated payload with new personalId:', payload.personalId);
+      }
+
+      // Optionally, notify the user or reset the form
+      alert('Form submitted successfully!');
     },
     onError: (errors) => {
-      // Handle errors (e.g., show error messages)
       console.error('Form submission errors:', errors);
     },
   });

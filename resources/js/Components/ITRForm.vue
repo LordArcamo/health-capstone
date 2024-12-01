@@ -3,7 +3,7 @@
     <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Individual Treatment Record</h2>
 
-      <form @submit="handleSubmit">
+      <form @submit="submitForm">
         <!-- Step 1: Patient Information -->
         <div v-if="step === 1">
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
@@ -92,7 +92,7 @@
             </div>
           </div>
           <div class="mt-6 flex justify-center text-right">
-            <button @click="nextStep" class="btn">Next</button>
+            <button type="button" @click="nextStep" class="btn">Next</button>
           </div>
         </div>
 
@@ -138,8 +138,8 @@
             </div>
           </div>
           <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="btn">Back</button>
-            <button @click="nextStep" class="btn">Next</button>
+            <button type="button" @click="prevStep" class="btn">Back</button>
+            <button type="button" @click="nextStep" class="btn">Next</button>
           </div>
         </div>
 
@@ -193,8 +193,8 @@
             </div>
           </div>
           <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="btn">Back</button>
-            <button type="button" @click="handleSubmit" class="btn">Submit</button>
+            <button type="button" @click="prevStep" class="btn">Back</button>
+            <button type="submit" @click="submitForm" class="btn">Submit</button>
           </div>
         </div>
       </form>
@@ -206,22 +206,31 @@
 </template>
 
 <script>
+
 export default {
-  props: ['onSubmit'],
+  
+  props: {
+    selectedPatient: {
+    type: Object,
+    required: false,
+    default: () => ({}),
+    },
+    onSubmit: Function,
+  },
   data() {
     return {
       step: 1,
       form: {
-        firstName: '',
-        lastName: '',
-        middleName: '',
-        suffix: '',
-        purok: '',
-        barangay: '',
+        firstName: this.selectedPatient?.firstName || '',
+        lastName: this.selectedPatient?.lastName || '',
+        middleName: this.selectedPatient?.middleName || '',
+        suffix: this.selectedPatient?.suffix || '',
+        purok: this.selectedPatient?.purok || '',
+        barangay: this.selectedPatient?.barangay || '',
         age: '',
-        birthdate: '',
-        contact: '',
-        sex: '',
+        birthdate: this.selectedPatient?.birthdate || '',
+        contact: this.selectedPatient?.contact || '',
+        sex: this.selectedPatient?.sex || '',
         consultationDate: '',
         consultationTime: '',
         modeOfTransaction: '',
@@ -236,43 +245,91 @@ export default {
         diagnosis: '',
         medication: '',
       },
-      errors: {
-        contact: '',
-      },
+      errors: {},
       successMessage: '',
     };
   },
-    computed: {
-      // This computed property will automatically calculate the age based on the birthdate
-      computedAge() {
-        if (!this.form.birthdate) return '';
-        const birthDate = new Date(this.form.birthdate);
-        const age = new Date().getFullYear() - birthDate.getFullYear();
-        return age;
+  computed: {
+    computedAge() {
+      if (!this.form.birthdate) return '';
+      const birthDate = new Date(this.form.birthdate);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      // Check if the birthday has occurred this year
+      const hasBirthdayOccurred = 
+        today.getMonth() > birthDate.getMonth() || 
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+      if (!hasBirthdayOccurred) {
+        age--;
+      }
+
+      return age;
+    },
+  },
+  watch: {
+    selectedPatient: {
+      immediate: true,
+      handler(newPatient) {
+        if (newPatient && newPatient.personalId === null) {
+          // Clear the form for a new patient
+          this.resetForm();
+        } else if (newPatient && Object.keys(newPatient).length > 0) {
+          // Populate the form with selected patient data
+          this.populateForm(newPatient);
+        }
       },
     },
-    watch: {
-      // Watch for changes in birthdate and update the age field
-      'form.birthdate': function () {
-        this.form.age = this.computedAge; // Automatically update age when birthdate changes
-      },
-    isFormValid() {
-      return this.form.contact.length === 10 && this.form.emergencyContact.length === 10;
+    // Watch for changes in birthdate and update the age field
+    'form.birthdate': function () {
+      this.form.age = this.computedAge; // Automatically update age when birthdate changes
     },
   },
   methods: {
-    handleSubmit(event) {
-      // Prevent the default form submission (which reloads the page)
-      event.preventDefault();
+    populateForm(patient) {
+      console.log("Populating form with patient:", patient);
+      this.form = {
+        firstName: this.selectedPatient?.firstName || '',
+        lastName: this.selectedPatient?.lastName || '',
+        middleName: this.selectedPatient?.middleName || '',
+        suffix: this.selectedPatient?.suffix || '',
+        purok: this.selectedPatient?.purok || '',
+        barangay: this.selectedPatient?.barangay || '',
+        age: '',
+        birthdate: this.selectedPatient?.birthdate || '',
+        contact: this.selectedPatient?.contact || '',
+        sex: this.selectedPatient?.sex || '',
+        
+      };
+      this.form.age = this.computedAge;
 
-      // Now call submitForm logic without reloading the page
-      this.submitForm();
+    },
+    formatContact() {
+      // Ensure the input starts with "09", remove non-numeric characters, and limit to 10 digits
+      if (!this.form.contact.startsWith('0')) {
+        this.form.contact = '0' + this.form.contact.replace(/[^0-9]/g, '');
+      } else {
+        this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 11);
+      }
+    },
+    nextStep() {
+      if (this.step === 1 && this.validateStep1()) {
+        this.step++;
+      } else if (this.step === 2 && this.validateStep2()) {
+        this.step++;
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.submitForm();
+      }
+    },
+    prevStep() {
+      this.step--;
     },
     validateStep1() {
       this.errors = {};
       let valid = true;
 
-      // Validate each field
       if (!this.form.firstName) {
         this.errors.firstName = 'First name is required.';
         valid = false;
@@ -297,9 +354,9 @@ export default {
         this.errors.birthdate = 'Birthdate is required.';
         valid = false;
       }
-      if (this.form.contact.length !== 10) {
-      this.errors.contact = 'Contact number must be exactly 10 digits after +63.';
-      valid = false;
+      if (this.form.contact.length !== 11) {
+        this.errors.contact = 'Contact number must be exactly 10 digits after +63.';
+        valid = false;
       }
       return valid;
     },
@@ -335,79 +392,113 @@ export default {
       }
       return valid;
     },
-    nextStep() {
-      if (this.step === 1 && this.validateStep1()) {
-        this.step++;
-      } else if (this.step === 2 && this.validateStep2()) {
-        this.step++;
-      } else if (this.step === 3 && this.validateStep3()) {
-        this.submitForm();
-      }
-    },
-    prevStep() {
-      this.step--;
-    },
-    formatContact() {
-      // Ensure the input starts with "09", remove non-numeric characters, and limit to 10 digits
-      if (!this.form.contact.startsWith('0')) {
-        this.form.contact = '0' + this.form.contact.replace(/[^0-9]/g, '');
-      } else {
-        this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
-      }
-
-      // Limit to exactly 10 digits
-      if (this.form.contact.length > 10) {
-        this.form.contact = this.form.contact.slice(0, 10);
-      }
-    },
     submitForm() {
-      // Check if all steps are valid before submitting
-      if (this.validateStep1() && this.validateStep2() && this.validateStep3()) {
-        console.log('Submitting form with data:', this.form);
 
-        // Emit the form data to the parent component via the onSubmit prop
-        this.$emit('submitForm', this.form);
 
-        // Optional: Display a success message or alert
-        alert('Form submitted');
-        this.successMessage = 'Form submitted successfully!';
+      // Prepare the payload
+      const payload = {
+        personalId: this.selectedPatient?.personalId || null, // Include personalId if it exists
+        firstName: this.form.firstName,
+        lastName: this.form.lastName,
+        middleName: this.form.middleName,
+        suffix: this.form.suffix,
+        purok: this.form.purok,
+        barangay: this.form.barangay,
+        age: this.form.age,
+        birthdate: this.form.birthdate,
+        contact: this.form.contact,
+        sex: this.form.sex,
+        consultationDate: this.form.consultationDate,
+        consultationTime: this.form.consultationTime,
+        modeOfTransaction: this.form.modeOfTransaction,
+        bloodPressure: this.form.bloodPressure,
+        temperature: this.form.temperature,
+        height: this.form.height,
+        weight: this.form.weight,
+        providerName: this.form.providerName,
+        natureOfVisit: this.form.natureOfVisit,
+        visitType: this.form.visitType,
+        chiefComplaints: this.form.chiefComplaints,
+        diagnosis: this.form.diagnosis,
+        medication: this.form.medication,
+    };
 
-        // Reset the form fields to their initial state
-        this.form = {
-          firstName: '',
-          lastName: '',
-          middleName: '',
-          suffix: '',
-          purok: '',
-          barangay: '',
-          age: '',
-          birthdate: '',
-          contact: '',
-          sex: '',
-          consultationDate: '',
-          consultationTime: '',
-          modeOfTransaction: '',
-          bloodPressure: '',
-          temperature: '',
-          height: '',
-          weight: '',
-          providerName: '',
-          natureOfVisit: '',
-          visitType: '',
-          chiefComplaints: '',
-          diagnosis: '',
-          medication: ''
-        };
-
-        // Reset errors
-        this.errors = {};
-      } else {
-        this.successMessage = 'Please complete all required fields before submitting.';
+      // Add personal information only if the patient is new
+      if (!this.selectedPatient?.personalId) {
+        Object.assign(payload, {
+          firstName: this.form.firstName,
+          lastName: this.form.lastName,
+          middleName: this.form.middleName,
+          suffix: this.form.suffix,
+          purok: this.form.purok,
+          barangay: this.form.barangay,
+          age: this.form.age,
+          birthdate: this.form.birthdate,
+          contact: this.form.contact,
+          sex: this.form.sex,
+        });
       }
+
+      console.log('Submitting form with payload:', payload);
+
+      // Emit the form data to the parent component via the onSubmit prop
+      this.$emit('submitForm', payload);
+
+      // Optional: Display a success message or alert
+      alert('Form submitted');
+      this.successMessage = 'Form submitted successfully!';
+
+      // Reset the form fields to their initial state
+      this.resetForm();
     },
+
+    resetForm() {
+    this.form = {
+      firstName: '',
+      lastName: '',
+      middleName: '',
+      suffix: '',
+      purok: '',
+      barangay: '',
+      age: '',
+      birthdate: '',
+      contact: '',
+      sex: '',
+      consultationDate: '',
+      consultationTime: '',
+      modeOfTransaction: '',
+      bloodPressure: '',
+      temperature: '',
+      height: '',
+      weight: '',
+      providerName: '',
+      natureOfVisit: '',
+      visitType: '',
+      chiefComplaints: '',
+      diagnosis: '',
+      medication: '',
+    };
+    this.errors = {};
+  },
+  populateForm(patient) {
+    this.form = {
+      ...this.form,
+      ...patient,
+    };
+  },
+},
+  mounted() {
+    console.log('Received personalInfo:', this.personalInfo);
+    if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
+      console.log('Rendering empty form for new patient');
+    } else {
+      console.log('Rendering form for existing patient:', this.selectedPatient);
+      this.populateForm(this.selectedPatient);
+    }
   },
 };
 </script>
+
 
 
 <style scoped>

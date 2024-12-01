@@ -2,7 +2,7 @@
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import Modal from '@/Components/WelcomeModal.vue';
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref } from 'vue';
 
 // Receive patients from Inertia props
 const props = defineProps({
@@ -13,34 +13,37 @@ const props = defineProps({
 });
 
 // Declare reactive variables
-const selectedPatient = ref(null);
 
-// Emit event to update patients in parent component
+
+const selectedPatient = ref({});
+
+
 const emit = defineEmits(['patients-updated', 'patientSelected']);
 
-// Handle patient selection in parent component
+// Function to handle patient selection from Modal
 function handlePatientSelected(patient) {
-  console.log('Selected patient:', patient); // Debugging log
-  selectedPatient.value = patient; // Update the selected patient in parent
-  emit('patientSelected', patient); // Emit to the parent if needed for further actions
+  console.log('Selected patient in Checkup:', patient);
+  selectedPatient.value = patient; // Update the selected patient
 }
 
-// Handle patient updates coming from the child (modal)
+// Function to handle patient updates in the parent
 function updatePatients(newPatients) {
   console.log('Updating patients in parent component');
   emit('patients-updated', newPatients); // Emit updated patients back to the parent
 }
+
+// Function to handle form submission from ITRForm
 </script>
 
 <template>
   <NewLayout>
     <Head title="Check Up" />
-    
+
     <!-- Modal for searching and selecting patients -->
-    <Modal 
+    <Modal
       :patients="props.patients"
-      @patientSelected="handlePatientSelected" 
-      @patients-updated="updatePatients" 
+      @patientSelected="handlePatientSelected"
+      @patients-updated="updatePatients"
     />
   </NewLayout>
 </template>

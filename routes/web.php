@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
     Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); 
     Route::get('/patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
+    
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -59,8 +59,8 @@
         </thead>
         <tbody class="text-gray-600 text-sm">
           <tr
-            v-for="patient in filteredPatients"
-            :key="patient.personalId"
+            v-for="(patient, index) in filteredPatients"
+            :key="`${patient.personalId}-${index}`"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
           >
           <td class="py-3 px-6">{{ patient.personalId }}</td>

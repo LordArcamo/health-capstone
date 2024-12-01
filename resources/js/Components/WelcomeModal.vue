@@ -65,7 +65,8 @@
         <p class="text-gray-700 mb-6 text-lg">What type of Check-Up do we have today?</p>
         <div class="flex justify-center space-x-4 mb-4">
           <Link
-            :href="route('itr', { patient_personalId: selectedPatient.personalId })"
+            v-if="selectedPatient && Object.keys(selectedPatient).length > 0"
+            :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new', })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             Individual Treatment Record
@@ -79,7 +80,8 @@
           </button>
 
           <Link
-            :href="route('nationalimmunizationprogram', { patient_personalId: selectedPatient.personalId })"
+            v-if="selectedPatient && Object.keys(selectedPatient).length > 0"
+            :href="route('nationalimmunizationprogram', { patient_personalId: selectedPatient.personalId || 'new', })"
             class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
           >
             National Immunization Program
@@ -109,7 +111,8 @@
           <h2 class="text-3xl font-bold mb-6">Select Checkup Type</h2>
           <div class="flex flex-col space-y-4">
             <Link
-              :href="route('prenatal', { patient_id: selectedPatient.personalId })"
+              v-if="selectedPatient && Object.keys(selectedPatient).length > 0"
+              :href="route('prenatal', { patient_personalId: selectedPatient.personalId || 'new', })"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-3 px-6 rounded shadow hover:from-green-600 hover:to-yellow-600 transition-colors duration-300"
             >
               Prenatal Checkup
@@ -130,22 +133,23 @@
 <script>
 import { Link } from '@inertiajs/vue3';
 import { debounce } from 'lodash';
+//import { usePatientStore } from '@/Stores/patientStore';
 
 export default {
   components: { Link },
   props: {
     patients: {
       type: Array,
-      default: () => [],
+      required: true,
     },
   },
   data() {
     return {
       step: 1,
       searchQuery: '',
-      selectedPatient: null,
       showModal: false,
       filteredPatients: [],
+      selectedPatient: null,
     };
   },
     watch: {
@@ -188,15 +192,30 @@ export default {
 
     console.log('Filtered Patients:', this.filteredPatients);
   },
-
-    selectPatient(patient) {
+  selectPatient(patient) {
+      console.log('Patient selected:', patient);
       this.selectedPatient = patient;
+      this.$emit('patientSelected', patient); // Emit selected patient
       this.step = 2;
     },
     addNewPatient() {
-      this.selectedPatient = { personalId: 'new', lastName: this.searchQuery };
-      this.step = 2;
-    },
+      console.log("Add New Patient triggered");
+      // Create a blank selected patient for a new patient flow
+      this.selectedPatient = {
+          personalId: null, // Indicating a new patient
+          firstName: '',
+          lastName: '',
+          middleName: '',
+          suffix: '',
+          purok: '',
+          barangay: '',
+          birthdate: '',
+          contact: '',
+          sex: '',
+      };
+      this.$emit('patientSelected', this.selectedPatient); // Emit the new patient object
+      this.step = 2; // Proceed to check-up type selection
+  }
   },
 };
 </script>
