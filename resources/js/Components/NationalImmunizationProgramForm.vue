@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen flex flex-col justify-center items-center bg-gray-100">
+  <div class="min-h-screen flex flex-col justify-center items-center">
     <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">National Immunization Form</h2>
 
       <!-- Step Navigation -->
-      <div class="relative z-40 flex justify-between items-center pb-4 border-b">
+      <div class="relative z-10 flex justify-between items-center pb-4 border-b">
         <div class="absolute inset-0 flex items-center justify-between px-4">
           <!-- Connecting lines -->
           <div v-for="(_, index) in stepTitles.length - 1" :key="index" class="flex-1 h-0.5 bg-gray-300">
@@ -12,7 +12,7 @@
               :style="{ width: '100%' }"></div>
           </div>
         </div>
-        <div v-for="(stepTitle, index) in stepTitles" :key="index" class="relative z-50">
+        <div v-for="(stepTitle, index) in stepTitles" :key="index" class="relative z-10">
           <button type="button" class="px-4 py-2 rounded-sm text-sm font-semibold flex items-center justify-center"
             :class="{
               'bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white': step === index + 1,

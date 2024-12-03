@@ -16,28 +16,16 @@
         <h3 class="text-lg font-semibold mb-4">Search for a Patient</h3>
         <div>
           <label for="search" class="block text-sm font-medium text-gray-700">Search by Name</label>
-          <input
-            type="text"
-            v-model="searchQuery"
-            @input="filterPatients"
-            id="search"
-            class="input"
-            placeholder="Enter patient name"
-          />
+          <input type="text" v-model="searchQuery" @input="filterPatients" id="search" class="input"
+            placeholder="Enter patient name" />
         </div>
 
         <div v-if="filteredPatients.length > 0" class="mt-4">
           <ul class="bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
-            <li
-              v-for="patient in filteredPatients"
-              :key="patient.id"
-              @click="selectPatient(patient)"
-              :class="{
-                'bg-gray-100': selectedPatient?.id === patient.id,
-                'hover:bg-gray-50': selectedPatient?.id !== patient.id,
-              }"
-              class="cursor-pointer px-4 py-2"
-            >
+            <li v-for="patient in filteredPatients" :key="patient.id" @click="selectPatient(patient)" :class="{
+              'bg-gray-100': selectedPatient?.id === patient.id,
+              'hover:bg-gray-50': selectedPatient?.id !== patient.id,
+            }" class="cursor-pointer px-4 py-2">
               {{ patient.name }} ({{ patient.age }} years)
             </li>
           </ul>
@@ -49,11 +37,8 @@
 
         <div class="flex justify-end space-x-4 mt-6">
           <button @click="closeModal" class="bg-red-500 text-white py-2 px-4 rounded-md">Cancel</button>
-          <button
-            :disabled="!selectedPatient && !allowAddNewPatient"
-            @click="addOrNextStep"
-            class="bg-blue-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400"
-          >
+          <button :disabled="!selectedPatient && !allowAddNewPatient" @click="addOrNextStep"
+            class="bg-blue-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400">
             {{ selectedPatient ? "Next" : "Add New Patient" }}
           </button>
         </div>
@@ -86,7 +71,7 @@
             <div>
               <label class="block">Middle Name:</label>
               <input type="text" v-model="form.middleName" class="input" placeholder="Example: Penduko" required />
-          
+
             </div>
             <div>
               <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix:</label>
@@ -104,7 +89,7 @@
                 <option value="V">V</option>
               </select>
 
-     
+
             </div>
             <div>
               <label for="barangay" class="block mb-1">Barangay:</label>
@@ -174,29 +159,31 @@
         </div>
       </div>
 
+
       <!-- Step 3: Vaccine Selection -->
       <div v-if="step === 3">
         <h3 class="text-lg font-semibold mb-4">Vaccine Details</h3>
         <div class="mb-4">
-          <label for="vaccineCategory" class="block text-sm font-medium text-gray-700">Vaccine Category</label>
-          <select
-            v-model="form.vaccineCategory"
-            id="vaccineCategory"
-            class="input"
-          >
+          <label for="vaccineCategory" class="block text-sm font-medium text-gray-700">
+            Vaccine Category
+          </label>
+          <select v-model="form.vaccineCategory" id="vaccineCategory" class="input">
             <option disabled value="">Select Category</option>
-            <option v-for="category in vaccineCategories" :key="category" :value="category">{{ category }}</option>
+            <option v-for="category in vaccineCategories" :key="category" :value="category">
+              {{ category }}
+            </option>
           </select>
         </div>
-        <div class="mb-4">
-          <label for="vaccineType" class="block text-sm font-medium text-gray-700">Vaccine Type</label>
-          <select
-            v-model="form.vaccineType"
-            id="vaccineType"
-            class="input"
-          >
+
+        <div class="mb-4" v-if="form.vaccineCategory">
+          <label for="vaccineType" class="block text-sm font-medium text-gray-700">
+            Vaccine Type
+          </label>
+          <select v-model="form.vaccineType" id="vaccineType" class="input">
             <option disabled value="">Select Vaccine Type</option>
-            <option v-for="type in vaccineTypes" :key="type" :value="type">{{ type }}</option>
+            <option v-for="type in vaccineTypesForCategory" :key="type" :value="type">
+              {{ type }}
+            </option>
           </select>
         </div>
 
@@ -206,18 +193,100 @@
         </div>
       </div>
 
-      <!-- Step 4: Confirmation -->
+      <!-- Step 4: Vaccination Record Form -->
       <div v-if="step === 4">
-        <h3 class="text-lg font-semibold mb-4">Confirmation</h3>
-        <p><strong>Patient:</strong> {{ selectedPatient?.name || form.firstName + " " + form.lastName }}</p>
-        <p><strong>Vaccine Category:</strong> {{ form.vaccineCategory }}</p>
-        <p><strong>Vaccine Type:</strong> {{ form.vaccineType }}</p>
+        <h3 class="text-lg font-semibold mb-6">Vaccination Record</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Date of Visit -->
+          <div>
+            <label for="dateOfVisit" class="block text-sm font-medium text-gray-700">
+              Date of Visit
+            </label>
+            <input type="date" v-model="form.dateOfVisit" id="dateOfVisit" class="input" required />
+          </div>
 
+          <!-- Conditional Age Input -->
+          <div>
+            <label for="age" class="block text-sm font-medium text-gray-700">
+              {{ isUnderOneYear ? 'Age in Months' : 'Age in Years' }}
+            </label>
+            <input type="number" id="age" v-model="age" class="input"
+              :placeholder="isUnderOneYear ? 'Enter age in months' : 'Enter age in years'" required />
+          </div>
+
+          <!-- Weight -->
+          <div>
+            <label for="weight" class="block text-sm font-medium text-gray-700">
+              Weight
+            </label>
+            <input type="text" v-model="form.weight" id="weight" class="input" placeholder="Enter weight (e.g., 10 kg)"
+              required />
+          </div>
+
+          <!-- Height -->
+          <div>
+            <label for="height" class="block text-sm font-medium text-gray-700">
+              Height
+            </label>
+            <input type="text" v-model="form.height" id="height" class="input" placeholder="Enter height (e.g., 75 cm)"
+              required />
+          </div>
+
+          <!-- Temperature -->
+          <div>
+            <label for="temperature" class="block text-sm font-medium text-gray-700">
+              Temperature
+            </label>
+            <input type="text" v-model="form.temperature" id="temperature" class="input"
+              placeholder="Enter temperature (e.g., 36.5°C)" required />
+          </div>
+
+          <!-- Antigen Given -->
+          <div>
+            <label for="antigenGiven" class="block text-sm font-medium text-gray-700">
+              Antigen Given
+            </label>
+            <input type="text" v-model="form.antigenGiven" id="antigenGiven" class="input"
+              placeholder="Enter antigen details" required />
+          </div>
+
+          <!-- Injected By -->
+          <div>
+            <label for="injectedBy" class="block text-sm font-medium text-gray-700">
+              Injected By
+            </label>
+            <input type="text" v-model="form.injectedBy" id="injectedBy" class="input"
+              placeholder="Enter name of injector" required />
+          </div>
+
+          <!-- Exclusively Breastfed (only for Under 1 Year) -->
+          <div v-if="isUnderOneYear">
+            <label for="exclusivelyBreastfed" class="block text-sm font-medium text-gray-700">
+              Exclusively Breastfed
+            </label>
+            <select v-model="form.exclusivelyBreastfed" id="exclusivelyBreastfed" class="input">
+              <option disabled value="">Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          <!-- Next Appointment -->
+          <div>
+            <label for="nextAppointment" class="block text-sm font-medium text-gray-700">
+              Next Appointment
+            </label>
+            <input type="date" v-model="form.nextAppointment" id="nextAppointment" class="input" required />
+          </div>
+        </div>
         <div class="flex justify-between mt-6">
           <button @click="prevStep" class="bg-gray-500 text-white py-2 px-4 rounded-md">Back</button>
           <button @click="saveVaccination" class="bg-green-500 text-white py-2 px-4 rounded-md">Save</button>
         </div>
       </div>
+
+
+
     </div>
   </div>
 </template>
@@ -239,68 +308,125 @@ export default {
       form: {
         firstName: "",
         lastName: "",
+        birthdate: "",
+        contact: "",
         vaccineCategory: "",
         vaccineType: "",
+        dateOfVisit: "",
+        ageInMonths: "",
+        ageInYears: "",
+        weight: "",
+        height: "",
+        temperature: "",
+        antigenGiven: "",
+        injectedBy: "",
+        exclusivelyBreastfed: "",
+        nextAppointment: "",
       },
-      vaccineCategories: ["Category A", "Category B"],
-      vaccineTypes: ["Type 1", "Type 2"],
+      vaccineCategories: [
+        "Pregnant",
+        "Under 1 Year",
+        "School-aged Immunization",
+        "Senior Citizen",
+      ],
+      vaccineTypes: {
+        Pregnant: ["Tetanus Toxoid", "Tetanus Diphtheria"],
+        "Under 1 Year": [
+          "BCG",
+          "Hepatitis B",
+          "Pentavalent 1, 2, 3",
+          "Bivalent Oral Polio Vaccine 1, 2, 3",
+          "Inactivated Polio Vaccine 1, 2, 3",
+          "Pneumococcal Conjugate Vaccine 1, 2, 3",
+          "Measles, Mumps, Rubella 1, 2",
+        ],
+        "School-aged Immunization": [
+          "Grade 1: Measles & Rubella",
+          "Grade 4: Tetanus Diphtheria",
+          "HPV",
+        ],
+        "Senior Citizen": ["PPV23", "Flu Vaccine"],
+      },
+      vaccineTypesForCategory: [],
     };
   },
+  watch: {
+    "form.vaccineCategory": function () {
+      this.updateVaccineTypes();
+    },
+  },
+  computed: {
+    // Determine if the selected category is "Under 1 Year"
+    isUnderOneYear() {
+      return this.form.vaccineCategory === "Under 1 Year";
+    },
+  },
   methods: {
+    handleAgeInput(event) {
+      // Clear irrelevant field based on the selected vaccine category
+      if (this.isUnderOneYear) {
+        this.form.ageInYears = "";
+      } else {
+        this.form.ageInMonths = "";
+      }
+    },
+    updateVaccineTypes() {
+      this.vaccineTypesForCategory =
+        this.vaccineTypes[this.form.vaccineCategory] || [];
+    },
     closeModal() {
       this.showModal = false;
     },
     nextStep() {
-      this.step++;
+      if (this.step === 4) {
+        this.saveVaccination(); // Save vaccination details on Step 4
+      } else {
+        this.step++;
+      }
     },
     prevStep() {
-      this.step--;
+      if (this.step > 1) {
+        this.step--;
+      }
     },
     addOrNextStep() {
       if (this.allowAddNewPatient) {
-        this.selectedPatient = null; // Clear any selected patient when adding a new one
-        this.step = 2; // Move to add patient form
+        this.step = 2;
       } else if (this.selectedPatient) {
-        this.nextStep(); // Proceed to the next step if a patient is selected
+        this.nextStep();
       }
     },
     filterPatients() {
       const query = this.searchQuery.trim().toLowerCase();
-      if (query) {
-        this.filteredPatients = this.patients.filter((patient) =>
-          patient.name.toLowerCase().includes(query)
-        );
-        this.allowAddNewPatient = this.filteredPatients.length === 0;
-      } else {
-        this.filteredPatients = [];
-        this.allowAddNewPatient = false;
-      }
+      this.filteredPatients = this.patients.filter((patient) =>
+        patient.name.toLowerCase().includes(query)
+      );
+      this.allowAddNewPatient = this.filteredPatients.length === 0;
     },
     selectPatient(patient) {
-      this.selectedPatient = patient; // Set the selected patient
-      this.allowAddNewPatient = false; // Disable add new patient when a patient is selected
+      this.selectedPatient = patient;
+      this.allowAddNewPatient = false;
+    },
+    validateStepTwo() {
+      const requiredFields = ["firstName", "lastName", "birthdate"];
+      for (const field of requiredFields) {
+        if (!this.form[field]) {
+          alert(`Please complete the field: ${field}`);
+          return;
+        }
+      }
+      this.nextStep();
     },
     saveVaccination() {
-      const newPatient = {
-        id: this.patients.length + 1,
-        name: `${this.form.firstName} ${this.form.lastName}`,
-        age: "N/A",
-        contact: this.form.contact || "N/A",
-      };
-      if (this.allowAddNewPatient) {
-        this.patients.push(newPatient); // Add new patient to the list
-        this.selectedPatient = newPatient; // Set the new patient as selected
-      }
-      console.log("Vaccination saved:", {
-        patient: this.selectedPatient,
-        vaccineCategory: this.form.vaccineCategory,
-        vaccineType: this.form.vaccineType,
-      });
+      console.log("Vaccination saved:", this.form);
       this.closeModal();
     },
   },
 };
 </script>
+
+
+
 
 
 <style scoped>

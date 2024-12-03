@@ -4,7 +4,7 @@
         <!-- Logo Section -->
         <div @click="$inertia.visit('/')" class="cursor-pointer flex items-center space-x-4">
           <img src="/images/RHU%20Logo.png" alt="Logo" class="h-16 w-16 md:h-20 md:w-20" />
-          <span class="text-xl font-bold text-green-600 hidden md:block">Initao Regional Health Office</span>
+          <span class="text-xl font-bold text-black-600 hidden md:block">Initao Regional Health Office</span>
         </div>
   
         <!-- Mobile Menu Button (Hamburger) -->
