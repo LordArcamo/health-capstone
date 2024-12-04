@@ -3,7 +3,42 @@
     <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Individual Treatment Record</h2>
 
-      <form @submit="handleSubmit">
+      <!-- Step Navigation -->
+      <div class="relative z-40 flex justify-between items-center pb-4 border-b">
+        <div class="absolute inset-0 flex items-center justify-between px-4">
+          <!-- Connecting lines -->
+          <div v-for="(_, index) in stepTitles.length - 1" :key="index" class="flex-1 h-0.5 bg-gray-300">
+            <div v-if="step > index + 1" class="h-0.5 bg-gradient-to-r from-[#0F8F46] to-[#FED035]"
+              :style="{ width: '100%' }"></div>
+          </div>
+        </div>
+        <div v-for="(stepTitle, index) in stepTitles" :key="index" class="relative z-50">
+          <button type="button" class="px-4 py-2 rounded-sm text-sm font-semibold flex items-center justify-center"
+            :class="{
+              'bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white': step === index + 1,
+              'bg-gray-200 text-gray-800': step !== index + 1,
+            }" @click="navigateToStep(index + 1)">
+            {{ stepTitle }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert -->
+      <div v-if="alertMessage"
+        class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg flex items-center z-50"
+        role="alert">
+        <svg class="fill-current w-6 h-6 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <path
+            d="M10 15a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm.883-9.885a.4.4 0 00-.766 0l-3.5 9.5a.4.4 0 00.766.27l3.5-9.5a.4.4 0 00-.344-.54h-.07zm-.883 2.55a.6.6 0 100 1.2.6.6 0 000-1.2z" />
+        </svg>
+        <span>{{ alertMessage }}</span>
+        <button @click="closeAlert" class="ml-4 bg-transparent border-0 text-red-700 font-bold focus:outline-none">
+          ✕
+        </button>
+      </div>
+
+
+      <form @submit.prevent="triggerSubmit">
         <!-- Step 1: Patient Information -->
         <div v-if="step === 1">
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
@@ -110,7 +145,7 @@
             </div>
           </div>
           <div class="mt-6 flex justify-center text-right">
-            <button type="button" @click="nextStep" class="btn">Next</button>
+            <button @click="nextStep" class="btn">Next</button>
           </div>
         </div>
 
@@ -186,8 +221,8 @@
             </div>
           </div>
           <div class="mt-6 flex justify-between">
-            <button type="button" @click="prevStep" class="btn">Back</button>
-            <button type="button" @click="nextStep" class="btn">Next</button>
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="nextStep" class="btn">Next</button>
           </div>
         </div>
 
@@ -270,7 +305,7 @@
           </div>
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
-            <button type="button" @click="handleSubmit" class="btn">Submit</button>
+            <button type="submit" class="btn">Submit</button>
           </div>
         </div>
       </form>
@@ -306,17 +341,8 @@
 </template>
 
 <script>
-
 export default {
-  
-  props: {
-    selectedPatient: {
-    type: Object,
-    required: false,
-    default: () => ({}),
-    },
-    onSubmit: Function,
-  },
+  props: ['onSubmit'],
   data() {
     return {
       showSessions: false,
@@ -336,16 +362,16 @@ export default {
       ],
       step: 1,
       form: {
-        firstName: this.selectedPatient?.firstName || '',
-        lastName: this.selectedPatient?.lastName || '',
-        middleName: this.selectedPatient?.middleName || '',
-        suffix: this.selectedPatient?.suffix || '',
-        purok: this.selectedPatient?.purok || '',
-        barangay: this.selectedPatient?.barangay || '',
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        purok: '',
+        barangay: '',
         age: '',
-        birthdate: this.selectedPatient?.birthdate || '',
-        contact: this.selectedPatient?.contact || '',
-        sex: this.selectedPatient?.sex || '',
+        birthdate: '',
+        contact: '',
+        sex: '',
         consultationDate: '',
         consultationTime: '',
         modeOfTransaction: '',
@@ -376,38 +402,11 @@ export default {
     computedAge() {
       if (!this.form.birthdate) return '';
       const birthDate = new Date(this.form.birthdate);
-      const today = new Date();
-
-      let age = today.getFullYear() - birthDate.getFullYear();
-
-      // Check if the birthday has occurred this year
-      const hasBirthdayOccurred = 
-        today.getMonth() > birthDate.getMonth() || 
-        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
-
-      if (!hasBirthdayOccurred) {
-        age--;
-      }
-
+      const age = new Date().getFullYear() - birthDate.getFullYear();
       return age;
     },
-  },
-  watch: {
-    selectedPatient: {
-      immediate: true,
-      handler(newPatient) {
-        if (newPatient && newPatient.personalId === null) {
-          // Clear the form for a new patient
-          this.resetForm();
-        } else if (newPatient && Object.keys(newPatient).length > 0) {
-          // Populate the form with selected patient data
-          this.populateForm(newPatient);
-        }
-      },
-    },
-    // Watch for changes in birthdate and update the age field
-    'form.birthdate': function () {
-      this.form.age = this.computedAge; // Automatically update age when birthdate changes
+    isFormValid() {
+      return this.form.contact.length === 10 && this.form.emergencyContact?.length === 10;
     },
   },
   methods: {
@@ -551,10 +550,6 @@ export default {
       if (!this.form.birthdate) {
         this.errors.birthdate = 'Birthdate is required.';
         valid = false;
-      }
-      if (this.form.contact.length !== 10) {
-      this.errors.contact = 'Contact number must be exactly 10 digits after +63.';
-      valid = false;
       }
       return valid;
     },

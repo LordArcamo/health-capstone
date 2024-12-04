@@ -144,8 +144,8 @@
             </div>
             <!-- Continue the rest of the Step 1 fields... -->
           </div>
-          <div class="mt-6 flex justify-center text-right">
-            <button @click="nextStep" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">Next</button>
+          <div class="mt-6 flex justify-center">
+            <button @click="nextStep" class="btn bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white">Next</button>
           </div>
         </div>
 
@@ -276,9 +276,8 @@
           </div>
 
           <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-semibold py-2 px-4 rounded shadow hover:from-red-700 hover:to-orange-500 transition-colors duration-300"
-            >Back</button>
-            <button @click="nextStep" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">Next</button>
+            <button @click="prevStep" class="btn bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53]">Back</button>
+            <button @click="nextStep" class="btn bg-gradient-to-r from-[#0F8F46] to-[#FED035]">Next</button>
           </div>
         </div>
 
@@ -343,8 +342,8 @@
             </div>
           </div>
           <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] text-white font-semibold py-2 px-4 rounded shadow hover:from-red-700 hover:to-orange-500 transition-colors duration-300">Back</button>
-            <button type="submit" class="bg-gradient-to-r from-[#0F8F46] to-[#FED035] text-white font-semibold py-2 px-4 rounded shadow hover:from-green-700 hover:to-yellow-500 transition-colors duration-300">Submit</button>
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="handleSubmit" class="btn">Submit</button>
           </div>
         </div>
       </form>
@@ -356,30 +355,23 @@
 
 <script>
 export default {
-  props: {
-    selectedPatient: {
-    type: Object,
-    required: false,
-    default: () => ({}),
-    },
-    onSubmit: Function,
-  },
+  props: ['onSubmit'],
   data() {
     return {
       step: 1, // Current step in the form process
       stepTitles: ['Patient Information', 'Consultation Details', 'Visit Information', 'Review Information'], // Step titles for navigation
       alertMessage: '',
       form: {
-        firstName: this.selectedPatient?.firstName || '',
-        lastName: this.selectedPatient?.lastName || '',
-        middleName: this.selectedPatient?.middleName || '',
-        suffix: this.selectedPatient?.suffix || '',
-        purok: this.selectedPatient?.purok || '',
-        barangay: this.selectedPatient?.barangay || '',
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        purok: '',
+        barangay: '',
         age: '',
-        birthdate: this.selectedPatient?.birthdate || '',
-        contact: this.selectedPatient?.contact || '',
-        sex: this.selectedPatient?.sex || '',
+        birthdate: '',
+        contact: '',
+        sex: '',
         birthplace: '',
         bloodtype: '',
         mothername: '',
@@ -455,20 +447,14 @@ export default {
     // Calculate age based on birthdate
     calculateAge() {
       if (!this.form.birthdate) return '';
-      const birthDate = new Date(this.form.birthdate);
+      const birthdate = new Date(this.form.birthdate);
       const today = new Date();
-
-      let age = today.getFullYear() - birthDate.getFullYear();
-
-      // Check if the birthday has occurred this year
-      const hasBirthdayOccurred = 
-        today.getMonth() > birthDate.getMonth() || 
-        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
-
-      if (!hasBirthdayOccurred) {
+      let age = today.getFullYear() - birthdate.getFullYear();
+      const monthDiff = today.getMonth() - birthdate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
         age--;
       }
-
+      this.form.age = age;
       return age;
     },
 
