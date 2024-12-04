@@ -32,24 +32,34 @@ watch(() => props.personalInfo, (newVal) => {
 });
 
 function submitForm(payload) {
-  console.log('Submitting from parent:', payload);
+  console.log("Submitting from parent:", payload);
 
-  Inertia.post('/nationalimmunizationprogram/store', payload, {
-    onSuccess: (response) => {
-      console.log('Data saved successfully!');
-
-      // Check if the server returns a new personalId
-      if (response.props.personalId) {
-        payload.personalId = response.props.personalId; // Update the payload with the new personalId
-        console.log('Updated payload with new personalId:', payload.personalId);
-      }
-
-      // Optionally, notify the user or reset the form
-      alert('Form submitted successfully!');
-    },
-    onError: (errors) => {
-      console.error('Form submission errors:', errors);
-    },
-  });
+  if (payload.personalId) {
+    // Update existing patient
+    Inertia.post("/nationalimmunizationprogram/store", payload, {
+      onSuccess: () => {
+        alert("Existing patient's record updated successfully!");
+      },
+      onError: (errors) => {
+        console.error("Error updating existing patient:", errors);
+        alert("Failed to update existing patient's record.");
+      },
+    });
+  } else {
+    // Create new patient
+    Inertia.post("/nationalimmunizationprogram/store", payload, {
+      onSuccess: ({ props }) => {
+        if (props.personalId) {
+          payload.personalId = props.personalId; // Update payload with the new ID
+          console.log("New personalId received:", payload.personalId);
+        }
+        alert("New patient record added successfully!");
+      },
+      onError: (errors) => {
+        console.error("Error adding new patient:", errors);
+        alert("Failed to add new patient record.");
+      },
+    });
+  }
 }
 </script>

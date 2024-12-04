@@ -122,8 +122,8 @@
         </thead>
         <tbody class="text-gray-600 text-sm">
           <tr
-            v-for="patient in filteredPatients"
-            :key="patient.personalId"
+            v-for="(patient, index) in filteredPatients"
+              :key="patient.id || index"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
           >
             <td class="py-3 px-6">{{ patient.fullName }}</td>
@@ -201,8 +201,7 @@
             <li><strong>Household No.:</strong> {{ selectedPatient.houseHoldno }}</li>
           <li><strong>4Ps Member?:</strong> {{ selectedPatient.fourpsmember }}</li>
           <li><strong>Primary Care Benefit (PCB) Member?:</strong> {{ selectedPatient.PCBMember }}</li>
-          <li><strong>Philhealth Member:</strong> {{ selectedPatient.philhealthMember }}</li>
-          <li><strong>Status Type:</strong> {{ selectedPatient.statusType }}</li>
+          <li><strong>philhealthStatus</strong> {{ selectedPatient.philhealthStatus }}</li>
           <li><strong>Philhealth No.:</strong> {{ selectedPatient.philhealthNo }}</li>
           <li><strong>If Member, please indicate category:</strong> {{ selectedPatient.ifMember }}</li>
           <li><strong>Family Member:</strong> {{ selectedPatient.familyMember }}</li>

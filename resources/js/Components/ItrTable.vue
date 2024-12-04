@@ -160,7 +160,8 @@
           </tr>
         </thead>
         <tbody class="text-gray-600 text-sm">
-          <tr v-for="patient in filteredPatients" :key="patient.personalId"
+          <tr v-for="(patient, index) in filteredPatients"
+              :key="patient.id || index"
             class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
             <td class="py-3 px-6">{{ patient.fullName }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
@@ -263,6 +264,26 @@ export default {
       isFilterPanelOpen: false, // Toggle filter panel visibility
     };
   },
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    filterGender() {
+      this.currentPage = 1;
+    },
+    filterAgeRange() {
+      this.currentPage = 1;
+    },
+    filterPrk() {
+      this.currentPage = 1;
+    },
+    filterBarangay() {
+      this.currentPage = 1;
+    },
+    filterDiagnosis() {
+      this.currentPage = 1;
+    },
+  },
   computed: {
     filteredPatients() {
       const query = this.searchQuery.toLowerCase();
@@ -326,6 +347,9 @@ export default {
     // Unique diagnosis options
     diagnosisOptions() {
       return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
+    },
+    totalPages() {
+      return Math.ceil(this.patients.length / this.itemsPerPage);
     },
   },
   methods: {

@@ -246,6 +246,27 @@ export default {
       vaccineTypes: ["Type 1", "Type 2"],
     };
   },
+  computed: {
+    computedAge() {
+      if (!this.form.birthdate) return '';
+      const birthDate = new Date(this.form.birthdate);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      // Check if the birthday has occurred this year
+      const hasBirthdayOccurred = 
+        today.getMonth() > birthDate.getMonth() || 
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+      if (!hasBirthdayOccurred) {
+        age--;
+      }
+
+      return age;
+    },
+  },
+  
   methods: {
     closeModal() {
       this.showModal = false;

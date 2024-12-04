@@ -182,8 +182,11 @@
     </div>
 
     <!-- Trimester Modal -->
-    <TrimesterModal :patient="selectedPatient" :show="showTrimesterModal" @close="closeTrimesterModal"
-      @confirm="confirmTrimesterSelection" />
+    <TrimesterModal :patient="selectedPatient" 
+    :show="showTrimesterModal" 
+    :prenatalId="selectedPatient?.prenatalId"
+    @close="closeTrimesterModal"
+    @confirm="confirmTrimesterSelection" />
   </div>
 </template>
 
@@ -210,6 +213,7 @@ export default {
       currentPage: 1, // Current page for pagination
       itemsPerPage: 5, // Number of items per page
       showTrimesterModal: false, // Modal visibility flag
+      isModalOpen: false,
       selectedPatient: null, // Selected patient for modal display
       isFilterPanelOpen: false, // Toggle filter panel visibility
     };

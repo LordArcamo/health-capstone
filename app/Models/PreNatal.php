@@ -20,7 +20,7 @@ class PreNatal extends Model
         'personalId', // Added personalId as a fillable field
         'modeOfTransaction', 'consultationDate', 'consultationTime', 'bloodPressure',
         'temperature', 'height', 'weight', 'providerName', 'nameOfSpouse',
-        'emergencyContact', 'fourMember', 'philhealthStatus', 'philhealthId',
+        'emergencyContact', 'fourMember', 'philhealthStatus', 'philhealthNo',
         'menarche', 'sexualOnset', 'periodDuration', 'birthControl', 'intervalCycle',
         'menopause', 'lmp', 'edc', 'gravidity', 'parity', 'term', 'preterm',
         'abortion', 'living', 'syphilisResult', 'penicillin', 'hemoglobin',

@@ -21,12 +21,17 @@ return new class extends Migration
             $table->decimal('temperature', 5, 2); 
             $table->decimal('height', 5, 2); 
             $table->decimal('weight', 5, 2); 
+            $table->string('referredFrom', 255);
+            $table->string('referredTo', 255);
+            $table->string('reasonsForReferral', 255);
+            $table->string('referredBy', 255);
             $table->string('providerName', 100);
             $table->string('natureOfVisit', 100);
             $table->string('visitType', 50); 
             $table->string('chiefComplaints', 255);
             $table->string('diagnosis', 255);
             $table->string('medication', 255);
+            
 
             $table->timestamps();
 

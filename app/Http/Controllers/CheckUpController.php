@@ -135,12 +135,17 @@ class CheckUpController extends Controller
             'temperature' => 'nullable|numeric|between:0,100',
             'height' => 'nullable|numeric|between:0,300',
             'weight' => 'nullable|numeric|between:0,500',
+            'referredFrom' => 'nullable|string|max:255',
+            'referredTo' => 'nullable|string|max:255',
+            'reasonsForReferral' => 'nullable|string|max:255',
+            'referredBy' => 'nullable|string|max:255',
             'providerName' => 'required|string|max:100',
             'natureOfVisit' => 'required|string|max:100',
             'visitType' => 'required|string|max:50',
             'chiefComplaints' => 'required|string|max:255',
             'diagnosis' => 'required|string|max:255',
             'medication' => 'required|string|max:255',
+
         ]);
 
         $personalInfo = null;
@@ -190,12 +195,17 @@ class CheckUpController extends Controller
             'temperature' => $validatedData['temperature'],
             'height' => $validatedData['height'],
             'weight' => $validatedData['weight'],
+            'referredFrom' => $validatedData['referredFrom'] ?? 'None',
+            'referredTo' => $validatedData['referredTo'] ?? 'None',
+            'reasonsForReferral' => $validatedData['reasonsForReferral'] ?? 'None',
+            'referredBy' => $validatedData['referredBy'] ?? 'None',
             'providerName' => $validatedData['providerName'],
             'natureOfVisit' => $validatedData['natureOfVisit'],
             'visitType' => $validatedData['visitType'],
             'chiefComplaints' => $validatedData['chiefComplaints'],
             'diagnosis' => $validatedData['diagnosis'],
             'medication' => $validatedData['medication'],
+
         ]);
 
         // Log the action and return success response

@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('emergencyContact', 15); 
             $table->string('fourMember', 50);        
             $table->string('philhealthStatus', 20); 
-            $table->string('philhealthId', 20)->nullable();      
+            $table->string('philhealthNo', 20)->nullable();      
             $table->string('menarche', 10);          
             $table->string('sexualOnset', 10);      
             $table->string('periodDuration', 10);    

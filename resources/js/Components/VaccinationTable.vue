@@ -1,116 +1,3 @@
-<script>
-import { ref, onMounted, onUnmounted } from 'vue';
-import VaccinationModal from './VaccinationModals/VaccinationModal.vue';
-import ScheduleNextAppointmentModal from './VaccinationModals/ScheduleNextAppointmentModal.vue';
-import ViewHistoryModal from './VaccinationModals/ViewHistoryModal.vue';
-
-export default {
-  components: {
-    VaccinationModal,
-    ScheduleNextAppointmentModal,
-    ViewHistoryModal,
-  },
-  data() {
-    return {
-      showVaccinationModal: false,
-      showScheduleModal: false,
-      showHistoryModal: false,
-      activePatient: null, // Stores the patient data for the modals
-      searchQuery: '',
-      filterBarangay: '',
-      filterAddress: '',
-      patients: [
-        {
-          id: 1,
-          name: 'John Doe',
-          age: 25,
-          vaccineType: 'Vaccine 1',
-          nextAppointment: '2024-12-01',
-          address: 'Barangay 1, Initao',
-          barangay: 'Barangay 1',
-        },
-        {
-          id: 2,
-          name: 'Jane Smith',
-          age: 30,
-          vaccineType: 'Vaccine A',
-          nextAppointment: '2024-12-10',
-          address: 'Barangay 2, Initao',
-          barangay: 'Barangay 2',
-        },
-      ],
-      vaccineCategories: ['Pregnant', 'Senior Citizen'],
-      filteredVaccineTypes: ['Vaccine 1', 'Vaccine 2'],
-      paginatedPatients: [],
-      dropdownOpen: null, // Store which patient's dropdown is open
-    };
-  },
-  computed: {
-    barangayOptions() {
-      return [...new Set(this.patients.map((p) => p.barangay))];
-    },
-  },
-  methods: {
-    openVaccinationModal() {
-      this.showVaccinationModal = true;
-    },
-    closeVaccinationModal() {
-      this.showVaccinationModal = false;
-    },
-    applyFilters() {
-      this.paginatedPatients = this.patients.filter((patient) => {
-        return (
-          (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
-          (!this.filterAddress || patient.address.includes(this.filterAddress)) &&
-          (!this.searchQuery || patient.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
-        );
-      });
-    },
-    toggleDropdown(patientId) {
-      // Close any open dropdown when clicking a new one
-      if (this.dropdownOpen === patientId) {
-        this.dropdownOpen = null; // Close the dropdown if clicking the same one
-      } else {
-        this.dropdownOpen = patientId; // Open the clicked dropdown
-      }
-    },
-    openEditPatientModal(patient) {
-      this.activePatient = patient;
-      this.showEditPatientModal = true;
-    },
-    openScheduleModal(patient) {
-      this.activePatient = patient;
-      this.showScheduleModal = true;
-    },
-    openHistoryModal(patient) {
-      this.activePatient = patient;
-      this.showHistoryModal = true;
-    },
-    closeAllModals() {
-      this.showEditPatientModal = false;
-      this.showScheduleModal = false;
-      this.showHistoryModal = false;
-      this.activePatient = null;
-    },
-    handleClickOutside(event) {
-      const dropdownElement = this.$refs.dropdown;
-      if (dropdownElement && !dropdownElement.contains(event.target)) {
-        this.dropdownOpen = null; // Close the dropdown if clicked outside
-      }
-    },
-  },
-  mounted() {
-    this.paginatedPatients = this.patients;
-    // Listen for clicks outside the dropdown to close it
-    document.addEventListener('click', this.handleClickOutside);
-  },
-  beforeUnmount() {
-    // Clean up the event listener when the component is destroyed
-    document.removeEventListener('click', this.handleClickOutside);
-  },
-};
-</script>
-
 <template>
   <div class="w-full min-h-screen p-4">
     <!-- Filter Section -->
@@ -234,4 +121,122 @@ export default {
     />
   </div>
 </template>
+
+<script>
+import { ref, onMounted, onUnmounted } from 'vue';
+import VaccinationModal from './VaccinationModals/VaccinationModal.vue';
+import ScheduleNextAppointmentModal from './VaccinationModals/ScheduleNextAppointmentModal.vue';
+import ViewHistoryModal from './VaccinationModals/ViewHistoryModal.vue';
+
+export default {
+  components: {
+    VaccinationModal,
+    ScheduleNextAppointmentModal,
+    ViewHistoryModal,
+  },
+  data() {
+    return {
+      showVaccinationModal: false,
+      showScheduleModal: false,
+      showHistoryModal: false,
+      activePatient: null, // Stores the patient data for the modals
+      searchQuery: '',
+      filterBarangay: '',
+      filterAddress: '',
+      patients: [
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          vaccineType: 'Vaccine 1',
+          nextAppointment: '2024-12-01',
+          address: 'Barangay 1, Initao',
+          barangay: 'Barangay 1',
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          vaccineType: 'Vaccine A',
+          nextAppointment: '2024-12-10',
+          address: 'Barangay 2, Initao',
+          barangay: 'Barangay 2',
+        },
+      ],
+      vaccineCategories: ['Pregnant', 'Senior Citizen'],
+      filteredVaccineTypes: ['Vaccine 1', 'Vaccine 2'],
+      paginatedPatients: [],
+      dropdownOpen: null, // Store which patient's dropdown is open
+    };
+  },
+  computed: {
+    barangayOptions() {
+      return [...new Set(this.patients.map((p) => p.barangay))];
+    },
+  },
+  methods: {
+    handleSaveVaccination(patientData) {
+    // Perform save logic here, like adding a new patient
+    console.log("Saving vaccination data:", patientData);
+    this.showVaccinationModal = false; // Close modal after saving
+  },
+    openVaccinationModal() {
+      this.showVaccinationModal = true;
+    },
+    closeVaccinationModal() {
+      this.showVaccinationModal = false;
+    },
+    applyFilters() {
+      this.paginatedPatients = this.patients.filter((patient) => {
+        return (
+          (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
+          (!this.filterAddress || patient.address.includes(this.filterAddress)) &&
+          (!this.searchQuery || patient.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
+        );
+      });
+    },
+    toggleDropdown(patientId) {
+      // Close any open dropdown when clicking a new one
+      if (this.dropdownOpen === patientId) {
+        this.dropdownOpen = null; // Close the dropdown if clicking the same one
+      } else {
+        this.dropdownOpen = patientId; // Open the clicked dropdown
+      }
+    },
+    openEditPatientModal(patient) {
+      this.activePatient = patient;
+      this.showEditPatientModal = true;
+    },
+    openScheduleModal(patient) {
+      this.activePatient = patient;
+      this.showScheduleModal = true;
+    },
+    openHistoryModal(patient) {
+      this.activePatient = patient;
+      this.showHistoryModal = true;
+    },
+    closeAllModals() {
+      this.showEditPatientModal = false;
+      this.showScheduleModal = false;
+      this.showHistoryModal = false;
+      this.activePatient = null;
+    },
+    handleClickOutside(event) {
+      const dropdownElement = this.$refs.dropdown;
+      if (dropdownElement && !dropdownElement.contains(event.target)) {
+        this.dropdownOpen = null; // Close the dropdown if clicked outside
+      }
+    },
+  },
+  mounted() {
+    this.paginatedPatients = this.patients;
+    // Listen for clicks outside the dropdown to close it
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    // Clean up the event listener when the component is destroyed
+    document.removeEventListener('click', this.handleClickOutside);
+  },
+};
+</script>
 
