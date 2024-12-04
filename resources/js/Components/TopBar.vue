@@ -69,7 +69,7 @@ watch(() => component, () => {
             <!-- Dropdown Menu -->
             <div
               v-if="patientsDropdownOpen"
-              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-60 z-10"
+              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-60 z-50"
             >
               <div class="grid grid-cols-1 gap-4 p-4">
                 <NavLink

@@ -49,7 +49,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Main Content Area -->
-      <div class="rounded-none shadow-none w-full mt-4">
+      <div class="rounded-none shadow-none w-full">
         <slot />
       </div>
     </main>

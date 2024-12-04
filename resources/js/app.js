@@ -9,44 +9,10 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 // Import Font Awesome library and icons
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import {
-    faHome,
-    faUser,
-    faClipboard,
-    faCalendarCheck,
-    faHistory,
-    faChevronDown,
-    faHeartbeat,
-    faChevronRight,
-    faCalendar,
-    faFileMedical,
-    faBars,
-    faTimes,
-    faEllipsisV,
-    faSignOutAlt,
-    faChartBar,
-    faPlusCircle // Import the Plus Circle icon here
-} from '@fortawesome/free-solid-svg-icons';
+import { faHome, faUser, faCaretUp, faCaretDown, faClipboard, faCalendarCheck, faHistory,faChevronDown,faHeartbeat, faChevronRight, faCalendar , faFileMedical, faBars, faTimes, faEllipsisV, faSignOutAlt} from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to the Font Awesome library
-library.add(
-    faHome,
-    faUser,
-    faClipboard,
-    faCalendarCheck,
-    faHistory,
-    faHeartbeat,
-    faChevronDown,
-    faChevronRight,
-    faCalendar,
-    faFileMedical,
-    faBars,
-    faTimes,
-    faSignOutAlt,
-    faEllipsisV,
-    faChartBar,
-    faPlusCircle // Add the Plus Circle icon here
-);
+library.add(faHome, faUser, faCaretUp, faCaretDown ,faClipboard, faCalendarCheck, faHistory, faHeartbeat,faChevronDown, faChevronRight, faCalendar, faFileMedical, faBars, faTimes, faSignOutAlt , faEllipsisV);
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
