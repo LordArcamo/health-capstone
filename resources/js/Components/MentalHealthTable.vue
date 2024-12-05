@@ -131,11 +131,41 @@
         Next
       </button>
     </div>
+    <transition name="fade">
+  <div
+    v-if="showModal"
+    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+  >
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+      <h3 class="text-lg font-semibold mb-4">Patient Details</h3>
+      <p><strong>Patient ID:</strong> {{ selectedPatient.personalId }}</p>
+      <p><strong>Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</p>
+      <p><strong>Age:</strong> {{ selectedPatient.age }}</p>
+      <p><strong>Barangay:</strong> {{ selectedPatient.barangay }}</p>
+      <p><strong>Visit Type:</strong> {{ selectedPatient.visitType }}</p>
+      <p><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</p>
+      <div class="flex justify-end mt-4">
+        <button
+          @click="closeModal"
+          class="bg-red-500 text-white py-2 px-4 rounded shadow hover:bg-red-600"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</transition>
   </div>
 </template>
 
 <script>
 export default {
+  props: {
+    patients: {
+      type: Array,
+      required: true,
+    },
+  },
   data() {
     return {
       searchQuery: "",
@@ -144,6 +174,8 @@ export default {
       currentPage: 1,
       itemsPerPage: 5,
       megaFilterOpen: false,
+      showModal: false, // Added for modal visibility
+      selectedPatient: null,
       selectedSessionId: "",
       sessions: [
         { id: 1, title: "Session 1", date: "2024-11-20" },
@@ -190,6 +222,13 @@ export default {
     },
   },
   methods: {
+    openModal(patient) {
+      this.selectedPatient = patient;
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+    },
     toggleMegaFilter() {
       this.megaFilterOpen = !this.megaFilterOpen;
     },
