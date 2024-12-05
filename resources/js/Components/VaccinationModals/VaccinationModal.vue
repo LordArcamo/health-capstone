@@ -1,7 +1,8 @@
 <template>
-  <div v-if="showModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6">
-      <!-- Modal Header -->
+<div v-if="showModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+    <AlertMessage v-if="showAlert" :message="alertMessage" @close="showAlert = false" />
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 overflow-y-auto max-h-[90vh]">
+        <!-- Modal Content -->
       <div class="flex justify-between items-center border-b pb-4 mb-4">
         <h2 class="text-xl font-semibold">Vaccination Details</h2>
         <button @click="closeModal" class="text-gray-500 hover:text-gray-800">
@@ -60,18 +61,22 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" class="input" placeholder="Example: Juan" required />
+              <input type="text" v-model="form.firstName" @input="capitalizeName('firstName')" class="input"
+                placeholder="Example: Juan" required />
+              <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName }}</span>
             </div>
             <div>
               <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName" class="input" placeholder="Example: Dela Cruz" required />
-
+              <input type="text" v-model="form.lastName" @input="capitalizeName('lastName')" class="input"
+                placeholder="Example: Dela Cruz" required />
+              <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName }}</span>
             </div>
 
             <div>
               <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName" class="input" placeholder="Example: Penduko" required />
-
+              <input type="text" v-model="form.middleName" @input="capitalizeName('middleName')" class="input"
+                placeholder="Example: Penduko" required />
+              <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
             </div>
             <div>
               <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix:</label>
@@ -93,7 +98,7 @@
             </div>
             <div>
               <label for="barangay" class="block mb-1">Barangay:</label>
-              <select id="barangay" v-model="form.barangay" class="input" required>
+              <select id="barangay" v-model="form.barangay" class="input">
                 <option disabled value="">Select a Barangay</option>
                 <option value="Apas">Apas</option>
                 <option value="Aluna">Aluna</option>
@@ -112,16 +117,20 @@
                 <option value="Tawantawan">Tawantawan</option>
                 <option value="Tubigan">Tubigan</option>
               </select>
+              <span v-if="errors.barangay" class="text-red-600 text-sm">{{ errors.barangay }}</span>
             </div>
 
 
             <div>
               <label class="block">Purok:</label>
               <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
+              <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
             <div>
               <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input" required />
+              <input type="date" v-model="form.birthdate" @input="restrictBirthdateInput" @change="validateBirthdate"
+                class="input" required />
+              <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
             <div>
               <label class="block">Age:</label>
@@ -173,6 +182,7 @@
               {{ category }}
             </option>
           </select>
+          <span v-if="errors.vaccineCategory" class="text-red-600 text-sm">{{ errors.vaccineCategory }}</span>
         </div>
 
         <div class="mb-4" v-if="form.vaccineCategory">
@@ -184,6 +194,7 @@
             <option v-for="type in vaccineTypesForCategory" :key="type" :value="type">
               {{ type }}
             </option>
+            <span v-if="errors.vaccineType" class="text-red-600 text-sm">{{ errors.vaccineType }}</span>
           </select>
         </div>
 
@@ -203,6 +214,7 @@
               Date of Visit
             </label>
             <input type="date" v-model="form.dateOfVisit" id="dateOfVisit" class="input" required />
+            <span v-if="errors.dateOfVisit" class="text-red-600 text-sm">{{ errors.dateOfVisit }}</span>
           </div>
 
           <!-- Conditional Age Input -->
@@ -219,8 +231,9 @@
             <label for="weight" class="block text-sm font-medium text-gray-700">
               Weight
             </label>
-            <input type="text" v-model="form.weight" id="weight" class="input" placeholder="Enter weight (e.g., 10 kg)"
-              required />
+            <input type="text" v-model="form.weight" id="weight" class="input" @input="validateWeight"
+              placeholder="Enter weight (e.g., 10 kg)" required />
+            <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
           </div>
 
           <!-- Height -->
@@ -228,8 +241,9 @@
             <label for="height" class="block text-sm font-medium text-gray-700">
               Height
             </label>
-            <input type="text" v-model="form.height" id="height" class="input" placeholder="Enter height (e.g., 75 cm)"
-              required />
+            <input type="text" v-model="form.height" id="height" class="input" @input="validateHeight"
+              placeholder="Enter height (e.g., 75 cm)" required />
+            <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
           </div>
 
           <!-- Temperature -->
@@ -237,8 +251,9 @@
             <label for="temperature" class="block text-sm font-medium text-gray-700">
               Temperature
             </label>
-            <input type="text" v-model="form.temperature" id="temperature" class="input"
+            <input type="text" v-model="form.temperature" id="temperature" @input="formatTemperature" class="input"
               placeholder="Enter temperature (e.g., 36.5°C)" required />
+            <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
           </div>
 
           <!-- Antigen Given -->
@@ -248,6 +263,7 @@
             </label>
             <input type="text" v-model="form.antigenGiven" id="antigenGiven" class="input"
               placeholder="Enter antigen details" required />
+            <span v-if="errors.antigenGiven" class="text-red-600 text-sm">{{ errors.antigenGiven }}</span>
           </div>
 
           <!-- Injected By -->
@@ -257,6 +273,7 @@
             </label>
             <input type="text" v-model="form.injectedBy" id="injectedBy" class="input"
               placeholder="Enter name of injector" required />
+            <span v-if="errors.injectedBy" class="text-red-600 text-sm">{{ errors.injectedBy }}</span>
           </div>
 
           <!-- Exclusively Breastfed (only for Under 1 Year) -->
@@ -277,25 +294,66 @@
               Next Appointment
             </label>
             <input type="date" v-model="form.nextAppointment" id="nextAppointment" class="input" required />
+            <span v-if="errors.nextAppointment" class="text-red-600 text-sm">{{ errors.nextAppointment }}</span>
           </div>
         </div>
         <div class="flex justify-between mt-6">
           <button @click="prevStep" class="bg-gray-500 text-white py-2 px-4 rounded-md">Back</button>
-          <button @click="saveVaccination" class="bg-green-500 text-white py-2 px-4 rounded-md">Save</button>
+          <button @click="nextStep" class="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>
+
         </div>
       </div>
 
+      <!-- Step 5: Review Data -->
+      <div v-if="step === 5">
+        <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Loop through form fields to display data -->
+          <div v-for="(value, key) in reviewFields" :key="key" class="border-b pb-2">
+            <label class="block font-medium">{{ formatLabel(key) }}:</label>
+            <p class="text-gray-600">{{ value || 'Not Provided' }}</p>
+          </div>
+        </div>
+        <div class="flex justify-between mt-6">
+          <button @click="prevStep" class="bg-gray-500 text-white py-2 px-4 rounded-md">Back</button>
+          <button @click="showConfirmationModal = true" :disabled="!isFormValid"
+            class="bg-green-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400">
+            Submit
+          </button>
+        </div>
+      </div>
 
+      <!-- Confirmation Modal -->
+      <div v-if="showConfirmationModal"
+        class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-60">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <h3 class="text-lg font-semibold mb-4">Confirm Submission</h3>
+          <p class="mb-6">Are you sure you want to submit this vaccination record?</p>
+          <div class="flex justify-end space-x-4">
+            <button @click="showConfirmationModal = false"
+              class="bg-gray-500 text-white py-2 px-4 rounded-md">Cancel</button>
+            <button @click="saveVaccination" class="bg-green-500 text-white py-2 px-4 rounded-md">Yes, Submit</button>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
 </template>
 
 <script>
+import AlertMessage from '../AlertMessage.vue';
+
 export default {
+  components: {
+    AlertMessage,
+  },
   data() {
     return {
       showModal: true,
+      showAlert: false,
+      alertMessage: "",
+      showConfirmationModal: false, // To toggle confirmation modal
       step: 1,
       searchQuery: "",
       patients: [
@@ -306,10 +364,16 @@ export default {
       selectedPatient: null,
       allowAddNewPatient: false,
       form: {
-        firstName: "",
-        lastName: "",
-        birthdate: "",
-        contact: "",
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        purok: '',
+        barangay: '',
+        age: '',
+        birthdate: '',
+        contact: '',
+        sex: '',
         vaccineCategory: "",
         vaccineType: "",
         dateOfVisit: "",
@@ -348,6 +412,7 @@ export default {
         "Senior Citizen": ["PPV23", "Flu Vaccine"],
       },
       vaccineTypesForCategory: [],
+      errors: {},
     };
   },
   watch: {
@@ -356,32 +421,148 @@ export default {
     },
   },
   computed: {
-    // Determine if the selected category is "Under 1 Year"
     isUnderOneYear() {
       return this.form.vaccineCategory === "Under 1 Year";
     },
+    isFormValid() {
+      return (
+        this.form.dateOfVisit &&
+        this.form.weight &&
+        this.form.height &&
+        this.form.temperature &&
+        this.form.antigenGiven &&
+        this.form.injectedBy &&
+        (!this.isUnderOneYear || this.form.exclusivelyBreastfed) &&
+        this.form.nextAppointment
+      );
+    },
+    reviewFields() {
+    // Merge selected patient data and form data
+    return this.selectedPatient
+      ? {
+          ...this.selectedPatient, // Use existing patient data if selected
+          ...this.form,            // Overwrite with any updated or additional form data
+        }
+      : { ...this.form };          // Use only the form data if no patient is selected
+  },
+
+    computedAge() {
+      if (!this.form.birthdate) return '';
+      const birthDate = new Date(this.form.birthdate);
+      const age = new Date().getFullYear() - birthDate.getFullYear();
+      return age;
+    },
   },
   methods: {
+    formatLabel(key) {
+      // Convert camelCase or snake_case keys to readable labels
+      return key
+        .replace(/([A-Z])/g, " $1") // Add space before uppercase letters
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
+    },
+    openConfirmationModal() {
+      if (!this.validateStep4()) {
+        this.alertMessage = "Please complete all required fields before submission.";
+        this.showAlert = true;
+        return;
+      }
+      this.showConfirmationModal = true; // Open the confirmation modal if validation passes
+    },
+    confirmSave() {
+      this.saveVaccination(); // Call the save function if the user confirms
+      this.showConfirmationModal = false; // Close the confirmation modal
+    },
+    cancelConfirmation() {
+      this.showConfirmationModal = false; // Close the confirmation modal without saving
+    },
     handleAgeInput(event) {
-      // Clear irrelevant field based on the selected vaccine category
       if (this.isUnderOneYear) {
         this.form.ageInYears = "";
       } else {
         this.form.ageInMonths = "";
       }
     },
+    formatContact() {
+      this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
+    },
     updateVaccineTypes() {
-      this.vaccineTypesForCategory =
-        this.vaccineTypes[this.form.vaccineCategory] || [];
+      this.vaccineTypesForCategory = this.vaccineTypes[this.form.vaccineCategory] || [];
+    },
+    validateHeight(event) {
+      let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and a single decimal point
+
+      // Handle multiple decimal points
+      const parts = value.split('.');
+      if (parts.length > 2) {
+        value = `${parts[0]}.${parts[1]}`; // Keep only the first decimal point
+      }
+
+      // Auto-format when the input reaches 4 digits without a decimal
+      if (value.length === 4 && !value.includes('.')) {
+        value = `${value.slice(0, 3)}.${value.slice(3)}`; // Add decimal before the last digit
+      }
+
+      // Limit to 3 digits before the decimal and 1 digit after
+      if (value.includes('.')) {
+        const [integer, decimal] = value.split('.');
+        value = `${integer.slice(0, 3)}.${decimal.slice(0, 1)}`;
+      }
+
+      this.form.height = value; // Update the form value
+    },
+    formatTemperature(event) {
+      let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
+
+      if (value.length > 2) {
+        value = `${value.slice(0, 2)}.${value.slice(2, 3)}`; // Automatically add the decimal after the second digit
+      }
+
+      this.form.temperature = value; // Update the input value
+    },
+    validateWeight(event) {
+      // Retrieve and sanitize the input value
+      let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numeric characters and a single decimal point
+
+      // Ensure there is only one decimal point
+      const parts = value.split('.');
+      if (parts.length > 2) {
+        value = `${parts[0]}.${parts[1]}`; // Combine the first two parts, discarding extra decimals
+      }
+
+      // Auto-format when the input reaches 4 digits without a decimal
+      if (value.length === 4 && !value.includes('.')) {
+        value = `${value.slice(0, 3)}.${value.slice(3)}`; // Add a decimal before the last digit
+      }
+
+      // If a decimal exists, enforce limits on the integer and decimal parts
+      if (value.includes('.')) {
+        const [integer, decimal] = value.split('.');
+        value = `${integer.slice(0, 3)}.${decimal.slice(0, 1)}`; // Limit to 3 digits before and 1 digit after the decimal
+      } else {
+        // If no decimal, limit the integer part to 3 digits
+        value = value.slice(0, 3);
+      }
+
+      // Update the form weight with the validated value
+      this.form.weight = value;
     },
     closeModal() {
       this.showModal = false;
     },
     nextStep() {
-      if (this.step === 4) {
-        this.saveVaccination(); // Save vaccination details on Step 4
-      } else {
+      if (this.step === 1 && this.selectedPatient) {
+        this.step = 3; // Skip to vaccine selection if patient exists
+      } else if (this.step === 1 && this.validateStep1()) {
         this.step++;
+      } else if (this.step === 2 && this.validateStep2()) {
+        this.step++;
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.step++;
+      } else if (this.step === 4 && this.validateStep4()) {
+        this.step++; // Move to step 5 for review
+      } else if (this.step === 5) {
+        this.saveVaccination(); // Save the details after review
       }
     },
     prevStep() {
@@ -390,15 +571,16 @@ export default {
       }
     },
     addOrNextStep() {
-      if (this.allowAddNewPatient) {
+      if (this.selectedPatient) {
+        // If a patient is selected, go directly to Step 3
+        this.step = 3;
+      } else if (this.allowAddNewPatient) {
         this.step = 2;
-      } else if (this.selectedPatient) {
-        this.nextStep();
       }
     },
     filterPatients() {
       const query = this.searchQuery.trim().toLowerCase();
-      this.filteredPatients = this.patients.filter((patient) =>
+      this.filteredPatients = this.patients.filter(patient =>
         patient.name.toLowerCase().includes(query)
       );
       this.allowAddNewPatient = this.filteredPatients.length === 0;
@@ -407,27 +589,181 @@ export default {
       this.selectedPatient = patient;
       this.allowAddNewPatient = false;
     },
-    validateStepTwo() {
-      const requiredFields = ["firstName", "lastName", "birthdate"];
-      for (const field of requiredFields) {
-        if (!this.form[field]) {
-          alert(`Please complete the field: ${field}`);
-          return;
-        }
+    validateStep1() {
+      this.errors = {};
+      if (!this.selectedPatient && !this.allowAddNewPatient) {
+        this.errors.step1 = 'Please select a patient or proceed to add a new one.';
+        return false;
       }
-      this.nextStep();
+      return true;
+    },
+    validateStep2() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.firstName) {
+        this.errors.firstName = 'First name is required.';
+        valid = false;
+      }
+      if (!this.form.lastName) {
+        this.errors.lastName = 'Last name is required.';
+        valid = false;
+      }
+      if (!this.form.purok) {
+        this.errors.purok = 'Purok is required.';
+        valid = false;
+      }
+      if (!this.form.barangay) {
+        this.errors.barangay = 'Barangay is required.';
+        valid = false;
+      }
+      if (!this.form.birthdate) {
+        this.errors.birthdate = 'Birthdate is required.';
+        valid = false;
+      }
+
+      return valid;
+    },
+    validateStep3() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.vaccineCategory) {
+        this.errors.vaccineCategory = 'Vaccine Category is required.';
+        valid = false;
+      }
+      if (!this.form.vaccineType) {
+        this.errors.vaccineType = 'Vaccine Type is required.';
+        valid = false;
+      }
+      return valid;
+    },
+    validateStep4() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.dateOfVisit) {
+        this.errors.dateOfVisit = 'Date of Visit is required.';
+        valid = false;
+      }
+      if (!this.form.weight) {
+        this.errors.weight = 'Weight is required.';
+        valid = false;
+      }
+      if (!this.form.height) {
+        this.errors.height = 'Height is required.';
+        valid = false;
+      }
+      if (!this.form.temperature) {
+        this.errors.temperature = 'Temperature is required.';
+        valid = false;
+      }
+      if (!this.form.antigenGiven) {
+        this.errors.antigenGiven = 'Antigen Given is required.';
+        valid = false;
+      }
+      if (!this.form.injectedBy) {
+        this.errors.injectedBy = 'Injected By field is required.';
+        valid = false;
+      }
+      if (this.isUnderOneYear && !this.form.exclusivelyBreastfed) {
+        this.errors.exclusivelyBreastfed = 'This field is required for children under 1 year.';
+        valid = false;
+      }
+      if (!this.form.nextAppointment) {
+        this.errors.nextAppointment = 'Next Appointment is required.';
+        valid = false;
+      }
+
+      return valid;
     },
     saveVaccination() {
-      console.log("Vaccination saved:", this.form);
+      // Check if all validations are passed before saving
+      if (!this.validateStep4()) {
+        this.alertMessage = "Please complete all required fields";
+        this.showAlert = true;
+        return;
+      }
+      console.log("Vaccination data saved:", this.form);
+      this.showConfirmationModal = false;
+      this.closeModal();
+
+      // Consolidate all data from the form
+      const vaccinationData = {
+        patient: this.selectedPatient
+          ? { ...this.selectedPatient }
+          : {
+            firstName: this.form.firstName,
+            lastName: this.form.lastName,
+            middleName: this.form.middleName,
+            suffix: this.form.suffix,
+            purok: this.form.purok,
+            barangay: this.form.barangay,
+            age: this.computedAge,
+            birthdate: this.form.birthdate,
+            contact: this.form.contact,
+            sex: this.form.sex,
+          },
+        vaccinationDetails: {
+          vaccineCategory: this.form.vaccineCategory,
+          vaccineType: this.form.vaccineType,
+          dateOfVisit: this.form.dateOfVisit,
+          age: this.isUnderOneYear ? this.form.ageInMonths : this.form.ageInYears,
+          weight: this.form.weight,
+          height: this.form.height,
+          temperature: this.form.temperature,
+          antigenGiven: this.form.antigenGiven,
+          injectedBy: this.form.injectedBy,
+          exclusivelyBreastfed: this.isUnderOneYear
+            ? this.form.exclusivelyBreastfed
+            : null,
+          nextAppointment: this.form.nextAppointment,
+        },
+      };
+
+      // Log the consolidated data
+      console.log("Vaccination saved:", vaccinationData);
+
+      this.alertMessage = "Submission successful!";
+      this.showAlert = true;
+
+      // Reset form and close modal
+      this.resetForm();
       this.closeModal();
     },
+    resetForm() {
+      this.form = {
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        purok: '',
+        barangay: '',
+        age: '',
+        birthdate: '',
+        contact: '',
+        sex: '',
+        vaccineCategory: '',
+        vaccineType: '',
+        dateOfVisit: '',
+        ageInMonths: '',
+        ageInYears: '',
+        weight: '',
+        height: '',
+        temperature: '',
+        antigenGiven: '',
+        injectedBy: '',
+        exclusivelyBreastfed: '',
+        nextAppointment: '',
+      };
+      this.selectedPatient = null;
+      this.errors = {};
+      this.step = 1; // Reset to the first step
+    }
+
   },
 };
 </script>
-
-
-
-
 
 <style scoped>
 .input {

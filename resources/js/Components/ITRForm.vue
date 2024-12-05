@@ -406,7 +406,7 @@ export default {
       return age;
     },
     isFormValid() {
-      return this.form.contact.length === 10 && this.form.emergencyContact?.length === 10;
+      return this.form.contact.length === 10;
     },
   },
   methods: {
