@@ -10,7 +10,7 @@ const props = defineProps({
       name: "Unknown",
       age: "Unknown",
       vaccineType: "Unknown",
-      nextAppointment: "N/A",
+      nextAppointment: "",
     }),
   },
 });
@@ -22,9 +22,11 @@ const appointmentDate = ref(props.patient.nextAppointment || "");
 
 // Computed property to validate the date
 const isDateValid = computed(() => {
+  if (!appointmentDate.value) return false;
   const selectedDate = new Date(appointmentDate.value);
   const today = new Date();
-  return appointmentDate.value && selectedDate >= today;
+  today.setHours(0, 0, 0, 0); // Ensure no time conflicts
+  return selectedDate >= today;
 });
 
 // Method to handle scheduling the appointment
@@ -75,7 +77,7 @@ const closeModal = () => {
           v-model="appointmentDate"
           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
           :class="{ 'border-red-500': !isDateValid && appointmentDate }"
-          aria-invalid="true"
+          :aria-invalid="!isDateValid"
         />
         <p v-if="!isDateValid && appointmentDate" class="text-red-500 text-xs mt-1">
           Please select a valid date that is today or later.

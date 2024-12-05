@@ -18,7 +18,8 @@ export default {
   },
   data() {
     return {
-      showVaccinationModal: false,
+      showVaccinationModal: false, // State to show/hide the modal
+      modalKey: 0, // Key to force re-render of the modal
       showScheduleModal: false,
       showHistoryModal: false,
       activePatient: null,
@@ -96,6 +97,10 @@ export default {
       alert(`Next appointment for ${patient.name} scheduled on ${date}.`);
     },
     openVaccinationModal() {
+      // Reset the key to reinitialize the child component
+      this.modalKey += 1;
+
+      // Show the modal
       this.showVaccinationModal = true;
     },
     closeVaccinationModal() {
@@ -293,12 +298,7 @@ export default {
     </div>
 
     <!-- Modals -->
-    <VaccinationModal
-      v-if="showVaccinationModal"
-      :key="showVaccinationModal"
-      :patients="patients"
-      @close="closeVaccinationModal"
-    />
+    <VaccinationModal v-if="showVaccinationModal" :key="modalKey" @close="closeVaccinationModal" />
     <ScheduleNextAppointmentModal v-if="showScheduleModal" :patient="activePatient" @close="closeAllModals"
       @schedule="scheduleAppointment" />
     <ViewHistoryModal v-if="showHistoryModal" :patient="activePatient" :history="activePatientHistory"
