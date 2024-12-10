@@ -13,31 +13,42 @@ class CheckUpController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    // Use Eloquent to join the two tables
-    $data = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
-        ->select(
-            'personal_information.*', 
-            'itr.consultationDate',
-            'itr.consultationTime',
-            'itr.modeOfTransaction',
-            'itr.bloodPressure',
-            'itr.temperature',
-            'itr.height',
-            'itr.weight',
-            'itr.providerName',
-            'itr.natureOfVisit',
-            'itr.visitType',
-            'itr.chiefComplaints',
-            'itr.diagnosis',
-            'itr.medication'
-        )
-        ->get();
-
-    // Pass the joined data to the view
-    return Inertia::render('Table/IndividualTreatmentRecord', [
-        'ITR' => $data,
-    ]);
+    {
+        // Use Eloquent to join the PersonalInformation and itr tables
+        $data = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
+            ->select(
+                'personal_information.personalId',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                'itr.consultationDate',
+                'itr.consultationTime',
+                'itr.modeOfTransaction',
+                'itr.bloodPressure',
+                'itr.temperature',
+                'itr.height',
+                'itr.weight',
+                'itr.providerName',
+                'itr.natureOfVisit',
+                'itr.visitType',
+                'itr.chiefComplaints',
+                'itr.diagnosis',
+                'itr.medication'
+            )
+            ->distinct() // Ensure no duplicate entries
+            ->get();
+    
+        // Pass the joined data to the view
+        return Inertia::render('Table/IndividualTreatmentRecord', [
+            'ITR' => $data,
+        ]);
 
     // Query the CheckUp model to get the data needed for the chart
     $checkups = CheckUp::selectRaw('
@@ -66,70 +77,117 @@ class CheckUpController extends Controller
     return Inertia::render('ChartPage', [
         'chartData' => $chartData,
     ]);
-}
+    }
+    
 
 
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup');
+        $personalId = $request->get('patient_personalId');
+
+        if ($personalId === 'new') {
+            return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup', [
+                'personalInfo' => null, // No existing patient
+            ]);
+        }
+
+        $personalInfo = $personalId ? PersonalInformation::find($personalId) : null;
+
+        if (!$personalInfo) {
+            return back()->withErrors(['error' => 'Patient not found']);
+        }
+
+        return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup', [
+            'personalInfo' => $personalInfo,
+        ]);
     }
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        // Log the incoming request
+        \Log::info('Incoming request data:', $request->all());
+
         // Validate request data
         $validatedData = $request->validate([
-            'firstName' => 'required|string|max:100',
-            'lastName' => 'required|string|max:100',
-            'middleName' => 'required|string|max:100',
-            'suffix' => 'nullable|string|max:10', 
+            'personalId' => 'nullable|exists:personal_information,personalId',
+            'firstName' => 'required_without:personalId|string|max:100',
+            'lastName' => 'required_without:personalId|string|max:100',
+            'middleName' => 'required_without:personalId|string|max:100',
+            'suffix' => 'nullable|string|max:10',
             'purok' => 'nullable|string|max:100',
             'barangay' => 'nullable|string|max:100',
-            'age' => 'required|numeric', 
-            'birthdate' => 'required|date',
-            'contact' => 'required|string|max:15',
-            'sex' => 'required|string|max:10', 
+            'age' => 'nullable|numeric',
+            'birthdate' => 'nullable|date',
+            'contact' => 'nullable|string|max:15',
+            'sex' => 'nullable|string|max:10',
             'consultationDate' => 'required|date',
             'consultationTime' => 'required|date_format:H:i',
             'modeOfTransaction' => 'required|string|max:50',
-            'bloodPressure' => 'required|string|max:20', 
-            'temperature' => 'required|numeric|between:0,100', 
-            'height' => 'required|numeric|between:0,300',
-            'weight' => 'required|numeric|between:0,500', 
+            'bloodPressure' => 'nullable|string|max:20',
+            'temperature' => 'nullable|numeric|between:0,100',
+            'height' => 'nullable|numeric|between:0,300',
+            'weight' => 'nullable|numeric|between:0,500',
+            'referredFrom' => 'nullable|string|max:255',
+            'referredTo' => 'nullable|string|max:255',
+            'reasonsForReferral' => 'nullable|string|max:255',
+            'referredBy' => 'nullable|string|max:255',
             'providerName' => 'required|string|max:100',
             'natureOfVisit' => 'required|string|max:100',
             'visitType' => 'required|string|max:50',
             'chiefComplaints' => 'required|string|max:255',
             'diagnosis' => 'required|string|max:255',
             'medication' => 'required|string|max:255',
+
         ]);
 
-        // Split validated data for PersonalInformation
-        $personalData = [
-            'firstName' => $validatedData['firstName'],
-            'lastName' => $validatedData['lastName'],
-            'middleName' => $validatedData['middleName'],
-            'suffix' => $validatedData['suffix'],
-            'purok' => $validatedData['purok'],
-            'barangay' => $validatedData['barangay'],
-            'age' => $validatedData['age'],
-            'birthdate' => $validatedData['birthdate'],
-            'contact' => $validatedData['contact'],
-            'sex' => $validatedData['sex'],
-        ];
+        $personalInfo = null;
 
-        // Save personal data to PersonalInformation table
-        $personalInfo = PersonalInformation::create($personalData);
+        if (isset($validatedData['personalId'])) {
+            // Patient exists, update personal information
+            $personalInfo = PersonalInformation::find($validatedData['personalId']);
+            if ($personalInfo) {
+                $personalInfo->update([
+                    'firstName' => $validatedData['firstName'] ?? $personalInfo->firstName,
+                    'lastName' => $validatedData['lastName'] ?? $personalInfo->lastName,
+                    'middleName' => $validatedData['middleName'] ?? $personalInfo->middleName,
+                    'suffix' => $validatedData['suffix'] ?? $personalInfo->suffix,
+                    'purok' => $validatedData['purok'] ?? $personalInfo->purok,
+                    'barangay' => $validatedData['barangay'] ?? $personalInfo->barangay,
+                    'age' => $validatedData['age'] ?? $personalInfo->age,
+                    'birthdate' => $validatedData['birthdate'] ?? $personalInfo->birthdate,
+                    'contact' => $validatedData['contact'] ?? $personalInfo->contact,
+                    'sex' => $validatedData['sex'] ?? $personalInfo->sex,
+                ]);
+            } else {
+                return back()->withErrors(['error' => 'Patient not found.']);
+            }
+        } else {
+            // Patient does not exist, create new record
+            $personalInfo = PersonalInformation::create([
+                'firstName' => $validatedData['firstName'],
+                'lastName' => $validatedData['lastName'],
+                'middleName' => $validatedData['middleName'],
+                'suffix' => $validatedData['suffix'],
+                'purok' => $validatedData['purok'],
+                'barangay' => $validatedData['barangay'],
+                'age' => $validatedData['age'],
+                'birthdate' => $validatedData['birthdate'],
+                'contact' => $validatedData['contact'],
+                'sex' => $validatedData['sex'],
+            ]);
+        }
 
-        // Prepare data for CheckUp table
-        $checkUpData = [
-            'personalId' => $personalInfo->personalId, // Link to personal information record
+        // Save the ITR (Individual Treatment Record) data
+        CheckUp::create([
+            'personalId' => $personalInfo->personalId,
             'consultationDate' => $validatedData['consultationDate'],
             'consultationTime' => $validatedData['consultationTime'],
             'modeOfTransaction' => $validatedData['modeOfTransaction'],
@@ -137,19 +195,25 @@ class CheckUpController extends Controller
             'temperature' => $validatedData['temperature'],
             'height' => $validatedData['height'],
             'weight' => $validatedData['weight'],
+            'referredFrom' => $validatedData['referredFrom'] ?? 'None',
+            'referredTo' => $validatedData['referredTo'] ?? 'None',
+            'reasonsForReferral' => $validatedData['reasonsForReferral'] ?? 'None',
+            'referredBy' => $validatedData['referredBy'] ?? 'None',
             'providerName' => $validatedData['providerName'],
             'natureOfVisit' => $validatedData['natureOfVisit'],
             'visitType' => $validatedData['visitType'],
             'chiefComplaints' => $validatedData['chiefComplaints'],
             'diagnosis' => $validatedData['diagnosis'],
             'medication' => $validatedData['medication'],
-        ];
 
-        // Save check-up data to CheckUp table
-        $checkUp = CheckUp::create($checkUpData);
+        ]);
 
-        // Redirect back with a success message
-        return back()->with('Success', 'Data saved successfully!');
+        // Log the action and return success response
+        \Log::info('Patient and ITR saved successfully:', $personalInfo->toArray());
+        return back()->with([
+            'success' => 'Data saved successfully!',
+            'personalId' => $personalInfo->personalId,
+        ]);
     }
 
 

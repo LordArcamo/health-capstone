@@ -16,8 +16,16 @@ class PreNatalController extends Controller
     {
         $data = PersonalInformation::join('prenatal', 'personal_information.personalId', '=', 'prenatal.personalId')
         ->select(
+            'personal_information.personalId',
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.contact',
             'prenatal.prenatalId',
-            'personal_information.*', 
             'prenatal.modeOfTransaction',
             'prenatal.consultationDate',
             'prenatal.consultationTime',
@@ -30,7 +38,7 @@ class PreNatalController extends Controller
             'prenatal.emergencyContact', 
             'prenatal.fourMember', 
             'prenatal.philhealthStatus', 
-            'prenatal.philhealthId',
+            'prenatal.philhealthNo',
             'prenatal.menarche', 
             'prenatal.sexualOnset', 
             'prenatal.periodDuration', 
@@ -53,6 +61,7 @@ class PreNatalController extends Controller
             'prenatal.ttStatus', 
             'prenatal.tdDate',
         )
+        ->distinct()
         ->get();
 
         return Inertia::render('Table/PreNatal', [
@@ -63,9 +72,25 @@ class PreNatalController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('CheckUp/PreNatalCheckup');
+        $personalId = $request->get('patient_personalId');
+
+        if ($personalId === 'new') {
+            return Inertia::render('CheckUp/PreNatalCheckup', [
+                'personalInfo' => null, // No existing patient
+            ]);
+        }
+
+        $personalInfo = $personalId ? PersonalInformation::find($personalId) : null;
+
+        if (!$personalInfo) {
+            return back()->withErrors(['error' => 'Patient not found']);
+        }
+
+        return Inertia::render('CheckUp/PreNatalCheckup', [
+            'personalInfo' => $personalInfo,
+        ]);
     }
 
     /**
@@ -73,16 +98,23 @@ class PreNatalController extends Controller
      */
     public function store(Request $request)
     {
+        // Log the incoming request
+        \Log::info('Incoming request data:', $request->all());
+
         // Validate request data
         $validatedData = $request->validate([
-            'firstName' => 'required|string|max:255',
-            'lastName' => 'required|string|max:255',
-            'middleName' => 'required|string|max:255',
+            // Personal Information
+            'personalId' => 'nullable|exists:personal_information,personalId',
+            'firstName' => 'required_without:personalId|string|max:255',
+            'lastName' => 'required_without:personalId|string|max:255',
+            'middleName' => 'nullable|string|max:255',
             'purok' => 'nullable|string|max:100',
             'barangay' => 'nullable|string|max:100',
             'age' => 'required|numeric',
             'birthdate' => 'required|date',
             'contact' => 'required|string|max:15',
+
+            // PreNatal Data
             'modeOfTransaction' => 'required|string|max:255',
             'consultationDate' => 'required|date',
             'consultationTime' => 'required|date_format:H:i',
@@ -95,7 +127,7 @@ class PreNatalController extends Controller
             'emergencyContact' => 'required|string|max:255',
             'fourMember' => 'required|string|max:255',
             'philhealthStatus' => 'required|string|max:255',
-            'philhealthId' => 'nullable|string|max:255',
+            'philhealthNo' => 'nullable|string|max:255',
             'menarche' => 'required|string|max:255',
             'sexualOnset' => 'required|string|max:255',
             'periodDuration' => 'required|string|max:255',
@@ -119,66 +151,97 @@ class PreNatalController extends Controller
             'tdDate' => 'required|date',
         ]);
 
-        // Split validated data for PersonalInformation
-        $personalData = [
-            'firstName' => $validatedData['firstName'],
-            'lastName' => $validatedData['lastName'],
-            'middleName' => $validatedData['middleName'],
-            'purok' => $validatedData['purok'],
-            'barangay' => $validatedData['barangay'],
-            'age' => $validatedData['age'],
-            'birthdate' => $validatedData['birthdate'],
-            'contact' => $validatedData['contact'],
-        ];
+        try {
+            $personalInfo = null;
 
-        // Save personal data to PersonalInformation table
-        $personalInfo = PersonalInformation::create($personalData);
+            // Handle existing or new personal information
+            if (!empty($validatedData['personalId'])) {
+                // Update existing personal information
+                $personalInfo = PersonalInformation::findOrFail($validatedData['personalId']);
+                $personalInfo->update([
+                    'firstName' => $validatedData['firstName'] ?? $personalInfo->firstName,
+                    'lastName' => $validatedData['lastName'] ?? $personalInfo->lastName,
+                    'middleName' => $validatedData['middleName'] ?? $personalInfo->middleName,
+                    'suffix' => $validatedData['suffix'] ?? $personalInfo->suffix,
+                    'purok' => $validatedData['purok'] ?? $personalInfo->purok,
+                    'barangay' => $validatedData['barangay'] ?? $personalInfo->barangay,
+                    'age' => $validatedData['age'] ?? $personalInfo->age,
+                    'birthdate' => $validatedData['birthdate'] ?? $personalInfo->birthdate,
+                    'contact' => $validatedData['contact'] ?? $personalInfo->contact,
+                    'sex' => $validatedData['sex'] ?? $personalInfo->sex,
+                ]);
+            } else {
+                // Create new personal information
+                $personalInfo = PersonalInformation::create([
+                    'firstName' => $validatedData['firstName'],
+                    'lastName' => $validatedData['lastName'],
+                    'middleName' => $validatedData['middleName'],
+                    'suffix' => 'None',
+                    'purok' => $validatedData['purok'],
+                    'barangay' => $validatedData['barangay'],
+                    'age' => $validatedData['age'],
+                    'birthdate' => $validatedData['birthdate'],
+                    'contact' => $validatedData['contact'],
+                    'sex' => 'Female',
+                ]);
+            }
 
-        // Prepare data for PreNatal table
-        $prenatalData = [
-            'personalId' => $personalInfo->personalId, // Link to personal information record
-            'modeOfTransaction' => $validatedData['modeOfTransaction'],
-            'consultationDate' => $validatedData['consultationDate'],
-            'consultationTime' => $validatedData['consultationTime'],
-            'bloodPressure' => $validatedData['bloodPressure'],
-            'temperature' => $validatedData['temperature'],
-            'height' => $validatedData['height'],
-            'weight' => $validatedData['weight'],
-            'providerName' => $validatedData['providerName'],
-            'nameOfSpouse' => $validatedData['nameOfSpouse'],
-            'emergencyContact' => $validatedData['emergencyContact'],
-            'fourMember' => $validatedData['fourMember'],
-            'philhealthStatus' => $validatedData['philhealthStatus'],
-            'philhealthId' => $validatedData['philhealthId'],
-            'menarche' => $validatedData['menarche'],
-            'sexualOnset' => $validatedData['sexualOnset'],
-            'periodDuration' => $validatedData['periodDuration'],
-            'birthControl' => $validatedData['birthControl'],
-            'intervalCycle' => $validatedData['intervalCycle'],
-            'menopause' => $validatedData['menopause'],
-            'lmp' => $validatedData['lmp'],
-            'edc' => $validatedData['edc'],
-            'gravidity' => $validatedData['gravidity'],
-            'parity' => $validatedData['parity'],
-            'term' => $validatedData['term'],
-            'preterm' => $validatedData['preterm'],
-            'abortion' => $validatedData['abortion'],
-            'living' => $validatedData['living'],
-            'syphilisResult' => $validatedData['syphilisResult'],
-            'penicillin' => $validatedData['penicillin'],
-            'hemoglobin' => $validatedData['hemoglobin'],
-            'hematocrit' => $validatedData['hematocrit'],
-            'urinalysis' => $validatedData['urinalysis'],
-            'ttStatus' => $validatedData['ttStatus'],
-            'tdDate' => $validatedData['tdDate'],
-        ];
+            // Save PreNatal data
+            PreNatal::create([
+                'personalId' => $personalInfo->personalId,
+                'modeOfTransaction' => $validatedData['modeOfTransaction'],
+                'consultationDate' => $validatedData['consultationDate'],
+                'consultationTime' => $validatedData['consultationTime'],
+                'bloodPressure' => $validatedData['bloodPressure'],
+                'temperature' => $validatedData['temperature'],
+                'height' => $validatedData['height'],
+                'weight' => $validatedData['weight'],
+                'providerName' => $validatedData['providerName'],
+                'nameOfSpouse' => $validatedData['nameOfSpouse'],
+                'emergencyContact' => $validatedData['emergencyContact'],
+                'fourMember' => $validatedData['fourMember'],
+                'philhealthStatus' => $validatedData['philhealthStatus'],
+                'philhealthNo' => $validatedData['philhealthNo'] ?? null,
+                'menarche' => $validatedData['menarche'],
+                'sexualOnset' => $validatedData['sexualOnset'],
+                'periodDuration' => $validatedData['periodDuration'],
+                'birthControl' => $validatedData['birthControl'],
+                'intervalCycle' => $validatedData['intervalCycle'],
+                'menopause' => $validatedData['menopause'],
+                'lmp' => $validatedData['lmp'],
+                'edc' => $validatedData['edc'],
+                'gravidity' => $validatedData['gravidity'],
+                'parity' => $validatedData['parity'],
+                'term' => $validatedData['term'],
+                'preterm' => $validatedData['preterm'],
+                'abortion' => $validatedData['abortion'],
+                'living' => $validatedData['living'],
+                'syphilisResult' => $validatedData['syphilisResult'],
+                'penicillin' => $validatedData['penicillin'],
+                'hemoglobin' => $validatedData['hemoglobin'],
+                'hematocrit' => $validatedData['hematocrit'],
+                'urinalysis' => $validatedData['urinalysis'],
+                'ttStatus' => $validatedData['ttStatus'],
+                'tdDate' => $validatedData['tdDate'],
+            ]);
 
-        // Save prenatal data to PreNatal table
-        $prenatal = PreNatal::create($prenatalData);
+            // Log the success
+            \Log::info('Data saved successfully for personalId:', [
+                'personalId' => $personalInfo->personalId,
+            ]);
 
-        // Redirect back with a success message
-        return back()->with('Success', 'Data saved successfully!');
+            // Redirect with success
+            return back()->with('success', 'Data saved successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Error saving data:', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['error' => 'An unexpected error occurred. Please try again later.']);
+        }
     }
+
+
 
 
     /**

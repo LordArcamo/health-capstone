@@ -168,9 +168,9 @@
               <select v-model="form.modeOfTransaction" class="input" required>
                 <!-- Placeholder option for selecting suffix -->
                 <option value="" disabled selected>Select a Mode of Transaction</option>
-                <option>Walk-in</option>
-                <option>Visited</option>
-                <option>Referral</option>
+                <option value="Walk-in">Walk-in</option>
+                <option value="Visited">Visited</option>
+                <option value="Referral">Referral</option>
               </select>
             </div>
             <div>
@@ -247,29 +247,18 @@
               <label class="block">Type of Consultation/Purpose of Visit:</label>
               <select v-model="form.visitType" class="input" @change="checkMentalHealth" required>
                 <option value="" disabled selected>Select a Type</option>
-                <option>General</option>
-                <option>Dental Care</option>
-                <option>Child Care</option>
-                <option>Injury</option>
-                <option>Adult Immunization</option>
-                <option>Family Planning</option>
-                <option>Postpartum</option>
-                <option>Tuberculosis</option>
-                <option>Child Immunization</option>
-                <option>Sick Children</option>
-                <option>Firecracker Injury</option>
-                <option>Mental Health</option>
-              </select>
-            </div>
-
-            <!-- Sessions Dropdown for Mental Health -->
-            <div v-if="showSessions">
-              <label class="block">Select Session:</label>
-              <select v-model="form.session" class="input">
-                <option value="" disabled selected>Select a Session</option>
-                <option v-for="session in mentalHealthSessions" :key="session" :value="session">
-                  {{ session }}
-                </option>
+                <option value="General">General</option>
+                <option value="Dental Care">Dental Care</option>
+                <option value="Child Care">Child Care</option>
+                <option value="Injury">Injury</option>
+                <option value="Adult Immunization">Adult Immunization</option>
+                <option value="Family Planning">Family Planning</option>
+                <option value="Postpartum">Postpartum</option>
+                <option value="Tuberculosis">Tuberculosis</option>
+                <option value="Child Immunization">Child Immunization</option>
+                <option value="Sick Children">Sick Children</option>
+                <option value="Firecracker Injury">Firecracker Injury</option>
+                <option value="Mental Health">Mental Health</option>
               </select>
             </div>
 
@@ -342,19 +331,18 @@
 
 <script>
 export default {
-  props: ['onSubmit'],
+  props: {
+    selectedPatient: {
+    type: Object,
+    required: false,
+    default: () => ({}),
+    },
+    onSubmit: Function,
+  },
   data() {
     return {
-      showSessions: false,
       alertMessage: '',
       showModal: false, // Tracks modal visibility
-      mentalHealthSessions: [
-        'Initial Assessment',
-        'Counseling Session',
-        'Follow-up Session',
-        'Psychological Evaluation',
-        'Therapeutic Intervention'
-      ],
       stepTitles: ['Patient Information',
         'Consultation Details',
         'Visit Information',
@@ -379,17 +367,16 @@ export default {
         temperature: '',
         height: '',
         weight: '',
+        referredFrom: '',
+        referredTo: '',
+        reasonsForReferral: '',
+        referredBy: '',
         providerName: '',
         natureOfVisit: '',
         visitType: '',
         chiefComplaints: '',
         diagnosis: '',
         medication: '',
-        referredFrom: '',
-        referredTo: '',
-        reasonsForReferral: '',
-        referredBy: '',
-        session: '',
       },
       errors: {
         contact: '',
@@ -402,14 +389,110 @@ export default {
     computedAge() {
       if (!this.form.birthdate) return '';
       const birthDate = new Date(this.form.birthdate);
-      const age = new Date().getFullYear() - birthDate.getFullYear();
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      // Check if the birthday has occurred this year
+      const hasBirthdayOccurred = 
+        today.getMonth() > birthDate.getMonth() || 
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+      if (!hasBirthdayOccurred) {
+        age--;
+      }
+
       return age;
     },
     isFormValid() {
       return this.form.contact.length === 10;
     },
   },
+  watch: {
+    selectedPatient: {
+      immediate: true,
+      handler(newPatient) {
+        if (newPatient && newPatient.personalId === null) {
+          // Clear the form for a new patient
+          this.resetForm();
+        } else if (newPatient && Object.keys(newPatient).length > 0) {
+          // Populate the form with selected patient data
+          this.populateForm(newPatient);
+        }
+      },
+    },
+    // Watch for changes in birthdate and update the age field
+    'form.birthdate': function () {
+      this.form.age = this.computedAge; // Automatically update age when birthdate changes
+    },
+    'form.modeOfTransaction': function (newVal) {
+        if (newVal === 'Referral') {
+            // Reset the fields to empty when Referral is selected
+            this.form.referredFrom = '';
+            this.form.referredTo = '';
+            this.form.reasonsForReferral = '';
+            this.form.referredBy = '';
+        } else {
+            // Set the fields to "None" when not Referral
+            this.form.referredFrom = 'None';
+            this.form.referredTo = 'None';
+            this.form.reasonsForReferral = 'None';
+            this.form.referredBy = 'None';
+        }
+    },
+  },
   methods: {
+    resetForm() {
+      this.form = {
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        suffix: '',
+        purok: '',
+        barangay: '',
+        age: '',
+        birthdate: '',
+        contact: '',
+        sex: '',
+        consultationDate: '',
+        consultationTime: '',
+        modeOfTransaction: '',
+        bloodPressure: '',
+        temperature: '',
+        height: '',
+        weight: '',
+        providerName: '',
+        natureOfVisit: '',
+        visitType: '',
+        session: '',
+        chiefComplaints: '',
+        diagnosis: '',
+        medication: '',
+        referredFrom: '',
+        referredTo: '',
+        reasonsForReferral: '',
+        referredBy: '',
+      };
+      this.errors = {};
+    },
+    populateForm(patient) {
+      console.log("Populating form with patient:", patient);
+      this.form = {
+        firstName: this.selectedPatient?.firstName || '',
+        lastName: this.selectedPatient?.lastName || '',
+        middleName: this.selectedPatient?.middleName || '',
+        suffix: this.selectedPatient?.suffix || '',
+        purok: this.selectedPatient?.purok || '',
+        barangay: this.selectedPatient?.barangay || '',
+        age: '',
+        birthdate: this.selectedPatient?.birthdate || '',
+        contact: this.selectedPatient?.contact || '',
+        sex: this.selectedPatient?.sex || '',
+        
+      };
+      this.form.age = this.computedAge;
+
+    },
     formatLabel(key) {
       return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
     },
@@ -512,12 +595,6 @@ export default {
 
       // Update the form weight with the validated value
       this.form.weight = value;
-    },
-    checkMentalHealth() {
-      this.showSessions = this.form.visitType === 'Mental Health';
-      if (!this.showSessions) {
-        this.form.session = '';
-      }
     },
     handleSubmit(event) {
       event.preventDefault();
@@ -626,7 +703,12 @@ export default {
       this.alertMessage = ''; // Close the alert
     },
     formatContact() {
-      this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
+      // Ensure the input starts with "09", remove non-numeric characters, and limit to 10 digits
+      if (!this.form.contact.startsWith('0')) {
+        this.form.contact = '0' + this.form.contact.replace(/[^0-9]/g, '');
+      } else {
+        this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 11);
+      }
     },
     triggerSubmit() {
       if (this.validateStep1() && this.validateStep2() && this.validateStep3()) {
@@ -637,24 +719,76 @@ export default {
     },
     confirmSubmit() {
       // Prepare the form data and parse weight and height as numbers
-      const formData = {
-        ...this.form,
-        weight: parseFloat(this.form.weight) || null, // Convert to number or null if invalid
-        height: parseFloat(this.form.height) || null, // Convert to number or null if invalid
+      const payload = {
+        personalId: this.selectedPatient?.personalId || null,
+        firstName: this.form.firstName,
+        lastName: this.form.lastName,
+        middleName: this.form.middleName,
+        suffix: this.form.suffix,
+        purok: this.form.purok,
+        barangay: this.form.barangay,
+        age: this.form.age,
+        birthdate: this.form.birthdate,
+        contact: this.form.contact,
+        sex: this.form.sex,
+        consultationDate: this.form.consultationDate,
+        consultationTime: this.form.consultationTime,
+        modeOfTransaction: this.form.modeOfTransaction,
+        bloodPressure: this.form.bloodPressure,
+        temperature: this.form.temperature,
+        height: parseFloat(this.form.height),
+        weight: parseFloat(this.form.weight),
+        referredFrom: this.form.referredFrom || 'None',
+        referredTo: this.form.referredTo || 'None',
+        reasonsForReferral: this.form.reasonsForReferral || 'None',
+        referredBy: this.form.referredBy || 'None',
+        providerName: this.form.providerName,
+        natureOfVisit: this.form.natureOfVisit,
+        visitType: this.form.visitType,
+        chiefComplaints: this.form.chiefComplaints,
+        diagnosis: this.form.diagnosis,
+        medication: this.form.medication,
+
       };
 
+      if (!this.selectedPatient?.personalId) {
+        Object.assign(payload, {
+          firstName: this.form.firstName,
+          lastName: this.form.lastName,
+          middleName: this.form.middleName,
+          suffix: this.form.suffix,
+          purok: this.form.purok,
+          barangay: this.form.barangay,
+          age: this.form.age,
+          birthdate: this.form.birthdate,
+          contact: this.form.contact,
+          sex: this.form.sex,
+        });
+      }
+      console.log('Submitting form with payload:', payload);
       // Emit the parsed form data
-      this.$emit('submitForm', formData);
+      this.$emit('submitForm', payload);
 
       // Display success message
       this.successMessage = 'Form submitted successfully!';
       this.showModal = false; // Hide modal
       this.errors = {};
+      this.resetForm();
     },
     cancelSubmit() {
       this.showModal = false; // Hide modal
     },
   },
+  mounted() {
+    console.log('Received personalInfo:', this.personalInfo);
+    if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
+      console.log('Rendering empty form for new patient');
+    } else {
+      console.log('Rendering form for existing patient:', this.selectedPatient);
+      this.populateForm(this.selectedPatient);
+    }
+  },
+
 };
 </script>
 

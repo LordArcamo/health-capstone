@@ -22,8 +22,7 @@ return new class extends Migration
             $table->string('houseHoldno', 100);
             $table->string('fourpsmember', 100);
             $table->string('PCBMember', 100);
-            $table->string('philhealthMember', 100);
-            $table->string('statusType', 50);
+            $table->string('philhealthStatus', 50);
             $table->string('philhealthNo', 15);
             $table->string('ifMember', 100);
             $table->string('familyMember', 100);

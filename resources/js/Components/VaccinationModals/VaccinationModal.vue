@@ -17,29 +17,45 @@
         <h3 class="text-lg font-semibold mb-4">Search for a Patient</h3>
         <div>
           <label for="search" class="block text-sm font-medium text-gray-700">Search by Name</label>
-          <input type="text" v-model="searchQuery" @input="filterPatients" id="search" class="input"
-            placeholder="Enter patient name" />
+          <input 
+            type="text" 
+            v-model="searchQuery" 
+            @input="debouncedSearchPatients" 
+            id="search" 
+            class="input" 
+            placeholder="Example: Pedro Penduko" 
+          />
         </div>
 
-        <div v-if="filteredPatients.length > 0" class="mt-4">
-          <ul class="bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
-            <li v-for="patient in filteredPatients" :key="patient.id" @click="selectPatient(patient)" :class="{
+        <div class="bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
+          <ul v-if="filteredPatients.length">
+            <li 
+            v-for="patient in filteredPatients" 
+            :key="patient.id" 
+            @click="selectPatient(patient)" 
+            :class="{
               'bg-gray-100': selectedPatient?.id === patient.id,
               'hover:bg-gray-50': selectedPatient?.id !== patient.id,
             }" class="cursor-pointer px-4 py-2">
-              {{ patient.name }} ({{ patient.age }} years)
+              {{ patient.firstName }} {{ patient.lastName }} ({{ patient.age }} years)
             </li>
           </ul>
-        </div>
-
-        <div v-else-if="searchQuery.trim()" class="mt-4 text-sm text-gray-500">
+          <div v-else-if="searchQuery.trim()" class="mt-4 text-sm text-gray-500">
           No patients found. You can proceed to add a new patient.
         </div>
+        <div v-else class="mt-4 text-sm text-gray-500 px-4 py-2">
+            Start typing to search for a patient.
+          </div>
+        </div>
+
 
         <div class="flex justify-end space-x-4 mt-6">
           <button @click="closeModal" class="bg-red-500 text-white py-2 px-4 rounded-md">Cancel</button>
-          <button :disabled="!selectedPatient && !allowAddNewPatient" @click="addOrNextStep"
-            class="bg-blue-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400">
+          <button
+            :disabled="!selectedPatient && !allowAddNewPatient"
+            @click="addOrNextStep"
+            class="bg-blue-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400"
+          >
             {{ selectedPatient ? "Next" : "Add New Patient" }}
           </button>
         </div>
@@ -134,7 +150,7 @@
             </div>
             <div>
               <label class="block">Age:</label>
-              <input type="number" v-model="computedAge" class="input" readonly />
+              <input type="number" v-model="patientAgeInYears" class="input" readonly />
             </div>
             <!-- Contact Number -->
             <div>
@@ -220,10 +236,17 @@
           <!-- Conditional Age Input -->
           <div>
             <label for="age" class="block text-sm font-medium text-gray-700">
-              {{ isUnderOneYear ? 'Age in Months' : 'Age in Years' }}
+              {{ isUnderOneYear ? "Age in Months" : "Age in Years" }}
             </label>
-            <input type="number" id="age" v-model="age" class="input"
-              :placeholder="isUnderOneYear ? 'Enter age in months' : 'Enter age in years'" required />
+            <input
+              type="number"
+              id="age"
+              v-model="computedVaccinationAge"
+              class="input"
+              :placeholder="isUnderOneYear ? 'Enter age in months' : 'Enter age in years'"
+              :value="computedVaccinationAge"
+              readonly
+            />
           </div>
 
           <!-- Weight -->
@@ -344,7 +367,14 @@
 <script>
 import AlertMessage from '../AlertMessage.vue';
 
+import { debounce } from 'lodash';
 export default {
+  props: {
+    patients: {
+        type: Array,
+        default: () => [],
+      },
+  },
   components: {
     AlertMessage,
   },
@@ -356,11 +386,7 @@ export default {
       showConfirmationModal: false, // To toggle confirmation modal
       step: 1,
       searchQuery: "",
-      patients: [
-        { id: 1, name: "John Doe", age: 35, contact: "+63 912 345 6789" },
-        { id: 2, name: "Jane Smith", age: 29, contact: "+63 987 654 3210" },
-      ],
-      filteredPatients: [],
+      filteredPatients: this.patients || [],
       selectedPatient: null,
       allowAddNewPatient: false,
       form: {
@@ -384,7 +410,7 @@ export default {
         temperature: "",
         antigenGiven: "",
         injectedBy: "",
-        exclusivelyBreastfed: "",
+        exclusivelyBreastfed: "None",
         nextAppointment: "",
       },
       vaccineCategories: [
@@ -416,43 +442,96 @@ export default {
     };
   },
   watch: {
+    searchQuery: {
+      immediate: true,
+      handler() {
+        this.debouncedSearchPatients();
+      },
+    },
+    patients(newPatients) {
+      this.filteredPatients = newPatients;
+    },
+    patients: {
+      immediate: true,
+      handler(newPatients) {
+        console.log('Patients updated in modal:', newPatients);
+        if (Array.isArray(newPatients) && newPatients.length > 0) {
+          this.filteredPatients = [...newPatients]; // Update filtered patients
+        } else {
+          console.warn('Patients array is empty or undefined.');
+          this.filteredPatients = [];
+        }
+      },
+    },
+    'form.birthdate': function () {
+      this.form.age = this.patientAgeInYears; // Automatically update age when birthdate changes
+    },
     "form.vaccineCategory": function () {
       this.updateVaccineTypes();
     },
-  },
+    "form.vaccineCategory": function () {
+      this.updateVaccineTypes();
+      if (!this.isUnderOneYear) {
+        this.form.exclusivelyBreastfed = null; // Reset this field if the category is not "Under 1 Year"
+      }
+    },
+    'form.vaccineCategory': function (newVal) {
+        if (newVal === 'Under 1 Year') {
+            // Reset the fields to empty when Referral is selected
+            this.form.exclusivelyBreastfed = '';
+            
+        } else {
+            // Set the fields to "None" when not Referral
+            this.form.exclusivelyBreastfed = 'None';
+        }
+      },
+    },
   computed: {
+    patientAgeInYears() {
+      if (!this.form.birthdate) return '';
+      const birthDate = new Date(this.form.birthdate);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      // Check if the birthday has occurred this year
+      const hasBirthdayOccurred = 
+        today.getMonth() > birthDate.getMonth() || 
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+      if (!hasBirthdayOccurred) {
+        age--;
+      }
+
+      return age;
+    },
+
+    // Age for Vaccination Record Form (dynamic: months or years)
+    computedVaccinationAge() {
+      if (!this.form.birthdate) return "";
+      const birthDate = new Date(this.form.birthdate);
+      const today = new Date();
+
+      // Calculate months
+      const yearsDifference = today.getFullYear() - birthDate.getFullYear();
+      const monthsDifference = today.getMonth() - birthDate.getMonth();
+      let totalMonths = yearsDifference * 12 + monthsDifference;
+
+      // Subtract one month if today’s day is earlier than the birthday day
+      if (today.getDate() < birthDate.getDate()) {
+        totalMonths--;
+      }
+
+      // Return months or years depending on the selected category
+      return this.isUnderOneYear ? totalMonths : Math.floor(totalMonths / 12);
+    },
+
+    // Determine if the selected vaccine category is "Under 1 Year"
     isUnderOneYear() {
       return this.form.vaccineCategory === "Under 1 Year";
     },
-    isFormValid() {
-      return (
-        this.form.dateOfVisit &&
-        this.form.weight &&
-        this.form.height &&
-        this.form.temperature &&
-        this.form.antigenGiven &&
-        this.form.injectedBy &&
-        (!this.isUnderOneYear || this.form.exclusivelyBreastfed) &&
-        this.form.nextAppointment
-      );
-    },
-    reviewFields() {
-    // Merge selected patient data and form data
-    return this.selectedPatient
-      ? {
-          ...this.selectedPatient, // Use existing patient data if selected
-          ...this.form,            // Overwrite with any updated or additional form data
-        }
-      : { ...this.form };          // Use only the form data if no patient is selected
   },
-
-    computedAge() {
-      if (!this.form.birthdate) return '';
-      const birthDate = new Date(this.form.birthdate);
-      const age = new Date().getFullYear() - birthDate.getFullYear();
-      return age;
-    },
-  },
+  
   methods: {
     formatLabel(key) {
       // Convert camelCase or snake_case keys to readable labels
@@ -483,11 +562,57 @@ export default {
     cancelConfirmation() {
       this.showConfirmationModal = false; // Close the confirmation modal without saving
     },
+    searchPatients() {
+      const query = this.searchQuery.trim().toLowerCase();
+      console.log('Search Query:', query);
+
+      if (!Array.isArray(this.patients) || this.patients.length === 0) {
+        console.warn('Patients array is empty or undefined.');
+        this.filteredPatients = [];
+        return;
+      }
+
+      if (query === '') {
+        console.log('Clearing filtered patients because query is empty.');
+        this.filteredPatients = [...this.patients];
+        return;
+      }
+
+      this.filteredPatients = this.patients.filter((patient) => {
+        const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+        return (
+          fullName.includes(query) ||
+          patient.firstName.toLowerCase().includes(query) ||
+          patient.lastName.toLowerCase().includes(query) ||
+          (patient.personalId && patient.personalId.toString().includes(query))
+        );
+      });
+
+      console.log('Filtered Patients:', this.filteredPatients);
+      this.allowAddNewPatient = this.filteredPatients.length === 0;
+    },
+
+    // Debounced search for better performance
+    debouncedSearchPatients: debounce(function () {
+      console.log('Debounced search triggered:', this.searchQuery);
+      this.searchPatients();
+    }, 300),
+    
+    updateAgeFields() {
+      const age = this.computedVaccinationAge;
+      if (this.isUnderOneYear) {
+        this.form.ageInMonths = age; // Set months for "Under 1 Year"
+        this.form.ageInYears = ""; // Clear years
+      } else {
+        this.form.ageInYears = age; // Set years
+        this.form.ageInMonths = ""; // Clear months
+      }
+    },
     handleAgeInput(event) {
       if (this.isUnderOneYear) {
-        this.form.ageInYears = "";
-      } else {
         this.form.ageInMonths = "";
+      } else {
+        this.form.ageInYears = "";
       }
     },
     formatContact() {
@@ -583,6 +708,8 @@ export default {
         this.step = 3;
       } else if (this.allowAddNewPatient) {
         this.step = 2;
+      } else if (this.selectedPatient) {
+        this.step++;
       }
     },
     filterPatients() {
@@ -685,13 +812,21 @@ export default {
       return valid;
     },
     saveVaccination() {
+      if (this.isUnderOneYear) {
+        this.form.ageInMonths = this.computedVaccinationAge;
+        this.form.ageInYears = "";
+      } else {
+        this.form.ageInYears = this.computedVaccinationAge;
+        this.form.ageInMonths = "";
+      }
+
       // Check if all validations are passed before saving
       if (!this.validateStep4()) {
         this.alertMessage = "Please complete all required fields";
         this.showAlert = true;
         return;
       }
-      console.log("Vaccination data saved:", this.form);
+      console.log("Vaccination data saved:", this.form); // Verify the form object
       this.showConfirmationModal = false;
       this.closeModal();
 
@@ -768,6 +903,12 @@ export default {
       this.step = 1; // Reset to the first step
     }
 
+  },
+  mounted() {
+    if (this.patients && Array.isArray(this.patients)) {
+      this.filteredPatients = this.patients;
+      console.log('Initialized filteredPatients:', this.filteredPatients);
+    }
   },
 };
 </script>

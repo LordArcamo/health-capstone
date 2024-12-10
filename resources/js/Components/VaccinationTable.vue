@@ -5,6 +5,12 @@ import ScheduleNextAppointmentModal from "./VaccinationModals/ScheduleNextAppoin
 import ViewHistoryModal from "./VaccinationModals/ViewHistoryModal.vue";
 
 export default {
+  props: {
+    patients: {
+      type: Array,
+      default: () => [],
+    },
+  },
   components: {
     VaccinationModal,
     ScheduleNextAppointmentModal,
@@ -21,52 +27,52 @@ export default {
       searchQuery: "",
       filterBarangay: "",
       filterAddress: "",
-      patients: [
-        {
-          id: 1,
-          name: "John Doe",
-          age: 25,
-          vaccineType: "Vaccine A",
-          nextAppointment: "2024-12-01",
-          address: "Barangay 1, Initao",
-          barangay: "Barangay 1",
-          history: [
-            {
-              id: 1,
-              dateOfVisit: "2024-01-15",
-              ageInYears: 25,
-              weight: "70 kg",
-              height: "170 cm",
-              temperature: "37°C",
-              antigenGiven: "Measles Vaccine",
-              injectedBy: "Dr. Smith",
-              nextAppointment: "2024-02-15",
-            },
-          ],
-        },
-        {
-          id: 2,
-          name: "Jane Smith",
-          age: 30,
-          vaccineType: "Vaccine B",
-          nextAppointment: "2024-12-10",
-          address: "Barangay 2, Initao",
-          barangay: "Barangay 2",
-          history: [
-            {
-              id: 1,
-              dateOfVisit: "2024-01-10",
-              ageInYears: 30,
-              weight: "65 kg",
-              height: "165 cm",
-              temperature: "36.5°C",
-              antigenGiven: "Polio Vaccine",
-              injectedBy: "Dr. Adam",
-              nextAppointment: "2024-02-10",
-            },
-          ],
-        },
-      ],
+      // patients: [
+      //   {
+      //     id: 1,
+      //     name: "John Doe",
+      //     age: 25,
+      //     vaccineType: "Vaccine A",
+      //     nextAppointment: "2024-12-01",
+      //     address: "Barangay 1, Initao",
+      //     barangay: "Barangay 1",
+      //     history: [
+      //       {
+      //         id: 1,
+      //         dateOfVisit: "2024-01-15",
+      //         ageInYears: 25,
+      //         weight: "70 kg",
+      //         height: "170 cm",
+      //         temperature: "37°C",
+      //         antigenGiven: "Measles Vaccine",
+      //         injectedBy: "Dr. Smith",
+      //         nextAppointment: "2024-02-15",
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     id: 2,
+      //     name: "Jane Smith",
+      //     age: 30,
+      //     vaccineType: "Vaccine B",
+      //     nextAppointment: "2024-12-10",
+      //     address: "Barangay 2, Initao",
+      //     barangay: "Barangay 2",
+      //     history: [
+      //       {
+      //         id: 1,
+      //         dateOfVisit: "2024-01-10",
+      //         ageInYears: 30,
+      //         weight: "65 kg",
+      //         height: "165 cm",
+      //         temperature: "36.5°C",
+      //         antigenGiven: "Polio Vaccine",
+      //         injectedBy: "Dr. Adam",
+      //         nextAppointment: "2024-02-10",
+      //       },
+      //     ],
+      //   },
+      // ],
       paginatedPatients: [],
       dropdownOpen: null,
     };
@@ -99,6 +105,7 @@ export default {
     },
     closeVaccinationModal() {
       this.showVaccinationModal = false;
+      this.$refs.vaccinationModal?.resetState?.();
     },
     applyFilters() {
       this.paginatedPatients = this.patients.filter((patient) => {
@@ -262,17 +269,19 @@ export default {
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Age</th>
             <th class="px-6 py-3 text-left  font-medium text-white uppercase tracking-wider">Vaccine Type</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Next Appointment</th>
-            <th class="px-6 py-3 text-left  font-medium text-white uppercase tracking-wider">Address</th>
+            <th class="px-6 py-3 text-left  font-medium text-white uppercase tracking-wider">Barangay</th>
+            <th class="px-6 py-3 text-left  font-medium text-white uppercase tracking-wider">Purok</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-for="patient in paginatedPatients" :key="patient.id" class="hover:bg-gray-100">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.name }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.vaccineType }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.nextAppointment || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.address || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.barangay || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.purok || 'N/A' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
               <button @click="openScheduleModal(patient)"
                 class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400">

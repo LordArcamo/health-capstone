@@ -37,7 +37,7 @@
         </button>
       </div>
 
-      <form @submit.prevent="submitForm">
+      <form @submit.prevent="triggerSubmit">
         <!-- Step 1: Patient Information -->
         <div v-if="step === 1">
           <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
@@ -56,26 +56,6 @@
               <label class="block">Middle Name:</label>
               <input type="text" v-model="form.middleName" class="input"  @input="capitalizeName('middleName')" placeholder="Example: Penduko" required />
               <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
-            </div>
-            <div>
-              <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix:</label>
-              <select v-model="form.suffix"
-                class="input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <!-- Placeholder option for selecting suffix -->
-                <option value="" disabled selected>Select a Suffix</option>
-
-                <option value="None">None</option>
-                <option value="Jr.">Jr.</option>
-                <option value="Sr.">Sr.</option>
-                <option value="I">I</option>
-                <option value="II">II</option>
-                <option value="III">III</option>
-                <option value="IV">IV</option>
-                <option value="V">V</option>
-              </select>
-
-              <!-- Error message if no suffix is selected -->
-              <span v-if="errors.suffix" class="text-red-600 text-sm">{{ errors.suffix }}</span>
             </div>
 
             <div>
@@ -117,6 +97,19 @@
             <div>
               <label class="block">Age:</label>
               <input type="number" v-model="computedAge" class="input" readonly />
+            </div>
+            
+            <div>
+              <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
+              <div class="relative">
+                <input type="tel" v-model="form.contact" @input="formatContact"
+                  class="pl-14 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 w-full"
+                  placeholder="Enter 10 digits" required />
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
+                  +63
+                </span>
+              </div>
             </div>
 
           </div>
@@ -185,7 +178,7 @@
             <div>
               <label class="block">Name of Spouse:</label>
               <input type="text" v-model="form.nameOfSpouse" placeholder="Example: Pedro Penduko" class="input"></input>
-              <span v-if="errors.nameOfSpouse" class="text-red-600 text-sm">{{ errors.nameofSpouse }}</span>
+              <span v-if="errors.nameOfSpouse" class="text-red-600 text-sm">{{ errors.nameOfSpouse }}</span>
             </div>
             <!-- Emergency Contact Number -->
             <div>
@@ -222,8 +215,8 @@
 
               <!-- Conditionally Render ID Input -->
               <div v-if="form.philhealthStatus === 'Member'" class="mt-4">
-                <label for="philhealthId" class="block font-medium text-gray-700">Philhealth ID Number:</label>
-                <input id="philhealthId" v-model="form.philhealthId" type="text"
+                <label for="philhealthNo" class="block font-medium text-gray-700">Philhealth ID Number:</label>
+                <input id="philhealthNo" v-model="form.philhealthNo" type="text"
                   class="input border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   placeholder="Enter ID number" />
               </div>
@@ -410,7 +403,7 @@
 
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
-            <button @click="handleSubmit" class="btn">Submit</button>
+            <button @click="nextStep" class="btn">Next</button>
           </div>
         </div>
 
@@ -436,17 +429,45 @@
         {{ successMessage }}
       </div> -->
     </div>
+    <div v-if="showModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+      <!-- Modal Content -->
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <!-- Modal Header -->
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Are you sure?</h2>
+        <!-- Modal Body -->
+        <p class="text-gray-600 mb-6">Do you want to submit the form?</p>
+        <!-- Modal Actions -->
+        <div class="flex justify-end space-x-3">
+          <button @click="cancelSubmit"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+            Cancel
+          </button>
+          <button @click="confirmSubmit"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+            Yes, Submit
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </template>
 
 <script>
 export default {
-  props: ['onSubmit'],
+  props: {
+    selectedPatient: {
+    type: Object,
+    required: false,
+    default: () => ({}),
+    },
+    onSubmit: Function,
+  },
   data() {
     return {
-      step: 1,
+      isNewPatient: true,
       alertMessage: '',
+      showModal: false,
       stepTitles: [
         'Patient Information',
         'For CHU/RHU Personnel Only',
@@ -455,15 +476,16 @@ export default {
         'Labs Done On:',
         'Review Information'
       ],
+      step: 1,
       form: {
-        firstName: '',
-        lastName: '',
-        middleName: '',
-        suffix: '',
-        purok: '',
-        barangay: '',
+        firstName: this.selectedPatient?.firstName || '',
+        lastName: this.selectedPatient?.lastName || '',
+        middleName: this.selectedPatient?.middleName || '',
+        purok: this.selectedPatient?.purok || '',
+        barangay: this.selectedPatient?.barangay || '',
         age: '',
-        birthdate: '',
+        birthdate: this.selectedPatient?.birthdate || '',
+        contact: this.selectedPatient?.contact || '',
         modeOfTransaction: '',
         consultationDate: '',
         consultationTime: '',
@@ -476,7 +498,7 @@ export default {
         emergencyContact: '',
         fourMember: '',
         philhealthStatus: '',
-        philhealthId: '',
+        philhealthNo: '',
         menarche: '',
         sexualOnset: '',
         periodDuration: '',
@@ -509,11 +531,117 @@ export default {
     computedAge() {
       if (!this.form.birthdate) return '';
       const birthDate = new Date(this.form.birthdate);
-      const age = new Date().getFullYear() - birthDate.getFullYear();
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      // Check if the birthday has occurred this year
+      const hasBirthdayOccurred = 
+        today.getMonth() > birthDate.getMonth() || 
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+      if (!hasBirthdayOccurred) {
+        age--;
+      }
+
       return age;
     },
+    isFormValid() {
+      return this.form.contact.length === 10 && this.form.emergencyContact?.length === 10;
+    },
   },
+  watch: {
+    selectedPatient: {
+      immediate: true,
+      handler(newPatient) {
+        if (newPatient && newPatient.personalId === null) {
+          // Clear the form for a new patient
+          this.resetForm();
+        } else if (newPatient && Object.keys(newPatient).length > 0) {
+          // Populate the form with selected patient data
+          this.populateForm(newPatient);
+        }
+      },
+    },
+    // Watch for changes in birthdate and update the age field
+    'form.birthdate': function () {
+      this.form.age = this.computedAge; // Automatically update age when birthdate changes
+    },
+  },
+  'form.philhealthStatus': function (newVal) {
+        if (newVal === 'Member') {
+            // Reset the fields to empty when Referral is selected
+            this.form.philhealthNo = '';
+        } else {
+            // Set the fields to "None" when not Referral
+            this.form.philhealthNo = 'None';
+
+        }
+    },
   methods: {
+    resetForm() {
+      this.form = {
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        purok: '',
+        barangay: '',
+        age: '',
+        birthdate: '',
+        contact: '',
+        modeOfTransaction: '',
+        consultationDate: '',
+        consultationTime: '',
+        bloodPressure: '',
+        temperature: '',
+        height: '',
+        weight: '',
+        providerName: '',
+        nameOfSpouse: '',
+        emergencyContact: '',
+        fourMember: '',
+        philhealthStatus: '',
+        philhealthNo: '',
+        menarche: '',
+        sexualOnset: '',
+        periodDuration: '',
+        birthControl: '',
+        intervalCycle: '',
+        menopause: '',
+        lmp: '',
+        edc: '',
+        gravidity: '',
+        parity: '',
+        term: '',
+        preterm: '',
+        abortion: '',
+        living: '',
+        syphilisResult: '',
+        penicillin: '',
+        hemoglobin: '',
+        hematocrit: '',
+        urinalysis: '',
+        ttStatus: '',
+        tdDate: '',
+      };
+      this.errors = {};
+    },
+    populateForm(patient) {
+      console.log("Populating form with patient:", patient);
+      this.form = {
+        firstName: this.selectedPatient?.firstName || '',
+        lastName: this.selectedPatient?.lastName || '',
+        middleName: this.selectedPatient?.middleName || '',
+        purok: this.selectedPatient?.purok || '',
+        barangay: this.selectedPatient?.barangay || '',
+        age: '',
+        birthdate: this.selectedPatient?.birthdate || '',
+        contact: this.selectedPatient?.contact || '',
+        
+      };
+      this.form.age = this.computedAge;
+
+    },
     formatLabel(key) {
       // Convert camelCase keys to readable labels
       return key
@@ -565,6 +693,22 @@ export default {
 
       this.form.height = value; // Update the form value
     },
+    validateBirthdate() {
+      this.errors.birthdate = ''; // Reset error message
+
+      if (!this.form.birthdate) {
+        this.errors.birthdate = 'Birthdate is required.';
+        return;
+      }
+
+      const birthDate = new Date(this.form.birthdate);
+      const today = new Date();
+      const maxDate = new Date(today.getFullYear() - 200, today.getMonth(), today.getDate());
+
+      if (birthDate < maxDate) {
+        this.errors.birthdate = 'Please enter a birthdate that is valid.';
+      }
+    },
     validateWeight(event) {
       // Retrieve and sanitize the input value
       let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numeric characters and a single decimal point
@@ -592,38 +736,9 @@ export default {
       // Update the form weight with the validated value
       this.form.weight = value;
     },
-    navigateToStep(targetStep) {
-      if (targetStep > this.step) {
-        // Validate the current step before proceeding
-        const isCurrentStepValid =
-          (this.step === 1 && this.validateStep1()) ||
-          (this.step === 2 && this.validateStep2()) ||
-          (this.step === 3 && this.validateStep3());
-
-        if (!isCurrentStepValid) {
-          this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
-
-          // Automatically close the alert after 2 seconds
-          setTimeout(() => {
-            this.alertMessage = '';
-          }, 2000);
-
-          return; // Prevent navigation
-        }
-      }
-      // If validation passes or moving backward, update the step
-      this.step = targetStep;
-    },
-
-    closeAlert() {
-      this.alertMessage = ''; // Close the alert
-    },
     handleSubmit(event) {
-      // Prevent the default form submission (which reloads the page)
       event.preventDefault();
-
-      // Now call submitForm logic without reloading the page
-      this.submitForm();
+      this.triggerSubmit();
     },
     validateStep1() {
       this.errors = {};
@@ -665,16 +780,24 @@ export default {
         this.errors.modeOfTransaction = 'Mode of Transaction is required.';
         valid = false;
       }
+      if (!this.form.consultationDate) {
+        this.errors.consultationDate = 'Consultation date is required.';
+        valid = false;
+      }
       if (!this.form.consultationTime) {
         this.errors.consultationTime = 'Consultation time is required.';
         valid = false;
       }
-      if (!this.form.nameOfSpouse) {
-        this.errors.nameOfSpouse = 'Name of Spouse is required.';
+      if (!this.form.height || isNaN(this.form.height) || parseFloat(this.form.height) <= 0) {
+        this.errors.height = 'Valid height is required.';
         valid = false;
       }
-      if (!this.form.emergencyContact) {
-        this.errors.emergencyContact = 'Emergency Contact is required.';
+      if (!this.form.weight || isNaN(this.form.weight) || parseFloat(this.form.weight) <= 0) {
+        this.errors.weight = 'Valid weight is required.';
+        valid = false;
+      }
+      if (!this.form.temperature || isNaN(this.form.temperature) || parseFloat(this.form.temperature) <= 0) {
+        this.errors.temperature = 'Valid temperature is required.';
         valid = false;
       }
       return valid;
@@ -788,38 +911,154 @@ export default {
         this.step++;
       } else if (this.step === 5 && this.validateStep5()) {
         this.step++;
-      } else if (this.step === 5 && this.validateStep5()) {
-        this.submitForm();
       }
 
     },
     prevStep() {
       this.step--;
     },
-    formatEmergencyContact() {
-      // Keep only numeric characters, limit to 10 digits
-      this.form.emergencyContact = this.form.emergencyContact.replace(/[^0-9]/g, '').slice(0, 10);
+    navigateToStep(targetStep) {
+      if (targetStep > this.step) {
+        // Validate the current step before proceeding
+        const isCurrentStepValid =
+          (this.step === 1 && this.validateStep1()) ||
+          (this.step === 2 && this.validateStep2()) ||
+          (this.step === 3 && this.validateStep3()) ||
+          (this.step === 4 && this.validateStep4()) ||
+          (this.step === 5 && this.validateStep5());
+
+        if (!isCurrentStepValid) {
+          this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
+
+          // Automatically close the alert after 2 seconds
+          setTimeout(() => {
+            this.alertMessage = '';
+          }, 2000);
+
+          return; // Prevent navigation
+        }
+      }
+      // If validation passes or moving backward, update the step
+      this.step = targetStep;
     },
-    submitForm() {
-      // Check if all steps are valid
-      if (this.validateStep1() && this.validateStep2() && this.validateStep3() && this.validateStep4() && this.validateStep5()) {
-        // Prepare the form data for submission
-        const formData = { ...this.form };
 
-        // Emit the form data to the parent component via the onSubmit prop
-        this.$emit('submitForm', formData);
-
-        // Display a success message (optional, as the parent may handle success messages)
-        this.successMessage = 'Form submitted successfully!';
-
-        // Don't reset the form, keeping the entered values
-        // Optional: Reset errors if needed
-        this.errors = {};
+    closeAlert() {
+      this.alertMessage = ''; // Close the alert
+    },
+    formatEmergencyContact() {
+      this.form.emergencyContact = this.form.emergencyContact.replace(/[^0-9]/g, ''); // Only allow numbers
+      if (!this.form.emergencyContact.startsWith('0')) {
+        this.form.emergencyContact = `0${this.form.emergencyContact}`; // Ensure it starts with "0"
+      }
+      this.form.emergencyContact = this.form.emergencyContact.slice(0, 11); // Limit to 11 digits
+    },
+    formatContact() {
+      // Ensure the input starts with "09", remove non-numeric characters, and limit to 10 digits
+      if (!this.form.contact.startsWith('0')) {
+        this.form.contact = '0' + this.form.contact.replace(/[^0-9]/g, '');
       } else {
-        // Handle the error case if validation fails (e.g., show a general error message)
+        this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 11);
+      }
+    },
+    triggerSubmit() {
+      if (this.validateStep1() && this.validateStep2()&& this.validateStep3() && this.validateStep4() && this.validateStep5()) {
+        this.showModal = true; // Show confirmation modal
+      } else {
         this.successMessage = 'Please complete all required fields before submitting.';
       }
     },
+    confirmSubmit() {
+      // Prepare the form data and parse weight and height as numbers
+      const payload = {
+        personalId: this.selectedPatient?.personalId || null, // Include personalId if it exists
+        firstName: this.form.firstName,
+        lastName: this.form.lastName,
+        middleName: this.form.middleName,
+        purok: this.form.purok,
+        barangay: this.form.barangay,
+        age: this.form.age,
+        birthdate: this.form.birthdate,
+        contact: this.form.contact,
+        modeOfTransaction: this.form.modeOfTransaction,
+        consultationDate: this.form.consultationDate,
+        consultationTime: this.form.consultationTime,
+        bloodPressure: this.form.bloodPressure,
+        temperature: this.form.temperature,
+        height: this.form.height,
+        weight: this.form.weight,
+        providerName: this.form.providerName,
+        nameOfSpouse: this.form.nameOfSpouse,
+        emergencyContact: this.form.emergencyContact,
+        fourMember: this.form.fourMember,
+        philhealthStatus: this.form.philhealthStatus,
+        philhealthNo: this.form.philhealthNo || 'None',
+        menarche: this.form.menarche,
+        sexualOnset: this.form.sexualOnset,
+        periodDuration: this.form.periodDuration,
+        birthControl: this.form.birthControl,
+        intervalCycle: this.form.intervalCycle,
+        menopause: this.form.menopause,
+        lmp: this.form.lmp,
+        edc: this.form.edc,
+        gravidity: this.form.gravidity,
+        parity: this.form.parity,
+        term: this.form.term,
+        preterm: this.form.preterm,
+        abortion: this.form.abortion,
+        living: this.form.living,
+        syphilisResult: this.form.syphilisResult,
+        penicillin: this.form.penicillin,
+        hemoglobin: this.form.hemoglobin,
+        hematocrit: this.form.hematocrit,
+        urinalysis: this.form.urinalysis,
+        ttStatus: this.form.ttStatus,
+        tdDate: this.form.tdDate,
+      };
+      if (this.selectedPatient?.personalId) {
+        // Use existing values for suffix and sex
+        payload.suffix = this.selectedPatient.suffix || 'None';
+        payload.sex = this.selectedPatient.sex || 'Female';
+      } else {
+        // Assign default values for new patients
+        payload.suffix = 'None';
+        payload.sex = 'Female';
+      }
+
+
+      if (!this.selectedPatient?.personalId) {
+        Object.assign(payload, {
+          firstName: this.form.firstName,
+          lastName: this.form.lastName,
+          middleName: this.form.middleName,
+          purok: this.form.purok,
+          barangay: this.form.barangay,
+          age: this.form.age,
+          birthdate: this.form.birthdate,
+          contact: this.form.contact,
+        });
+      }
+      console.log('Submitting form with payload:', payload);
+      // Emit the parsed form data
+      this.$emit('submitForm', payload);
+
+      // Display success message
+      this.successMessage = 'Form submitted successfully!';
+      this.showModal = false; // Hide modal
+      this.errors = {};
+      this.resetForm();
+    },
+    cancelSubmit() {
+      this.showModal = false; // Hide modal
+    },
+  },
+  mounted() {
+    console.log('Received personalInfo:', this.personalInfo);
+    if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
+      console.log('Rendering empty form for new patient');
+    } else {
+      console.log('Rendering form for existing patient:', this.selectedPatient);
+      this.populateForm(this.selectedPatient);
+    }
   },
 };
 </script>

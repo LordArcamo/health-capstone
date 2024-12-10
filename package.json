@@ -18,8 +18,8 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "^6.6.0",
-        "@fortawesome/free-solid-svg-icons": "^6.6.0",
+        "@fortawesome/fontawesome-svg-core": "^6.7.1",
+        "@fortawesome/free-solid-svg-icons": "^6.7.1",
         "@fortawesome/vue-fontawesome": "^3.0.8",
         "@harv46/vue-table": "^0.1.2",
         "@heroicons/vue": "^2.1.5",
@@ -30,6 +30,7 @@
         "date-fns": "^4.1.0",
         "flatpickr": "^4.6.13",
         "lodash": "^4.17.21",
+        "pinia": "^2.2.6",
         "primevue": "^4.0.6",
         "vue-chartjs": "^5.3.1",
         "vue-router": "^4.4.5"

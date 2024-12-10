@@ -84,21 +84,24 @@
             <p class="text-gray-700 mb-6 text-lg">What type of Check-Up do we have today?</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
               <Link
-                :href="route('itr', { patient_personalId: selectedPatient.personalId })"
+                v-if="selectedPatient && Object.keys(selectedPatient).length > 0"
+            :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new', })"
                 class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105"
               >
                 Individual Treatment Record
               </Link>
 
               <Link
-                  :href="route('prenatal', { patient_id: selectedPatient.personalId })"
+                  v-if="selectedPatient && Object.keys(selectedPatient).length > 0"
+              :href="route('prenatal', { patient_personalId: selectedPatient.personalId || 'new', })"
                   class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105"
                 >
                   Prenatal Checkup
                 </Link>
 
               <Link
-                :href="route('nationalimmunizationprogram', { patient_personalId: selectedPatient.personalId })"
+                v-if="selectedPatient && Object.keys(selectedPatient).length > 0"
+            :href="route('nationalimmunizationprogram', { patient_personalId: selectedPatient.personalId || 'new', })"
                 class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105"
               >
                 National Immunization Program
@@ -153,67 +156,90 @@
   import { Link } from '@inertiajs/vue3';
   import { debounce } from 'lodash';
 
-  export default {
-    components: { Link },
-    props: {
-      patients: {
-        type: Array,
-        default: () => [],
-      },
+export default {
+  components: { Link },
+  props: {
+    patients: {
+      type: Array,
+      required: true,
     },
-    data() {
-      return {
-        step: 1,
-        searchQuery: '',
-        selectedPatient: null,
-        showModal: false,
-        filteredPatients: [],
-      };
-    },
+  },
+  data() {
+    return {
+      step: 1,
+      searchQuery: '',
+      selectedPatient: null,
+      showModal: false,
+      filteredPatients: [],
+    };
+  },
     watch: {
-      patients: {
-        immediate: true,
-        handler(newPatients) {
-          if (this.searchQuery.trim() === '') {
-            this.filteredPatients = [];
-          } else {
-            this.filteredPatients = [...newPatients];
-          }
-        },
-      },
-    },
-    methods: {
-      debouncedSearchPatients: debounce(function () {
-        this.searchPatients();
-      }, 100),
-      searchPatients() {
-        const query = this.searchQuery.trim().toLowerCase();
-        if (query === '') {
-          this.filteredPatients = [];
+    patients: {
+      immediate: true,
+      handler(newPatients) {
+        console.log('Received patients:', newPatients);
+        // Only set the filteredPatients if there's a search query
+        if (this.searchQuery.trim() === '') {
+          this.filteredPatients = []; // Clear patients if search query is empty
         } else {
-          this.filteredPatients = this.patients.filter(patient => {
-            const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
-            return (
-              fullName.includes(query) ||
-              patient.firstName.toLowerCase().includes(query) ||
-              patient.lastName.toLowerCase().includes(query) ||
-              patient.personalId.toString().includes(query)
-            );
-          });
+          this.filteredPatients = [...newPatients]; // Otherwise show all patients
         }
       },
-
-      selectPatient(patient) {
-        this.selectedPatient = patient;
-        this.step = 2;
-      },
-      addNewPatient() {
-        this.selectedPatient = { personalId: 'new', lastName: this.searchQuery };
-        this.step = 2;
-      },
     },
-  };
-  </script>
+  },
+  methods: {
+    debouncedSearchPatients: debounce(function () {
+      this.searchPatients();
+    }, 100),
+    searchPatients() {
+      const query = this.searchQuery.trim().toLowerCase();
+      console.log('Search Query:', query);
+
+      // If search query is empty, clear the filtered list
+      if (query === '') {
+        this.filteredPatients = [];
+      } else {
+        // Filter patients only when there's a search query
+        this.filteredPatients = this.patients.filter(patient => {
+          const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+          return (
+            fullName.includes(query) ||
+            patient.firstName.toLowerCase().includes(query) ||
+            patient.lastName.toLowerCase().includes(query) ||
+            patient.personalId.toString().includes(query)
+          );
+        });
+      }
+
+    console.log('Filtered Patients:', this.filteredPatients);
+  },
+  selectPatient(patient) {
+      console.log('Patient selected:', patient);
+      this.selectedPatient = patient;
+      this.$emit('patientSelected', patient); // Emit selected patient
+      this.step = 2;
+    },
+    addNewPatient() {
+      console.log("Add New Patient triggered");
+      // Create a blank selected patient for a new patient flow
+      this.selectedPatient = {
+          personalId: null, // Indicating a new patient
+          firstName: '',
+          lastName: '',
+          middleName: '',
+          suffix: '',
+          purok: '',
+          barangay: '',
+          birthdate: '',
+          contact: '',
+          sex: '',
+      };
+      this.$emit('patientSelected', this.selectedPatient); // Emit the new patient object
+      this.step = 2; // Proceed to check-up type selection
+  }
+  },
+};
+</script>
 
   <style scoped>
   .fade-enter-active, .fade-leave-active {

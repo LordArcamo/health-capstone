@@ -32,7 +32,7 @@ class Trimester1Controller extends Controller
     {
         // Validate request data
         $validatedData = $request->validate([
-            'prenatalId' => 'required|integer',
+            'prenatalId' => 'required|exists:prenatal,prenatalId',
             'date_of_visit' => 'required|date',
             'weight' => 'required|numeric',
             'bp' => 'required|string|max:20',

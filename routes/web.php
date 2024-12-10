@@ -16,6 +16,7 @@ use App\Http\Controllers\Trimester3Controller;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\VaccineController;
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
@@ -93,6 +94,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/trimester3/store', [Trimester3Controller::class, 'store'])->name('trimester3.store');
 });
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/services/mental-health', [SessionController::class, 'index'])->name('mental-health.index');
+    Route::get('/services/mental-health', [SessionController::class, 'create'])->name('mentalhealth');
+});
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('/vaccination', VaccineController::class);
+    // Route::get('/services/vaccination', [VaccineController::class, 'index'])->name('vaccine.index');
+    Route::get('/services/vaccination', [VaccineController::class, 'create'])->name('vaccine.create');
+    Route::get('/patients/search', [VaccineController::class, 'search'])->name('patients.search');
+    Route::get('/patients/{personalId}', [VaccineController::class, 'show'])->name('patients.show');
+});
 
 
 Route::get('/checkup', function () {
@@ -116,14 +128,6 @@ Route::get('/mortality', function () {
 Route::get('/system-analytics', function () {
     return Inertia::render('Analytics');
 })->middleware(['auth', 'verified'])->name('system-analytics');
-
-Route::get('/services/mental-health', function () {
-    return Inertia::render('Services/MentalHealth');
-})->middleware(['auth', 'verified'])->name('mental-health');
-
-Route::get('/services/vaccination', function () {
-    return Inertia::render('Services/Vaccination');
-})->middleware(['auth', 'verified'])->name('vaccination');
 
 Route::get('/services/risk-management', function () {
     return Inertia::render('Services/RiskManagement');

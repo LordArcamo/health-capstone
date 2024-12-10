@@ -261,6 +261,26 @@ export default {
       isFilterPanelOpen: false, // Toggle filter panel visibility
     };
   },
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    filterGender() {
+      this.currentPage = 1;
+    },
+    filterAgeRange() {
+      this.currentPage = 1;
+    },
+    filterPrk() {
+      this.currentPage = 1;
+    },
+    filterBarangay() {
+      this.currentPage = 1;
+    },
+    filterDiagnosis() {
+      this.currentPage = 1;
+    },
+  },
   computed: {
       // Paginated and filtered patients
   paginatedPatients() {
@@ -327,6 +347,9 @@ totalPages() {
     // Unique diagnosis options
     diagnosisOptions() {
       return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
+    },
+    totalPages() {
+      return Math.ceil(this.patients.length / this.itemsPerPage);
     },
   },
   methods: {
