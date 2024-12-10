@@ -461,6 +461,13 @@ export default {
         .replace(/_/g, " ") // Replace underscores with spaces
         .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
     },
+    capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .toLowerCase() // Convert entire string to lowercase first
+          .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+      }
+    },
     openConfirmationModal() {
       if (!this.validateStep4()) {
         this.alertMessage = "Please complete all required fields before submission.";

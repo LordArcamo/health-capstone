@@ -144,53 +144,51 @@
 
       <h1 class="text-2xl font-bold text-start mt-6 mb-4">Individual Treatment Records</h1>
     </div>
+    
+<!-- Responsive Table -->
+<div class="overflow-x-auto bg-gray-100 rounded-lg">
+  <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
+    <thead>
+      <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
+        <th class="py-4 px-6 text-left border-b border-indigo-200">Full Name</th>
+        <th class="py-4 px-6 text-left border-b border-indigo-200">Address</th>
+        <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
+        <th class="py-4 px-6 text-left border-b border-indigo-200">Nature of Visit</th>
+        <th class="py-4 px-6 text-left border-b border-indigo-200">Visit Type</th>
+        <th class="py-4 px-6 text-left border-b border-indigo-200">Gender</th>
+      </tr>
+    </thead>
+    <tbody class="text-gray-600 text-sm">
+      <tr
+        v-for="patient in paginatedPatients"
+        :key="patient.personalId"
+        class="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+        @click="openModal(patient)"
+      >
+        <td class="py-3 px-6">{{ patient.fullName }}</td>
+        <td class="py-3 px-6">{{ patient.address }}</td>
+        <td class="py-3 px-6">{{ patient.age }}</td>
+        <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
+        <td class="py-3 px-6">{{ patient.visitType }}</td>
+        <td class="py-3 px-6">{{ patient.sex }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-    <!-- Responsive Table -->
-    <div class="overflow-x-auto bg-gray-100 rounded-lg">
-      <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
-        <thead>
-          <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Full Name</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Address</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Nature of Visit</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Visit Type</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Gender</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="text-gray-600 text-sm">
-          <tr v-for="patient in filteredPatients" :key="patient.personalId"
-            class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-            <td class="py-3 px-6">{{ patient.fullName }}</td>
-            <td class="py-3 px-6">{{ patient.address }}</td>
-            <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
-            <td class="py-3 px-6">{{ patient.visitType }}</td>
-            <td class="py-3 px-6">{{ patient.sex }}</td>
-            <td class="py-3 px-6">
-              <button @click="openModal(patient)"
-                class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black">
-                View More
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <!-- Pagination -->
-    <div class="mt-6 flex justify-center space-x-4">
-      <button @click="prevPage" :disabled="currentPage === 1"
-        class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-red-600 disabled:opacity-50">
-        Previous
-      </button>
-      <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages"
-        class="bg-green-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-600 disabled:opacity-50">
-        Next
-      </button>
-    </div>
+<!-- Pagination -->
+<div class="mt-6 flex justify-center space-x-4">
+  <button @click="prevPage" :disabled="currentPage === 1"
+    class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-red-600 disabled:opacity-50">
+    Previous
+  </button>
+  <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+  <button @click="nextPage" :disabled="currentPage === totalPages"
+    class="bg-green-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-600 disabled:opacity-50">
+    Next
+  </button>
+</div>
 
     <!-- Modal -->
     <div v-if="showModal && selectedPatient"
@@ -257,64 +255,67 @@ export default {
       filterAgeRange: '', // Filter by age range
       filterDiagnosis: [], // Array for selected diagnoses
       currentPage: 1, // Current page for pagination
-      itemsPerPage: 5, // Number of items per page
+      itemsPerPage: 8, // Number of items per page
       showModal: false, // Modal visibility flag
       selectedPatient: null, // Selected patient for modal display
       isFilterPanelOpen: false, // Toggle filter panel visibility
     };
   },
   computed: {
+      // Paginated and filtered patients
+  paginatedPatients() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.filteredPatients.slice(start, end);
+  },
+
     filteredPatients() {
-      const query = this.searchQuery.toLowerCase();
-      return this.patients
-        .map((patient) => ({
-          ...patient,
-          fullName: `${patient.firstName} ${patient.lastName}`, // Combine first and last name
-          address: `${patient.purok}, ${patient.barangay}`, // Combine purok and barangay for address
-        }))
-        .filter((patient) => {
-          // Match against full name, nature of visit, visit type, address, and diagnosis
-          const matchesQuery =
-            patient.fullName.toLowerCase().includes(query) ||
-            patient.natureOfVisit.toLowerCase().includes(query) ||
-            patient.visitType.toLowerCase().includes(query) ||
-            patient.address.toLowerCase().includes(query) ||
-            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(query));
+  const query = this.searchQuery.toLowerCase();
+  return this.patients
+    .map((patient) => ({
+      ...patient,
+      fullName: `${patient.firstName} ${patient.lastName}`, // Combine first and last name
+      address: `${patient.purok}, ${patient.barangay}`, // Combine purok and barangay for address
+    }))
+    .filter((patient) => {
+      // Match search query
+      const matchesQuery =
+        patient.fullName.toLowerCase().includes(query) ||
+        patient.natureOfVisit.toLowerCase().includes(query) ||
+        patient.visitType.toLowerCase().includes(query) ||
+        patient.address.toLowerCase().includes(query) ||
+        (patient.diagnosis && patient.diagnosis.toLowerCase().includes(query));
 
-          // Match filters for purok, barangay, and age range
-          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
-          const matchesBarangay =
-            !this.filterBarangay || patient.barangay === this.filterBarangay;
+      // Match filters
+      const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
+      const matchesBarangay =
+        !this.filterBarangay || patient.barangay === this.filterBarangay;
+      const matchesGender =
+        this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+      const matchesDiagnosis =
+        this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
 
-          let matchesAgeRange = true;
-          if (this.filterAgeRange) {
-            const [minAge, maxAge] = this.filterAgeRange.split('-').map(Number);
-            const patientAge = patient.age;
-            matchesAgeRange =
-              (isNaN(minAge) || patientAge >= minAge) &&
-              (isNaN(maxAge) || patientAge <= maxAge);
-          }
+      // Match age range
+      let matchesAgeRange = true;
+      if (this.filterAgeRange) {
+        const patientAge = parseInt(patient.age, 10);
+        matchesAgeRange = patientAge >= parseInt(this.filterAgeRange, 10);
+      }
 
-          // Match filters for gender and diagnosis
-          const matchesGender =
-            this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
-          const matchesDiagnosis =
-            this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
+      return (
+        matchesQuery &&
+        matchesPrk &&
+        matchesBarangay &&
+        matchesGender &&
+        matchesDiagnosis &&
+        matchesAgeRange
+      );
+    });
+},
 
-          return (
-            matchesQuery &&
-            matchesPrk &&
-            matchesBarangay &&
-            matchesAgeRange &&
-            matchesGender &&
-            matchesDiagnosis
-          );
-        })
-        .slice(
-          (this.currentPage - 1) * this.itemsPerPage,
-          this.currentPage * this.itemsPerPage
-        );
-    },
+totalPages() {
+    return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
+  },
     // Unique purok options
     purokOptions() {
       return Array.from(new Set(this.patients.map((p) => p.purok)));

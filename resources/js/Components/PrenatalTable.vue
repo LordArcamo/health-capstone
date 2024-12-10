@@ -81,29 +81,37 @@
             <th class="py-4 px-6 text-left border-b border-indigo-200">Actions</th>
           </tr>
         </thead>
-
         <tbody class="text-gray-600 text-sm">
-          <tr v-for="patient in filteredPatients" :key="patient.id"
-            class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-            <td class="py-3 px-6">{{ patient.fullName }}</td>
-            <td class="py-3 px-6">{{ patient.address }}</td>
-            <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.contact }}</td>
-            <td class="py-3 px-6">{{ patient.ttStatus }}</td>
-            <td class="py-3 px-6">
-              <div class="flex gap-1">
-                <button @click="openModal(patient)"
-                  class="bg-green-500 text-white px-3 py-1 rounded hover:bg-yellow-300 hover:text-black">
-                  View More
-                </button>
-                <button @click="openTrimesterModal(patient)"
-                  class="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-green-600">
-                  Trimester
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
+  <tr
+    v-for="patient in filteredPatients"
+    :key="patient.id"
+    class="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+    @click="openModal('inline', patient)"
+  >
+    <td class="py-3 px-6">{{ patient.fullName }}</td>
+    <td class="py-3 px-6">{{ patient.address }}</td>
+    <td class="py-3 px-6">{{ patient.age }}</td>
+    <td class="py-3 px-6">{{ patient.contact }}</td>
+    <td class="py-3 px-6">{{ patient.ttStatus }}</td>
+    <td class="py-3 px-6">
+      <div class="flex gap-1">
+        <button
+          @click.stop="openModal('trimester', patient)"
+          class="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+        >
+          Trimester
+        </button>
+        <button
+          @click.stop="openModal('postpartum', patient)"
+          class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
+        >
+          PostPartum
+        </button>
+      </div>
+    </td>
+  </tr>
+</tbody>
+
       </table>
     </div>
 
@@ -121,7 +129,7 @@
     </div>
 
     <!-- Modal -->
-    <div v-if="isModalOpen" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div v-if="currentModal === 'inline'" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
         <button @click="closeModal"
           class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
@@ -181,17 +189,27 @@
       </div>
     </div>
 
-    <!-- Trimester Modal -->
-    <TrimesterModal :patient="selectedPatient" :show="showTrimesterModal" @close="closeTrimesterModal"
-      @confirm="confirmTrimesterSelection" />
+    <TrimesterModal
+  v-if="currentModal === 'trimester'"
+  :prenatalId="selectedPatient?.id"
+  @close="closeModal"
+/>
+<PostpartumModal
+  v-if="currentModal === 'postpartum'"
+  :patient="selectedPatient"
+  @close="closeModal"
+/>
   </div>
 </template>
 
-<script>import TrimesterModal from "@/Components/TrimesterModal.vue";
+<script>
+import PostpartumModal from "./PostpartumForm.vue";
+import TrimesterModal from "@/Components/TrimesterModal.vue";
 
 export default {
   components: {
     TrimesterModal,
+    PostpartumModal,
   },
   props: {
     patients: {
@@ -201,6 +219,7 @@ export default {
   },
   data() {
     return {
+      isModalOpen: false, // Initialize modal visibility state
       searchQuery: '', // Search query for filtering
       filterPrk: '', // Filter by purok
       filterBarangay: '', // Filter by barangay
@@ -209,7 +228,7 @@ export default {
       filterDiagnosis: [], // Array for selected diagnoses
       currentPage: 1, // Current page for pagination
       itemsPerPage: 5, // Number of items per page
-      showTrimesterModal: false, // Modal visibility flag
+      currentModal: null, // Stores the type of modal ('trimester', 'postpartum')
       selectedPatient: null, // Selected patient for modal display
       isFilterPanelOpen: false, // Toggle filter panel visibility
     };
@@ -235,17 +254,13 @@ export default {
           const matchesBarangay =
             !this.filterBarangay || patient.barangay === this.filterBarangay;
 
-          let matchesAgeRange = true;
-          if (this.filterAgeRange) {
-            const [minAge, maxAge] = this.filterAgeRange.split('-').map(Number);
-            const patientAge = patient.age;
-            matchesAgeRange =
-              (isNaN(minAge) || patientAge >= minAge) &&
-              (isNaN(maxAge) || patientAge <= maxAge);
-          }
+          const matchesAgeRange = this.filterAgeRange
+            ? parseInt(patient.age) >= parseInt(this.filterAgeRange)
+            : true;
 
           const matchesGender =
             this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+
           const matchesDiagnosis =
             this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
 
@@ -267,36 +282,31 @@ export default {
       return Math.ceil(this.patients.length / this.itemsPerPage);
     },
     purokOptions() {
-      const puroks = new Set(this.patients.map((patient) => patient.purok));
-      return Array.from(puroks);
+      return [...new Set(this.patients.map((patient) => patient.purok))];
     },
     barangayOptions() {
-      const barangays = new Set(this.patients.map((patient) => patient.barangay));
-      return Array.from(barangays);
+      return [...new Set(this.patients.map((patient) => patient.barangay))];
     },
   },
   methods: {
     toggleFilterPanel() {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
-    openTrimesterModal(patient) {
+    openModal(type, patient) {
       this.selectedPatient = patient;
-      this.showTrimesterModal = true;
-    },
-    closeTrimesterModal() {
-      this.showTrimesterModal = false;
-    },
-    confirmTrimesterSelection() {
-      console.log("Trimester confirmed for:", this.selectedPatient);
-      this.closeTrimesterModal();
-    },
-    openModal(patient) {
-      this.selectedPatient = patient;
-      this.isModalOpen = true;
+      this.currentModal = type; // 'trimester' or 'postpartum'
     },
     closeModal() {
-      this.isModalOpen = false;
-      this.selectedPatient = {};
+      this.currentModal = null;
+      this.selectedPatient = null;
+    },
+    handlePostpartumSubmit(formData) {
+      console.log("Submitted Postpartum Data:", formData);
+      this.closeModal();
+    },
+    handleTrimesterConfirm() {
+      console.log("Trimester confirmed for:", this.selectedPatient);
+      this.closeModal();
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -337,6 +347,7 @@ export default {
   },
 };
 </script>
+
 
 
 <style scoped>
