@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\NationalImmunizationProgram;
 use App\Models\PersonalInformation;
+use Illuminate\Support\Facades\DB;
 
 class NationalImmunizationProgramController extends Controller
 {
@@ -53,6 +54,67 @@ class NationalImmunizationProgramController extends Controller
 
         ]);
     }
+
+    public function import(Request $request)
+{
+    set_time_limit(300); // Increase time limit to 5 minutes
+    // Validate the uploaded file
+    $request->validate([
+        'file' => 'required|file|mimes:csv,txt',
+    ]);
+
+    $file = $request->file('file');
+    $data = array_map('str_getcsv', file($file->getRealPath()));
+    $header = array_shift($data); // Extract the header row
+
+    DB::transaction(function () use ($data, $header) {
+        foreach ($data as $row) {
+            $immunizationData = array_combine($header, $row);
+
+            // Insert or update data in PersonalInformation
+            $personalInfo = PersonalInformation::updateOrCreate(
+                [
+                    'firstName' => $immunizationData['firstName'],
+                    'lastName' => $immunizationData['lastName'],
+                    'middleName' => $immunizationData['middleName'],
+                    'suffix' => $immunizationData['suffix'] ?? null,
+                    'purok' => $immunizationData['purok'],
+                    'barangay' => $immunizationData['barangay'],
+                    'age' => $immunizationData['age'],
+                    'birthdate' => $immunizationData['birthdate'],
+                    'contact' => $immunizationData['contact'],
+                    'sex' => $immunizationData['sex'],
+                ]
+            );
+
+            // Insert or update data in National Immunization Programs
+            NationalImmunizationProgram::updateOrCreate(
+                ['personalId' => $personalInfo->personalId],
+                [
+                    'birthplace' => $immunizationData['birthplace'],
+                    'bloodtype' => $immunizationData['bloodtype'],
+                    'mothername' => $immunizationData['mothername'],
+                    'dswdNhts' => $immunizationData['dswdNhts'],
+                    'facilityHouseholdno' => $immunizationData['facilityHouseholdno'],
+                    'houseHoldno' => $immunizationData['houseHoldno'],
+                    'fourpsmember' => $immunizationData['fourpsmember'],
+                    'PCBMember' => $immunizationData['PCBMember'],
+                    'philhealthStatus' => $immunizationData['philhealthStatus'],
+                    'philhealthNo' => $immunizationData['philhealthNo'],
+                    'ifMember' => $immunizationData['ifMember'],
+                    'familyMember' => $immunizationData['familyMember'],
+                    'ttStatus' => isset($immunizationData['ttStatus']) ? substr($immunizationData['ttStatus'], 0, 255) : null,
+                    'dateAssesed' => $immunizationData['dateAssesed'],
+                    'date' => $immunizationData['date'],
+                    'place' => $immunizationData['place'],
+                    'guardian' => $immunizationData['guardian'],
+                ]
+            );
+        }
+    });
+
+    return redirect()->back()->with('success', 'National Immunization data imported successfully!');
+}
 
     /**
      * Show the form for creating a new resource.

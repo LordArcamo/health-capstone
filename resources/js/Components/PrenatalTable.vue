@@ -1,135 +1,181 @@
 <template>
-  <div class=" mx-auto py-3 px-10">
+  <div class="mx-auto py-8 px-10 bg-gradient-to-br from-green-100 to-blue-100 min-h-screen">
+    <!-- Header Section -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-green-600 text-center">Prenatal and Postpartum</h1>
+      <p class="text-gray-700 text-center">Search, filter, and manage patient records efficiently.</p>
+    </div>
+
     <!-- Search and Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <!-- Search Bar -->
       <div class="w-full md:w-2/3">
-        <input v-model="searchQuery" type="text" placeholder="Search by name, diagnosis, or visit type"
-          class="border border-gray-300 p-3 rounded w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search by name, diagnosis, or visit type"
+          class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
       </div>
 
       <!-- Filter Panel Toggle -->
-      <button @click="toggleFilterPanel"
-        class="flex items-center px-4 py-3 bg-green-500 text-white font-medium rounded shadow hover:bg-green-600 focus:outline-none w-full md:w-1/3">
+      <button
+        @click="toggleFilterPanel"
+        class="flex items-center px-4 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 focus:outline-none w-full md:w-1/3"
+      >
         <span>Filters</span>
-        <svg class="w-4 h-4 ml-2 transform" :class="{ 'rotate-180': isFilterPanelOpen }"
-          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          class="w-4 h-4 ml-2 transform"
+          :class="{ 'rotate-180': isFilterPanelOpen }"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
     </div>
 
     <!-- Collapsible Filter Panel -->
-    <div v-if="isFilterPanelOpen" class="mt-4 mb-4 border border-gray-300 rounded-lg p-6 shadow-md bg-white">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        <!-- Age Range Slider -->
-        <div>
-          <label class="block text-base font-semibold mb-2">Age Range</label>
-          <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500">0</span>
-            <input type="range" v-model="filterAgeRange" min="0" max="100" step="5" class="w-full accent-green-500" />
-            <span class="text-sm text-gray-500">100+</span>
+    <transition name="fade">
+      <div
+        v-if="isFilterPanelOpen"
+        class="mt-4 mb-4 border border-gray-300 rounded-lg p-6 shadow-md bg-white"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Age Range Slider -->
+          <div>
+            <label class="block text-base font-semibold mb-2">Age Range</label>
+            <div class="flex items-center gap-4">
+              <span class="text-sm text-gray-500">0</span>
+              <input
+                type="range"
+                v-model="filterAgeRange"
+                min="0"
+                max="100"
+                step="5"
+                class="w-full accent-green-500"
+              />
+              <span class="text-sm text-gray-500">100+</span>
+            </div>
+            <div class="text-sm text-gray-700 mt-1">Selected: {{ filterAgeRange }}+</div>
           </div>
-          <div class="text-sm text-gray-700 mt-1">Selected: {{ filterAgeRange }}+</div>
-        </div>
 
-        <!-- Purok Filter -->
-        <div>
-          <label class="block text-base font-semibold mb-2">Purok</label>
-          <select v-model="filterPrk"
-            class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-            <option value="">All Purok</option>
-            <option v-for="purok in purokOptions" :key="purok" :value="purok">
-              {{ purok }}
-            </option>
-          </select>
-        </div>
+          <!-- Purok Filter -->
+          <div>
+            <label class="block text-base font-semibold mb-2">Purok</label>
+            <select
+              v-model="filterPrk"
+              class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+            >
+              <option value="">All Purok</option>
+              <option v-for="purok in purokOptions" :key="purok" :value="purok">{{ purok }}</option>
+            </select>
+          </div>
 
-        <!-- Barangay Filter -->
-        <div>
-          <label class="block text-base font-semibold mb-2">Barangay</label>
-          <select v-model="filterBarangay"
-            class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400">
-            <option value="">All Barangay</option>
-            <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
-              {{ barangay }}
-            </option>
-          </select>
+          <!-- Barangay Filter -->
+          <div>
+            <label class="block text-base font-semibold mb-2">Barangay</label>
+            <select
+              v-model="filterBarangay"
+              class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+            >
+              <option value="">All Barangay</option>
+              <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
+                {{ barangay }}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
-    </div>
+    </transition>
 
-    <!-- Generate Report Button -->
-    <div class="mb-6">
-      <button @click="generateReport"
-        class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 hover:text-black transition-colors">
+    <!-- Buttons -->
+    <div class="mb-6 flex gap-4">
+      <button
+        @click="generateReport"
+        class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none transition"
+      >
         Generate Report
       </button>
+      <button
+        @click="triggerImport"
+        class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition flex items-center gap-2"
+      >
+        Import CSV
+      </button>
+      <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
     </div>
 
-    <!-- Responsive Table -->
-    <div class="overflow-x-auto bg-gray-100 rounded-lg">
-      <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
+    <!-- Table -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+      <table class="min-w-full bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Full Name</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Address</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Contact Number</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">TT Status</th>
-            <th class="py-4 px-6 text-left border-b border-indigo-200">Actions</th>
+            <th class="py-4 px-6 text-left">Full Name</th>
+            <th class="py-4 px-6 text-left">Address</th>
+            <th class="py-4 px-6 text-left">Age</th>
+            <th class="py-4 px-6 text-left">Contact Number</th>
+            <th class="py-4 px-6 text-left">TT Status</th>
+            <th class="py-4 px-6 text-left">Actions</th>
           </tr>
         </thead>
-        <tbody class="text-gray-600 text-sm">
-  <tr
-    v-for="patient in filteredPatients"
-    :key="patient.id"
-    class="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
-    @click="openModal('inline', patient)"
-  >
-    <td class="py-3 px-6">{{ patient.fullName }}</td>
-    <td class="py-3 px-6">{{ patient.address }}</td>
-    <td class="py-3 px-6">{{ patient.age }}</td>
-    <td class="py-3 px-6">{{ patient.contact }}</td>
-    <td class="py-3 px-6">{{ patient.ttStatus }}</td>
-    <td class="py-3 px-6">
-      <div class="flex gap-1">
-        <button
-          @click.stop="openModal('trimester', patient)"
-          class="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-        >
-          Trimester
-        </button>
-        <button
-          @click.stop="openModal('postpartum', patient)"
-          class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
-        >
-          PostPartum
-        </button>
-      </div>
-    </td>
-  </tr>
-</tbody>
-
+        <tbody class="divide-y divide-gray-200 text-gray-700">
+          <tr
+            v-for="patient in filteredPatients"
+            :key="patient.id"
+            class="hover:bg-gray-50 transition-colors cursor-pointer"
+             @click="openModal('inline', patient)"
+          >
+            <td class="py-3 px-6">{{ patient.fullName }}</td>
+            <td class="py-3 px-6">{{ patient.address }}</td>
+            <td class="py-3 px-6">{{ patient.age }}</td>
+            <td class="py-3 px-6">{{ patient.contact }}</td>
+            <td class="py-3 px-6">{{ patient.ttStatus }}</td>
+            <td class="py-3 px-6">
+              <div class="flex gap-2">
+                <button
+                    @click.stop="openModal('trimester', patient)"
+                  class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-green-600 transition"
+                >
+                  Trimester
+                </button>
+                <button
+                  @click.stop="openModal('postpartum', patient)"
+                  class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-yellow-600 transition"
+                >
+                  PostPartum
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
-    <!-- Pagination controls -->
-    <div class="mt-6 flex justify-center items-center space-x-4">
-      <button @click="prevPage" :disabled="currentPage === 1"
-        class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-red-600 disabled:opacity-50">
+    <!-- Pagination -->
+    <div class="mt-6 flex justify-center gap-4">
+      <button
+        @click="prevPage"
+        :disabled="currentPage === 1"
+        class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow hover:bg-red-600 focus:outline-none transition disabled:opacity-50"
+      >
         Previous
       </button>
       <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages"
-        class="bg-green-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-600 disabled:opacity-50">
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none transition disabled:opacity-50"
+      >
         Next
       </button>
     </div>
+  </div>
 
-    <!-- Modal -->
-    <div v-if="currentModal === 'inline'" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
+     <!-- Modal -->
+     <div v-if="currentModal === 'inline'" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
         <button @click="closeModal"
           class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
@@ -159,7 +205,7 @@
             <li><strong>Emergency Contact Number:</strong> {{ selectedPatient.emergencyContact }}</li>
             <li><strong>4ps?::</strong> {{ selectedPatient.fourMember }}</li>
             <li><strong>Philhealth Status:</strong> {{ selectedPatient.philhealthStatus }}</li>
-            <li><strong>Philhealth ID Number:</strong> {{ selectedPatient.philhealthId }}</li>
+            <li><strong>Philhealth ID Number:</strong> {{ selectedPatient.philhealthNo }}</li>
             <li><strong>Menarche:</strong> {{ selectedPatient.menarche }}</li>
             <li><strong>Onset of Sexual Intercourse:</strong> {{ selectedPatient.sexualOnset }}</li>
             <li><strong>Period/Duration:</strong> {{ selectedPatient.periodDuration }}</li>
@@ -199,12 +245,13 @@
   :patient="selectedPatient"
   @close="closeModal"
 />
-  </div>
 </template>
 
 <script>
 import PostpartumModal from "./PostpartumForm.vue";
 import TrimesterModal from "@/Components/TrimesterModal.vue";
+import { Inertia } from '@inertiajs/inertia';
+
 
 export default {
   components: {
@@ -235,49 +282,42 @@ export default {
   },
   computed: {
     filteredPatients() {
-      const query = this.searchQuery.toLowerCase();
-      return this.patients
-        .map((patient) => ({
-          ...patient,
-          fullName: `${patient.firstName} ${patient.lastName}`, // Combine first and last name
-          address: `${patient.purok}, ${patient.barangay}`, // Combine purok and barangay for address
-        }))
-        .filter((patient) => {
-          const matchesQuery =
-            patient.fullName.toLowerCase().includes(query) ||
-            patient.natureOfVisit.toLowerCase().includes(query) ||
-            patient.visitType.toLowerCase().includes(query) ||
-            patient.address.toLowerCase().includes(query) ||
-            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(query));
+  const query = this.searchQuery.toLowerCase();
+  return this.patients
+    .map((patient) => ({
+      ...patient,
+      fullName: `${patient.firstName} ${patient.lastName}`, // Combine first and last name
+      address: `${patient.purok}, ${patient.barangay}`, // Combine purok and barangay for address
+    }))
+    .filter((patient) => {
+      const matchesQuery =
+        patient.fullName.toLowerCase().includes(query) ||
+        (patient.natureOfVisit && patient.natureOfVisit.toLowerCase().includes(query)) ||
+        (patient.visitType && patient.visitType.toLowerCase().includes(query)) ||
+        patient.address.toLowerCase().includes(query);
 
-          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
-          const matchesBarangay =
-            !this.filterBarangay || patient.barangay === this.filterBarangay;
+      const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
+      const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
+      const matchesAgeRange = this.filterAgeRange
+        ? parseInt(patient.age) >= parseInt(this.filterAgeRange)
+        : true;
+      const matchesGender =
+        this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
 
-          const matchesAgeRange = this.filterAgeRange
-            ? parseInt(patient.age) >= parseInt(this.filterAgeRange)
-            : true;
+      return (
+        matchesQuery &&
+        matchesPrk &&
+        matchesBarangay &&
+        matchesAgeRange &&
+        matchesGender
+      );
+    })
+    .slice(
+      (this.currentPage - 1) * this.itemsPerPage,
+      this.currentPage * this.itemsPerPage
+    );
+},
 
-          const matchesGender =
-            this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
-
-          const matchesDiagnosis =
-            this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
-
-          return (
-            matchesQuery &&
-            matchesPrk &&
-            matchesBarangay &&
-            matchesAgeRange &&
-            matchesGender &&
-            matchesDiagnosis
-          );
-        })
-        .slice(
-          (this.currentPage - 1) * this.itemsPerPage,
-          this.currentPage * this.itemsPerPage
-        );
-    },
     totalPages() {
       return Math.ceil(this.patients.length / this.itemsPerPage);
     },
@@ -289,6 +329,28 @@ export default {
     },
   },
   methods: {
+    triggerImport() {
+      this.$refs.fileInput.click(); // Trigger file input click
+    },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        this.uploadCSV(formData);
+      }
+    },
+    uploadCSV(formData) {
+      Inertia.post('/services/patients/prenatal-postpartum', formData, {
+        onSuccess: () => {
+          alert('Patients imported successfully!');
+        },
+        onError: (errors) => {
+          console.error('Errors during upload:', errors);
+          alert('Failed to import CSV. Please check the file and try again.');
+        },
+      });
+    },
     toggleFilterPanel() {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },

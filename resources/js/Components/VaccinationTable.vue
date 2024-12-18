@@ -18,8 +18,8 @@ export default {
   },
   data() {
     return {
-      showVaccinationModal: false, // State to show/hide the modal
-      modalKey: 0, // Key to force re-render of the modal
+      showVaccinationModal: false,
+      modalKey: 0,
       showScheduleModal: false,
       showHistoryModal: false,
       activePatient: null,
@@ -27,53 +27,9 @@ export default {
       searchQuery: "",
       filterBarangay: "",
       filterAddress: "",
-      // patients: [
-      //   {
-      //     id: 1,
-      //     name: "John Doe",
-      //     age: 25,
-      //     vaccineType: "Vaccine A",
-      //     nextAppointment: "2024-12-01",
-      //     address: "Barangay 1, Initao",
-      //     barangay: "Barangay 1",
-      //     history: [
-      //       {
-      //         id: 1,
-      //         dateOfVisit: "2024-01-15",
-      //         ageInYears: 25,
-      //         weight: "70 kg",
-      //         height: "170 cm",
-      //         temperature: "37°C",
-      //         antigenGiven: "Measles Vaccine",
-      //         injectedBy: "Dr. Smith",
-      //         nextAppointment: "2024-02-15",
-      //       },
-      //     ],
-      //   },
-      //   {
-      //     id: 2,
-      //     name: "Jane Smith",
-      //     age: 30,
-      //     vaccineType: "Vaccine B",
-      //     nextAppointment: "2024-12-10",
-      //     address: "Barangay 2, Initao",
-      //     barangay: "Barangay 2",
-      //     history: [
-      //       {
-      //         id: 1,
-      //         dateOfVisit: "2024-01-10",
-      //         ageInYears: 30,
-      //         weight: "65 kg",
-      //         height: "165 cm",
-      //         temperature: "36.5°C",
-      //         antigenGiven: "Polio Vaccine",
-      //         injectedBy: "Dr. Adam",
-      //         nextAppointment: "2024-02-10",
-      //       },
-      //     ],
-      //   },
-      // ],
       paginatedPatients: [],
+      currentPage: 1,
+      itemsPerPage: 5, // Number of items per page
       dropdownOpen: null,
     };
   },
@@ -81,34 +37,8 @@ export default {
     barangayOptions() {
       return [...new Set(this.patients.map((p) => p.barangay))];
     },
-  },
-  methods: {
-    scheduleAppointment({ patientId, date }) {
-      const patient = this.patients.find((p) => p.id === patientId);
-      if (!patient) {
-        console.error(`Patient with ID ${patientId} not found.`);
-        return;
-      }
-      if (new Date(date) <= new Date()) {
-        alert("Appointment date must be in the future.");
-        return;
-      }
-      patient.nextAppointment = date;
-      alert(`Next appointment for ${patient.name} scheduled on ${date}.`);
-    },
-    openVaccinationModal() {
-      // Reset the key to reinitialize the child component
-      this.modalKey += 1;
-
-      // Show the modal
-      this.showVaccinationModal = true;
-    },
-    closeVaccinationModal() {
-      this.showVaccinationModal = false;
-      this.$refs.vaccinationModal?.resetState?.();
-    },
-    applyFilters() {
-      this.paginatedPatients = this.patients.filter((patient) => {
+    filteredPatients() {
+      return this.patients.filter((patient) => {
         return (
           (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
           (!this.filterAddress || patient.address.toLowerCase().includes(this.filterAddress.toLowerCase())) &&
@@ -116,8 +46,39 @@ export default {
         );
       });
     },
-    toggleDropdown(key) {
-      this.dropdownOpen = this.dropdownOpen === key ? null : key;
+    totalPages() {
+      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
+    },
+  },
+  methods: {
+    applyFilters() {
+      this.currentPage = 1; // Reset to the first page after filtering
+      this.updatePagination();
+    },
+    updatePagination() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = this.currentPage * this.itemsPerPage;
+      this.paginatedPatients = this.filteredPatients.slice(start, end);
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.updatePagination();
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.updatePagination();
+      }
+    },
+    openVaccinationModal() {
+      this.modalKey += 1;
+      this.showVaccinationModal = true;
+    },
+    closeVaccinationModal() {
+      this.showVaccinationModal = false;
+      this.$refs.vaccinationModal?.resetState?.();
     },
     openHistoryModal(patient) {
       this.activePatient = patient;
@@ -135,64 +96,30 @@ export default {
       this.activePatient = null;
       this.activePatientHistory = [];
     },
-    handleClickOutside(event) {
-      const dropdown = document.querySelector(`[data-dropdown="${this.dropdownOpen}"]`);
-      if (dropdown && !dropdown.contains(event.target)) {
-        this.dropdownOpen = null;
-      }
-    },
     clearFilters() {
       this.searchQuery = "";
       this.filterBarangay = "";
       this.filterAddress = "";
       this.applyFilters();
     },
-    generateReport() {
-      if (!this.patients || this.patients.length === 0) {
-        alert("No patient data available to generate the report.");
-        return;
-      }
-
-      const headers = ["Name", "Age", "Vaccine Type", "Next Appointment", "Address"];
-
-      const rows = this.patients.map((patient) => [
-        patient.name,
-        patient.age,
-        patient.vaccineType,
-        patient.nextAppointment || "N/A",
-        patient.address || "N/A",
-      ]);
-
-      const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.setAttribute("download", "patients_report.csv");
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      alert("Report generated and downloaded successfully!");
-    },
   },
   mounted() {
-    this.paginatedPatients = [...this.patients];
-    this.applyFilters();
-    document.addEventListener("click", this.handleClickOutside);
-  },
-  beforeUnmount() {
-    document.removeEventListener("click", this.handleClickOutside);
+    this.updatePagination(); // Initialize pagination on mount
   },
 };
 </script>
 
 
 
+
 <template>
-  <div class="w-full min-h-screen p-4">
+  <div class="w-full min-h-screen px-11 py-5 bg-gradient-to-br from-green-100 to-blue-100 p-4">
+     <!-- Header Section -->
+     <div class="mb-6">
+      <h1 class="text-3xl font-bold text-green-600 text-center">Vaccination Records</h1>
+      <p class="text-gray-700 text-center">Search, filter, and manage vaccination records efficiently.</p>
+    </div>
+
     <!-- Top Action Bar -->
     <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
       <!-- Search Bar -->
@@ -303,5 +230,25 @@ export default {
       @schedule="scheduleAppointment" />
     <ViewHistoryModal v-if="showHistoryModal" :patient="activePatient" :history="activePatientHistory"
       @close="closeAllModals" />
+
+          <!-- Pagination -->
+    <div class="flex justify-center gap-5 items-center mt-6">
+      <button
+        @click="prevPage"
+        :disabled="currentPage === 1"
+        class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Previous
+      </button>
+      <span class="text-sm text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+    </div>
+
   </div>
 </template>

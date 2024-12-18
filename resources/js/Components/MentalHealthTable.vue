@@ -2,7 +2,7 @@
   <div class="container py-8 px-4">
     <!-- Sessions Dropdown -->
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold text-green-700">Patient Records</h2>
+      <h1 class="text-3xl font-bold text-green-700">Patient Records</h1>
       <select
         v-model="selectedSessionId"
         class="border border-gray-300 py-2 px-4 rounded shadow-sm focus:outline-none focus:ring-green-500"

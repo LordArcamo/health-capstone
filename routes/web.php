@@ -59,13 +59,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
     Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); 
     Route::get('/services/patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
+    Route::post('/services/patients/itrtable', [CheckUpController::class, 'import'])->name('itr.import');
 });
+
+Route::get('/services/patients', [PatientController::class, 'show'])->name('totalPatients.show');
+
+Route::get('/services/patients/referred', [PatientController::class, 'showReferred'])->name('referredPatients.show');
+
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/nationalimmunizationprogram', NationalImmunizationProgramController::class);
     Route::get('/checkup/nationalimmunizationprogram', [NationalImmunizationProgramController::class, 'create'])->name('nationalimmunizationprogram');
     Route::post('/nationalimmunizationprogram/store', [NationalImmunizationProgramController::class, 'store'])->name('nationalimmunizationprogram.store');
     Route::get('/services/patients/epi-records', [NationalImmunizationProgramController::class, 'index'])->name('nationalimmunizationprogram.index');
+    Route::post('/services/patients/epi-records', [NationalImmunizationProgramController::class, 'import'])->name('nationalimmunizationprogram.import');
 });
 
 
@@ -75,6 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkup/prenatal', [PreNatalController::class, 'create'])->name('prenatal');
     Route::post('/prenatal/store', [PreNatalController::class, 'store'])->name('prenatal.store');
     Route::get('/services/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
+    Route::post('/services/patients/prenatal-postpartum', [PreNatalController::class, 'import'])->name('prenatal-postpartum.import');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -123,7 +132,29 @@ Route::get('/mortality', function () {
     return Inertia::render('Mortality');
 })->middleware(['auth', 'verified'])->name('mortality');
 
+Route::get('/itr-services', function () {
+    return Inertia::render('About/ItrDescription');
+})->middleware(['auth', 'verified'])->name('itr-services');
 
+Route::get('/epi-records-services', function () {
+    return Inertia::render('About/EpiDescription');
+})->middleware(['auth', 'verified'])->name('epi-records');
+
+Route::get('/prenatal-postpartum-services', function () {
+    return Inertia::render('About/PrenatalDescription');
+})->middleware(['auth', 'verified'])->name('prenatal-postpartum-services');
+
+Route::get('/vaccination-services', function () {
+    return Inertia::render('About/VaccinationDescription');
+})->middleware(['auth', 'verified'])->name('vaccination-services');
+
+Route::get('/risk-management-services', function () {
+    return Inertia::render('About/RiskDescription');
+})->middleware(['auth', 'verified'])->name('risk-management-services');
+
+Route::get('/mental-health', function () {
+    return Inertia::render('About/MentalDescription');
+})->middleware(['auth', 'verified'])->name('mental-health');
 
 Route::get('/system-analytics', function () {
     return Inertia::render('Analytics');
@@ -133,11 +164,11 @@ Route::get('/services/risk-management', function () {
     return Inertia::render('Services/RiskManagement');
 })->middleware(['auth', 'verified'])->name('risk-management');
 
-Route::get('/patient', function () {
-    return Inertia::render('Patients');
-})->middleware(['auth', 'verified'])->name('patient');
+Route::get('/patients/cases', function () {
+    return Inertia::render('Table/DiseaseCases');
+})->middleware(['auth', 'verified'])->name('cases');
 
-Route::get('/dashboard', [PatientController::class, 'index'])
+Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 

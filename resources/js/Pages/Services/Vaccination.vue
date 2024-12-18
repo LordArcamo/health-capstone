@@ -15,7 +15,7 @@ defineProps({
     <Head title="Vaccination" />
 
     <NewLayout>
-        <div class="mt-4 mx-4">
+        <div>
             <div class="flex justify-between">
                 <!-- Pass props to the child VaccinationTable component -->
                 <VaccinationTable

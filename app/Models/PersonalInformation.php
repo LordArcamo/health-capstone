@@ -26,5 +26,5 @@ class PersonalInformation extends Model
         'age', 'birthdate', 'contact', 'sex'
     ];
 
-    protected $hidden = ['created_at', 'updated_at'];
+    protected $hidden = ['updated_at'];
 }

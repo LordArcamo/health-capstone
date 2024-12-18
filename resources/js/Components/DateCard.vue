@@ -1,109 +1,290 @@
 <template>
-  <ShortBox>
+  <ShortBox class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-md transition-shadow relative">
     <div class="flex flex-row items-center justify-between gap-4">
       <!-- Date Display -->
       <div class="flex flex-col items-start gap-2">
-        <h1 class="text-green">Date</h1>
-        <p class="text-black text-lg text-center flex items-center justify-center">
-          <font-awesome-icon :icon="['fas', 'calendar']" class="mr-3 avatar-icon" />
-          {{ currentDate }} <!-- Display the dynamic date -->
+        <h1 class="text-lg font-bold">Date Range</h1>
+        <p class="text-lg flex items-center">
+          <font-awesome-icon :icon="['fas', 'calendar']" class="mr-2 text-blue-600" />
+          {{ formattedDateRange }}
         </p>
       </div>
 
       <!-- Settings Icon (three dots) -->
-      <div @click="toggleDropdown" class="cursor-pointer">
-        <font-awesome-icon :icon="['fas', 'ellipsis-v']" class="text-gray-600 hover:text-gray-800" />
+      <div @click="toggleDropdown" class="relative cursor-pointer z-20 dropdown-toggle">
+        <font-awesome-icon :icon="['fas', 'ellipsis-v']" class="text-blue-600 hover:text-blue-800" />
       </div>
     </div>
 
     <!-- Dropdown Menu -->
-    <div 
-      v-if="isDropdownOpen" 
-      class="absolute mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-    >
-      <ul class="py-1">
-        <li 
-          class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" 
-          @click="filterDate('today')"
-        >
-          Filter by Today
-        </li>
-        <li 
-          class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" 
-          @click="filterDate('week')"
-        >
-          Filter by This Week
-        </li>
-        <li 
-          class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" 
-          @click="filterDate('month')"
-        >
-          Filter by {{ currentMonth }}
-        </li>
-      </ul>
-    </div>
+    <transition name="fade">
+      <div
+        v-if="isDropdownOpen"
+        class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
+        ref="dropdownMenu"
+        @click.stop
+      >
+        <ul class="py-1">
+          <li
+            class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
+            @click="filterPatients('total')"
+          >
+            Show All Patients
+          </li>
+          <li
+            class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
+            @click="filterPatients('today')"
+          >
+            Filter by Today
+          </li>
+          <li
+            class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
+            @click="filterPatients('week')"
+          >
+            Filter by This Week
+          </li>
+          <li
+            class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer"
+            @click="filterPatients('month')"
+          >
+            Filter by This Month
+          </li>
+        </ul>
+      </div>
+    </transition>
   </ShortBox>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import ShortBox from './ShortBox.vue'; // Adjust the path as needed
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import ShortBox from './ShortBox.vue';
 
 export default {
-  components: {
-    ShortBox,
+  components: { ShortBox },
+  props: {
+    patients: {
+      type: Array,
+      default: () => [],
+    },
   },
-  setup() {
+  emits: ['updateStats'],
+  setup(props, { emit }) {
+    console.log(props.patients);
+
     const isDropdownOpen = ref(false);
-    const currentDate = ref(''); // This will store the dynamic current date
-    const currentMonth = ref(''); // This will store the current month's name
+    const currentFilter = ref('total'); // Set to "total" for default display
+    const formattedDateRange = ref('');
 
-    // Update the current date and month dynamically
-    const updateCurrentDate = () => {
-      const date = new Date();
-      
-      // Format date as "Month day, Year"
-      const formattedDate = date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      currentDate.value = formattedDate;
+    const formatDateRange = (startDate, endDate, type) => {
+  if (type === 'today') {
+    return new Date(startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  } else if (type === 'week') {
+    const options = { month: 'long', day: 'numeric', year: 'numeric' };
+    const start = new Date(startDate).toLocaleDateString('en-US', options);
+    const end = new Date(endDate).toLocaleDateString('en-US', options);
+    return `${start} - ${end}`; // Use backticks for template literals
+  } else if (type === 'month') {
+    return new Date(startDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } else {
+    return 'All Dates';
+  }
+};
 
-      // Get the current month name (just the month)
-      const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(date);
-      currentMonth.value = monthName;
-    };
 
-    // Toggle dropdown visibility
+const getStartOfWeek = () => {
+  const now = new Date();
+  const day = now.getDay(); // 0 (Sunday) to 6 (Saturday)
+  const diff = now.getDate() - day; // Get the start of the week
+  const startOfWeek = new Date(now.setDate(diff));
+  startOfWeek.setHours(0, 0, 0, 0); // Ensure time is at the start of the day
+  return startOfWeek;
+};
+
+const getEndOfWeek = () => {
+  const startOfWeek = getStartOfWeek();
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Add 6 days to start of the week
+  endOfWeek.setHours(23, 59, 59, 999); // Ensure time is at the end of the day
+  return endOfWeek;
+};
+const getStartOfMonth = () => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  startOfMonth.setHours(0, 0, 0, 0); // Start of the day
+  return startOfMonth;
+};
+
+const getEndOfMonth = () => {
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of the month
+  endOfMonth.setHours(23, 59, 59, 999); // End of the day
+  return endOfMonth;
+};
+
+// Debugging the functions
+console.log('Start of Month:', getStartOfMonth());
+console.log('End of Month:', getEndOfMonth());  
+
+// Main Filter Logic
+const filteredPatients = computed(() => {
+  if (!props.patients || !props.patients.length) {
+    console.warn('No patients available for filtering');
+    return [];
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Get start and end of the current month
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  endOfMonth.setHours(23, 59, 59, 999);
+
+  console.log('Current Filter:', currentFilter.value);
+  console.log('Start of Month:', startOfMonth, 'End of Month:', endOfMonth);
+
+  return props.patients.filter((patient) => {
+    if (!patient.created_at) {
+      console.warn('Skipping patient with missing created_at:', patient);
+      return false;
+    }
+
+    const patientDate = new Date(patient.created_at);
+    if (isNaN(patientDate)) {
+      console.warn('Skipping patient with invalid created_at:', patient.created_at);
+      return false;
+    }
+
+    if (currentFilter.value === 'month') {
+      // Strictly check for current month range
+      return patientDate >= startOfMonth && patientDate <= endOfMonth;
+    } else if (currentFilter.value === 'today') {
+      return patientDate.toDateString() === today.toDateString();
+    } else if (currentFilter.value === 'week') {
+      const startOfWeek = getStartOfWeek();
+      const endOfWeek = getEndOfWeek();
+      return patientDate >= startOfWeek && patientDate <= endOfWeek;
+    }
+
+    return true; // Default to showing all patients
+  });
+});
+
+// Debugging Watcher
+watch(() => props.patients, (newPatients) => {
+  console.log('Updated Patients:', newPatients);
+  if (!Array.isArray(newPatients) || newPatients.length === 0) {
+    console.warn('Patients array is empty or invalid');
+  }
+});
+    // Update stats for Total Patients and Referred Patients
+    const updateStats = () => {
+  console.log('Filtered Patients:', filteredPatients.value);
+
+  const referredPatients = filteredPatients.value.filter(
+    (patient) => patient.modeOfTransaction === 'Referral'
+  ).length;
+
+  console.log('Total Patients:', filteredPatients.value.length);
+  console.log('Referred Patients:', referredPatients);
+
+  emit('updateStats', {
+    totalPatients: filteredPatients.value.length || 0,
+    referredPatients: referredPatients || 0,
+  });
+};
+
+
+    // Filter patients based on the selected filter
+const filterPatients = (filterType) => {
+  console.log('Filter Type:', filterType);
+  currentFilter.value = filterType; // Update filter type first
+  isDropdownOpen.value = false;
+
+  // Dynamically set formatted date range for display
+  let startDate = null;
+  let endDate = null;
+
+  if (filterType === 'today') {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    startDate = today;
+    endDate = today;
+  } else if (filterType === 'week') {
+    startDate = getStartOfWeek();
+    endDate = getEndOfWeek();
+  } else if (filterType === 'month') {
+    startDate = getStartOfMonth();
+    endDate = getEndOfMonth();
+  }
+
+  formattedDateRange.value = formatDateRange(startDate, endDate, filterType);
+
+  // Debugging
+  console.log('Start Date:', startDate, 'End Date:', endDate);
+  console.log('Filtered Patients Count:', filteredPatients.value.length);
+
+  // Ensure `filteredPatients` is up to date before stats update
+  setTimeout(() => {
+    updateStats();
+  }, 0); // Delay to allow computed to react
+};
+
+
+
+
     const toggleDropdown = () => {
       isDropdownOpen.value = !isDropdownOpen.value;
     };
 
-    // Handle date filter selection
-    const filterDate = (filterType) => {
-      console.log(`Filtering by: ${filterType}`);
-      isDropdownOpen.value = false; // Close the dropdown after selection
-      // You can add your actual filtering logic here
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-menu') && !event.target.closest('.dropdown-toggle')) {
+        isDropdownOpen.value = false;
+      }
     };
 
-    // Update the current date on mount
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        isDropdownOpen.value = false;
+      }
+    };
+
+    // Initialize with default stats and current date
     onMounted(() => {
-      updateCurrentDate(); // Set the initial date when the component mounts
-      setInterval(updateCurrentDate, 60000); // Update every minute to keep it dynamic
+      formattedDateRange.value = formatDateRange(new Date(), null, 'today'); // Default to "Today"
+      updateStats(); // Update stats immediately on load
+
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('keydown', handleEscKey);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleEscKey);
     });
 
     return {
       isDropdownOpen,
       toggleDropdown,
-      filterDate,
-      currentDate,
-      currentMonth,
+      filterPatients,
+      formattedDateRange,
     };
   },
 };
 </script>
 
+
+
+
 <style scoped>
-/* Add styling for dropdown to avoid overlap */
+.avatar-icon {
+  font-size: 20px;
+}
+
+.absolute {
+  position: absolute;
+}
+.text-green {
+  color: #10b981; /* Tailwind green color */
+}
 </style>

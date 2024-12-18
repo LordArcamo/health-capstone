@@ -1,147 +1,151 @@
 <template>
-    <div>
-      <!-- Year and Month Filters -->
-      <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
-        <!-- Year Filter -->
-        <div class="flex items-center space-x-2">
-          <label for="year" class="font-semibold text-gray-700">Year:</label>
-          <select v-model="selectedYear" @change="filterData" class="border rounded px-4 py-2">
-            <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
-          </select>
-        </div>
-  
-        <!-- Month Filter -->
-        <div class="flex items-center space-x-2">
-          <label for="month" class="font-semibold text-gray-700">Month:</label>
-          <select v-model="selectedMonth" @change="filterData" class="border rounded px-4 py-2">
-            <option value="">All</option>
-            <option v-for="(month, index) in months" :key="index" :value="month">{{ month }}</option>
-          </select>
-        </div>
-      </div>
-  
-      <!-- Combined Chart Section -->
-      <div class="h-80">
-        <h3 class="text-lg font-semibold text-center mb-2">Outpatient and Referred Cases</h3>
-        <Bar ref="combinedChart" :data="filteredCombinedData" :options="chartOptions" />
-      </div>
+  <div class="oten">
+    <h2 class="text-xl font-semibold text-gray-700 mb-6">
+      Monthly Trending Cases by Diagnosis
+    </h2>
+
+    <!-- Chart -->
+    <apexchart
+      v-if="chartOptions.series.length"
+      type="bar"
+      height="400"
+      :options="chartOptions.options"
+      :series="chartOptions.series"
+    />
+    <div v-else class="text-center text-gray-500">
+      No data available to display.
     </div>
-  </template>
-  
-  <script>
-  import { Bar } from 'vue-chartjs';
-  import {
-    Chart as ChartJS,
-    Title,
-    Tooltip,
-    Legend,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-  } from 'chart.js';
-  
-  ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
-  
-  export default {
-    name: "OutpatientReferredChart",
-    components: { Bar },
-    data() {
-      return {
-        years: [2022, 2023, 2024],
-        months: [
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December",
-        ],
-        selectedYear: 2023,
-        selectedMonth: "",
-        outpatientData: {
-          labels: [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December",
-          ],
-          datasets: [
-            {
-              label: "Outpatient Cases",
-              data: [100, 120, 130, 110, 150, 170, 160, 180, 200, 190, 210, 220],
-              backgroundColor: "#42A5F5", // Blue for outpatient
-              borderRadius: 10,
-            },
-          ],
-        },
-        referredData: {
-          labels: [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December",
-          ],
-          datasets: [
-            {
-              label: "Referred Cases",
-              data: [30, 40, 35, 50, 45, 60, 55, 70, 65, 80, 75, 90],
-              backgroundColor: "#66BB6A", // Green for referred
-              borderRadius: 10,
-            },
-          ],
-        },
-        chartOptions: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-            },
-          },
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: "Month",
-              },
-            },
-            y: {
-              title: {
-                display: true,
-                text: "Number of Cases",
-              },
-              beginAtZero: true,
-            },
-          },
-        },
-      };
+  </div>
+</template>
+
+<script>
+import { defineComponent, computed } from "vue";
+import ApexCharts from "vue3-apexcharts";
+
+export default defineComponent({
+  components: {
+    apexchart: ApexCharts,
+  },
+  props: {
+    nonReferredData: {
+      type: Array,
+      required: true,
     },
-    computed: {
-      filteredCombinedData() {
-        // If a month is selected, filter data for the selected month
-        if (this.selectedMonth) {
-          const monthIndex = this.months.indexOf(this.selectedMonth);
-          return {
-            labels: [this.selectedMonth],
-            datasets: [
-              {
-                ...this.outpatientData.datasets[0],
-                data: [this.outpatientData.datasets[0].data[monthIndex]],
-              },
-              {
-                ...this.referredData.datasets[0],
-                data: [this.referredData.datasets[0].data[monthIndex]],
-              },
-            ],
+  },
+  setup(props) {
+    const months = [
+      "January", "February", "March", "April", "May",
+      "June", "July", "August", "September", "October",
+      "November", "December",
+    ];
+
+    const trendingCases = computed(() => {
+      const data = props.nonReferredData;
+      const monthlyTrending = Array(12).fill(null);
+
+      data.forEach((item) => {
+        const monthIndex = item.month - 1;
+        if (
+          !monthlyTrending[monthIndex] ||
+          monthlyTrending[monthIndex].case_count < item.case_count
+        ) {
+          monthlyTrending[monthIndex] = {
+            diagnosis: item.diagnosis,
+            case_count: item.case_count,
           };
         }
-        // If no month is selected, return the full data for both datasets
-        return {
-          labels: this.outpatientData.labels,
-          datasets: [
-            ...this.outpatientData.datasets,
-            ...this.referredData.datasets,
-          ],
-        };
-      },
-    },
-    methods: {
-      filterData() {
-        // You can add logic here if needed to filter data by year or other parameters
-      },
-    },
-  };
-  </script>
-  
+      });
+
+      return monthlyTrending.map((entry, index) => ({
+        month: months[index],
+        diagnosis: entry ? entry.diagnosis : "No Data",
+        case_count: entry ? entry.case_count : 0,
+      }));
+    });
+
+    const chartOptions = computed(() => {
+      const labels = trendingCases.value.map((item) => item.month);
+      const data = trendingCases.value.map((item) => (item ? item.case_count : 0));
+      const diagnoses = trendingCases.value.map((item) => (item ? item.diagnosis : "No Data"));
+
+      return {
+        options: {
+          chart: {
+            type: "bar",
+            height: 400,
+            toolbar: {
+              show: false,
+            },
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: "40%", // Thinner bars
+              endingShape: "rounded",
+            },
+          },
+          fill: {
+            type: "gradient",
+            gradient: {
+              shade: "light",
+              type: "vertical",
+              gradientToColors: ["#66fcf1"], // Gradient end color
+              stops: [0, 100],
+            },
+          },
+          dataLabels: {
+            enabled: false, // Removed labels on bars
+          },
+          xaxis: {
+            categories: labels,
+            title: {
+              text: "Month",
+              style: {
+                fontSize: "14px",
+                fontWeight: "bold",
+              },
+            },
+          },
+          yaxis: {
+            title: {
+              text: "Number of Cases",
+              style: {
+                fontSize: "14px",
+                fontWeight: "bold",
+              },
+            },
+          },
+          tooltip: {
+            shared: true,
+            intersect: false,
+            y: {
+              formatter: function (value, { seriesIndex, dataPointIndex }) {
+                return `${value} cases (${diagnoses[dataPointIndex]})`;
+              },
+            },
+          },
+          colors: ["#1f77b4"], // Start color of gradient
+        },
+        series: [
+          {
+            name: "Trending Cases",
+            data,
+          },
+        ],
+      };
+    });
+
+    return {
+      chartOptions,
+    };
+  },
+});
+</script>
+
+<style>
+/* Add any custom styling if needed */
+
+.oten{
+  z-index: 0!important;
+}
+</style>

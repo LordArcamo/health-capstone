@@ -107,7 +107,8 @@
 
             <div>
               <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
+              <input type="text" v-model="form.purok" class="input" @input="capitalizeName('purok')"
+                placeholder="Example: Purok 1A" required />
               <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
             <div>
@@ -160,7 +161,7 @@
             </div>
             <div>
               <label class="block">Consultation Time:</label>
-              <input type="time" v-model="form.consultationTime" class="input" required />
+              <input type="time" v-model="form.consultationTime" class="input" required    @input="handleTimeSelection" />
               <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
             </div>
             <div>
@@ -168,33 +169,38 @@
               <select v-model="form.modeOfTransaction" class="input" required>
                 <!-- Placeholder option for selecting suffix -->
                 <option value="" disabled selected>Select a Mode of Transaction</option>
-                <option value="Walk-in">Walk-in</option>
-                <option value="Visited">Visited</option>
+                <option value="Walk-in">Consultation</option>
+                <option value="Visited">Emergency</option>
                 <option value="Referral">Referral</option>
               </select>
+              <span v-if="errors.modeOfTransaction" class="text-red-600 text-sm">{{ errors.modeOfTransaction }}</span>
+
             </div>
             <div>
               <label class="block">Blood Pressure:</label>
               <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatBloodPressure" />
+                @input="formatBloodPressure" required/>
+                <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
             </div>
             <div>
               <label class="block">Temperature (°C):</label>
               <input type="text" v-model="form.temperature" placeholder="Example: 37.5°C"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatTemperature" />
-
+                @input="formatTemperature" required/>
+                <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
             </div>
             <div>
               <label class="block">Height (cm):</label>
               <input type="text" v-model="form.height" placeholder="Example: 180" class="input"
-                @input="validateHeight" />
+                @input="validateHeight" required/>
+                <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
             </div>
             <div>
               <label class="block">Weight (kg):</label>
               <input type="text" v-model="form.weight" placeholder="Example: 70" class="input"
-                @input="validateWeight" />
+                @input="validateWeight" required/>
+                <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
             </div>
 
           </div>
@@ -231,8 +237,9 @@
           <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block">Name of Healthcare Provider:</label>
-              <input type="text" v-model="form.providerName" class="input" />
+              <label class="block">Name of Attending Physician:</label>
+              <input type="text" v-model="form.providerName" @input="capitalizeName('providerName')" placeholder="Example: Dr. Jose Legazpi" class="input" />
+              <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
             <div>
               <label class="block">Nature of Visit:</label>
@@ -242,6 +249,7 @@
                 <option>New Admission</option>
                 <option>Follow-up Visit</option>
               </select>
+              <span v-if="errors.natureOfVisit" class="text-red-600 text-sm">{{ errors.natureOfVisit }}</span>
             </div>
             <div>
               <label class="block">Type of Consultation/Purpose of Visit:</label>
@@ -258,22 +266,26 @@
                 <option value="Child Immunization">Child Immunization</option>
                 <option value="Sick Children">Sick Children</option>
                 <option value="Firecracker Injury">Firecracker Injury</option>
-                <option value="Mental Health">Mental Health</option>
+                <option value="Mental Health">Psychological Status</option>
               </select>
+              <span v-if="errors.visitType" class="text-red-600 text-sm">{{ errors.visitType }}</span>
             </div>
 
             <div>
               <label class="block">Chief Complaints:</label>
               <textarea v-model="form.chiefComplaints" placeholder="Example: Low Bowel Movements etc."
                 class="input"></textarea>
+                <span v-if="errors.chiefComplaints" class="text-red-600 text-sm">{{ errors.chiefComplaints }}</span>
             </div>
             <div>
               <label class="block">Diagnosis:</label>
               <textarea v-model="form.diagnosis" placeholder="Example: Diarrhea" class="input"></textarea>
+              <span v-if="errors.diagnosis" class="text-red-600 text-sm">{{ errors.diagnosis }}</span>
             </div>
             <div>
               <label class="block">Medication/Treatment:</label>
               <textarea v-model="form.medication" placeholder="Example: Loperamide" class="input"></textarea>
+              <span v-if="errors.medication" class="text-red-600 text-sm">{{ errors.medication }}</span>
             </div>
           </div>
           <div class="mt-6 flex justify-between">
@@ -333,9 +345,9 @@
 export default {
   props: {
     selectedPatient: {
-    type: Object,
-    required: false,
-    default: () => ({}),
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     onSubmit: Function,
   },
@@ -394,8 +406,8 @@ export default {
       let age = today.getFullYear() - birthDate.getFullYear();
 
       // Check if the birthday has occurred this year
-      const hasBirthdayOccurred = 
-        today.getMonth() > birthDate.getMonth() || 
+      const hasBirthdayOccurred =
+        today.getMonth() > birthDate.getMonth() ||
         (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
 
       if (!hasBirthdayOccurred) {
@@ -426,19 +438,19 @@ export default {
       this.form.age = this.computedAge; // Automatically update age when birthdate changes
     },
     'form.modeOfTransaction': function (newVal) {
-        if (newVal === 'Referral') {
-            // Reset the fields to empty when Referral is selected
-            this.form.referredFrom = '';
-            this.form.referredTo = '';
-            this.form.reasonsForReferral = '';
-            this.form.referredBy = '';
-        } else {
-            // Set the fields to "None" when not Referral
-            this.form.referredFrom = 'None';
-            this.form.referredTo = 'None';
-            this.form.reasonsForReferral = 'None';
-            this.form.referredBy = 'None';
-        }
+      if (newVal === 'Referral') {
+        // Reset the fields to empty when Referral is selected
+        this.form.referredFrom = '';
+        this.form.referredTo = '';
+        this.form.reasonsForReferral = '';
+        this.form.referredBy = '';
+      } else {
+        // Set the fields to "None" when not Referral
+        this.form.referredFrom = 'None';
+        this.form.referredTo = 'None';
+        this.form.reasonsForReferral = 'None';
+        this.form.referredBy = 'None';
+      }
     },
   },
   methods: {
@@ -488,7 +500,7 @@ export default {
         birthdate: this.selectedPatient?.birthdate || '',
         contact: this.selectedPatient?.contact || '',
         sex: this.selectedPatient?.sex || '',
-        
+
       };
       this.form.age = this.computedAge;
 
@@ -503,6 +515,29 @@ export default {
           .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
       }
     },
+    validateConsultationDate() {
+    const today = new Date();
+    const inputDate = new Date(this.form.consultationDate);
+
+    if (!this.form.consultationDate) {
+      this.errors.consultationDate = "Consultation date is required.";
+      return false;
+    }
+
+    if (isNaN(inputDate.getTime())) {
+      this.errors.consultationDate = "Please enter a valid date.";
+      return false;
+    }
+
+    if (inputDate > today) {
+      this.errors.consultationDate = "Consultation date cannot be in the future.";
+      return false;
+    }
+
+    // Clear error if validation passes
+    this.errors.consultationDate = "";
+    return true;
+  },
     formatBloodPressure(event) {
       let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
       if (value.length > 3) {
@@ -518,6 +553,24 @@ export default {
       }
 
       this.form.temperature = value; // Update the input value
+    },
+    handleTimeSelection(event) {
+      // Automatically retract the time picker
+      const input = this.$refs.timeInput;
+
+      // Force blur after a change (immediately hide dropdown)
+      if (input) {
+        setTimeout(() => {
+          input.blur();
+        }, 100); // Adding a slight delay for smoothness
+      }
+
+      // Optional Validation
+      if (!this.form.consultationTime) {
+        this.errors.consultationTime = "Consultation time is required.";
+      } else {
+        this.errors.consultationTime = "";
+      }
     },
     validateHeight(event) {
       let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and a single decimal point
@@ -631,19 +684,51 @@ export default {
       return valid;
     },
     validateStep2() {
-      this.errors = {};
-      let valid = true;
+  this.errors = {};
+  let valid = true;
 
-      if (!this.form.consultationDate) {
-        this.errors.consultationDate = 'Consultation date is required.';
-        valid = false;
-      }
-      if (!this.form.consultationTime) {
-        this.errors.consultationTime = 'Consultation time is required.';
-        valid = false;
-      }
-      return valid;
-    },
+  const today = new Date();
+  const consultationDate = new Date(this.form.consultationDate);
+
+  if (!this.form.consultationDate) {
+    this.errors.consultationDate = "Consultation date is required.";
+    valid = false;
+  } else if (isNaN(consultationDate.getTime())) {
+    this.errors.consultationDate = "Please enter a valid date.";
+    valid = false;
+  } else if (consultationDate > today) {
+    this.errors.consultationDate = "Consultation date cannot be in the future.";
+    valid = false;
+  }
+
+  if (!this.form.consultationTime) {
+    this.errors.consultationTime = "Consultation time is required.";
+    valid = false;
+  }
+  if (!this.form.modeOfTransaction) {
+    this.errors.modeOfTransaction = "Mode of Transaction is required.";
+    valid = false;
+  }
+  if (!this.form.bloodPressure) {
+    this.errors.bloodPressure = "Blood Pressure is required.";
+    valid = false;
+  }
+  if (!this.form.temperature) {
+    this.errors.temperature = "Temperature is required.";
+    valid = false;
+  }
+  if (!this.form.height) {
+    this.errors.height = "Height is required.";
+    valid = false;
+  }
+  if (!this.form.weight) {
+    this.errors.weight = "Weight is required.";
+    valid = false;
+  }
+
+  return valid;
+},
+
     validateStep3() {
       this.errors = {};
       let valid = true;
@@ -658,6 +743,18 @@ export default {
       }
       if (!this.form.visitType) {
         this.errors.visitType = 'Visit type is required.';
+        valid = false;
+      }
+      if (!this.form.chiefComplaints) {
+        this.errors.chiefComplaints = 'Chief Complaints is required.';
+        valid = false;
+      }
+      if (!this.form.diagnosis) {
+        this.errors.diagnosis = 'Diagnosis is required.';
+        valid = false;
+      }
+      if (!this.form.medication) {
+        this.errors.medication = 'Medication is required.';
         valid = false;
       }
       return valid;
@@ -703,11 +800,14 @@ export default {
       this.alertMessage = ''; // Close the alert
     },
     formatContact() {
-      // Ensure the input starts with "09", remove non-numeric characters, and limit to 10 digits
-      if (!this.form.contact.startsWith('0')) {
-        this.form.contact = '0' + this.form.contact.replace(/[^0-9]/g, '');
+      // Remove all non-numeric characters first
+      this.form.contact = this.form.contact.replace(/[^0-9]/g, '');
+
+      // Ensure the number starts with "9" and limit to 11 digits
+      if (!this.form.contact.startsWith('9')) {
+        this.form.contact = '9' + this.form.contact.slice(0, 10); // Add "9" and limit to 10 more digits
       } else {
-        this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 11);
+        this.form.contact = this.form.contact.slice(0, 10); // Limit to 11 digits if it already starts with "9"
       }
     },
     triggerSubmit() {
@@ -795,6 +895,46 @@ export default {
 
 
 <style scoped>
+/* Styling for the default input[type="time"] */
+.time-input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  outline: none;
+}
+
+/* Focus styling */
+.time-input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 4px rgba(40, 167, 69, 0.5);
+}
+
+/* Custom placeholder for time input (may not show in all browsers) */
+.time-input::-webkit-datetime-edit-fields-wrapper {
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.time-input::-webkit-datetime-edit {
+  padding: 0 4px;
+  color: #555;
+}
+
+.time-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  background: none;
+  margin-right: 4px;
+  opacity: 0.6;
+}
+
+.time-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
 .input {
   width: 100%;
   padding: 8px;
