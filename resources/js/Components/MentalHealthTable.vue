@@ -3,15 +3,6 @@
     <!-- Sessions Dropdown -->
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-lg font-semibold text-green-700">Patient Records</h2>
-      <select
-        v-model="selectedSessionId"
-        class="border border-gray-300 py-2 px-4 rounded shadow-sm focus:outline-none focus:ring-green-500"
-      >
-        <option value="">All Sessions</option>
-        <option v-for="session in sessions" :key="session.id" :value="session.id">
-          {{ session.title }} ({{ session.date }})
-        </option>
-      </select>
     </div>
 
     <!-- Search and Filter Section -->
@@ -86,12 +77,13 @@
             <th class="py-4 px-6 text-left">Age</th>
             <th class="py-4 px-6 text-left">Barangay</th>
             <th class="py-4 px-6 text-left">Visit Type</th>
+            <th class="py-4 px-6 text-left">Visit Date</th>
             <th class="py-4 px-6 text-left">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="patient in filteredPatients"
+            v-for="patient in paginatedPatients"
             :key="patient.personalId"
             class="border-b hover:bg-gray-50 transition-colors"
           >
@@ -100,6 +92,7 @@
             <td class="py-4 px-6">{{ patient.age }}</td>
             <td class="py-4 px-6">{{ patient.barangay }}</td>
             <td class="py-4 px-6">{{ patient.visitType }}</td>
+            <td class="py-4 px-6">{{ formatDate(patient.visitDate) }}</td>
             <td class="py-4 px-6">
               <button
                 @click="openModal(patient)"
@@ -132,29 +125,31 @@
       </button>
     </div>
     <transition name="fade">
-  <div
-    v-if="showModal"
-    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-  >
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-      <h3 class="text-lg font-semibold mb-4">Patient Details</h3>
-      <p><strong>Patient ID:</strong> {{ selectedPatient.personalId }}</p>
-      <p><strong>Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</p>
-      <p><strong>Age:</strong> {{ selectedPatient.age }}</p>
-      <p><strong>Barangay:</strong> {{ selectedPatient.barangay }}</p>
-      <p><strong>Visit Type:</strong> {{ selectedPatient.visitType }}</p>
-      <p><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</p>
-      <div class="flex justify-end mt-4">
-        <button
-          @click="closeModal"
-          class="bg-red-500 text-white py-2 px-4 rounded shadow hover:bg-red-600"
-        >
-          Close
-        </button>
+      <div
+        v-if="showModal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      >
+        <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+          <h3 class="text-lg font-semibold mb-4">Patient Details</h3>
+          <p><strong>Patient ID:</strong> {{ selectedPatient.personalId }}</p>
+          <p><strong>Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</p>
+          <p><strong>Age:</strong> {{ selectedPatient.age }}</p>
+          <p><strong>Barangay:</strong> {{ selectedPatient.barangay }}</p>
+          <p><strong>Purok:</strong> {{ selectedPatient.purok }}</p>
+          <p><strong>Visit Type:</strong> {{ selectedPatient.visitType }}</p>
+          <p><strong>Visit Date:</strong> {{ formatDate(selectedPatient.visitDate) }}</p>
+          <p><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</p>
+          <div class="flex justify-end mt-4">
+            <button
+              @click="closeModal"
+              class="bg-red-500 text-white py-2 px-4 rounded shadow hover:bg-red-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</transition>
+    </transition>
   </div>
 </template>
 
@@ -164,6 +159,7 @@ export default {
     patients: {
       type: Array,
       required: true,
+      default: () => []
     },
   },
   data() {
@@ -172,62 +168,61 @@ export default {
       filterPrk: "",
       filterBarangay: "",
       currentPage: 1,
-      itemsPerPage: 5,
+      itemsPerPage: 10,
       megaFilterOpen: false,
-      showModal: false, // Added for modal visibility
+      showModal: false,
       selectedPatient: null,
-      selectedSessionId: "",
-      sessions: [
-        { id: 1, title: "Session 1", date: "2024-11-20" },
-        { id: 2, title: "Session 2", date: "2024-11-21" },
-      ],
-      patients: [
-        { personalId: 101, firstName: "John", lastName: "Doe", age: 25, barangay: "Barangay 1", purok: "Purok 1", sessionId: 1, visitType: "Consultation", diagnosis: "Flu" },
-        { personalId: 102, firstName: "Jane", lastName: "Smith", age: 32, barangay: "Barangay 2", purok: "Purok 2", sessionId: 1, visitType: "Follow-up", diagnosis: "Hypertension" },
-        { personalId: 103, firstName: "Alice", lastName: "Johnson", age: 45, barangay: "Barangay 3", purok: "Purok 3", sessionId: 2, visitType: "Consultation", diagnosis: "Diabetes" },
-      ],
     };
   },
   computed: {
     filteredPatients() {
+      if (!this.patients) return [];
+      
       const query = this.searchQuery.toLowerCase();
-      const patientsFilteredBySession = this.selectedSessionId
-        ? this.patients.filter((p) => p.sessionId === this.selectedSessionId)
-        : this.patients;
-
-      return patientsFilteredBySession
-        .filter((patient) => {
-          const matchesQuery =
-            patient.firstName.toLowerCase().includes(query) ||
-            patient.lastName.toLowerCase().includes(query) ||
-            patient.visitType.toLowerCase().includes(query);
-          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
-          const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
-
-          return matchesQuery && matchesPrk && matchesBarangay;
-        })
-        .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+      
+      return this.patients.filter((patient) => {
+        const matchesSearch = 
+          patient.firstName.toLowerCase().includes(query) ||
+          patient.lastName.toLowerCase().includes(query) ||
+          patient.diagnosis?.toLowerCase().includes(query) ||
+          patient.visitType.toLowerCase().includes(query);
+          
+        const matchesPurok = !this.filterPrk || patient.purok === this.filterPrk;
+        const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
+        
+        return matchesSearch && matchesPurok && matchesBarangay;
+      });
+    },
+    paginatedPatients() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredPatients.slice(start, end);
     },
     totalPages() {
-      const patientsFilteredBySession = this.selectedSessionId
-        ? this.patients.filter((p) => p.sessionId === this.selectedSessionId)
-        : this.patients;
-      return Math.ceil(patientsFilteredBySession.length / this.itemsPerPage);
+      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
     },
     purokOptions() {
-      return [...new Set(this.patients.map((patient) => patient.purok))];
+      return [...new Set(this.patients.map(p => p.purok))].filter(Boolean).sort();
     },
     barangayOptions() {
-      return [...new Set(this.patients.map((patient) => patient.barangay))];
-    },
+      return [...new Set(this.patients.map(p => p.barangay))].filter(Boolean).sort();
+    }
   },
   methods: {
+    formatDate(date) {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+      });
+    },
     openModal(patient) {
       this.selectedPatient = patient;
       this.showModal = true;
     },
     closeModal() {
       this.showModal = false;
+      this.selectedPatient = null;
     },
     toggleMegaFilter() {
       this.megaFilterOpen = !this.megaFilterOpen;
@@ -235,18 +230,15 @@ export default {
     resetFilters() {
       this.filterPrk = "";
       this.filterBarangay = "";
-    },
-    openModal(patient) {
-      this.selectedPatient = patient;
-      this.showModal = true;
+      this.searchQuery = "";
+      this.megaFilterOpen = false;
     },
     prevPage() {
       if (this.currentPage > 1) this.currentPage--;
     },
     nextPage() {
       if (this.currentPage < this.totalPages) this.currentPage++;
-    },
-  },
+    }
+  }
 };
 </script>
-  

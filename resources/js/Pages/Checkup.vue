@@ -22,7 +22,6 @@ const emit = defineEmits(['patients-updated', 'patientSelected']);
 
 // Function to handle patient selection from Modal
 function handlePatientSelected(patient) {
-  console.log('Selected patient in Checkup:', patient);
   selectedPatient.value = patient; // Update the selected patient
 }
 

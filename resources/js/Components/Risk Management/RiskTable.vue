@@ -9,13 +9,15 @@
           placeholder="Search by Name..."
           class="border rounded-md px-4 py-2 shadow-md w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-green-600"
         />
-        <button
-          @click="toggleMegaFilter"
-          class="bg-green-700 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm ml-4"
-        >
-          Filter Options
-          <font-awesome-icon :icon="['fas', megaFilterOpen ? 'caret-up' : 'caret-down']" />
-        </button>
+        <div class="flex space-x-4">
+          <button
+            @click="toggleMegaFilter"
+            class="bg-green-700 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+          >
+            Filter Options
+            <font-awesome-icon :icon="['fas', megaFilterOpen ? 'caret-up' : 'caret-down']" />
+          </button>
+        </div>
       </div>
   
       <!-- Mega Filter Dropdown -->
@@ -117,20 +119,34 @@
         </table>
       </div>
     </div>
+
+    <!-- Risk Modal -->
+    <RiskModal
+      v-if="showRiskModal"
+      @close="closeRiskModal"
+      @saved="handleRiskSaved"
+    />
   </template>
   
   <script>
+  import RiskModal from './RiskModal.vue';
+
   export default {
+    components: {
+      RiskModal
+    },
     props: {
       data: Array,
     },
     data() {
       return {
         megaFilterOpen: false,
-        filterName: "",
-        filterFoodIntake: "",
-        filterPhysicalActivity: "",
-        filterDiabetes: "",
+        filterName: '',
+        filterFoodIntake: '',
+        filterPhysicalActivity: '',
+        filterDiabetes: '',
+        showRiskModal: false,
+        selectedEntry: null,
       };
     },
     computed: {
@@ -150,18 +166,26 @@
         this.megaFilterOpen = !this.megaFilterOpen;
       },
       editEntry(index) {
-        this.$emit("edit", index);
+        this.selectedEntry = this.filteredData[index];
+        this.showRiskModal = true;
       },
       deleteEntry(index) {
-        this.$emit("delete", index);
+        // Implementation for delete functionality
       },
       clearFilters() {
-        this.filterName = "";
-        this.filterFoodIntake = "";
-        this.filterPhysicalActivity = "";
-        this.filterDiabetes = "";
+        this.filterName = '';
+        this.filterFoodIntake = '';
+        this.filterPhysicalActivity = '';
+        this.filterDiabetes = '';
       },
+      closeRiskModal() {
+        this.showRiskModal = false;
+        this.selectedEntry = null;
+      },
+      handleRiskSaved(data) {
+        this.closeRiskModal();
+        this.$emit('risk-saved', data);
+      }
     },
   };
   </script>
-  

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\VaccinationRecord;
 
 class PersonalInformation extends Model
 {
@@ -27,4 +28,12 @@ class PersonalInformation extends Model
     ];
 
     protected $hidden = ['created_at', 'updated_at'];
+
+    /**
+     * Get the vaccination records for the patient.
+     */
+    public function vaccinationRecords()
+    {
+        return $this->hasMany(VaccinationRecord::class, 'personalId', 'personalId');
+    }
 }

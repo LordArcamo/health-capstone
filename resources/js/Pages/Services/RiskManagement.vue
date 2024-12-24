@@ -26,6 +26,13 @@ const riskData = ref([
   },
 ]);
 
+const props = defineProps({
+  patients: {
+    type: Array,
+    default: () => [],
+  }
+});
+
 const showRiskModal = ref(false);
 const currentEntry = ref(null);
 
@@ -75,6 +82,8 @@ const saveEntry = (entry) => {
       <!-- Risk Modal -->
       <RiskModal
         :showModal="showRiskModal"
+        :currentEntry="currentEntry"
+        :patients="props.patients"
         @close="closeRiskModal"
         @save="saveEntry"
       />

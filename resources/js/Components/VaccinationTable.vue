@@ -8,9 +8,15 @@ export default {
   props: {
     patients: {
       type: Array,
+      required: true,
+      default: () => [],
+    },
+    vaccinatedPatients: {
+      type: Array,
       default: () => [],
     },
   },
+  
   components: {
     VaccinationModal,
     ScheduleNextAppointmentModal,
@@ -79,12 +85,21 @@ export default {
   },
   computed: {
     barangayOptions() {
-      return [...new Set(this.patients.map((p) => p.barangay))];
+      return [...new Set(this.vaccinatedPatients.map((p) => p.barangay))];
     },
   },
   methods: {
+    // Function to format date
+    formatDate(dateString) {
+      if (!dateString) return "N/A";
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+      });
+    },
     scheduleAppointment({ patientId, date }) {
-      const patient = this.patients.find((p) => p.id === patientId);
+      const patient = this.vaccinatedPatients.find((p) => p.id === patientId);
       if (!patient) {
         console.error(`Patient with ID ${patientId} not found.`);
         return;
@@ -94,13 +109,11 @@ export default {
         return;
       }
       patient.nextAppointment = date;
-      alert(`Next appointment for ${patient.name} scheduled on ${date}.`);
+      alert(`Next appointment for ${patient.firstName} scheduled on ${date}.`);
     },
     openVaccinationModal() {
       // Reset the key to reinitialize the child component
       this.modalKey += 1;
-
-      // Show the modal
       this.showVaccinationModal = true;
     },
     closeVaccinationModal() {
@@ -108,11 +121,19 @@ export default {
       this.$refs.vaccinationModal?.resetState?.();
     },
     applyFilters() {
-      this.paginatedPatients = this.patients.filter((patient) => {
+      const searchQuery = this.searchQuery.trim().toLowerCase();
+      const filterBarangay = this.filterBarangay.trim().toLowerCase();
+      const filterAddress = this.filterAddress.trim().toLowerCase();
+
+      this.paginatedPatients = this.vaccinatedPatients.filter((patient) => {
+        const fullName = `${patient.firstName || ""} ${patient.lastName || ""}`.trim().toLowerCase();
+        const barangay = (patient.barangay || "").trim().toLowerCase();
+        const address = (patient.address || "").trim().toLowerCase();
+
         return (
-          (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
-          (!this.filterAddress || patient.address.toLowerCase().includes(this.filterAddress.toLowerCase())) &&
-          (!this.searchQuery || patient.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
+          (!filterBarangay || barangay.includes(filterBarangay)) &&
+          (!filterAddress || address.includes(filterAddress)) &&
+          (!searchQuery || fullName.includes(searchQuery))
         );
       });
     },
@@ -148,19 +169,19 @@ export default {
       this.applyFilters();
     },
     generateReport() {
-      if (!this.patients || this.patients.length === 0) {
+      if (!this.vaccinatedPatients || this.vaccinatedPatients.length === 0) {
         alert("No patient data available to generate the report.");
         return;
       }
 
       const headers = ["Name", "Age", "Vaccine Type", "Next Appointment", "Address"];
 
-      const rows = this.patients.map((patient) => [
-        patient.name,
+      const rows = this.vaccinatedPatients.map((patient) => [
+        patient.firstName,
         patient.age,
         patient.vaccineType,
-        patient.nextAppointment || "N/A",
-        patient.address || "N/A",
+        this.formatDate(patient.nextAppointment),
+        patient.barangay || "N/A",
       ]);
 
       const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
@@ -179,7 +200,7 @@ export default {
     },
   },
   mounted() {
-    this.paginatedPatients = [...this.patients];
+    this.paginatedPatients = [...this.vaccinatedPatients];
     this.applyFilters();
     document.addEventListener("click", this.handleClickOutside);
   },
@@ -275,11 +296,11 @@ export default {
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="patient in paginatedPatients" :key="patient.id" class="hover:bg-gray-100">
+          <tr v-for="patient in vaccinatedPatients" :key="patient.id" class="hover:bg-gray-100">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.vaccineType }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.nextAppointment || 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(patient.nextAppointment) }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.barangay || 'N/A' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.purok || 'N/A' }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -298,7 +319,12 @@ export default {
     </div>
 
     <!-- Modals -->
-    <VaccinationModal v-if="showVaccinationModal" :key="modalKey" @close="closeVaccinationModal" />
+    <VaccinationModal
+      v-if="showVaccinationModal"
+      :patients="patients"
+      :key="modalKey"
+      @close="closeVaccinationModal"
+    />
     <ScheduleNextAppointmentModal v-if="showScheduleModal" :patient="activePatient" @close="closeAllModals"
       @schedule="scheduleAppointment" />
     <ViewHistoryModal v-if="showHistoryModal" :patient="activePatient" :history="activePatientHistory"

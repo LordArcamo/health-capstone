@@ -1,48 +1,56 @@
-<script setup>
+<script>
 import { defineProps, defineEmits, ref, computed } from "vue";
 
-// Props for the patient object
-const props = defineProps({
-  patient: {
-    type: Object,
-    required: true,
-    default: () => ({
-      name: "Unknown",
-      age: "Unknown",
-      vaccineType: "Unknown",
-      nextAppointment: "",
-    }),
+export default {
+  props: {
+    patient: {
+      type: Object,
+      required: true,
+      default: () => ({
+        name: "Unknown",
+        age: "Unknown",
+        vaccineType: "Unknown",
+        nextAppointment: "",
+      }),
+    },
   },
-});
+  emits: ["close", "schedule"],
+  setup(props, { emit }) {
+    // Local state for the appointment date
+    const appointmentDate = ref(props.patient.nextAppointment || "");
 
-const emit = defineEmits(["close", "schedule"]);
+    // Computed property to validate the date
+    const isDateValid = computed(() => {
+      if (!appointmentDate.value) return false;
+      const selectedDate = new Date(appointmentDate.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Ensure no time conflicts
+      return selectedDate >= today;
+    });
 
-// Local state for the appointment date
-const appointmentDate = ref(props.patient.nextAppointment || "");
+    // Method to handle scheduling the appointment
+    const handleSchedule = () => {
+      if (!isDateValid.value) {
+        alert("Please select a valid appointment date.");
+        return;
+      }
 
-// Computed property to validate the date
-const isDateValid = computed(() => {
-  if (!appointmentDate.value) return false;
-  const selectedDate = new Date(appointmentDate.value);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Ensure no time conflicts
-  return selectedDate >= today;
-});
+      emit("schedule", { patientId: props.patient.id, date: appointmentDate.value });
+      emit("close");
+    };
 
-// Method to handle scheduling the appointment
-const handleSchedule = () => {
-  if (!isDateValid.value) {
-    alert("Please select a valid appointment date.");
-    return;
-  }
+    // Close the modal
+    const closeModal = () => {
+      emit("close");
+    };
 
-  emit("schedule", { patientId: props.patient.id, date: appointmentDate.value });
-  emit("close");
-};
-
-// Close the modal
-const closeModal = () => {
-  emit("close");
+    return {
+      appointmentDate,
+      isDateValid,
+      handleSchedule,
+      closeModal,
+    };
+  },
 };
 </script>
 
@@ -61,7 +69,7 @@ const closeModal = () => {
 
       <!-- Patient Details -->
       <div class="mb-6 border-b pb-4 text-sm text-gray-700">
-        <p><strong>Name:</strong> {{ patient.name || "N/A" }}</p>
+        <p><strong>Name:</strong> {{ patient.firstName || "N/A" }} {{ patient.middleName || "N/A" }} {{ patient.lastName || "N/A" }} {{ patient.suffix || "N/A" }}</p>
         <p><strong>Age:</strong> {{ patient.age || "N/A" }}</p>
         <p><strong>Vaccine Type:</strong> {{ patient.vaccineType || "N/A" }}</p>
       </div>

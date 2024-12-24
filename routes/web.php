@@ -17,6 +17,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VaccineController;
+use App\Http\Controllers\PersonalInformationController;
+use App\Http\Controllers\RiskManagementController;
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
@@ -96,16 +98,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/services/mental-health', [SessionController::class, 'index'])->name('mental-health.index');
-    Route::get('/services/mental-health', [SessionController::class, 'create'])->name('mentalhealth');
+    
+    // Mental Health Session Management
+    Route::post('/mental-health-sessions', [SessionController::class, 'store']);
+    Route::put('/mental-health-sessions/{id}', [SessionController::class, 'update']);
+    Route::delete('/mental-health-sessions/{id}', [SessionController::class, 'destroy']);
+    Route::put('/mental-health-sessions/{id}/status', [SessionController::class, 'updateStatus']);
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/vaccination', VaccineController::class);
-    // Route::get('/services/vaccination', [VaccineController::class, 'index'])->name('vaccine.index');
-    Route::get('/services/vaccination', [VaccineController::class, 'create'])->name('vaccine.create');
-    Route::get('/patients/search', [VaccineController::class, 'search'])->name('patients.search');
+    Route::get('/services/vaccination', [VaccineController::class, 'handle'])->name('vaccine.handle');
+    Route::get('/services/vaccination-create', [VaccineController::class, 'create'])->name('vaccine.create');
+    Route::get('/patients/search-vaccine', [VaccineController::class, 'search'])->name('risk.search');
     Route::get('/patients/{personalId}', [VaccineController::class, 'show'])->name('patients.show');
+    Route::post('/vaccination/store', [VaccineController::class, 'store'])->name('vaccination.store');
+    Route::get('/vaccination/history/{personalId}', [VaccineController::class, 'getHistory'])->name('vaccination.history');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/services/risk-management', [RiskManagementController::class, 'index'])->name('risk-management.index');
+    Route::get('/patients/search-risk', [RiskManagementController::class, 'search'])->name('risk.search');
+    Route::get('/patients/{personalId}', [RiskManagementController::class, 'show'])->name('risk.show');
+});
+
+Route::get('/api/personal-information/search', [PersonalInformationController::class, 'search'])->name('personal-information.search');
 
 Route::get('/checkup', function () {
     // Retrieve all patients from the database
@@ -129,9 +145,6 @@ Route::get('/system-analytics', function () {
     return Inertia::render('Analytics');
 })->middleware(['auth', 'verified'])->name('system-analytics');
 
-Route::get('/services/risk-management', function () {
-    return Inertia::render('Services/RiskManagement');
-})->middleware(['auth', 'verified'])->name('risk-management');
 
 Route::get('/patient', function () {
     return Inertia::render('Patients');

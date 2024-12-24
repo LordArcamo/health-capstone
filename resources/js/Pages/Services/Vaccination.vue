@@ -4,11 +4,20 @@ import { Head } from '@inertiajs/vue3';
 import VaccinationTable from '@/Components/VaccinationTable.vue';
 
 // Props from Inertia (passed from the backend)
-defineProps({
-    patients: Array, // Array of patients fetched from the backend
+const props = defineProps({
+    patients: {
+        type: Array,
+        default: () => [],
+    },
+    VACCINATION: {
+        type: Array,
+        default: () => [],
+    },
     vaccineCategories: Array, // Vaccine categories fetched from the backend
     filteredVaccineTypes: Array, // Optional filtered vaccine types
 });
+
+// Log VACCINATION to debug
 </script>
 
 <template>
@@ -19,7 +28,8 @@ defineProps({
             <div class="flex justify-between">
                 <!-- Pass props to the child VaccinationTable component -->
                 <VaccinationTable
-                    :patients="patients"
+                    :patients="props.patients"
+                    :vaccinatedPatients="props.VACCINATION"
                     :vaccine-categories="vaccineCategories"
                     :filtered-vaccine-types="filteredVaccineTypes"
                 />

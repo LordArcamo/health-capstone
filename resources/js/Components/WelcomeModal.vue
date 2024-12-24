@@ -177,7 +177,6 @@ export default {
     patients: {
       immediate: true,
       handler(newPatients) {
-        console.log('Received patients:', newPatients);
         // Only set the filteredPatients if there's a search query
         if (this.searchQuery.trim() === '') {
           this.filteredPatients = []; // Clear patients if search query is empty
@@ -193,7 +192,6 @@ export default {
     }, 100),
     searchPatients() {
       const query = this.searchQuery.trim().toLowerCase();
-      console.log('Search Query:', query);
 
       // If search query is empty, clear the filtered list
       if (query === '') {
@@ -211,10 +209,8 @@ export default {
         });
       }
 
-    console.log('Filtered Patients:', this.filteredPatients);
   },
   selectPatient(patient) {
-      console.log('Patient selected:', patient);
       this.selectedPatient = patient;
       this.$emit('patientSelected', patient); // Emit selected patient
       this.step = 2;
