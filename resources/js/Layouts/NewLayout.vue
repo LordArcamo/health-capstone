@@ -30,7 +30,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-lime-50 text-gray-800">
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-green-100 via-blue-100 to-blue-200 text-gray-800">
     <!-- Header -->
     <header v-if="$slots.header" class="bg-black-100 shadow-md border-b">
       <div class="flex justify-between items-center w-full py-4 px-4">
@@ -42,7 +42,7 @@ onUnmounted(() => {
     <main class="flex-1">
       <!-- Sticky TopBar -->
       <div
-        class="sticky top-0 z-20 transition-transform duration-300"
+        class="sticky top-0 z-50 transition-transform duration-300"
         :class="{ '-translate-y-full': !showTopBar, 'translate-y-0': showTopBar }"
       >
         <TopBar />

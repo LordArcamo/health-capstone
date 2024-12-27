@@ -1,75 +1,160 @@
 <template>
-  <div class="max-w-xs mx-auto relative">
-    <!-- Donut Chart -->
-    <ChartjsDonut :data="chartData" :options="chartOptions" />
-  
-  </div>
+<div class="p-6 bg-white rounded-lg shadow-lg">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+    Most Common Diagnoses
+  </h2>
+
+  <!-- Chart -->
+  <apexchart
+    v-if="chartOptions.series.length"
+    type="donut"
+    :width="'100%'"
+    height="400"
+    :options="chartOptions.options"
+    :series="chartOptions.series"
+  />
+</div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
-import { Doughnut } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-
-ChartJS.register(Title, Tooltip, Legend, ArcElement);
+import { defineComponent, computed } from "vue";
+import ApexCharts from "vue3-apexcharts";
 
 export default defineComponent({
   components: {
-    ChartjsDonut: Doughnut
+    apexchart: ApexCharts,
   },
-  data() {
-    return {
-      chartData: {
-        labels: ['Bronchitis', 'Dengue X', 'Flu', 'Pneumonia', 'Asthma'],
-        datasets: [
-          {
-            data: [1200, 850, 1500, 950, 1300], // Example data for the diseases
-            backgroundColor: [
-              'rgba(75, 192, 192, 0.5)', // Low-opacity green
-              '#FF8D1A',
-              '#FFB74D',
-              '#F57C00',
-              '#2196F3'
-            ],
-            hoverBackgroundColor: [
-              'rgba(75, 192, 192, 0.8)',
-              '#FF7A13',
-              '#FF9C38',
-              '#F56A00',
-              '#1976D2'
-            ]
-          }
-        ]
-      },
-      chartOptions: {
-        responsive: true,
-        plugins: {
+  props: {
+    nonReferredData: {
+      type: Array,
+      required: true,
+    },
+  },
+  setup(props) {
+    // Process data to get the most common diagnoses
+    const topDiagnoses = computed(() => {
+      const diagnosisCounts = {};
+
+      props.nonReferredData.forEach((item) => {
+        if (item.diagnosis) {
+          diagnosisCounts[item.diagnosis] = (diagnosisCounts[item.diagnosis] || 0) + item.case_count;
+        }
+      });
+
+      // Sort and take the top 5 diagnoses
+      return Object.entries(diagnosisCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    });
+
+    const chartOptions = computed(() => {
+      const labels = topDiagnoses.value.map(([diagnosis]) => diagnosis);
+      const data = topDiagnoses.value.map(([, count]) => count);
+
+      return {
+        options: {
+          chart: {
+            type: "donut",
+            animations: {
+              enabled: true,
+              easing: "easeout",
+              speed: 800,
+            },
+          },
+          labels,
+          colors: [
+            "#66BB6A", // Light green
+            "#42A5F5", // Light blue
+            "#81C784", // Mint green
+            "#90CAF9", // Sky blue
+            "#A5D6A7", // Pale green
+          ],
           legend: {
-            position: 'top',
+            position: "bottom",
+            fontSize: "14px",
+            markers: {
+              radius: 10,
+              offsetX: -4,
+            },
             labels: {
-              font: {
-                size: 14
-              }
-            }
+              useSeriesColors: true,
+            },
+          },
+          dataLabels: {
+            enabled: false, // Disable on-chart labels
           },
           tooltip: {
-            callbacks: {
-              label: function(tooltipItem) {
-                return `${tooltipItem.label}: ${tooltipItem.raw} cases`;
-              }
-            }
-          }
+            enabled: true,
+            theme: "light",
+            style: {
+              fontSize: "14px",
+            },
+            y: {
+              formatter: function (val) {
+                return `${val} cases`;
+              },
+            },
+          },
+          plotOptions: {
+            pie: {
+              donut: {
+                size: "75%",
+                labels: {
+                  show: true,
+                  name: {
+                    show: true,
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    color: "#4CAF50", // Highlighted green for center label
+                    offsetY: -5,
+                  },
+                  value: {
+                    show: true,
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#2196F3", // Light blue for the total value
+                    offsetY: 5,
+                  },
+                  total: {
+                    show: true,
+                    showAlways: true,
+                    label: "Total Cases",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    color: "#555",
+                    formatter: function (w) {
+                      return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
-        cutout: '70%', // Makes it a donut chart with a larger hole
-      }
+        series: data,
+      };
+    });
+
+    return {
+      chartOptions,
     };
-  }
+  },
 });
 </script>
 
 <style scoped>
-/* Adjust the center text */
-.text-lg {
-  font-size: 1.125rem;
+/* Improve donut chart responsiveness */
+.apexcharts-legend {
+  justify-content: center !important;
+  margin-top: 10px;
+}
+
+.apexcharts-canvas {
+  position: relative;
+  z-index: 10 !important; /* Ensure it stays above most components */
+}
+
+.apexcharts-tooltip {
+  z-index: 50 !important; /* Higher z-index for tooltips */
 }
 </style>

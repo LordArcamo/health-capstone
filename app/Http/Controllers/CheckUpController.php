@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\CheckUp;
@@ -9,6 +11,104 @@ use App\Models\PersonalInformation;
 
 class CheckUpController extends Controller
 {
+    public function import(Request $request)
+    {
+        set_time_limit(300); // Increase time limit to 5 minutes
+        
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt',
+        ]);
+    
+        $file = $request->file('file');
+        $data = array_map('str_getcsv', file($file->getRealPath()));
+        $header = array_shift($data); // Extract the header row
+    
+        DB::transaction(function () use ($data, $header) {
+            foreach ($data as $row) {
+                $patientData = array_combine($header, $row);
+    
+                // Convert consultationTime to MySQL TIME format
+                $patientData['consultationTime'] = date('H:i:s', strtotime($patientData['consultationTime']));
+    
+                // Convert numeric fields to proper types
+                $patientData['temperature'] = (float) $patientData['temperature'];
+                $patientData['height'] = (int) $patientData['height'];
+                $patientData['weight'] = (int) $patientData['weight'];
+    
+                // Validate the row
+                $validator = Validator::make($patientData, [
+                    'firstName' => 'required|string|max:100',
+                    'lastName' => 'required|string|max:100',
+                    'middleName' => 'nullable|string|max:100',
+                    'suffix' => 'nullable|string|max:10',
+                    'purok' => 'nullable|string|max:100',
+                    'barangay' => 'nullable|string|max:100',
+                    'age' => 'nullable|numeric',
+                    'birthdate' => 'nullable|date',
+                    'contact' => 'nullable|string|max:15',
+                    'sex' => 'nullable|string|max:10',
+                    'consultationDate' => 'required|date',
+                    'consultationTime' => 'required|date_format:H:i:s', // Validate in HH:MM:SS format
+                    'modeOfTransaction' => 'required|string|max:50',
+                    'bloodPressure' => 'nullable|string|max:20',
+                    'temperature' => 'nullable|numeric|between:0,100',
+                    'height' => 'nullable|numeric|between:0,300',
+                    'weight' => 'nullable|numeric|between:0,500',
+                    'providerName' => 'required|string|max:100',
+                    'natureOfVisit' => 'required|string|max:100',
+                    'visitType' => 'required|string|max:50',
+                    'chiefComplaints' => 'required|string|max:255',
+                    'diagnosis' => 'required|string|max:255',
+                    'medication' => 'required|string|max:255',
+                ]);
+    
+                if ($validator->fails()) {
+                    \Log::error('Validation failed for row: ' . json_encode($patientData));
+                    \Log::error('Validation errors: ' . json_encode($validator->errors()->all()));
+                    throw new \Exception('Validation failed for row: ' . json_encode($patientData));
+                }
+    
+                // Create or update records in the database
+                $personalInfo = PersonalInformation::create([
+                    'firstName' => $patientData['firstName'],
+                    'lastName' => $patientData['lastName'],
+                    'middleName' => $patientData['middleName'],
+                    'suffix' => $patientData['suffix'],
+                    'purok' => $patientData['purok'],
+                    'barangay' => $patientData['barangay'],
+                    'age' => $patientData['age'],
+                    'birthdate' => $patientData['birthdate'],
+                    'contact' => $patientData['contact'],
+                    'sex' => $patientData['sex'],
+                ]);
+    
+                CheckUp::create([
+                    'personalId' => $personalInfo->personalId,
+                    'consultationDate' => $patientData['consultationDate'],
+                    'consultationTime' => $patientData['consultationTime'], // Insert in HH:MM:SS format
+                    'modeOfTransaction' => $patientData['modeOfTransaction'],
+                    'bloodPressure' => $patientData['bloodPressure'],
+                    'temperature' => $patientData['temperature'],
+                    'height' => $patientData['height'],
+                    'weight' => $patientData['weight'],
+                    'providerName' => $patientData['providerName'],
+                    'natureOfVisit' => $patientData['natureOfVisit'],
+                    'visitType' => $patientData['visitType'],
+                    'chiefComplaints' => $patientData['chiefComplaints'],
+                    'diagnosis' => $patientData['diagnosis'],
+                    'medication' => $patientData['medication'],
+                    'referredFrom' => $patientData['referredFrom'] ?? 'None',
+                    'referredTo' => $patientData['referredTo'] ?? 'None',
+                    'reasonsForReferral' => $patientData['reasonsForReferral'] ?? 'None',
+                    'referredBy' => $patientData['referredBy'] ?? 'None',
+                ]);
+            }
+        });
+    
+        return redirect()->back()->with('success', 'Patients imported successfully!');
+    }
+    
+    
     /**
      * Display a listing of the resource.
      */
@@ -73,6 +173,7 @@ class CheckUpController extends Controller
             });
         }),
     ];
+    
 
     return Inertia::render('ChartPage', [
         'chartData' => $chartData,
@@ -81,7 +182,44 @@ class CheckUpController extends Controller
     
 
 
-
+    public function testPatient()
+    {
+         // Use Eloquent to join the PersonalInformation and itr tables
+         $data = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
+         ->select(
+             'personal_information.personalId',
+             'personal_information.firstName',
+             'personal_information.lastName',
+             'personal_information.middleName',
+             'personal_information.suffix',
+             'personal_information.purok',
+             'personal_information.barangay',
+             'personal_information.age',
+             'personal_information.birthdate',
+             'personal_information.contact',
+             'personal_information.sex',
+             'itr.consultationDate',
+             'itr.consultationTime',
+             'itr.modeOfTransaction',
+             'itr.bloodPressure',
+             'itr.temperature',
+             'itr.height',
+             'itr.weight',
+             'itr.providerName',
+             'itr.natureOfVisit',
+             'itr.visitType',
+             'itr.chiefComplaints',
+             'itr.diagnosis',
+             'itr.medication'
+         )
+         ->distinct() // Ensure no duplicate entries
+         ->get();
+ 
+     // Pass the joined data to the view
+     return Inertia::render('Table/Patient', [
+         'ITR' => $data,
+        ]);
+    }
     /**
      * Show the form for creating a new resource.
      */

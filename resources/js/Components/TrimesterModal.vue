@@ -1,5 +1,5 @@
 <template>
-  <div v-if="show" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50" @click.self="close">
+  <div class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50" @click.self="close">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto"> <!-- Added max-h-screen and overflow-y-auto -->
       
       <!-- Step Indicator -->
@@ -85,10 +85,6 @@ export default {
       type: Number,
       required: true,  // This makes sure that the prop must be passed
       default: 0,      // Default to 0 if not provided
-    },
-    show: {
-      type: Boolean,
-      required: true,
     },
     onClose: {
       type: Function,

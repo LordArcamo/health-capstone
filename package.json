@@ -25,16 +25,20 @@
         "@heroicons/vue": "^2.1.5",
         "@inertiajs/inertia": "^0.11.1",
         "@inertiajs/inertia-vue3": "^0.6.0",
-        "@inertiajs/progress": "^0.2.7",
+        "@inertiajs/progress": "^0.1.2",
+        "@vuepic/vue-datepicker": "^10.0.0",
+        "apexcharts": "^4.2.0",
         "@kyvg/vue3-notification": "^3.4.1",
         "@vueuse/core": "^12.0.0",
         "chart.js": "^4.4.4",
+        "chartjs-plugin-datalabels": "^2.2.0",
         "date-fns": "^4.1.0",
         "flatpickr": "^4.6.13",
         "lodash": "^4.17.21",
         "pinia": "^2.2.6",
         "primevue": "^4.0.6",
         "vue-chartjs": "^5.3.1",
-        "vue-router": "^4.4.5"
+        "vue-router": "^4.4.5",
+        "vue3-apexcharts": "^1.8.0"
     }
 }

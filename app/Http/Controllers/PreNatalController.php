@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\PreNatal;
 use App\Models\PersonalInformation;
+use Illuminate\Support\Facades\DB;
+
 
 class PreNatalController extends Controller
 {
@@ -69,6 +71,80 @@ class PreNatalController extends Controller
         ]);
     }
 
+    public function import(Request $request)
+    {
+        // Validate the uploaded file
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt',
+        ]);
+    
+        $file = $request->file('file');
+        $data = array_map('str_getcsv', file($file->getRealPath()));
+        $header = array_shift($data); // Extract the header row
+    
+        DB::transaction(function () use ($data, $header) {
+            foreach ($data as $row) {
+                $prenatalData = array_combine($header, $row);
+    
+                // Insert data in PersonalInformation, excluding personalId
+                $personalInfo = PersonalInformation::create([
+                    'firstName' => $prenatalData['firstName'],
+                    'lastName' => $prenatalData['lastName'],
+                    'middleName' => $prenatalData['middleName'],
+                    'purok' => $prenatalData['purok'],
+                    'barangay' => $prenatalData['barangay'],
+                    'age' => $prenatalData['age'],
+                    'birthdate' => $prenatalData['birthdate'],
+                    'contact' => $prenatalData['contact'],
+                    'sex' => $prenatalData['sex'],
+                ]);
+    
+                // Insert data in Prenatal with the auto-incremented personalId
+                Prenatal::create([
+                    'personalId' => $personalInfo->personalId,
+                    'modeOfTransaction' => $prenatalData['modeOfTransaction'],
+                    'consultationDate' => $prenatalData['consultationDate'],
+                    'consultationTime' => $prenatalData['consultationTime'],
+                    'bloodPressure' => $prenatalData['bloodPressure'],
+                    'temperature' => $prenatalData['temperature'],
+                    'height' => $prenatalData['height'],
+                    'weight' => $prenatalData['weight'],
+                    'providerName' => $prenatalData['providerName'],
+                    'nameOfSpouse' => $prenatalData['nameOfSpouse'],
+                    'emergencyContact' => $prenatalData['emergencyContact'],
+                    'fourMember' => $prenatalData['fourMember'],
+                    'philhealthStatus' => $prenatalData['philhealthStatus'],
+                    'philhealthNo' => $prenatalData['philhealthNo'],
+                    'menarche' => $prenatalData['menarche'],
+                    'sexualOnset' => $prenatalData['sexualOnset'],
+                    'periodDuration' => $prenatalData['periodDuration'],
+                    'birthControl' => $prenatalData['birthControl'],
+                    'intervalCycle' => $prenatalData['intervalCycle'],
+                    'menopause' => $prenatalData['menopause'],
+                    'lmp' => $prenatalData['lmp'],
+                    'edc' => $prenatalData['edc'],
+                    'gravidity' => $prenatalData['gravidity'],
+                    'parity' => $prenatalData['parity'],
+                    'term' => $prenatalData['term'],
+                    'preterm' => $prenatalData['preterm'],
+                    'abortion' => $prenatalData['abortion'],
+                    'living' => $prenatalData['living'],
+                    'syphilisResult' => $prenatalData['syphilisResult'],
+                    'penicillin' => $prenatalData['penicillin'],
+                    'hemoglobin' => $prenatalData['hemoglobin'],
+                    'hematocrit' => $prenatalData['hematocrit'],
+                    'urinalysis' => $prenatalData['urinalysis'],
+                    'ttStatus' => substr($prenatalData['ttStatus'], 0, 50), // Truncate to fit the column size
+                    'tdDate' => $prenatalData['tdDate'],
+                ]);
+                
+            }
+        });
+    
+        return redirect()->back()->with('success', 'Prenatal data imported successfully!');
+    }
+    
+
     /**
      * Show the form for creating a new resource.
      */
@@ -113,6 +189,7 @@ class PreNatalController extends Controller
             'age' => 'required|numeric',
             'birthdate' => 'required|date',
             'contact' => 'required|string|max:15',
+            'sex' => 'required|string|max:15',
 
             // PreNatal Data
             'modeOfTransaction' => 'required|string|max:255',
