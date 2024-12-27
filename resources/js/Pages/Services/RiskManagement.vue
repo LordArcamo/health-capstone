@@ -5,32 +5,15 @@ import RiskModal from '@/Components/Risk Management/RiskModal.vue';
 import RiskTable from '@/Components/Risk Management/RiskTable.vue';
 import { ref } from "vue";
 
-const riskData = ref([
-  {
-    name: "John Doe",
-    foodIntake: "High Salt/Fat",
-    physicalActivity: "No",
-    diabetes: "Yes",
-  },
-  {
-    name: "Jane Smith",
-    foodIntake: "High Fiber",
-    physicalActivity: "Yes",
-    diabetes: "No",
-  },
-  {
-    name: "Alice Brown",
-    foodIntake: "Moderate Salt/Fat",
-    physicalActivity: "No",
-    diabetes: "Yes",
-  },
-]);
-
 const props = defineProps({
   patients: {
     type: Array,
     default: () => [],
-  }
+  },
+  RISK_MANAGEMENT: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const showRiskModal = ref(false);
@@ -76,7 +59,8 @@ const saveEntry = (entry) => {
 
       <!-- Risk Table -->
       <div class="shadow-md rounded-lg">
-        <RiskTable :data="riskData" />
+        <RiskTable
+        :riskPatients="props.RISK_MANAGEMENT" />
       </div>
 
       <!-- Risk Modal -->

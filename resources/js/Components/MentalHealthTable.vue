@@ -181,6 +181,8 @@ export default {
       megaFilterOpen: false,
       showModal: false,
       selectedPatient: null,
+      selectedSessionId: "",
+      sessions: []
     };
   },
   computed: {

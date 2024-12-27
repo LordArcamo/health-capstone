@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Checkbox1;
 
 class GeneralTrimester extends Model
 {
@@ -33,5 +34,9 @@ class GeneralTrimester extends Model
     public function prenatal()
     {
         return $this->belongsTo(Prenatal::class, 'prenatalId', 'prenatalId');
+    }
+    public function checkbox1()
+    {
+        return $this->hasOne(Checkbox1::class, 'generalTrimesterID', 'generalTrimesterID');
     }
 }

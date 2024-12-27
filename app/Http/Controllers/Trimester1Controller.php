@@ -9,6 +9,26 @@ use App\Models\CheckBox1;
 
 class Trimester1Controller extends Controller
 {
+
+    // public function fetchTrimesterData(Request $request, $prenatalId, $trimester)
+    // {
+    //     // Fetch the trimester data
+    //     $trimesterData = GeneralTrimester::with('checkbox1')
+    //         ->where('prenatalId', $prenatalId)
+    //         ->where('trimester', $trimester)
+    //         ->first();
+    
+    //     // Render the TrimesterOneForm component with the fetched data
+    //     return Inertia::render('Components/Trimester/TrimesterOneForm', [
+    //         'prefilledData' => $trimesterData ?? [],
+    //         'prenatalId' => $prenatalId,
+    //         'trimester' => $trimester,
+    //     ]);
+    // }
+    
+    
+    
+    
     /**
      * Display a listing of the resource.
      */

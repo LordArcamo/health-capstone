@@ -126,34 +126,42 @@ export default {
       required: true,
       default: 0,
     },
+    prefilledData: {
+      type: Object,
+      default: () => ({}),
+    },
+    trimester: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       form: {
         prenatalId: this.prenatalId,
-        date_of_visit: '',
-        weight: '',
-        bp: '',
-        heart_rate: '',
-        aog_months: '',
-        aog_days: '',
-        trimester: '',
-        prenatal_checkup: '',
-        pe_done: '',
-        prenatal_record: '',
-        birth_plan_done: '',
-        nkfda: '',
-        health_teachings: '',
-        referred_for: '',
-        healthy_diet: '',
-        fes04_folic: '',
-        folic_acid: '',
-        fhb: '',
-        position: '',
-        presentation: '',
-        fundal_height: ''
+        date_of_visit: this.prefilledData.date_of_visit || '',
+        weight: this.prefilledData.weight || '',
+        bp: this.prefilledData.bp || '',
+        heart_rate: this.prefilledData.heart_rate || '',
+        aog_months: this.prefilledData.aog_months || '',
+        aog_days: this.prefilledData.aog_days || '',
+        trimester: this.prefilledData.trimester || this.trimester,
+        prenatal_checkup: this.prefilledData.checkbox1?.prenatal_checkup || false,
+        pe_done: this.prefilledData.checkbox1?.pe_done || false,
+        prenatal_record: this.prefilledData.checkbox1?.prenatal_record || false,
+        birth_plan_done: this.prefilledData.checkbox1?.birth_plan_done || false,
+        nkfda: this.prefilledData.checkbox1?.nkfda || false,
+        health_teachings: this.prefilledData.checkbox1?.health_teachings || false,
+        referred_for: this.prefilledData.checkbox1?.referred_for || false,
+        healthy_diet: this.prefilledData.checkbox1?.healthy_diet || false,
+        fes04_folic: this.prefilledData.checkbox1?.fes04_folic || false,
+        folic_acid: this.prefilledData.checkbox1?.folic_acid || '',
+        fhb: this.prefilledData.fhb || '',
+        position: this.prefilledData.position || '',
+        presentation: this.prefilledData.presentation || '',
+        fundal_height: this.prefilledData.fundal_height || '',
       },
-      errors: {}
+      errors: {},
     };
   },
   methods: {
@@ -225,25 +233,30 @@ export default {
       aog_months: '',
       aog_days: '',
       trimester: '',
-      prenatal_checkup: '',
-      pe_done: '',
-      prenatal_record: '',
-      birth_plan_done: '',
-      nkfda: '',
-      health_teachings: '',
-      referred_for: '',
-      healthy_diet: '',
-      fes04_folic: '',
+      prenatal_checkup: false,
+      pe_done: false,
+      prenatal_record: false,
+      birth_plan_done: false,
+      nkfda: false,
+      health_teachings: false,
+      referred_for: false,
+      healthy_diet: false,
+      fes04_folic: false,
       folic_acid: '',
       fhb: '',
       position: '',
       presentation: '',
-      fundal_height: ''
+      fundal_height: '',
     };
     this.errors = {}; // Reset error messages
     this.successMessage = ''; // Reset success message
   }
-}
+},
+mounted() {
+  if (this.prefilledData && Object.keys(this.prefilledData).length) {
+    this.form = { ...this.form, ...this.prefilledData };
+  }
+},
 };
 </script>
 

@@ -39,9 +39,15 @@ export default {
       dropdownOpen: null,
     };
   },
+  watch: {
+    filteredPatients() {
+      this.currentPage = 1; // Reset to the first page
+      this.updatePagination();
+    },
+  },
   computed: {
     barangayOptions() {
-      return [...new Set(this.vaccinatedPatients.map((p) => p.barangay))];
+      return [...new Set(this.patients.map((p) => p.barangay))];
     },
     filteredPatients() {
       return this.patients.filter((patient) => {
@@ -53,30 +59,20 @@ export default {
       });
     },
     totalPages() {
-      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
-    },
-    filteredPatients() {
-      return this.patients.filter((patient) => {
-        return (
-          (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
-          (!this.filterAddress || patient.address.toLowerCase().includes(this.filterAddress.toLowerCase())) &&
-          (!this.searchQuery || patient.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
-        );
-      });
-    },
-    totalPages() {
-      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
+      const total = Math.ceil(this.vaccinatedPatients.length / this.itemsPerPage);
+      return total;
     },
   },
   methods: {
-    applyFilters() {
-      this.currentPage = 1; // Reset to the first page after filtering
-      this.updatePagination();
+    formatDate(date) {
+      if (!date) return "N/A";
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      return new Date(date).toLocaleDateString(undefined, options);
     },
     updatePagination() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = this.currentPage * this.itemsPerPage;
-      this.paginatedPatients = this.filteredPatients.slice(start, end);
+      this.paginatedPatients = this.vaccinatedPatients.slice(start, end); // Use vaccinatedPatients instead
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -90,22 +86,9 @@ export default {
         this.updatePagination();
       }
     },
-    openVaccinationModal() {
-      this.modalKey += 1;
-      this.showVaccinationModal = true;
-    },
-    closeVaccinationModal() {
-      this.showVaccinationModal = false;
-      this.$refs.vaccinationModal?.resetState?.();
-    },
     applyFilters() {
-      this.paginatedPatients = this.patients.filter((patient) => {
-        return (
-          (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
-          (!this.filterAddress || patient.address.toLowerCase().includes(this.filterAddress.toLowerCase())) &&
-          (!this.searchQuery || patient.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
-        );
-      });
+      this.currentPage = 1; // Reset to the first page after filtering
+      this.updatePagination();
     },
     toggleDropdown(key) {
       this.dropdownOpen = this.dropdownOpen === key ? null : key;
@@ -118,13 +101,6 @@ export default {
     openScheduleModal(patient) {
       this.activePatient = patient;
       this.showScheduleModal = true;
-    },
-    closeAllModals() {
-      this.showVaccinationModal = false;
-      this.showScheduleModal = false;
-      this.showHistoryModal = false;
-      this.activePatient = null;
-      this.activePatientHistory = [];
     },
     clearFilters() {
       this.searchQuery = "";
@@ -139,7 +115,6 @@ export default {
       }
 
       const headers = ["Name", "Age", "Vaccine Type", "Next Appointment", "Address"];
-
       const rows = this.vaccinatedPatients.map((patient) => [
         patient.firstName,
         patient.age,
@@ -149,7 +124,6 @@ export default {
       ]);
 
       const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
       const link = document.createElement("a");
@@ -162,17 +136,41 @@ export default {
 
       alert("Report generated and downloaded successfully!");
     },
+    scheduleAppointment() {
+      alert("Appointment scheduled successfully!");
+      this.closeAllModals();
+    },
+    openVaccinationModal() {
+      this.modalKey++; // Increment key to force re-render if needed
+      this.showVaccinationModal = true; // Show the modal
+    },
+    closeVaccinationModal() {
+      this.showVaccinationModal = false; // Hide the modal
+    },
+    openHistoryModal(patient) {
+      if (patient) {
+        this.activePatient = patient;
+        this.activePatientHistory = patient.history || [];
+        this.showHistoryModal = true;
+      } else {
+        console.error("Invalid patient data");
+      }
+    },
+    closeAllModals() {
+      this.showScheduleModal = false;
+      this.showHistoryModal = false;
+      setTimeout(() => {
+        this.activePatient = null; // Delay resetting to ensure proper unmount
+        this.activePatientHistory = [];
+      }, 300); // Add a slight delay to prevent reactive issues
+    }
   },
   mounted() {
-    this.paginatedPatients = [...this.vaccinatedPatients];
-    this.applyFilters();
-    document.addEventListener("click", this.handleClickOutside);
-  },
-  beforeUnmount() {
-    document.removeEventListener("click", this.handleClickOutside);
+    this.updatePagination(); // Initialize pagination
   },
 };
 </script>
+
 
 
 
@@ -267,7 +265,7 @@ export default {
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="patient in vaccinatedPatients" :key="patient.id" class="hover:bg-gray-100">
+          <tr v-for="patient in paginatedPatients" :key="patient.id" class="hover:bg-gray-100">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.vaccineType }}</td>
@@ -298,8 +296,12 @@ export default {
     />
     <ScheduleNextAppointmentModal v-if="showScheduleModal" :patient="activePatient" @close="closeAllModals"
       @schedule="scheduleAppointment" />
-    <ViewHistoryModal v-if="showHistoryModal" :patient="activePatient" :history="activePatientHistory"
-      @close="closeAllModals" />
+    <ViewHistoryModal 
+      v-if="showHistoryModal" 
+      :patient="activePatient" 
+      :history="activePatientHistory" 
+      @close="closeAllModals" 
+    />
 
           <!-- Pagination -->
     <div class="flex justify-center gap-5 items-center mt-6">

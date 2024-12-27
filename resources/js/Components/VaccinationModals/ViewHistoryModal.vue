@@ -109,15 +109,15 @@ const downloadReport = () => {
 
 <template>
   <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white p-8 rounded-lg w-full max-w-6xl shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="bg-white p-8 rounded-lg w-full max-w-6xl shadow-2xl">
       <!-- Header -->
-      <div class="sticky top-0 bg-white z-10 pb-4">
-        <h2 class="text-3xl font-bold mb-6 text-green-600">
+      <div class="pb-4 border-b border-gray-300">
+        <h2 class="text-3xl font-bold mb-4 text-green-600">
           Vaccination History
         </h2>
 
         <!-- Patient Details -->
-        <div class="mb-6 bg-green-50 border border-green-300 rounded-lg p-4">
+        <div class="mb-4 bg-green-50 border border-green-300 rounded-lg p-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p class="text-gray-700">
@@ -139,10 +139,10 @@ const downloadReport = () => {
         </div>
       </div>
 
-      <!-- History Table -->
-      <div v-if="history.length > 0" class="overflow-x-auto">
-        <table class="w-full text-left border-collapse rounded-lg overflow-hidden">
-          <thead class="bg-green-600 text-white">
+      <!-- Scrollable Table -->
+      <div class="overflow-y-auto max-h-[400px] border-t border-b border-gray-300">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-green-600 text-white sticky top-0">
             <tr>
               <th class="px-4 py-3 text-left font-semibold">Date of Visit</th>
               <th class="px-4 py-3 text-left font-semibold">Age</th>
@@ -163,8 +163,8 @@ const downloadReport = () => {
               :key="record.id"
               class="odd:bg-gray-50 even:bg-white hover:bg-green-100 transition-colors"
             >
-              <td class="px-4 py-3 text-left">{{ formatDate(record.dateOfVisit) }}</td>
-              <td class="px-4 py-3 text-left">
+              <td class="px-4 py-3">{{ formatDate(record.dateOfVisit) }}</td>
+              <td class="px-4 py-3">
                 <template v-if="isUnderOneYear">
                   {{ record.ageInMonths || "N/A" }} months
                 </template>
@@ -172,27 +172,22 @@ const downloadReport = () => {
                   {{ record.ageInYears || "N/A" }} years
                 </template>
               </td>
-              <td class="px-4 py-3 text-left">{{ record.weight || "N/A" }}</td>
-              <td class="px-4 py-3 text-left">{{ record.height || "N/A" }}</td>
-              <td class="px-4 py-3 text-left">{{ record.temperature || "N/A" }}</td>
-              <td class="px-4 py-3 text-left">{{ record.antigenGiven || "N/A" }}</td>
-              <td class="px-4 py-3 text-left">{{ record.injectedBy || "N/A" }}</td>
-              <td v-if="isUnderOneYear" class="px-4 py-3 text-left">
+              <td class="px-4 py-3">{{ record.weight || "N/A" }}</td>
+              <td class="px-4 py-3">{{ record.height || "N/A" }}</td>
+              <td class="px-4 py-3">{{ record.temperature || "N/A" }}</td>
+              <td class="px-4 py-3">{{ record.antigenGiven || "N/A" }}</td>
+              <td class="px-4 py-3">{{ record.injectedBy || "N/A" }}</td>
+              <td v-if="isUnderOneYear" class="px-4 py-3">
                 {{ record.exclusivelyBreastfed || "N/A" }}
               </td>
-              <td class="px-4 py-3 text-left">{{ formatDate(record.nextAppointment) }}</td>
+              <td class="px-4 py-3">{{ formatDate(record.nextAppointment) }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- No History Fallback -->
-      <div v-else class="text-center text-gray-500 mt-8">
-        <p>No vaccination history available for this patient.</p>
-      </div>
-
       <!-- Modal Footer -->
-      <div class="flex justify-between items-center mt-8 sticky bottom-0 bg-white pt-4">
+      <div class="pt-4 flex justify-between items-center">
         <button
           @click="closeModal"
           class="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 transition"
@@ -202,12 +197,8 @@ const downloadReport = () => {
         <button
           @click="downloadReport"
           :disabled="!history.length"
-          :class="[
-            'px-6 py-3 rounded-md transition',
-            history.length
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          ]"
+          :class="[history.length ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed']"
+          class="px-6 py-3 rounded-md transition"
         >
           Download Report
         </button>
@@ -215,3 +206,4 @@ const downloadReport = () => {
     </div>
   </div>
 </template>
+

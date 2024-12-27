@@ -86,6 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/prenatal/store', [PreNatalController::class, 'store'])->name('prenatal.store');
     Route::get('/services/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
     Route::post('/services/patients/prenatal-postpartum', [PreNatalController::class, 'import'])->name('prenatal-postpartum.import');
+    Route::get('/prenatal/{prenatalId}/trimester/{trimester}', [PreNatalController::class, 'fetchTrimesterData']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -96,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/trimester1/store', [Trimester1Controller::class, 'store'])->name('trimester1.store');
+    // Route::get('/trimester-data/{prenatalId}/{trimester}', [Trimester1Controller::class, 'fetchTrimesterData']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -125,9 +127,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/services/risk-management', [RiskManagementController::class, 'index'])->name('risk-management.index');
+    Route::get('/services/risk-management', [RiskManagementController::class, 'handle'])->name('risk-management.handle');
     Route::get('/patients/search-risk', [RiskManagementController::class, 'search'])->name('risk.search');
     Route::get('/patients/{personalId}', [RiskManagementController::class, 'show'])->name('risk.show');
+    Route::post('/risk-management/store', [RiskManagementController::class, 'store'])->name('risk-management.store');
+    Route::post('/risk-management{personalId}', [RiskManagementController::class, 'destroy'])->name('risk-management.destroy');
+    
 });
 
 Route::get('/api/personal-information/search', [PersonalInformationController::class, 'search'])->name('personal-information.search');

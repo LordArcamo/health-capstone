@@ -28,8 +28,11 @@ import {
     faEllipsisV,
     faSignOutAlt,
     faChartBar,
-    faPlusCircle, // Added faPlusCircle
-    faFileDownload // Added faFileDownload
+    faPlusCircle,
+    faFileDownload,
+    faSearch,      // Added faSearch
+    faFilter,      // Added faFilter
+    faFileImport   // Added faFileImport
 } from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to the Font Awesome library
@@ -51,8 +54,11 @@ library.add(
     faSignOutAlt,
     faEllipsisV,
     faChartBar,
-    faPlusCircle, // Added faPlusCircle
-    faFileDownload // Added faFileDownload
+    faPlusCircle,
+    faFileDownload,
+    faSearch,      // Added faSearch
+    faFilter,      // Added faFilter
+    faFileImport   // Added faFileImport
 );
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';

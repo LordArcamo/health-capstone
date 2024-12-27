@@ -236,14 +236,19 @@
     </div>
 
     <TrimesterModal
-  v-if="currentModal === 'trimester'"
-  :prenatalId="selectedPatient?.id"
-  @close="closeModal"
-/>
+      v-if="currentModal === 'trimester'"
+      :key="selectedPatient?.prenatalId"
+      :prenatalId="selectedPatient?.prenatalId"
+      :prefilledData="prefilledData"
+      @close="closeModal"
+      :onConfirm="handleTrimesterConfirm"
+    />
+
 <PostpartumModal
   v-if="currentModal === 'postpartum'"
   :patient="selectedPatient"
   @close="closeModal"
+  :onSubmit="handlePostpartumSubmit"
 />
 </template>
 
@@ -263,6 +268,9 @@ export default {
       type: Array,
       default: () => [],
     },
+    prefilledData: Object,
+    prenatalId: Number,
+    trimester: String,
   },
   data() {
     return {
@@ -278,6 +286,8 @@ export default {
       currentModal: null, // Stores the type of modal ('trimester', 'postpartum')
       selectedPatient: null, // Selected patient for modal display
       isFilterPanelOpen: false, // Toggle filter panel visibility
+      // prefilledData: {}, // Store trimester data
+      // prenatalId: null, // Store the current prenatal ID
     };
   },
   computed: {
@@ -355,8 +365,11 @@ export default {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
     openModal(type, patient) {
+      console.log("Opening modal with patient:", patient);
+    console.log("Patient ID (prenatalId):", patient.prenatalId);
       this.selectedPatient = patient;
       this.currentModal = type; // 'trimester' or 'postpartum'
+      console.log("Selected patient:", this.selectedPatient);
     },
     closeModal() {
       this.currentModal = null;

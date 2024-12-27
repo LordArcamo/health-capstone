@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\PreNatal;
 use App\Models\PersonalInformation;
+use App\Models\GeneralTrimester;
 use Illuminate\Support\Facades\DB;
 
 
@@ -70,6 +71,22 @@ class PreNatalController extends Controller
             'PRENATAL' => $data,
         ]);
     }
+
+    public function fetchTrimesterData($prenatalId, $trimester)
+    {
+        // Fetch data based on the prenatalId and trimester
+        $trimesterData = GeneralTrimester::with('checkbox1')
+            ->where('prenatalId', $prenatalId)
+            ->where('trimester', $trimester)
+            ->first();
+    
+        return Inertia::render('Table/PreNatal', [
+            'prefilledData' => $trimesterData ?: null,
+            'prenatalId' => $prenatalId,
+            'trimester' => $trimester,
+        ]);
+    }
+    
 
     public function import(Request $request)
     {

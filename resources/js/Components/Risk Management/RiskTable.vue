@@ -97,23 +97,20 @@
               <th class="px-4 py-2">Food Intake</th>
               <th class="px-4 py-2">Physical Activity</th>
               <th class="px-4 py-2">Diabetes</th>
-              <th class="px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
+            <tr v-if="filteredPatients.length === 0">
+              <td colspan="5" class="text-center py-4">No data available</td>
+            </tr>
             <tr
-              v-for="(entry, index) in filteredData"
-              :key="index"
+              v-for="patient in filteredPatients" :key="patient.id"
               class="hover:bg-gray-100 transition"
             >
-              <td class="px-4 py-2">{{ entry.name }}</td>
-              <td class="px-4 py-2">{{ entry.foodIntake }}</td>
-              <td class="px-4 py-2">{{ entry.physicalActivity }}</td>
-              <td class="px-4 py-2">{{ entry.diabetes }}</td>
-              <td class="px-4 py-2">
-                <button @click="editEntry(index)" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">Edit</button>
-                <button @click="deleteEntry(index)" class="ml-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600">Delete</button>
-              </td>
+              <td class="px-4 py-2">{{ patient.firstName  }} {{ patient.middleName }} {{ patient.lastName }}</td>
+              <td class="px-4 py-2">{{ patient.foodIntake || 'N/A' }}</td>
+              <td class="px-4 py-2">{{ patient.physicalActivity || 'N/A' }}</td>
+              <td class="px-4 py-2">{{ patient.bloodGlucose || 'N/A' }}</td>
             </tr>
           </tbody>
         </table>
@@ -136,7 +133,10 @@
       RiskModal
     },
     props: {
-      data: Array,
+      riskPatients: {
+        type: Array,
+        default: () => [],
+      }
     },
     data() {
       return {
@@ -150,13 +150,13 @@
       };
     },
     computed: {
-      filteredData() {
-        return this.data.filter((entry) => {
+      filteredPatients() {
+        return this.riskPatients.filter((patient) => {
           return (
-            (!this.filterName || entry.name.toLowerCase().includes(this.filterName.toLowerCase())) &&
-            (!this.filterFoodIntake || entry.foodIntake === this.filterFoodIntake) &&
-            (!this.filterPhysicalActivity || entry.physicalActivity === this.filterPhysicalActivity) &&
-            (!this.filterDiabetes || entry.diabetes === this.filterDiabetes)
+            (!this.filterName || `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(this.filterName.toLowerCase())) &&
+            (!this.filterFoodIntake || patient.foodIntake === this.filterFoodIntake) &&
+            (!this.filterPhysicalActivity || patient.physicalActivity === this.filterPhysicalActivity) &&
+            (!this.filterDiabetes || patient.bloodGlucose === this.filterDiabetes)
           );
         });
       },
@@ -166,10 +166,10 @@
         this.megaFilterOpen = !this.megaFilterOpen;
       },
       editEntry(index) {
-        this.selectedEntry = this.filteredData[index];
+        this.selectedEntry = this.filteredPatients[index];
         this.showRiskModal = true;
       },
-      deleteEntry(index) {
+      deleteEntry(patient) {
         // Implementation for delete functionality
       },
       clearFilters() {
@@ -187,5 +187,8 @@
         this.$emit('risk-saved', data);
       }
     },
+    mounted() {
+      console.log("Risk Patients:", this.riskPatients);
+    }
   };
   </script>

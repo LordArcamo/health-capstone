@@ -48,9 +48,11 @@
 
         <!-- Step 2: Show Selected Trimester Form -->
         <div v-else-if="step === 2">
-          <component :is="formComponent" :prenatalId="prenatalId" />
+          <component :is="formComponent" 
+          :prenatalId="prenatalId"
+          :prefilledData="formData[selectedTrimester]"
+          />
         </div>
-
         <!-- Step 3: Submission Complete Message -->
         <div v-else-if="step === 3" class="text-center">
           <h2 class="text-xl font-semibold text-green-600">Trimester Submitted!</h2>
@@ -78,6 +80,7 @@ import TrimesterTwoForm from '@/Components/Trimester/TrimesterTwoForm.vue';
 import TrimesterThreeForm from '@/Components/Trimester/TrimesterThreeForm.vue';
 import TrimesterFourForm from '@/Components/Trimester/TrimesterFourForm.vue';
 import TrimesterFiveForm from '@/Components/Trimester/TrimesterFiveForm.vue';
+import { Inertia } from '@inertiajs/inertia';
 
 export default {
   props: {
@@ -85,6 +88,10 @@ export default {
       type: Number,
       required: true,  // This makes sure that the prop must be passed
       default: 0,      // Default to 0 if not provided
+    },
+    prefilledData: {
+      type: Object,
+      default: () => ({}),
     },
     onClose: {
       type: Function,
@@ -106,7 +113,13 @@ export default {
       ],
       selectedTrimester: '',
       step: 1, // Start at Step 1
+      formData: {},
     };
+  },
+  watch: {
+    prenatalId(newVal) {
+      console.log("Updated prenatalId in TrimesterModal:", newVal);
+    },
   },
   computed: {
     formComponent() {
@@ -126,20 +139,48 @@ export default {
         default: return null;
       }
     },
-    confirmSelection() {
+    async confirmSelection() {
       if (this.selectedTrimester) {
-        this.step = 2; // Move to Step 2 to show form
+        const url = `/prenatal/${this.prenatalId}/trimester/${this.selectedTrimester}`;
+        console.log("Fetching URL:", url);
+
+        try {
+          await Inertia.get(url, {}, {
+            preserveState: true,
+            onSuccess: (page) => {
+              console.log("Page props:", page.props);
+              const response = page.props;
+
+              if (response.prefilledData) {
+                this.$set(this.formData, this.selectedTrimester, response.prefilledData);
+                console.log("Prefilled data loaded:", this.formData);
+              }
+
+              this.step = 2; // Proceed to Step 2
+            },
+            onError: (errors) => {
+              console.error("Error during request:", errors);
+              alert("Failed to load trimester data. Please try again.");
+            },
+          });
+        } catch (error) {
+          console.error("Unexpected error:", error);
+          alert("An unexpected error occurred. Please try again.");
+        }
+      } else {
+        alert("Please select a trimester first.");
       }
     },
-    // submitForm() {
-    //   this.step = 3; // Move to Step 3 to show submission message
-    // },
     goBack() {
-      this.step = 1; // Return to Step 1
+        this.step = 1; // Return to Step 1
+        this.prefilledData = {}; // Reset prefilled data
     },
     close() {
       this.onClose(); // Trigger onClose prop function
     },
+  },
+  mounted() {
+      console.log("Received prenatalId in TrimesterModal:", this.prenatalId);
   },
 };
 </script>
