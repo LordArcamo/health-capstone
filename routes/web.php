@@ -19,6 +19,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VaccineController;
 use App\Http\Controllers\PersonalInformationController;
 use App\Http\Controllers\RiskManagementController;
+use App\Http\Controllers\VaccineAppointmentController;
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
@@ -194,6 +195,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Vaccine Appointment Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/appointments', [VaccineAppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/appointments', [VaccineAppointmentController::class, 'store'])->name('appointments.store');
+    Route::put('/appointments/{id}/status', [VaccineAppointmentController::class, 'updateStatus'])->name('appointments.updateStatus');
+    Route::get('/appointments/patient/{personalId}', [VaccineAppointmentController::class, 'getUpcomingForPatient'])->name('appointments.upcoming');
+    Route::delete('/appointments/{id}', [VaccineAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::get('/appointments/latest/{personalId}', [VaccineAppointmentController::class, 'getLatestAppointment'])
+        ->name('appointments.latest');
 });
 
 require __DIR__.'/auth.php';

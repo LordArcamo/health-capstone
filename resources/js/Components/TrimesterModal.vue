@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50" @click.self="close">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto"> <!-- Added max-h-screen and overflow-y-auto -->
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto"> 
       
       <!-- Step Indicator -->
       <div class="flex justify-between items-center px-6 py-3 bg-green-100 rounded-t-lg">
@@ -34,13 +34,13 @@
       </header>
 
       <!-- Modal Body -->
-      <main class="px-6 py-6 text-gray-700 overflow-y-auto max-h-[70vh]"> <!-- Limited height for scrolling within body -->
+      <main class="px-6 py-6 text-gray-700 overflow-y-auto max-h-[70vh]"> 
         <!-- Step 1: Select Trimester -->
         <div v-if="step === 1">
           <p>Select the appropriate trimester options here:</p>
           <select v-model="selectedTrimester" @change="onTrimesterSelect" class="mt-4 border rounded-md w-full p-2">
             <option disabled value="">-- Please choose a trimester --</option>
-            <option v-for="(trimester, index) in trimesters" :key="index" :value="(index + 1).toString()">
+            <option v-for="(trimester, index) in trimesters" :key="index" :value="trimester">
               {{ trimester }}
             </option>
           </select>
@@ -48,9 +48,13 @@
 
         <!-- Step 2: Show Selected Trimester Form -->
         <div v-else-if="step === 2">
-          <component :is="formComponent" 
-          :prenatalId="prenatalId"
-          :prefilledData="formData[selectedTrimester]"
+          <component 
+            :is="formComponent" 
+            :prenatalId="prenatalId"
+            :trimester="getTrimesterNumber(selectedTrimester)"
+            :prefilledData="internalPrefilledData"
+            @submit="handleFormSubmit"
+            @back="goBack"
           />
         </div>
         <!-- Step 3: Submission Complete Message -->
@@ -74,113 +78,111 @@
   </div>
 </template>
 
-<script>
-import TrimesterOneForm from '@/Components/Trimester/TrimesterOneForm.vue';
-import TrimesterTwoForm from '@/Components/Trimester/TrimesterTwoForm.vue';
-import TrimesterThreeForm from '@/Components/Trimester/TrimesterThreeForm.vue';
-import TrimesterFourForm from '@/Components/Trimester/TrimesterFourForm.vue';
-import TrimesterFiveForm from '@/Components/Trimester/TrimesterFiveForm.vue';
-import { Inertia } from '@inertiajs/inertia';
+<script setup>
+import { ref, defineAsyncComponent, computed, watch, onMounted } from 'vue';
+import axios from 'axios';
 
-export default {
-  props: {
-    prenatalId: {
-      type: Number,
-      required: true,  // This makes sure that the prop must be passed
-      default: 0,      // Default to 0 if not provided
-    },
-    prefilledData: {
-      type: Object,
-      default: () => ({}),
-    },
-    onClose: {
-      type: Function,
-      required: true,
-    },
-    onConfirm: {
-      type: Function,
-      required: true,
-    },
+const props = defineProps({
+  prenatalId: {
+    type: Number,
+    required: true
   },
-  data() {
-    return {
-      trimesters: [
-        'Trimester 1',
-        'Trimester 2',
-        'Trimester 3',
-        'Trimester 4',
-        'Trimester 5',
-      ],
-      selectedTrimester: '',
-      step: 1, // Start at Step 1
-      formData: {},
-    };
+  prefilledData: {
+    type: Object,
+    default: null
   },
-  watch: {
-    prenatalId(newVal) {
-      console.log("Updated prenatalId in TrimesterModal:", newVal);
-    },
+  onClose: {
+    type: Function,
+    required: true
   },
-  computed: {
-    formComponent() {
-      return this.selectedTrimester
-        ? this.getFormComponent(this.selectedTrimester)
-        : null;
-    },
-  },
-  methods: {
-    getFormComponent(trimester) {
-      switch (trimester) {
-        case '1': return TrimesterOneForm;
-        case '2': return TrimesterTwoForm;
-        case '3': return TrimesterThreeForm;
-        case '4': return TrimesterFourForm;
-        case '5': return TrimesterFiveForm;
-        default: return null;
-      }
-    },
-    async confirmSelection() {
-      if (this.selectedTrimester) {
-        const url = `/prenatal/${this.prenatalId}/trimester/${this.selectedTrimester}`;
-        console.log("Fetching URL:", url);
+  onConfirm: {
+    type: Function,
+    required: true
+  }
+});
 
-        try {
-          await Inertia.get(url, {}, {
-            preserveState: true,
-            onSuccess: (page) => {
-              console.log("Page props:", page.props);
-              const response = page.props;
+const emit = defineEmits(['close']);
 
-              if (response.prefilledData) {
-                this.$set(this.formData, this.selectedTrimester, response.prefilledData);
-                console.log("Prefilled data loaded:", this.formData);
-              }
+const trimesters = ref([
+  'Trimester 1',
+  'Trimester 2',
+  'Trimester 3',
+  'Trimester 4',
+  'Trimester 5'
+]);
 
-              this.step = 2; // Proceed to Step 2
-            },
-            onError: (errors) => {
-              console.error("Error during request:", errors);
-              alert("Failed to load trimester data. Please try again.");
-            },
-          });
-        } catch (error) {
-          console.error("Unexpected error:", error);
-          alert("An unexpected error occurred. Please try again.");
-        }
-      } else {
-        alert("Please select a trimester first.");
-      }
-    },
-    goBack() {
-        this.step = 1; // Return to Step 1
-        this.prefilledData = {}; // Reset prefilled data
-    },
-    close() {
-      this.onClose(); // Trigger onClose prop function
-    },
-  },
-  mounted() {
-      console.log("Received prenatalId in TrimesterModal:", this.prenatalId);
-  },
+const selectedTrimester = ref('');
+const step = ref(1);
+const formData = ref({});
+const internalPrefilledData = ref(null);
+
+const formComponent = computed(() => {
+  switch (selectedTrimester.value) {
+    case 'Trimester 1':
+      return defineAsyncComponent(() => import('@/Components/Trimester/TrimesterOneForm.vue'));
+    case 'Trimester 2':
+      return defineAsyncComponent(() => import('@/Components/Trimester/TrimesterTwoForm.vue'));
+    case 'Trimester 3':
+      return defineAsyncComponent(() => import('@/Components/Trimester/TrimesterThreeForm.vue'));
+    case 'Trimester 4':
+      return defineAsyncComponent(() => import('@/Components/Trimester/TrimesterFourForm.vue'));
+    case 'Trimester 5':
+      return defineAsyncComponent(() => import('@/Components/Trimester/TrimesterFiveForm.vue'));
+    default:
+      return null;
+  }
+});
+
+const getTrimesterNumber = (trimester) => {
+  return trimester ? trimester.replace('Trimester ', '') : '';
 };
+
+const handleFormSubmit = (formData) => {
+  console.log('Form submitted:', formData);
+  props.onConfirm(formData);
+};
+
+const onTrimesterSelect = () => {
+  console.log('Selected trimester:', selectedTrimester.value);
+};
+
+const confirmSelection = async () => {
+  if (selectedTrimester.value) {
+    const trimesterNumber = getTrimesterNumber(selectedTrimester.value);
+    try {
+      const response = await axios.get(`/prenatal/${props.prenatalId}/trimester/${trimesterNumber}`);
+      console.log("API Response:", response.data);
+      
+      if (response.data.success) {
+        internalPrefilledData.value = response.data.data;
+        step.value = 2;
+      } else {
+        console.error("Error:", response.data.message);
+        alert("Failed to load trimester data. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error fetching trimester data:", error);
+      alert("An unexpected error occurred. Please try again.");
+    }
+  } else {
+    alert("Please select a trimester first.");
+  }
+};
+
+const goBack = () => {
+  step.value = 1;
+  internalPrefilledData.value = null;
+};
+
+const close = () => {
+  emit('close');
+};
+
+watch(() => props.prefilledData, (newVal) => {
+  internalPrefilledData.value = newVal;
+}, { immediate: true });
+
+onMounted(() => {
+  console.log("Received prenatalId in TrimesterModal:", props.prenatalId);
+});
 </script>

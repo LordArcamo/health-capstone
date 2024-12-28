@@ -55,8 +55,7 @@ class VaccineController extends Controller
                     return [
                         'id' => $record->vaccinationId,
                         'dateOfVisit' => $record->dateOfVisit,
-                        'ageInMonths' => $record->ageInMonths,
-                        'ageInYears' => $record->ageInYears,
+                        'vaccineType' => $record->vaccineType,
                         'weight' => $record->weight,
                         'height' => $record->height,
                         'temperature' => $record->temperature,

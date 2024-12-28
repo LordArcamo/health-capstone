@@ -255,6 +255,7 @@ export default {
       <table class="min-w-full divide-y divide-gray-200 bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-s font-bold">
+            <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">ID</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Name</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Age</th>
             <th class="px-6 py-3 text-left  font-medium text-white uppercase tracking-wider">Vaccine Type</th>
@@ -266,7 +267,8 @@ export default {
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-for="patient in paginatedPatients" :key="patient.id" class="hover:bg-gray-100">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.personalId }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }} {{ patient.middleName }} {{ patient.lastName }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.vaccineType }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(patient.nextAppointment) }}</td>

@@ -1,5 +1,6 @@
 <script>
-import { defineProps, defineEmits, ref, computed } from "vue";
+import { defineProps, defineEmits, ref, computed, onMounted } from "vue";
+import { Inertia } from '@inertiajs/inertia';
 
 export default {
   props: {
@@ -7,7 +8,11 @@ export default {
       type: Object,
       required: true,
       default: () => ({
-        name: "Unknown",
+        personalId: null,
+        firstName: "Unknown",
+        middleName: "",
+        lastName: "Unknown",
+        suffix: "",
         age: "Unknown",
         vaccineType: "Unknown",
         nextAppointment: "",
@@ -16,36 +21,86 @@ export default {
   },
   emits: ["close", "schedule"],
   setup(props, { emit }) {
-    // Local state for the appointment date
-    const appointmentDate = ref(props.patient.nextAppointment || "");
+    const appointmentDate = ref("");
+    const notes = ref("");
+    const loading = ref(false);
+    const error = ref(null);
+    const vaccineType = ref(props.patient.vaccineType || "");
 
-    // Computed property to validate the date
     const isDateValid = computed(() => {
       if (!appointmentDate.value) return false;
       const selectedDate = new Date(appointmentDate.value);
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Ensure no time conflicts
+      today.setHours(0, 0, 0, 0);
       return selectedDate >= today;
     });
 
-    // Method to handle scheduling the appointment
-    const handleSchedule = () => {
+    // Format date to YYYY-MM-DD for input field
+    const formatDateForInput = (dateString) => {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    };
+
+    // Fetch latest appointment data
+    const fetchLatestAppointment = async () => {
+      try {
+        const response = await fetch(`/appointments/latest/${props.patient.personalId}`);
+        const data = await response.json();
+        
+        if (data.success && data.appointment) {
+          vaccineType.value = data.appointment.vaccineType || props.patient.vaccineType;
+          notes.value = data.appointment.notes || "";
+          appointmentDate.value = formatDateForInput(data.appointment.appointmentDate);
+        }
+      } catch (e) {
+        console.error('Failed to fetch latest appointment:', e);
+      }
+    };
+
+    onMounted(() => {
+      fetchLatestAppointment();
+    });
+
+    const handleSchedule = async () => {
       if (!isDateValid.value) {
-        alert("Please select a valid appointment date.");
+        error.value = "Please select a valid appointment date.";
         return;
       }
 
-      emit("schedule", { patientId: props.patient.id, date: appointmentDate.value });
-      emit("close");
+      loading.value = true;
+      error.value = null;
+
+      try {
+        await Inertia.post('/appointments', {
+          personalId: props.patient.personalId,
+          appointmentDate: appointmentDate.value,
+          vaccineType: vaccineType.value,
+          notes: notes.value
+        });
+        
+        emit("schedule", { 
+          patientId: props.patient.personalId, 
+          date: appointmentDate.value 
+        });
+        emit("close");
+      } catch (e) {
+        error.value = "An error occurred while scheduling the appointment.";
+      } finally {
+        loading.value = false;
+      }
     };
 
-    // Close the modal
     const closeModal = () => {
       emit("close");
     };
 
     return {
       appointmentDate,
+      notes,
+      loading,
+      error,
+      vaccineType,
       isDateValid,
       handleSchedule,
       closeModal,
@@ -64,48 +119,87 @@ export default {
     <div class="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg">
       <!-- Header -->
       <h2 id="schedule-appointment-modal" class="text-xl font-semibold text-green-700 mb-4">
-        Schedule Next Appointment for {{ patient.name }}
+        Schedule Next Appointment
       </h2>
 
       <!-- Patient Details -->
       <div class="mb-6 border-b pb-4 text-sm text-gray-700">
-        <p><strong>Name:</strong> {{ patient.firstName || "N/A" }} {{ patient.middleName || "N/A" }} {{ patient.lastName || "N/A" }} {{ patient.suffix || "N/A" }}</p>
+        <p><strong>Name:</strong> {{ patient.firstName || "N/A" }} {{ patient.middleName || "" }} {{ patient.lastName || "N/A" }} {{ patient.suffix || "" }}</p>
         <p><strong>Age:</strong> {{ patient.age || "N/A" }}</p>
-        <p><strong>Vaccine Type:</strong> {{ patient.vaccineType || "N/A" }}</p>
+        <p><strong>Vaccine Type:</strong> {{ vaccineType || "N/A" }}</p>
       </div>
 
-      <!-- Appointment Date Input -->
-      <div class="mb-4">
-        <label for="appointment-date" class="block text-sm font-medium text-gray-700">
-          Appointment Date
-        </label>
-        <input
-          id="appointment-date"
-          type="date"
-          v-model="appointmentDate"
-          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
-          :class="{ 'border-red-500': !isDateValid && appointmentDate }"
-          :aria-invalid="!isDateValid"
-        />
-        <p v-if="!isDateValid && appointmentDate" class="text-red-500 text-xs mt-1">
-          Please select a valid date that is today or later.
-        </p>
+      <!-- Error Message -->
+      <div v-if="error" class="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+        {{ error }}
+      </div>
+
+      <!-- Form Fields -->
+      <div class="space-y-4">
+        <!-- Appointment Date Input -->
+        <div>
+          <label for="appointment-date" class="block text-sm font-medium text-gray-700">
+            Appointment Date *
+          </label>
+          <input
+            id="appointment-date"
+            type="date"
+            v-model="appointmentDate"
+            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+            :class="{ 'border-red-500': !isDateValid && appointmentDate }"
+            :aria-invalid="!isDateValid"
+            required
+          />
+          <p v-if="!isDateValid && appointmentDate" class="text-red-500 text-xs mt-1">
+            Please select a valid date that is today or later.
+          </p>
+        </div>
+
+        <!-- Vaccine Type Input -->
+        <div>
+          <label for="vaccine-type" class="block text-sm font-medium text-gray-700">
+            Vaccine Type
+          </label>
+          <input
+            id="vaccine-type"
+            type="text"
+            v-model="vaccineType"
+            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+          />
+        </div>
+
+        <!-- Notes Input -->
+        <div>
+          <label for="notes" class="block text-sm font-medium text-gray-700">
+            Notes (Optional)
+          </label>
+          <textarea
+            id="notes"
+            v-model="notes"
+            rows="3"
+            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+            placeholder="Add any notes about this appointment..."
+          ></textarea>
+        </div>
       </div>
 
       <!-- Buttons -->
       <div class="flex justify-end gap-4 mt-6">
         <button
           @click="closeModal"
-          class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+          type="button"
+          class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 disabled:opacity-50"
+          :disabled="loading"
         >
           Cancel
         </button>
         <button
           @click="handleSchedule"
-          :disabled="!isDateValid"
-          class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
+          :disabled="loading || !isDateValid"
         >
-          Save
+          {{ loading ? 'Scheduling...' : 'Schedule Appointment' }}
         </button>
       </div>
     </div>

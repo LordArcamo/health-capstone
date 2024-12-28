@@ -74,17 +74,52 @@ class PreNatalController extends Controller
 
     public function fetchTrimesterData($prenatalId, $trimester)
     {
-        // Fetch data based on the prenatalId and trimester
-        $trimesterData = GeneralTrimester::with('checkbox1')
-            ->where('prenatalId', $prenatalId)
-            ->where('trimester', $trimester)
-            ->first();
-    
-        return Inertia::render('Table/PreNatal', [
-            'prefilledData' => $trimesterData ?: null,
-            'prenatalId' => $prenatalId,
-            'trimester' => $trimester,
-        ]);
+        try {
+            // Fetch the latest data for this prenatalId and trimester
+            $trimesterData = GeneralTrimester::where('prenatalId', $prenatalId)
+                ->where('trimester', $trimester)
+                ->latest('created_at')  // Order by latest created_at
+                ->first();
+
+            if ($trimesterData) {
+                // Get the associated checkbox data based on trimester
+                $checkboxData = null;
+                switch($trimester) {
+                    case '1':
+                        $checkboxData = $trimesterData->checkbox1;
+                        break;
+                    case '2':
+                        $checkboxData = $trimesterData->checkbox2;
+                        break;
+                    case '3':
+                    case '4':
+                    case '5':
+                        $checkboxData = $trimesterData->checkbox3;
+                        break;
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'generalTrimester' => $trimesterData,
+                        'checkbox' . $trimester => $checkboxData
+                    ],
+                    'message' => 'Latest data found'
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => null,
+                'message' => 'No existing data'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching trimester data: ' . $e->getMessage()
+            ], 500);
+        }
     }
     
 
