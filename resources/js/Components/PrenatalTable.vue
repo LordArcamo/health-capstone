@@ -247,6 +247,7 @@
 <PostpartumModal
   v-if="currentModal === 'postpartum'"
   :patient="selectedPatient"
+  :existingData="postpartumData"
   @close="closeModal"
   :onSubmit="handlePostpartumSubmit"
 />
@@ -289,7 +290,8 @@ export default {
       currentModal: null,
       selectedPatient: null,
       isFilterPanelOpen: false,
-      localTrimesterData: null
+      localTrimesterData: null,
+      postpartumData: null,
     };
   },
   computed: {
@@ -375,17 +377,33 @@ export default {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
     async openModal(type, patient) {
-      this.selectedPatient = patient;
       this.currentModal = type;
+      this.selectedPatient = patient;
 
       if (type === 'trimester') {
         await this.fetchTrimesterData(patient.prenatalId);
+      } else if (type === 'postpartum') {
+        await this.fetchPostpartumData(patient.prenatalId);
+      }
+    },
+    async fetchPostpartumData(prenatalId) {
+      try {
+        const response = await axios.get(`/postpartum/data/${prenatalId}`);
+        if (response.data.success) {
+          this.postpartumData = response.data.data;
+        } else {
+          this.postpartumData = null;
+        }
+      } catch (error) {
+        console.error('Error fetching postpartum data:', error);
+        this.postpartumData = null;
       }
     },
     closeModal() {
       this.currentModal = null;
       this.selectedPatient = null;
       this.localTrimesterData = null;
+      this.postpartumData = null;
     },
     handlePostpartumSubmit(formData) {
       console.log("Submitted Postpartum Data:", formData);

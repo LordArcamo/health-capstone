@@ -12,20 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vaccine_appointments', function (Blueprint $table) {
-            $table->id('appointmentId');
-            $table->unsignedBigInteger('personalId');
-            $table->dateTime('appointmentDate');
-            $table->string('vaccineType')->nullable();
+            $table->bigIncrements('vacAppointmentId');
+            $table->unsignedBigInteger('vaccinationId');
+            $table->date('appointmentDate');
             $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
             $table->text('notes')->nullable();
-            $table->unsignedBigInteger('createdBy')->nullable();
-            $table->unsignedBigInteger('updatedBy')->nullable();
             $table->timestamps();
 
-            $table->foreign('personalId')
-                  ->references('personalId')
-                  ->on('personal_information')
-                  ->onDelete('cascade');
+            $table->foreign('vaccinationId')->references('vaccinationId')->on('vaccination_records')->onDelete('cascade');
         });
     }
 

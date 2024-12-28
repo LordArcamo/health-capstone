@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\VaccineAppointment;
-use App\Models\PersonalInformation;
+use App\Models\VaccinationRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -15,19 +15,13 @@ class VaccineAppointmentController extends Controller
      */
     public function index()
     {
-        $appointments = VaccineAppointment::with('patient')
+        $appointments = VaccineAppointment::with('vaccinationRecord')
             ->orderBy('appointmentDate', 'asc')
             ->get()
             ->map(function ($appointment) {
                 return [
-                    'id' => $appointment->appointmentId,
-                    'patientId' => $appointment->personalId,
-                    'firstName' => $appointment->patient->firstName,
-                    'middleName' => $appointment->patient->middleName,
-                    'lastName' => $appointment->patient->lastName,
-                    'suffix' => $appointment->patient->suffix,
-                    'age' => $appointment->patient->age,
-                    'vaccineType' => $appointment->vaccineType,
+                    'vacAppointmentId' => $appointment->vacAppointmentId,
+                    'vaccinationId' => $appointment->vaccinationId,
                     'appointmentDate' => $appointment->appointmentDate,
                     'status' => $appointment->status,
                     'notes' => $appointment->notes
@@ -44,99 +38,75 @@ class VaccineAppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'personalId' => 'required|exists:personal_information,personalId',
+        $validatedData = $request->validate([
+            'vaccinationId' => 'required|exists:vaccination_records,vaccinationId',
             'appointmentDate' => 'required|date|after_or_equal:today',
-            'vaccineType' => 'nullable|string|max:255',
-            'notes' => 'nullable|string'
+            'vaccineType' => 'required|string',
+            'notes' => 'nullable|string',
         ]);
 
-        $appointment = VaccineAppointment::create([
-            'personalId' => $validated['personalId'],
-            'appointmentDate' => $validated['appointmentDate'],
-            'vaccineType' => $validated['vaccineType'] ?? null,
-            'notes' => $validated['notes'] ?? null,
-            'status' => 'scheduled',
-            'createdBy' => Auth::id()
-        ]);
+        try {
+            $appointment = VaccineAppointment::create([
+                'vaccinationId' => $validatedData['vaccinationId'],
+                'appointmentDate' => $validatedData['appointmentDate'],
+                'vaccineType' => $validatedData['vaccineType'],
+                'notes' => $validatedData['notes'] ?? null,
+                'status' => 'scheduled'
+            ]);
 
-        return redirect()->back();
+            return redirect()->back()->with('success', 'Appointment scheduled successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to schedule appointment: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Update an appointment's status.
+     * Update appointment status.
      */
     public function updateStatus(Request $request, $id)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:scheduled,completed,cancelled',
-            'notes' => 'nullable|string'
+        $validatedData = $request->validate([
+            'status' => 'required|in:scheduled,completed,cancelled,missed'
         ]);
 
-        $appointment = VaccineAppointment::findOrFail($id);
-        $appointment->update([
-            'status' => $validated['status'],
-            'notes' => $validated['notes'] ?? $appointment->notes,
-            'updatedBy' => Auth::id()
-        ]);
-
-        return redirect()->back();
-    }
-
-    /**
-     * Get upcoming appointments for a patient.
-     */
-    public function getUpcomingForPatient($personalId)
-    {
-        $appointments = VaccineAppointment::where('personalId', $personalId)
-            ->where('status', 'scheduled')
-            ->where('appointmentDate', '>=', now())
-            ->orderBy('appointmentDate', 'asc')
-            ->get();
-
-        return Inertia::render('Patients/Show', [
-            'upcomingAppointments' => $appointments
-        ]);
-    }
-
-    /**
-     * Cancel an appointment.
-     */
-    public function cancel($id)
-    {
-        $appointment = VaccineAppointment::findOrFail($id);
-        $appointment->update([
-            'status' => 'cancelled',
-            'updatedBy' => Auth::id()
-        ]);
-
-        return redirect()->back();
-    }
-
-    /**
-     * Get latest appointment for a patient
-     */
-    public function getLatestAppointment($personalId)
-    {
-        $latestAppointment = VaccineAppointment::where('personalId', $personalId)
-            ->orderBy('appointmentDate', 'desc')
-            ->first();
-
-        if ($latestAppointment) {
-            return response()->json([
-                'success' => true,
-                'appointment' => [
-                    'appointmentDate' => $latestAppointment->appointmentDate,
-                    'vaccineType' => $latestAppointment->vaccineType,
-                    'notes' => $latestAppointment->notes,
-                    'status' => $latestAppointment->status
-                ]
+        try {
+            $appointment = VaccineAppointment::findOrFail($id);
+            $appointment->update([
+                'status' => $validatedData['status']
             ]);
-        }
 
-        return response()->json([
-            'success' => false,
-            'appointment' => null
-        ]);
+            return redirect()->back()->with('success', 'Appointment status updated successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update appointment status');
+        }
+    }
+
+    /**
+     * Get appointments for a specific vaccination record
+     */
+    public function getAppointmentsForVaccination($id)
+    {
+        try {
+            $appointments = VaccineAppointment::where('vaccinationId', $id)
+                ->orderBy('appointmentDate', 'desc')
+                ->get()
+                ->map(function ($appointment) {
+                    return [
+                        'vacAppointmentId' => $appointment->vacAppointmentId,
+                        'appointmentDate' => $appointment->appointmentDate,
+                        'status' => $appointment->status,
+                        'notes' => $appointment->notes,
+                        'vaccineType' => $appointment->vaccineType
+                    ];
+                });
+
+            return response()->json([
+                'appointments' => $appointments
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch appointments'
+            ], 500);
+        }
     }
 }

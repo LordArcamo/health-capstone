@@ -134,6 +134,12 @@ const downloadReport = () => {
               <p class="text-gray-700">
                 <strong>Address:</strong> Purok {{ patient.purok }}, {{ patient.barangay }}
               </p>
+              <p class="text-gray-700">
+                <strong>Vaccine Type:</strong> {{ history[0]?.vaccineType || 'N/A' }}
+              </p>
+              <p class="text-gray-700">
+                <strong>Total Records:</strong> {{ history.length }}
+              </p>
             </div>
           </div>
         </div>
@@ -145,7 +151,6 @@ const downloadReport = () => {
           <thead class="bg-green-600 text-white sticky top-0">
             <tr>
               <th class="px-4 py-3 text-left font-semibold">Date of Visit</th>
-              <th class="px-4 py-3 text-left font-semibold">Vaccine Type</th>
               <th class="px-4 py-3 text-left font-semibold">Weight</th>
               <th class="px-4 py-3 text-left font-semibold">Height</th>
               <th class="px-4 py-3 text-left font-semibold">Temperature</th>
@@ -164,7 +169,6 @@ const downloadReport = () => {
               class="odd:bg-gray-50 even:bg-white hover:bg-green-100 transition-colors"
             >
               <td class="px-4 py-3">{{ formatDate(record.dateOfVisit) }}</td>
-              <td class="px-4 py-3">{{ record.vaccineType || "N/A" }}</td>
               <td class="px-4 py-3">{{ record.weight || "N/A" }}</td>
               <td class="px-4 py-3">{{ record.height || "N/A" }}</td>
               <td class="px-4 py-3">{{ record.temperature || "N/A" }}</td>
@@ -199,4 +203,3 @@ const downloadReport = () => {
     </div>
   </div>
 </template>
-

@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import VaccinationModal from "./VaccinationModals/VaccinationModal.vue";
 import ScheduleNextAppointmentModal from "./VaccinationModals/ScheduleNextAppointmentModal.vue";
 import ViewHistoryModal from "./VaccinationModals/ViewHistoryModal.vue";
+import axios from 'axios';
 
 export default {
   props: {
@@ -58,8 +59,27 @@ export default {
         );
       });
     },
+    processedVaccinatedPatients() {
+      return this.vaccinatedPatients.map(patient => {
+        // Group history by vaccine type and get latest entry for each
+        const latestByVaccineType = {};
+        if (patient.history && patient.history.length > 0) {
+          patient.history.forEach(record => {
+            const currentLatest = latestByVaccineType[record.vaccineType];
+            if (!currentLatest || new Date(record.dateOfVisit) > new Date(currentLatest.dateOfVisit)) {
+              latestByVaccineType[record.vaccineType] = record;
+            }
+          });
+        }
+        // Create a new patient object with only the latest records
+        return {
+          ...patient,
+          history: Object.values(latestByVaccineType)
+        };
+      });
+    },
     totalPages() {
-      const total = Math.ceil(this.vaccinatedPatients.length / this.itemsPerPage);
+      const total = Math.ceil(this.processedVaccinatedPatients.length / this.itemsPerPage);
       return total;
     },
   },
@@ -72,7 +92,7 @@ export default {
     updatePagination() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = this.currentPage * this.itemsPerPage;
-      this.paginatedPatients = this.vaccinatedPatients.slice(start, end); // Use vaccinatedPatients instead
+      this.paginatedPatients = this.processedVaccinatedPatients.slice(start, end);
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -93,14 +113,33 @@ export default {
     toggleDropdown(key) {
       this.dropdownOpen = this.dropdownOpen === key ? null : key;
     },
-    openHistoryModal(patient) {
+    openHistoryModal(patient, vaccineType) {
       this.activePatient = patient;
-      this.activePatientHistory = patient.history || [];
+      // Get all history records for this vaccine type
+      const allHistory = this.vaccinatedPatients
+        .find(p => p.personalId === patient.personalId)?.history
+        .filter(record => record.vaccineType === vaccineType)
+        .sort((a, b) => new Date(b.dateOfVisit) - new Date(a.dateOfVisit)) || [];
+      this.activePatientHistory = allHistory;
       this.showHistoryModal = true;
     },
     openScheduleModal(patient) {
       this.activePatient = patient;
       this.showScheduleModal = true;
+      
+      // Fetch existing appointments for this vaccination
+      axios.get(`/api/appointments/vaccination/${patient.vaccinationId}`)
+        .then(response => {
+          const { appointments } = response.data;
+          // Update the activePatient with appointments
+          this.activePatient = {
+            ...this.activePatient,
+            appointments: appointments
+          };
+        })
+        .catch(error => {
+          console.error('Error fetching appointments:', error);
+        });
     },
     clearFilters() {
       this.searchQuery = "";
@@ -146,15 +185,6 @@ export default {
     },
     closeVaccinationModal() {
       this.showVaccinationModal = false; // Hide the modal
-    },
-    openHistoryModal(patient) {
-      if (patient) {
-        this.activePatient = patient;
-        this.activePatientHistory = patient.history || [];
-        this.showHistoryModal = true;
-      } else {
-        console.error("Invalid patient data");
-      }
     },
     closeAllModals() {
       this.showScheduleModal = false;
@@ -266,25 +296,31 @@ export default {
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="patient in paginatedPatients" :key="patient.id" class="hover:bg-gray-100">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.personalId }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }} {{ patient.middleName }} {{ patient.lastName }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.vaccineType }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(patient.nextAppointment) }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.barangay || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.purok || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              <button @click="openScheduleModal(patient)"
-                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                Schedule
-              </button>
-              <button @click="openHistoryModal(patient)"
-                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-gray-400 ml-2">
-                History
-              </button>
-            </td>
-          </tr>
+          <template v-for="patient in paginatedPatients" :key="patient.personalId">
+            <tr v-for="record in patient.history" :key="record.id" class="hover:bg-gray-100">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.personalId }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }} {{ patient.middleName }} {{ patient.lastName }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ record.vaccineType }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(record.nextAppointment) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.barangay || 'N/A' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.purok || 'N/A' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <button @click="openScheduleModal({
+                    ...patient,
+                    vaccineType: record.vaccineType,
+                    vaccinationId: record.id
+                  })"
+                  class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  Schedule
+                </button>
+                <button @click="openHistoryModal(patient, record.vaccineType)"
+                  class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-gray-400 ml-2">
+                  History
+                </button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -296,8 +332,13 @@ export default {
       :key="modalKey"
       @close="closeVaccinationModal"
     />
-    <ScheduleNextAppointmentModal v-if="showScheduleModal" :patient="activePatient" @close="closeAllModals"
-      @schedule="scheduleAppointment" />
+    <ScheduleNextAppointmentModal 
+      v-if="showScheduleModal" 
+      :patient="activePatient" 
+      :vaccinationId="activePatient?.vaccinationId"
+      @close="closeAllModals"
+      @schedule="scheduleAppointment" 
+    />
     <ViewHistoryModal 
       v-if="showHistoryModal" 
       :patient="activePatient" 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VaccineAppointment extends Model
 {
@@ -11,16 +12,13 @@ class VaccineAppointment extends Model
 
     protected $table = 'vaccine_appointments';
 
-    protected $primaryKey = 'appointmentId';
+    protected $primaryKey = 'vacAppointmentId';
 
     protected $fillable = [
-        'personalId',
+        'vaccinationId',
         'appointmentDate',
-        'vaccineType',
-        'status', // scheduled, completed, cancelled
-        'notes',
-        'createdBy',
-        'updatedBy'
+        'status',
+        'notes'
     ];
 
     protected $casts = [
@@ -29,9 +27,19 @@ class VaccineAppointment extends Model
         'updated_at' => 'datetime'
     ];
 
-    // Relationship with PersonalInformation
-    public function patient()
+    /**
+     * Get the vaccination record that this appointment belongs to
+     */
+    public function vaccinationRecord(): BelongsTo
     {
-        return $this->belongsTo(PersonalInformation::class, 'personalId', 'personalId');
+        return $this->belongsTo(VaccinationRecord::class, 'vaccinationId');
+    }
+
+    /**
+     * Get the personal information through the vaccination record
+     */
+    public function personalInformation()
+    {
+        return $this->vaccinationRecord->personalInformation();
     }
 }

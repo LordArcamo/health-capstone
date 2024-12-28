@@ -94,6 +94,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/postpartum', PostpartumController::class);
     Route::get('/checkup/postpartum', [PostpartumController::class, 'create'])->name('postpartum');
     Route::post('/postpartum/store', [PostpartumController::class, 'store'])->name('postpartum.store');
+    Route::get('/postpartum/{id}', [PostpartumController::class, 'show'])->name('postpartum.show');
+    Route::put('/postpartum/{id}', [PostpartumController::class, 'update'])->name('postpartum.update');
+    Route::get('/postpartum/data/{prenatalId}', [PostpartumController::class, 'getByPrenatalId'])->name('postpartum.getByPrenatalId');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -197,15 +200,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Vaccine Appointment Routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/appointments', [VaccineAppointmentController::class, 'index'])->name('appointments.index');
-    Route::post('/appointments', [VaccineAppointmentController::class, 'store'])->name('appointments.store');
-    Route::put('/appointments/{id}/status', [VaccineAppointmentController::class, 'updateStatus'])->name('appointments.updateStatus');
-    Route::get('/appointments/patient/{personalId}', [VaccineAppointmentController::class, 'getUpcomingForPatient'])->name('appointments.upcoming');
+// Appointments API route
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/api/appointments/vaccination/{id}', [VaccineAppointmentController::class, 'getAppointmentsForVaccination']);
+    Route::post('/appointments/store', [VaccineAppointmentController::class, 'store'])->name('appointments.store');
+    Route::put('/appointments/{id}', [VaccineAppointmentController::class, 'update'])->name('appointments.update');
     Route::delete('/appointments/{id}', [VaccineAppointmentController::class, 'cancel'])->name('appointments.cancel');
-    Route::get('/appointments/latest/{personalId}', [VaccineAppointmentController::class, 'getLatestAppointment'])
-        ->name('appointments.latest');
 });
 
 require __DIR__.'/auth.php';

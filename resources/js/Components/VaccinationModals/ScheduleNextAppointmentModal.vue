@@ -8,16 +8,16 @@ export default {
       type: Object,
       required: true,
       default: () => ({
-        personalId: null,
+        vaccinationId: null,
         firstName: "Unknown",
         middleName: "",
         lastName: "Unknown",
         suffix: "",
         age: "Unknown",
         vaccineType: "Unknown",
-        nextAppointment: "",
+        appointments: []
       }),
-    },
+    }
   },
   emits: ["close", "schedule"],
   setup(props, { emit }) {
@@ -35,32 +35,15 @@ export default {
       return selectedDate >= today;
     });
 
-    // Format date to YYYY-MM-DD for input field
-    const formatDateForInput = (dateString) => {
-      if (!dateString) return "";
+    const formatDate = (dateString) => {
+      if (!dateString) return "N/A";
       const date = new Date(dateString);
-      return date.toISOString().split('T')[0];
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
     };
-
-    // Fetch latest appointment data
-    const fetchLatestAppointment = async () => {
-      try {
-        const response = await fetch(`/appointments/latest/${props.patient.personalId}`);
-        const data = await response.json();
-        
-        if (data.success && data.appointment) {
-          vaccineType.value = data.appointment.vaccineType || props.patient.vaccineType;
-          notes.value = data.appointment.notes || "";
-          appointmentDate.value = formatDateForInput(data.appointment.appointmentDate);
-        }
-      } catch (e) {
-        console.error('Failed to fetch latest appointment:', e);
-      }
-    };
-
-    onMounted(() => {
-      fetchLatestAppointment();
-    });
 
     const handleSchedule = async () => {
       if (!isDateValid.value) {
@@ -72,27 +55,23 @@ export default {
       error.value = null;
 
       try {
-        await Inertia.post('/appointments', {
-          personalId: props.patient.personalId,
+        await Inertia.post('/appointments/store', {
+          vaccinationId: props.patient.vaccinationId,
           appointmentDate: appointmentDate.value,
           vaccineType: vaccineType.value,
           notes: notes.value
         });
         
         emit("schedule", { 
-          patientId: props.patient.personalId, 
           date: appointmentDate.value 
         });
         emit("close");
       } catch (e) {
         error.value = "An error occurred while scheduling the appointment.";
+        console.error('Schedule error:', e);
       } finally {
         loading.value = false;
       }
-    };
-
-    const closeModal = () => {
-      emit("close");
     };
 
     return {
@@ -102,8 +81,9 @@ export default {
       error,
       vaccineType,
       isDateValid,
+      formatDate,
       handleSchedule,
-      closeModal,
+      closeModal: () => emit("close"),
     };
   },
 };
@@ -127,6 +107,17 @@ export default {
         <p><strong>Name:</strong> {{ patient.firstName || "N/A" }} {{ patient.middleName || "" }} {{ patient.lastName || "N/A" }} {{ patient.suffix || "" }}</p>
         <p><strong>Age:</strong> {{ patient.age || "N/A" }}</p>
         <p><strong>Vaccine Type:</strong> {{ vaccineType || "N/A" }}</p>
+
+        <!-- Existing Appointments -->
+        <div v-if="patient.appointments && patient.appointments.length > 0" class="mt-4 p-4 bg-gray-50 rounded-md">
+          <h3 class="font-semibold mb-2">Existing Appointments</h3>
+          <div v-for="appointment in patient.appointments" :key="appointment.vacAppointmentId" class="mb-2">
+            <p><strong>Date:</strong> {{ formatDate(appointment.appointmentDate) }}</p>
+            <p><strong>Status:</strong> {{ appointment.status }}</p>
+            <p v-if="appointment.notes"><strong>Notes:</strong> {{ appointment.notes }}</p>
+            <hr class="my-2" v-if="patient.appointments.length > 1">
+          </div>
+        </div>
       </div>
 
       <!-- Error Message -->
@@ -153,19 +144,6 @@ export default {
           <p v-if="!isDateValid && appointmentDate" class="text-red-500 text-xs mt-1">
             Please select a valid date that is today or later.
           </p>
-        </div>
-
-        <!-- Vaccine Type Input -->
-        <div>
-          <label for="vaccine-type" class="block text-sm font-medium text-gray-700">
-            Vaccine Type
-          </label>
-          <input
-            id="vaccine-type"
-            type="text"
-            v-model="vaccineType"
-            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
-          />
         </div>
 
         <!-- Notes Input -->
@@ -199,7 +177,7 @@ export default {
           class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50"
           :disabled="loading || !isDateValid"
         >
-          {{ loading ? 'Scheduling...' : 'Schedule Appointment' }}
+          Schedule
         </button>
       </div>
     </div>
