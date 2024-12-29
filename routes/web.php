@@ -17,6 +17,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VaccineController;
+use App\Http\Controllers\SystemAnalyticsController;
+use App\Http\Controllers\ThankYouController;
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
@@ -30,6 +32,10 @@ use App\Http\Controllers\VaccineController;
 //     // Route::get('/services/mental-health/session', [SessionController::class, 'index'])->name('mental-health.sessions.index');
 // });
 
+
+Route::get('/checkup/thank-you', function () {
+    return Inertia::render('ThankYou');
+})->name('thank-you');
 
 
 Route::get('/', [AuthenticatedSessionController::class, 'index'])->name('home');
@@ -57,7 +63,7 @@ Route::get('/patients', [PatientController::class, 'index']);
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
-    Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); 
+    Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr');
     Route::get('/services/patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
     Route::post('/services/patients/itrtable', [CheckUpController::class, 'import'])->name('itr.import');
 });
@@ -156,9 +162,9 @@ Route::get('/mental-health', function () {
     return Inertia::render('About/MentalDescription');
 })->middleware(['auth', 'verified'])->name('mental-health');
 
-Route::get('/system-analytics', function () {
-    return Inertia::render('Analytics');
-})->middleware(['auth', 'verified'])->name('system-analytics');
+Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('system-analytics');
 
 Route::get('/services/risk-management', function () {
     return Inertia::render('Services/RiskManagement');
@@ -178,4 +184,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

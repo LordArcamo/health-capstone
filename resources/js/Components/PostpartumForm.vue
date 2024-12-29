@@ -123,6 +123,35 @@
             </div>
           </div>
 
+          <div v-if="currentStep === 2" class="mt-6 space-y-4">
+      <h2 class="text-lg font-semibold">Breastfeeding</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="date_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Date Initiated Breastfeeding</label>
+          <input v-model="form.date_initiated_breastfeeding" type="date" id="date_initiated_breastfeeding" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+        <div>
+          <label for="time_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Time Initiated Breastfeeding</label>
+          <input v-model="form.time_initiated_breastfeeding" type="time" id="time_initiated_breastfeeding" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+      </div>
+    </div>
+
+    <div v-if="currentStep === 3" class="mt-6 space-y-4">
+      <h2 class="text-lg font-semibold">Postpartum Details</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="date_vitamin_a" class="block text-sm font-medium text-gray-700">Date Vitamin A Given</label>
+          <input v-model="form.date_vitamin_a" type="date" id="date_vitamin_a" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+        <div>
+          <label for="danger_signs_mother" class="block text-sm font-medium text-gray-700">Danger Signs (Mother)</label>
+          <textarea v-model="form.danger_signs_mother" id="danger_signs_mother" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+        </div>
+      </div>
+    </div>
+
+
           <!-- Navigation Buttons -->
           <div class="flex justify-between items-center pt-4 border-t">
             <button

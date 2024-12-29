@@ -26,7 +26,7 @@ export default {
     new Chart(ctx, {
       type: "bar",
       data: {
-        labels: ["January", "February", "March", "April", "May", "June"],
+        labels: ["January", "February", "March", "April", "May", "June", "August", "September", "October", "November", "December"],
         datasets: [
           {
             label: "Total Patients",
