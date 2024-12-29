@@ -14,52 +14,57 @@
   
         <!-- Step 1: Search for Patient -->
         <div v-if="step === 1">
-          <h3 class="text-lg font-semibold mb-4">Search for a Patient</h3>
-          <div>
-            <label for="search" class="block text-sm font-medium text-gray-700">Search by Name</label>
-            <input 
-              type="text" 
-              v-model="searchQuery" 
-              @input="debouncedSearchPatients" 
-              id="search" 
-              class="input" 
-              placeholder="Example: Pedro Penduko" 
-            />
-          </div>
-  
-          <div class="bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
-            <ul v-if="filteredPatients.length">
-              <li 
-              v-for="patient in filteredPatients" 
-              :key="patient.id" 
-              @click="selectPatient(patient)" 
-              :class="{
-                'bg-gray-100': selectedPatient?.id === patient.id,
-                'hover:bg-gray-50': selectedPatient?.id !== patient.id,
-              }" class="cursor-pointer px-4 py-2">
-                {{ patient.firstName }} {{ patient.lastName }} ({{ patient.age }} years)
-              </li>
-            </ul>
-            <div v-else-if="searchQuery.trim()" class="mt-4 text-sm text-gray-500">
-            No patients found. You can proceed to add a new patient.
-          </div>
-          <div v-else class="mt-4 text-sm text-gray-500 px-4 py-2">
-              Start typing to search for a patient.
-            </div>
-          </div>
-  
-  
-          <div class="flex justify-end space-x-4 mt-6">
-            <button @click="closeModal" class="bg-red-500 text-white py-2 px-4 rounded-md">Cancel</button>
-            <button
-              :disabled="!selectedPatient && !allowAddNewPatient"
-              @click="addOrNextStep"
-              class="bg-blue-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400"
-            >
-              {{ selectedPatient ? "Next" : "Add New Patient" }}
-            </button>
-          </div>
-        </div>
+  <h3 class="text-lg font-semibold mb-4">Search for a Patient</h3>
+  <div>
+    <label for="search" class="block text-sm font-medium text-gray-700">Search by Name</label>
+    <input
+      type="text"
+      v-model="searchQuery"
+      @input="debouncedSearchPatients"
+      id="search"
+      class="input"
+      placeholder="Example: Pedro Penduko"
+    />
+  </div>
+
+  <!-- Search Results -->
+  <div
+    v-if="searchQuery.trim()"
+    class="bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto mt-4"
+  >
+    <ul v-if="filteredPatients.length">
+      <li
+        v-for="patient in filteredPatients"
+        :key="patient.id"
+        @click="selectPatient(patient)"
+        :class="{
+          'bg-gray-100': selectedPatient?.id === patient.id,
+          'hover:bg-gray-50': selectedPatient?.id !== patient.id,
+        }"
+        class="cursor-pointer px-4 py-2"
+      >
+        {{ patient.firstName }} {{ patient.lastName }} ({{ patient.age }} years)
+      </li>
+    </ul>
+    <div v-else class="mt-4 text-sm text-gray-500 px-4 py-2">
+      No patients found. You can proceed to add a new patient.
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex justify-end space-x-4 mt-6">
+    <button @click="closeModal" class="bg-red-500 text-white py-2 px-4 rounded-md">Cancel</button>
+    <button
+      :disabled="!selectedPatient && !allowAddNewPatient"
+      @click="addOrNextStep"
+      class="bg-blue-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400"
+    >
+      {{ selectedPatient ? "Next" : "Add New Patient" }}
+    </button>
+  </div>
+</div>
+
+
   
         <!-- Step 2: Patient Details -->
         <div v-if="step === 2">
