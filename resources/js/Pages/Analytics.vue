@@ -7,11 +7,11 @@ import Vaccinations from '@/Components/Charts/Vaccinations.vue';
 import MentalHealth from '@/Components/Charts/MentalHealth.vue';
 import RiskManagement from '@/Components/Charts/RiskManagement.vue';
 import Cases from '@/Components/Charts/Cases.vue';
-import { reactive } from 'vue';
-import { useForm } from "@inertiajs/inertia-vue3";
+import { ref } from 'vue';
 
-// Filters
-const filters = reactive({
+const showFilters = ref(false);
+
+const filters = ref({
   date: '',
   ageRange: '',
   gender: '',
@@ -42,25 +42,12 @@ const casesTypes = [
   { label: 'Deaths', value: 'deaths' },
 ];
 
-// Initialize the form with filters
-const form = useForm({
-  date: '',
-  ageRange: '',
-  gender: '',
-  casesType: '',
-});
-
-const applyFilters = () => {
-  form.date = filters.date;
-  form.ageRange = filters.ageRange;
-  form.gender = filters.gender;
-  form.casesType = filters.casesType;
-
-  form.get(route('system-analytics')); // Replace with your Laravel route name
+const toggleFilters = () => {
+  showFilters.value = !showFilters.value;
 };
 
-const generateReport = () => {
-  console.log('Generating Report with Filters:', filters);
+const applyFilters = () => {
+  console.log('Filters applied:', filters.value);
 };
 </script>
 
@@ -68,106 +55,122 @@ const generateReport = () => {
   <Head title="System Analytics" />
 
   <NewLayout>
-    <div class="mt-8 mx-8 space-y-8">
-      <!-- Header Section -->
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-6 px-4 lg:px-8 rounded-lg shadow-lg">
+      <h1 class="text-4xl font-extrabold text-center">System Analytics Dashboard</h1>
+      <p class="text-sm lg:text-base text-center mt-2">
+        Monitor, analyze, and understand health trends with real-time insights.
+      </p>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mt-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-800">System Analytics Dashboard</h1>
-        <button @click="generateReport"
-          class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition">
-          Generate Report
+        <h2 class="text-lg font-bold text-gray-700">Filters</h2>
+        <button
+          @click="toggleFilters"
+          class="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-6 py-3 rounded-lg shadow hover:scale-105 transition-transform"
+        >
+          Toggle Filters
         </button>
       </div>
-
-      <!-- Filters Section -->
-      <div class="bg-white shadow-lg rounded-lg p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Date Range -->
+      <div v-if="showFilters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-2">Date Range</label>
-          <select v-model="filters.date"
-            class="w-full border-gray-300 rounded-lg shadow focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Date Range</label>
+          <select
+            v-model="filters.date"
+            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
             <option value="" disabled>Select Date Range</option>
             <option v-for="option in dateOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
           </select>
         </div>
-
-        <!-- Age Range -->
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-2">Age Range</label>
-          <select v-model="filters.ageRange"
-            class="w-full border-gray-300 rounded-lg shadow focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Age Range</label>
+          <select
+            v-model="filters.ageRange"
+            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
             <option value="" disabled>Select Age Range</option>
             <option v-for="range in ageRanges" :key="range.value" :value="range.value">
               {{ range.label }}
             </option>
           </select>
         </div>
-
-        <!-- Gender -->
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-2">Gender</label>
-          <select v-model="filters.gender"
-            class="w-full border-gray-300 rounded-lg shadow focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
+          <select
+            v-model="filters.gender"
+            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
             <option value="" disabled>Select Gender</option>
             <option v-for="gender in genderOptions" :key="gender.value" :value="gender.value">
               {{ gender.label }}
             </option>
           </select>
         </div>
-
-        <!-- Cases Type -->
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-2">Cases Type</label>
-          <select v-model="filters.casesType"
-            class="w-full border-gray-300 rounded-lg shadow focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Cases Type</label>
+          <select
+            v-model="filters.casesType"
+            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
             <option value="" disabled>Select Cases Type</option>
             <option v-for="type in casesTypes" :key="type.value" :value="type.value">
               {{ type.label }}
             </option>
           </select>
         </div>
-
-        <!-- Apply Filters -->
-        <div class="flex items-end">
-          <button @click="applyFilters"
-            class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-green-700 transition w-full">
-            Apply Filters
-          </button>
-        </div>
       </div>
+    </div>
 
-      <!-- Charts Section -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-white shadow-lg rounded-lg p-6 col-span-2">
-          <h6 class="text-xl font-semibold mb-4 text-gray-800">Total Patients</h6>
-          <TotalPatients :filters="filters" />
-        </div>
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+      <div class="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-lg shadow-lg">
+        <h2 class="text-lg font-bold text-gray-700">Total Patients</h2>
+        <p class="text-3xl font-extrabold text-gray-800 mt-2">6,075</p>
+      </div>
+      <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-lg shadow-lg">
+        <h2 class="text-lg font-bold text-gray-700">Vaccinations</h2>
+        <p class="text-3xl font-extrabold text-gray-800 mt-2">11,432</p>
+      </div>
+      <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 p-6 rounded-lg shadow-lg">
+        <h2 class="text-lg font-bold text-gray-700">Mental Health Cases</h2>
+        <p class="text-3xl font-extrabold text-gray-800 mt-2">245</p>
+      </div>
+      <div class="bg-gradient-to-br from-red-100 to-red-300 p-6 rounded-lg shadow-lg">
+        <h2 class="text-lg font-bold text-gray-700">High-Risk Cases</h2>
+        <p class="text-3xl font-extrabold text-gray-800 mt-2">132</p>
+      </div>
+    </div>
 
-        <div class="bg-white shadow-lg rounded-lg p-6">
-          <h6 class="text-xl font-semibold mb-4 text-gray-800">Referred Patients</h6>
-          <ReferedPatients :filters="filters" />
-        </div>
-
-        <div class="bg-white shadow-lg rounded-lg p-6 col-span-3">
-          <h6 class="text-xl font-semibold mb-4 text-gray-800">Vaccinations</h6>
-          <Vaccinations :filters="filters" />
-        </div>
-
-        <div class="bg-white shadow-lg rounded-lg p-6 col-span-2">
-          <h6 class="text-xl font-semibold mb-4 text-gray-800">Cases</h6>
-          <Cases :filters="filters" />
-        </div>
-
-        <div class="bg-white shadow-lg rounded-lg p-6">
-          <h6 class="text-xl font-semibold mb-4 text-gray-800">Mental Health Cases</h6>
-          <MentalHealth :filters="filters" />
-        </div>
-
-        <div class="bg-white shadow-lg rounded-lg p-6 col-span-3">
-          <h6 class="text-xl font-semibold mb-4 text-gray-800">Risk Management</h6>
-          <RiskManagement :filters="filters" />
-        </div>
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Monthly Trending Cases</h6>
+        <TotalPatients :filters="filters" />
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Most Common Diagnoses</h6>
+        <ReferedPatients :filters="filters" />
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Vaccination Overview</h6>
+        <Vaccinations :filters="filters" />
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Cases Overview</h6>
+        <Cases :filters="filters" />
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Mental Health</h6>
+        <MentalHealth :filters="filters" />
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Risk Management</h6>
+        <RiskManagement :filters="filters" />
       </div>
     </div>
   </NewLayout>

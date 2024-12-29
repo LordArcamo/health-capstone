@@ -99,7 +99,7 @@
               <input type="number" v-model="computedAge" class="input" readonly />
             </div>
             
-            <div>
+            <!-- <div>
               <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
               <div class="relative">
                 <input type="tel" v-model="form.contact" @input="formatContact"
@@ -110,7 +110,7 @@
                   +63
                 </span>
               </div>
-            </div>
+            </div> -->
 
           </div>
           <div class="mt-6 flex justify-center text-right">
@@ -152,28 +152,33 @@
               <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 @input="formatBloodPressure" />
+                <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
             </div>
             <div>
               <label class="block">Temperature (°C):</label>
               <input type="text" v-model="form.temperature" placeholder="Example: 37.5°C"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 @input="formatTemperature" />
+                <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
 
             </div>
             <div>
               <label class="block">Height (cm):</label>
               <input type="text" v-model="form.height" placeholder="Example: 180" class="input"
                 @input="validateHeight" />
+                <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
             </div>
             <div>
               <label class="block">Weight (kg):</label>
               <input type="text" v-model="form.weight" placeholder="Example: 70" class="input"
                 @input="validateWeight" />
+                <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
             </div>
             <div>
               <label class="block">Name of Attending Doctor/Provider:</label>
               <input type="text" v-model="form.providerName" placeholder="Example: Dr.Aileen Uy"
                 class="input"></input>
+                <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
             <div>
               <label class="block">Name of Spouse:</label>
@@ -202,6 +207,7 @@
                 <option>Yes</option>
                 <option>No</option>
               </select>
+              <span v-if="errors.fourMember" class="text-red-600 text-sm">{{ errors.fourMember }}</span>
             </div>
             <div class="form-group">
               <label for="philhealthStatus" class="block font-medium text-gray-700">Philhealth Status:</label>
@@ -212,6 +218,7 @@
                 <option value="Member">Member</option>
                 <option value="Dependent">Dependent</option>
               </select>
+              <span v-if="errors.philhealthStatus" class="text-red-600 text-sm">{{ errors.philhealthStatus }}</span>
 
               <!-- Conditionally Render ID Input -->
               <div v-if="form.philhealthStatus === 'Member'" class="mt-4">
@@ -800,6 +807,30 @@ export default {
       }
       if (!this.form.temperature || isNaN(this.form.temperature) || parseFloat(this.form.temperature) <= 0) {
         this.errors.temperature = 'Valid temperature is required.';
+        valid = false;
+      }
+      if (!this.form.bloodPressure) {
+        this.errors.bloodPressure = 'Consultation time is required.';
+        valid = false;
+      }
+      if (!this.form.providerName) {
+        this.errors.providerName = 'Provider Name is required.';
+        valid = false;
+      }
+      if (!this.form.emergencyContact) {
+        this.errors.emergencyContact = 'Emergency Contact is required.';
+        valid = false;
+      }
+      if (!this.form.nameOfSpouse) {
+        this.errors.nameOfSpouse = 'Name of Spouse is required.';
+        valid = false;
+      }
+      if (!this.form.fourMember) {
+        this.errors.fourMember = 'Name of Spouse is required.';
+        valid = false;
+      }
+      if (!this.form.philhealthStatus) {
+        this.errors.philhealthStatus = 'Philhealth Status is required.';
         valid = false;
       }
       return valid;
