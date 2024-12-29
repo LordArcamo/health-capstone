@@ -68,11 +68,11 @@
     <!-- Sidebar -->
     <div :class="[
       'h-screen transition-all duration-300 shadow-lg bg-gradient-to-b from-green-500 to-green-700 text-white',
-      isSidebarOpen ? 'w-100' : 'w-20'
+      isSidebarOpen ? 'w-100' : 'w-16'
     ]">
       <!-- Sidebar Header -->
-      <div class="flex items-center justify-between px-4 py-6">
-        <h2 v-if="isSidebarOpen" class="text-xl font-semibold tracking-wide uppercase">
+      <div class="flex items-center justify-between px-3 py-3">
+        <h2 v-if="isSidebarOpen" class="text-lg font-semibold tracking-wide uppercase">
           Mental Health Program
         </h2>
         <button @click="toggleSidebar" class="text-white bg-white/10 p-2 rounded-lg hover:bg-white/20 transition">
@@ -91,11 +91,11 @@
       </div>
 
       <!-- Sidebar Content -->
-      <div v-if="isSidebarOpen" class="px-4 py-6 space-y-6 text-sm tracking-wide">
+      <div v-if="isSidebarOpen" class="px-3 py-3 space-y-4">
         <!-- Add Session -->
         <button @click="openModal"
-          class="w-full flex items-center gap-2 py-3 px-4 bg-white text-green-700 rounded-lg shadow-md hover:bg-gray-200 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          class="w-full flex items-center gap-2 py-2 px-3 bg-white text-green-700 rounded-lg shadow-md hover:bg-gray-50 transition text-sm font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 010-2h3V6a1 1 0 011-1z"
               clip-rule="evenodd" />
@@ -105,27 +105,29 @@
 
         <!-- Active Sessions -->
         <div>
-          <h3 class="text-lg font-medium mb-4">Active Sessions</h3>
-          <ul class="space-y-4">
+          <h3 class="text-base font-medium mb-2">Active Sessions</h3>
+          <ul class="space-y-2">
             <li v-for="session in activeSessions" :key="session.id"
-              class="flex items-center justify-between bg-white text-gray-900 p-4 rounded-lg shadow hover:shadow-lg transition">
-              <div>
-                <p class="text-base font-medium">{{ session.title }}</p>
-                <p class="text-xs text-gray-500">📅 {{ session.date }}</p>
-              </div>
-              <div class="flex items-center space-x-2">
-                <button @click="markAsFinished(session.id)"
-                  class="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                  Finish
-                </button>
-                <button @click="editSession(session)"
-                  class="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-                  Edit
-                </button>
-                <button @click="deleteSession(session.id)"
-                  class="p-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
-                  Delete
-                </button>
+              class="session-card bg-white text-gray-900">
+              <div class="flex items-center justify-between">
+                <div class="session-content">
+                  <p class="session-title">{{ session.title }}</p>
+                  <p class="session-date text-gray-500">{{ formatDate(session.date) }}</p>
+                </div>
+                <div class="button-group">
+                  <button @click="markAsFinished(session.id)"
+                    class="action-button bg-blue-600 hover:bg-blue-700">
+                    Finish
+                  </button>
+                  <button @click="editSession(session)"
+                    class="action-button bg-green-600 hover:bg-green-700">
+                    Edit
+                  </button>
+                  <button @click="deleteSession(session.id)"
+                    class="action-button bg-red-600 hover:bg-red-700">
+                    Delete
+                  </button>
+                </div>
               </div>
             </li>
           </ul>
@@ -133,23 +135,25 @@
 
         <!-- Finished Sessions -->
         <div>
-          <h3 class="text-lg font-medium mb-4">Finished Sessions</h3>
-          <ul class="space-y-4">
+          <h3 class="text-base font-medium mb-2">Finished Sessions</h3>
+          <ul class="space-y-2">
             <li v-for="session in finishedSessions" :key="session.id"
-              class="flex items-center justify-between bg-gray-200 p-4 rounded-lg shadow hover:shadow-lg transition">
-              <div>
-                <p class="text-base text-gray-600 font-medium">{{ session.title }}</p>
-                <p class="text-xs text-gray-600">📅 {{ session.date }}</p>
-              </div>
-              <div class="flex items-center space-x-2">
-                <button @click="markAsActive(session.id)"
-                  class="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-                  Restore
-                </button>
-                <button @click="deleteSession(session.id)"
-                  class="p-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
-                  Delete
-                </button>
+              class="session-card bg-gray-100">
+              <div class="flex items-center justify-between">
+                <div class="session-content">
+                  <p class="session-title text-gray-900">{{ session.title }}</p>
+                  <p class="session-date text-gray-700">{{ formatDate(session.date) }}</p>
+                </div>
+                <div class="button-group">
+                  <button @click="markAsActive(session.id)"
+                    class="action-button bg-green-600 hover:bg-green-700 text-black">
+                    Restore
+                  </button>
+                  <button @click="deleteSession(session.id)"
+                    class="action-button bg-red-600 hover:bg-red-700 text-black">
+                    Delete
+                  </button>
+                </div>
               </div>
             </li>
           </ul>
@@ -160,42 +164,42 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+
 export default {
+  props: {
+    initialSessions: {
+      type: Array,
+      required: true,
+      default: () => []
+    }
+  },
   data() {
     return {
-      sessions: [
-        {
-          id: 1,
-          title: "Stress Management Workshop",
-          date: "2024-12-01",
-          status: "active",
-        },
-        {
-          id: 2,
-          title: "Coping Mechanisms Seminar",
-          date: "2024-11-28",
-          status: "finished",
-        },
-        {
-          id: 3,
-          title: "Mindfulness Session",
-          date: "2024-11-15",
-          status: "finished",
-        },
-      ],
+      sessions: this.initialSessions,
       isSidebarOpen: true,
       isModalOpen: false,
       isEditing: false,
       showAlert: false,
       alertMessage: "",
-      alertType: "", // New property to determine the action type (edit or delete)
+      alertType: "",
       alertAction: null,
       form: {
         id: null,
         title: "",
         date: "",
+        status: "active"
       },
     };
+  },
+  watch: {
+    initialSessions: {
+      handler(newSessions) {
+        this.sessions = newSessions;
+      },
+      deep: true
+    }
   },
   computed: {
     activeSessions() {
@@ -206,57 +210,118 @@ export default {
     },
   },
   methods: {
+    formatDate(date) {
+      if (!date) return '';
+      const [day, month, year] = date.split('-');
+      return `${day}-${month}-${year}`;
+    },
+    formatDateForInput(date) {
+      if (!date) return '';
+      const [day, month, year] = date.split('-');
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
     },
     openModal() {
       this.isEditing = false;
-      this.form = { id: null, title: "", date: "" };
+      this.form = { id: null, title: "", date: "", status: "active" };
       this.isModalOpen = true;
     },
     closeModal() {
       this.isModalOpen = false;
+      this.form = { id: null, title: "", date: "", status: "active" };
     },
     saveSession() {
-      const sessionData = { ...this.form, id: Date.now(), status: "active" };
       if (this.isEditing) {
-        const index = this.sessions.findIndex(
-          (session) => session.id === this.form.id
-        );
-        if (index !== -1) this.sessions.splice(index, 1, sessionData);
+        router.put(`/mental-health-sessions/${this.form.id}`, this.form, {
+          preserveScroll: true,
+          preserveState: true,
+          onSuccess: (page) => {
+            this.sessions = page.props.sessions;
+            this.closeModal();
+          },
+          onError: (errors) => {
+            console.error(errors);
+          }
+        });
       } else {
-        this.sessions.push(sessionData);
+        router.post('/mental-health-sessions', this.form, {
+          preserveScroll: true,
+          preserveState: true,
+          onSuccess: (page) => {
+            this.sessions = page.props.sessions;
+            this.closeModal();
+          },
+          onError: (errors) => {
+            console.error(errors);
+          }
+        });
       }
-      this.closeModal();
     },
     editSession(session) {
       this.alertMessage = `Are you sure you want to edit the session titled "${session.title}"?`;
-      this.alertType = "edit"; // Set the alert type to edit
+      this.alertType = "edit";
       this.alertAction = () => {
         this.isEditing = true;
-        this.form = { ...session }; // Prefill form with session data
-        this.isModalOpen = true; // Open modal for editing
+        this.form = { 
+          ...session,
+          date: this.formatDateForInput(session.date)
+        };
+        this.isModalOpen = true;
       };
-      this.showAlert = true; // Display confirmation dialog
+      this.showAlert = true;
     },
     deleteSession(id) {
-      const session = this.sessions.find((session) => session.id === id);
+      const session = this.sessions.find(session => session.id === id);
       if (!session) return;
 
       this.alertMessage = `Are you sure you want to delete the session titled "${session.title}"?`;
-      this.alertType = "delete"; // Set the alert type to delete
+      this.alertType = "delete";
       this.alertAction = () => {
-        this.sessions = this.sessions.filter((session) => session.id !== id);
+        router.delete(`/mental-health-sessions/${id}`, {
+          preserveScroll: true,
+          preserveState: true,
+          onSuccess: (page) => {
+            this.sessions = page.props.sessions;
+            this.closeAlert();
+          },
+          onError: (errors) => {
+            console.error(errors);
+          }
+        });
       };
-      this.showAlert = true; // Display confirmation dialog
+      this.showAlert = true;
     },
     markAsFinished(id) {
-      const session = this.sessions.find((session) => session.id === id);
-      if (session) session.status = "finished";
+      router.put(`/mental-health-sessions/${id}/status`, 
+        { status: 'finished' },
+        {
+          preserveScroll: true,
+          preserveState: true,
+          onSuccess: (page) => {
+            this.sessions = page.props.sessions;
+          },
+          onError: (errors) => {
+            console.error(errors);
+          }
+        }
+      );
     },
     markAsActive(id) {
-      const session = this.sessions.find((session) => session.id === id);
-      if (session) session.status = "active";
+      router.put(`/mental-health-sessions/${id}/status`, 
+        { status: 'active' },
+        {
+          preserveScroll: true,
+          preserveState: true,
+          onSuccess: (page) => {
+            this.sessions = page.props.sessions;
+          },
+          onError: (errors) => {
+            console.error(errors);
+          }
+        }
+      );
     },
     confirmAlert() {
       if (this.alertAction) this.alertAction();
@@ -266,16 +331,41 @@ export default {
       this.showAlert = false;
       this.alertMessage = "";
       this.alertAction = null;
-      this.alertType = ""; // Reset the alert type
+      this.alertType = "";
     },
   },
 };
-
-
 </script>
 
-
-
 <style scoped>
-/* Optional: Add styling for visual enhancements */
+.w-100 {
+  width: 28rem;
+}
+
+.session-card {
+  @apply p-3 rounded-lg shadow hover:shadow-lg transition duration-200;
+  min-height: 3.5rem;
+  min-width: 26rem;
+}
+
+.session-content {
+  @apply flex-grow pr-4;
+}
+
+.session-title {
+  @apply text-sm font-medium mb-0.5;
+  max-width: 15rem;
+}
+
+.session-date {
+  @apply text-xs;
+}
+
+.button-group {
+  @apply flex items-center space-x-1.5 flex-shrink-0;
+}
+
+.action-button {
+  @apply px-2.5 py-1 rounded text-white transition duration-200 text-xs font-medium whitespace-nowrap;
+}
 </style>

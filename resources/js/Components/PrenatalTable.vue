@@ -236,14 +236,20 @@
     </div>
 
     <TrimesterModal
-  v-if="currentModal === 'trimester'"
-  :prenatalId="selectedPatient?.id"
-  @close="closeModal"
-/>
+      v-if="currentModal === 'trimester'"
+      :key="selectedPatient?.prenatalId"
+      :prenatalId="selectedPatient?.prenatalId"
+      :prefilledData="localTrimesterData"
+      @close="closeModal"
+      :onConfirm="handleTrimesterConfirm"
+    />
+
 <PostpartumModal
   v-if="currentModal === 'postpartum'"
   :patient="selectedPatient"
+  :existingData="postpartumData"
   @close="closeModal"
+  :onSubmit="handlePostpartumSubmit"
 />
 </template>
 
@@ -251,7 +257,7 @@
 import PostpartumModal from "./PostpartumForm.vue";
 import TrimesterModal from "@/Components/TrimesterModal.vue";
 import { Inertia } from '@inertiajs/inertia';
-
+import axios from 'axios';
 
 export default {
   components: {
@@ -263,21 +269,29 @@ export default {
       type: Array,
       default: () => [],
     },
+    prefilledData: {
+      type: Object,
+      default: null
+    },
+    prenatalId: Number,
+    trimester: String,
   },
   data() {
     return {
-      isModalOpen: false, // Initialize modal visibility state
-      searchQuery: '', // Search query for filtering
-      filterPrk: '', // Filter by purok
-      filterBarangay: '', // Filter by barangay
-      filterGender: [], // Array for selected genders
-      filterAgeRange: '', // Filter by age range
-      filterDiagnosis: [], // Array for selected diagnoses
-      currentPage: 1, // Current page for pagination
-      itemsPerPage: 5, // Number of items per page
-      currentModal: null, // Stores the type of modal ('trimester', 'postpartum')
-      selectedPatient: null, // Selected patient for modal display
-      isFilterPanelOpen: false, // Toggle filter panel visibility
+      isModalOpen: false,
+      searchQuery: '',
+      filterPrk: '',
+      filterBarangay: '',
+      filterGender: [],
+      filterAgeRange: '',
+      filterDiagnosis: [],
+      currentPage: 1,
+      itemsPerPage: 5,
+      currentModal: null,
+      selectedPatient: null,
+      isFilterPanelOpen: false,
+      localTrimesterData: null,
+      postpartumData: null,
     };
   },
   computed: {
@@ -286,8 +300,8 @@ export default {
   return this.patients
     .map((patient) => ({
       ...patient,
-      fullName: `${patient.firstName} ${patient.lastName}`, // Combine first and last name
-      address: `${patient.purok}, ${patient.barangay}`, // Combine purok and barangay for address
+      fullName: `${patient.firstName} ${patient.lastName}`,
+      address: `${patient.purok}, ${patient.barangay}`,
     }))
     .filter((patient) => {
       const matchesQuery =
@@ -328,9 +342,17 @@ export default {
       return [...new Set(this.patients.map((patient) => patient.barangay))];
     },
   },
+  watch: {
+    prefilledData: {
+      immediate: true,
+      handler(newVal) {
+        this.localTrimesterData = newVal;
+      }
+    }
+  },
   methods: {
     triggerImport() {
-      this.$refs.fileInput.click(); // Trigger file input click
+      this.$refs.fileInput.click();
     },
     handleFileUpload(event) {
       const file = event.target.files[0];
@@ -354,21 +376,53 @@ export default {
     toggleFilterPanel() {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
-    openModal(type, patient) {
+    async openModal(type, patient) {
+      this.currentModal = type;
       this.selectedPatient = patient;
-      this.currentModal = type; // 'trimester' or 'postpartum'
+
+      if (type === 'trimester') {
+        await this.fetchTrimesterData(patient.prenatalId);
+      } else if (type === 'postpartum') {
+        await this.fetchPostpartumData(patient.prenatalId);
+      }
+    },
+    async fetchPostpartumData(prenatalId) {
+      try {
+        const response = await axios.get(`/postpartum/data/${prenatalId}`);
+        if (response.data.success) {
+          this.postpartumData = response.data.data;
+        } else {
+          this.postpartumData = null;
+        }
+      } catch (error) {
+        console.error('Error fetching postpartum data:', error);
+        this.postpartumData = null;
+      }
     },
     closeModal() {
       this.currentModal = null;
       this.selectedPatient = null;
+      this.localTrimesterData = null;
+      this.postpartumData = null;
     },
     handlePostpartumSubmit(formData) {
       console.log("Submitted Postpartum Data:", formData);
       this.closeModal();
     },
-    handleTrimesterConfirm() {
-      console.log("Trimester confirmed for:", this.selectedPatient);
+    handleTrimesterConfirm(formData) {
+      console.log('Trimester form submitted:', formData);
+      // Handle the form submission here
       this.closeModal();
+    },
+    async fetchTrimesterData(prenatalId) {
+      try {
+        const response = await axios.get(`/prenatal/${prenatalId}/trimester/1`);
+        if (response.data.success) {
+          this.localTrimesterData = response.data.data;
+        }
+      } catch (error) {
+        console.error('Error fetching trimester data:', error);
+      }
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {

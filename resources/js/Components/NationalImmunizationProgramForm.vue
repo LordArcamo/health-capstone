@@ -339,7 +339,7 @@
             <!-- Loop through form fields to display data -->
             <div v-for="(value, key) in form" :key="key">
               <label class="block">{{ formatLabel(key) }}:</label>
-              <p class="input">{{ value || 'Not Provided' }}</p>
+              <p class="input">{{ key === 'age' && value === 0 ? 'Less than 1 year' : (value || 'Not Provided') }}</p>
             </div>
           </div>
           <div class="mt-6 flex justify-between">
@@ -432,17 +432,16 @@ export default {
       const today = new Date();
 
       let age = today.getFullYear() - birthDate.getFullYear();
-
-      // Check if the birthday has occurred this year
-      const hasBirthdayOccurred = 
-        today.getMonth() > birthDate.getMonth() || 
+      const hasBirthdayOccurred =
+        today.getMonth() > birthDate.getMonth() ||
         (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
 
       if (!hasBirthdayOccurred) {
         age--;
       }
 
-      return age;
+      // Return 0 if the calculated age is less than 1
+      return age < 1 ? 0 : age;
     },
   },
   watch: {
@@ -459,8 +458,11 @@ export default {
       },
     },
     // Watch for changes in birthdate and update the age field
+    computedAge(newAge) {
+      this.form.age = newAge;
+    },
     'form.birthdate': function () {
-      this.form.age = this.computedAge; // Automatically update age when birthdate changes
+      this.form.age = this.computedAge; // Update age when birthdate changes
     },
   },
   'form.philhealthStatus': function (newVal) {

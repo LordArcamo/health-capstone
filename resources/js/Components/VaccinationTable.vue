@@ -3,14 +3,21 @@ import { ref, onMounted, onUnmounted } from "vue";
 import VaccinationModal from "./VaccinationModals/VaccinationModal.vue";
 import ScheduleNextAppointmentModal from "./VaccinationModals/ScheduleNextAppointmentModal.vue";
 import ViewHistoryModal from "./VaccinationModals/ViewHistoryModal.vue";
+import axios from 'axios';
 
 export default {
   props: {
     patients: {
       type: Array,
+      required: true,
+      default: () => [],
+    },
+    vaccinatedPatients: {
+      type: Array,
       default: () => [],
     },
   },
+  
   components: {
     VaccinationModal,
     ScheduleNextAppointmentModal,
@@ -33,6 +40,12 @@ export default {
       dropdownOpen: null,
     };
   },
+  watch: {
+    filteredPatients() {
+      this.currentPage = 1; // Reset to the first page
+      this.updatePagination();
+    },
+  },
   computed: {
     barangayOptions() {
       return [...new Set(this.patients.map((p) => p.barangay))];
@@ -46,19 +59,40 @@ export default {
         );
       });
     },
+    processedVaccinatedPatients() {
+      return this.vaccinatedPatients.map(patient => {
+        // Group history by vaccine type and get latest entry for each
+        const latestByVaccineType = {};
+        if (patient.history && patient.history.length > 0) {
+          patient.history.forEach(record => {
+            const currentLatest = latestByVaccineType[record.vaccineType];
+            if (!currentLatest || new Date(record.dateOfVisit) > new Date(currentLatest.dateOfVisit)) {
+              latestByVaccineType[record.vaccineType] = record;
+            }
+          });
+        }
+        // Create a new patient object with only the latest records
+        return {
+          ...patient,
+          history: Object.values(latestByVaccineType)
+        };
+      });
+    },
     totalPages() {
-      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
+      const total = Math.ceil(this.processedVaccinatedPatients.length / this.itemsPerPage);
+      return total;
     },
   },
   methods: {
-    applyFilters() {
-      this.currentPage = 1; // Reset to the first page after filtering
-      this.updatePagination();
+    formatDate(date) {
+      if (!date) return "N/A";
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      return new Date(date).toLocaleDateString(undefined, options);
     },
     updatePagination() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = this.currentPage * this.itemsPerPage;
-      this.paginatedPatients = this.filteredPatients.slice(start, end);
+      this.paginatedPatients = this.processedVaccinatedPatients.slice(start, end);
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -72,29 +106,40 @@ export default {
         this.updatePagination();
       }
     },
-    openVaccinationModal() {
-      this.modalKey += 1;
-      this.showVaccinationModal = true;
+    applyFilters() {
+      this.currentPage = 1; // Reset to the first page after filtering
+      this.updatePagination();
     },
-    closeVaccinationModal() {
-      this.showVaccinationModal = false;
-      this.$refs.vaccinationModal?.resetState?.();
+    toggleDropdown(key) {
+      this.dropdownOpen = this.dropdownOpen === key ? null : key;
     },
-    openHistoryModal(patient) {
+    openHistoryModal(patient, vaccineType) {
       this.activePatient = patient;
-      this.activePatientHistory = patient.history || [];
+      // Get all history records for this vaccine type
+      const allHistory = this.vaccinatedPatients
+        .find(p => p.personalId === patient.personalId)?.history
+        .filter(record => record.vaccineType === vaccineType)
+        .sort((a, b) => new Date(b.dateOfVisit) - new Date(a.dateOfVisit)) || [];
+      this.activePatientHistory = allHistory;
       this.showHistoryModal = true;
     },
     openScheduleModal(patient) {
       this.activePatient = patient;
       this.showScheduleModal = true;
-    },
-    closeAllModals() {
-      this.showVaccinationModal = false;
-      this.showScheduleModal = false;
-      this.showHistoryModal = false;
-      this.activePatient = null;
-      this.activePatientHistory = [];
+      
+      // Fetch existing appointments for this vaccination
+      axios.get(`/api/appointments/vaccination/${patient.vaccinationId}`)
+        .then(response => {
+          const { appointments } = response.data;
+          // Update the activePatient with appointments
+          this.activePatient = {
+            ...this.activePatient,
+            appointments: appointments
+          };
+        })
+        .catch(error => {
+          console.error('Error fetching appointments:', error);
+        });
     },
     clearFilters() {
       this.searchQuery = "";
@@ -102,12 +147,60 @@ export default {
       this.filterAddress = "";
       this.applyFilters();
     },
+    generateReport() {
+      if (!this.vaccinatedPatients || this.vaccinatedPatients.length === 0) {
+        alert("No patient data available to generate the report.");
+        return;
+      }
+
+      const headers = ["Name", "Age", "Vaccine Type", "Next Appointment", "Address"];
+      const rows = this.vaccinatedPatients.map((patient) => [
+        patient.firstName,
+        patient.age,
+        patient.vaccineType,
+        this.formatDate(patient.nextAppointment),
+        patient.barangay || "N/A",
+      ]);
+
+      const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", "patients_report.csv");
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert("Report generated and downloaded successfully!");
+    },
+    scheduleAppointment() {
+      alert("Appointment scheduled successfully!");
+      this.closeAllModals();
+    },
+    openVaccinationModal() {
+      this.modalKey++; // Increment key to force re-render if needed
+      this.showVaccinationModal = true; // Show the modal
+    },
+    closeVaccinationModal() {
+      this.showVaccinationModal = false; // Hide the modal
+    },
+    closeAllModals() {
+      this.showScheduleModal = false;
+      this.showHistoryModal = false;
+      setTimeout(() => {
+        this.activePatient = null; // Delay resetting to ensure proper unmount
+        this.activePatientHistory = [];
+      }, 300); // Add a slight delay to prevent reactive issues
+    }
   },
   mounted() {
-    this.updatePagination(); // Initialize pagination on mount
+    this.updatePagination(); // Initialize pagination
   },
 };
 </script>
+
 
 
 
@@ -192,6 +285,7 @@ export default {
       <table class="min-w-full divide-y divide-gray-200 bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-s font-bold">
+            <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">ID</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Name</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Age</th>
             <th class="px-6 py-3 text-left  font-medium text-white uppercase tracking-wider">Vaccine Type</th>
@@ -202,34 +296,55 @@ export default {
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="patient in paginatedPatients" :key="patient.id" class="hover:bg-gray-100">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.vaccineType }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.nextAppointment || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.barangay || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.purok || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-              <button @click="openScheduleModal(patient)"
-                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                Schedule
-              </button>
-              <button @click="openHistoryModal(patient)"
-                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-gray-400 ml-2">
-                History
-              </button>
-            </td>
-          </tr>
+          <template v-for="patient in paginatedPatients" :key="patient.personalId">
+            <tr v-for="record in patient.history" :key="record.id" class="hover:bg-gray-100">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.personalId }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }} {{ patient.middleName }} {{ patient.lastName }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ record.vaccineType }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ formatDate(record.nextAppointment) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.barangay || 'N/A' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.purok || 'N/A' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <button @click="openScheduleModal({
+                    ...patient,
+                    vaccineType: record.vaccineType,
+                    vaccinationId: record.id
+                  })"
+                  class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  Schedule
+                </button>
+                <button @click="openHistoryModal(patient, record.vaccineType)"
+                  class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-gray-400 ml-2">
+                  History
+                </button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
 
     <!-- Modals -->
-    <VaccinationModal v-if="showVaccinationModal" :key="modalKey" @close="closeVaccinationModal" />
-    <ScheduleNextAppointmentModal v-if="showScheduleModal" :patient="activePatient" @close="closeAllModals"
-      @schedule="scheduleAppointment" />
-    <ViewHistoryModal v-if="showHistoryModal" :patient="activePatient" :history="activePatientHistory"
-      @close="closeAllModals" />
+    <VaccinationModal
+      v-if="showVaccinationModal"
+      :patients="patients"
+      :key="modalKey"
+      @close="closeVaccinationModal"
+    />
+    <ScheduleNextAppointmentModal 
+      v-if="showScheduleModal" 
+      :patient="activePatient" 
+      :vaccinationId="activePatient?.vaccinationId"
+      @close="closeAllModals"
+      @schedule="scheduleAppointment" 
+    />
+    <ViewHistoryModal 
+      v-if="showHistoryModal" 
+      :patient="activePatient" 
+      :history="activePatientHistory" 
+      @close="closeAllModals" 
+    />
 
           <!-- Pagination -->
     <div class="flex justify-center gap-5 items-center mt-6">

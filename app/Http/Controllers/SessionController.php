@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Session;
-use App\Models\CheckUp;
+use App\Models\MentalHealthSession;
 use App\Models\PersonalInformation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,72 +13,91 @@ class SessionController extends Controller
     public function index()
     {
         // Fetch data for mental health patients by joining ITR with PersonalInformation
-        return$data = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
-            ->where('itr.visitType', 'Mental Health') // Filter for mental health visit types
+        $patients = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
+            ->where('itr.visitType', 'Mental Health') // Filter for mental health visit type
             ->select(
                 'personal_information.personalId',
                 'personal_information.firstName',
                 'personal_information.lastName',
                 'personal_information.age',
                 'personal_information.barangay',
+                'personal_information.purok',
                 'itr.visitType',
-                'itr.diagnosis'
+                'itr.diagnosis',
+                'itr.created_at as visitDate'
             )
-            ->distinct() // Ensure no duplicate entries
+            ->orderBy('itr.created_at', 'desc')
             ->get();
 
-        // Pass the fetched data to the frontend
+        // Fetch sessions
+        $sessions = MentalHealthSession::orderBy('date', 'desc')->get();
+
+        // Log the data for debugging
+        \Log::info('Mental health patients data:', ['count' => $patients->count(), 'data' => $patients->toArray()]);
+
         return Inertia::render('Services/MentalHealth', [
-            'MENTALHEALTH' => $data,
+            'patients' => $patients,
+            'sessions' => $sessions,
         ]);
     }
 
-    
     // Store a new session
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'date' => 'required|date',
-            'status' => 'nullable|string|in:active,finished',
+            'status' => 'required|in:active,finished'
         ]);
 
-        $validated['status'] = $validated['status'] ?? 'active'; // Default status is "active"
-        Session::create($validated);
+        MentalHealthSession::create($validated);
 
-        return redirect()->route('mental-health.sessions.index')
-            ->with('success', 'Session created successfully!');
-    }
-    
-    public function create(Request $request)
-    {
-        return Inertia::render('Services/MentalHealth');
+        return redirect()->back()
+            ->with('success', 'Session created successfully')
+            ->with('sessions', MentalHealthSession::orderBy('date', 'desc')->get());
     }
 
     // Update an existing session
     public function update(Request $request, $id)
     {
-        $session = Session::findOrFail($id);
-
+        $session = MentalHealthSession::findOrFail($id);
+        
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'date' => 'sometimes|required|date',
-            'status' => 'nullable|string|in:active,finished',
+            'title' => 'required|string|max:255',
+            'date' => 'required|date',
+            'status' => 'required|in:active,finished'
         ]);
 
         $session->update($validated);
 
-        return redirect()->route('mental-health.sessions.index')
-            ->with('success', 'Session updated successfully!');
+        return redirect()->back()
+            ->with('success', 'Session updated successfully')
+            ->with('sessions', MentalHealthSession::orderBy('date', 'desc')->get());
     }
 
     // Destroy a session
     public function destroy($id)
     {
-        $session = Session::findOrFail($id);
+        $session = MentalHealthSession::findOrFail($id);
         $session->delete();
 
-        return redirect()->route('mental-health.sessions.index')
-            ->with('success', 'Session deleted successfully!');
+        return redirect()->back()
+            ->with('success', 'Session deleted successfully')
+            ->with('sessions', MentalHealthSession::orderBy('date', 'desc')->get());
+    }
+
+    // Update session status
+    public function updateStatus(Request $request, $id)
+    {
+        $session = MentalHealthSession::findOrFail($id);
+        $validated = $request->validate([
+            'status' => 'required|in:active,finished'
+        ]);
+
+        $session->update($validated);
+
+        return redirect()->back()
+            ->with('success', 'Session status updated successfully')
+            ->with('sessions', MentalHealthSession::orderBy('date', 'desc')->get());
     }
 }

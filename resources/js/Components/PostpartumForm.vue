@@ -1,4 +1,4 @@
-<template>
+postpartum <template>
   <div>
     <!-- Modal Overlay -->
     <div
@@ -38,27 +38,27 @@
             <h2 class="text-lg font-semibold">Prenatal Outcome</h2>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
-                <input
-                  v-model="form.last_name"
-                  type="text"
-                  id="last_name"
-                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                />
-              </div>
-              <div>
                 <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
                 <input
-                  v-model="form.first_name"
+                  v-model="form.firstName"
                   type="text"
                   id="first_name"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                 />
               </div>
               <div>
+                <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                <input
+                  v-model="form.lastName"
+                  type="text"
+                  id="last_name"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+              <div>
                 <label for="middle_name" class="block text-sm font-medium text-gray-700">Middle Name</label>
                 <input
-                  v-model="form.middle_name"
+                  v-model="form.middleName"
                   type="text"
                   id="middle_name"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
@@ -85,7 +85,7 @@
               <div>
                 <label for="birth_length" class="block text-sm font-medium text-gray-700">Birth Length</label>
                 <input
-                  v-model="form.birth_length"
+                  v-model="form.birthLength"
                   type="number"
                   step="0.01"
                   id="birth_length"
@@ -95,7 +95,7 @@
               <div>
                 <label for="birth_weight" class="block text-sm font-medium text-gray-700">Birth Weight</label>
                 <input
-                  v-model="form.birth_weight"
+                  v-model="form.birthWeight"
                   type="number"
                   step="0.01"
                   id="birth_weight"
@@ -105,7 +105,7 @@
               <div>
                 <label for="delivery_date" class="block text-sm font-medium text-gray-700">Delivery Date</label>
                 <input
-                  v-model="form.delivery_date"
+                  v-model="form.deliveryDate"
                   type="date"
                   id="delivery_date"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
@@ -114,7 +114,7 @@
               <div>
                 <label for="delivery_time" class="block text-sm font-medium text-gray-700">Delivery Time</label>
                 <input
-                  v-model="form.delivery_time"
+                  v-model="form.deliveryTime"
                   type="time"
                   id="delivery_time"
                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
@@ -124,33 +124,51 @@
           </div>
 
           <div v-if="currentStep === 2" class="mt-6 space-y-4">
-      <h2 class="text-lg font-semibold">Breastfeeding</h2>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="date_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Date Initiated Breastfeeding</label>
-          <input v-model="form.date_initiated_breastfeeding" type="date" id="date_initiated_breastfeeding" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-        </div>
-        <div>
-          <label for="time_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Time Initiated Breastfeeding</label>
-          <input v-model="form.time_initiated_breastfeeding" type="time" id="time_initiated_breastfeeding" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-        </div>
-      </div>
-    </div>
+            <h2 class="text-lg font-semibold">Breastfeeding</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="date_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Date Initiated Breastfeeding</label>
+                <input
+                  v-model="form.dateInitiatedBreastfeeding"
+                  type="date"
+                  id="date_initiated_breastfeeding"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+              <div>
+                <label for="time_initiated_breastfeeding" class="block text-sm font-medium text-gray-700">Time Initiated Breastfeeding</label>
+                <input
+                  v-model="form.timeInitiatedBreastfeeding"
+                  type="time"
+                  id="time_initiated_breastfeeding"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+            </div>
+          </div>
 
-    <div v-if="currentStep === 3" class="mt-6 space-y-4">
-      <h2 class="text-lg font-semibold">Postpartum Details</h2>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="date_vitamin_a" class="block text-sm font-medium text-gray-700">Date Vitamin A Given</label>
-          <input v-model="form.date_vitamin_a" type="date" id="date_vitamin_a" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-        </div>
-        <div>
-          <label for="danger_signs_mother" class="block text-sm font-medium text-gray-700">Danger Signs (Mother)</label>
-          <textarea v-model="form.danger_signs_mother" id="danger_signs_mother" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
-        </div>
-      </div>
-    </div>
-
+          <div v-if="currentStep === 3" class="mt-6 space-y-4">
+            <h2 class="text-lg font-semibold">Postpartum Details</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="date_vitamin_a" class="block text-sm font-medium text-gray-700">Date Vitamin A Given</label>
+                <input
+                  v-model="form.dateVitaminA"
+                  type="date"
+                  id="date_vitamin_a"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+              <div>
+                <label for="danger_signs_mother" class="block text-sm font-medium text-gray-700">Danger Signs (Mother)</label>
+                <textarea
+                  v-model="form.dangerSignsMother"
+                  id="danger_signs_mother"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                ></textarea>
+              </div>
+            </div>
+          </div>
 
           <!-- Navigation Buttons -->
           <div class="flex justify-between items-center pt-4 border-t">
@@ -184,50 +202,76 @@
   </div>
 </template>
 <script>
+import { router } from '@inertiajs/vue3'
+
 export default {
   props: {
     patient: {
       type: Object,
-      required: true,
+      required: true
     },
-    onSubmit: {
-      type: Function,
-      required: true,
-    },
+    existingData: {
+      type: Object,
+      default: null
+    }
   },
   data() {
     return {
-      steps: [
-        { title: "Prenatal Outcome" },
-        { title: "Delivery Details" },
-        { title: "Breastfeeding" },
-        { title: "Postpartum Details" },
-      ],
       currentStep: 0,
+      steps: [
+        { title: 'Basic Info' },
+        { title: 'Delivery Details' },
+        { title: 'Breastfeeding' },
+        { title: 'Postpartum Details' }
+      ],
       form: {
-        last_name: '',
-        first_name: '',
-        middle_name: '',
+        prenatalId: this.patient?.prenatalId || '',
+        lastName: '',
+        firstName: '',
+        middleName: '',
         sex: '',
-        birth_length: '',
-        birth_weight: '',
-        delivery_date: '',
-        delivery_time: '',
-        date_initiated_breastfeeding: '',
-        time_initiated_breastfeeding: '',
-        date_vitamin_a: '',
-        danger_signs_mother: '',
-      },
+        birthLength: '',
+        birthWeight: '',
+        deliveryDate: '',
+        deliveryTime: '',
+        dateInitiatedBreastfeeding: '',
+        timeInitiatedBreastfeeding: '',
+        dateVitaminA: '',
+        dangerSignsMother: ''
+      }
     };
+  },
+  watch: {
+    existingData: {
+      immediate: true,
+      handler(newData) {
+        if (newData) {
+          this.form = {
+            ...this.form,
+            ...newData
+          };
+        }
+      }
+    }
   },
   methods: {
     handleSubmit() {
-      this.onSubmit(this.form); // Emit form data to parent
-      this.closeModal(); // Close modal
+      const url = this.existingData 
+        ? `/postpartum/${this.existingData.postpartumId}` 
+        : '/postpartum/store';
+      
+      router.post(url, this.form, {
+        onSuccess: () => {
+          this.$emit('close');
+        },
+        onError: (errors) => {
+          console.error('Error submitting form:', errors);
+        }
+      });
     },
     closeModal() {
-      this.$emit('close'); // Notify parent to close modal
-    },
-  },
+      this.$emit('close');
+    }
+  }
 };
 </script>

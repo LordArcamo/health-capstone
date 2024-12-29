@@ -47,16 +47,8 @@
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700">Check Items</label>
         <div class="flex items-center">
-          <input v-model="form.prenatal_checkup" type="checkbox" id="prenatal_checkup" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="prenatal_checkup" class="ml-2 text-sm text-gray-600">In for prenatal check-up</label>
-        </div>
-        <div class="flex items-center">
-          <input v-model="form.pe_done" type="checkbox" id="pe_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">PE done</label>
-        </div>
-        <div class="flex items-center">
           <input v-model="form.prenatal_record" type="checkbox" id="prenatal_record" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
+          <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.reminded_importance" type="checkbox" id="reminded_importance" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
@@ -79,24 +71,28 @@
           <label for="breast_feeding" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.compliance_routine" type="checkbox" id="compliance_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="compliance_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
+          <input v-model="form.compliane_routine" type="checkbox" id="compliane_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="compliane_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.referred_utz" type="checkbox" id="referred_utz" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="referred_utz" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.information_newborn" type="checkbox" id="information_newborn" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="information_newborn" class="ml-2 text-sm text-gray-600">Information on Newborn Screening given</label>
+          <input v-model="form.fhb" type="checkbox" id="fhb" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fhb" class="ml-2 text-sm text-gray-600">FHB</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.fes04_folic" type="checkbox" id="fes04_folic" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
+          <input v-model="form.position" type="checkbox" id="position" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="position" class="ml-2 text-sm text-gray-600">Position</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.information_family" type="checkbox" id="information_family" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="information_family" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
+          <input v-model="form.presentation" type="checkbox" id="presentation" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="presentation" class="ml-2 text-sm text-gray-600">Presentation</label>
+        </div>
+        <div class="flex items-center">
+          <input v-model="form.fundal_height" type="checkbox" id="fundal_height" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fundal_height" class="ml-2 text-sm text-gray-600">Fundal Height</label>
         </div>
         <!-- Checkbox Items-->
       </div>
@@ -130,6 +126,7 @@
 </template>
 
 <script>
+import { ref, watch } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 
 export default {
@@ -137,133 +134,167 @@ export default {
     prenatalId: {
       type: Number,
       required: true,
-      default: 0,
     },
+    trimester: {
+      type: String,
+      required: true,
+    },
+    prefilledData: {
+      type: Object,
+      default: null
+    }
   },
-  data() {
-    return {
-      form: {
-        prenatalId: this.prenatalId,
-        date_of_visit: '',
-        weight: '',
-        bp: '',
-        heart_rate: '',
-        aog_months: '',
-        aog_days: '',
-        trimester: '',
-        prenatal_checkup: '',
-        pe_done: '',
-        prenatal_record: '',
-        reminded_importance: '',
-        health_teachings: '',
-        reminded_dangers: '',
-        healthy_diet: '',
-        breast_feeding: '',
-        compliance_routine: '',
-        referred_utz: '',
-        information_newborn: '',
-        fes04_folic: '',
-        folic_acid: '',
-        information_family: '',
-        fhb: '',
-        position: '',
-        presentation: '',
-        fundal_height: ''
-      },
-      errors: {}
+  setup(props) {
+    const form = ref({
+      date_of_visit: '',
+      weight: '',
+      bp: '',
+      heart_rate: '',
+      aog_months: '',
+      aog_days: '',
+      trimester: '5',
+      prenatal_record: false,
+      reminded_importance: false,
+      health_teachings: false,
+      reminded_dangers: false,
+      healthy_diet: false,
+      breast_feeding: false,
+      compliane_routine: false,
+      referred_utz: false,
+      fhb: '',
+      position: '',
+      presentation: '',
+      fundal_height: ''
+    });
+
+    const errors = ref({});
+    const loading = ref(false);
+
+    const populateForm = (data) => {
+      if (!data) return;
+
+      if (data.generalTrimester) {
+        const gt = data.generalTrimester;
+        form.value = {
+          ...form.value,
+          date_of_visit: gt.date_of_visit || '',
+          weight: gt.weight || '',
+          bp: gt.bp || '',
+          heart_rate: gt.heart_rate || '',
+          aog_months: gt.aog_months || '',
+          aog_days: gt.aog_days || '',
+          trimester: gt.trimester || '5'
+        };
+      }
+
+      const checkbox3Data = data.checkbox5 || (data.generalTrimester && data.generalTrimester.checkbox3);
+      if (checkbox3Data) {
+        form.value = {
+          ...form.value,
+          prenatal_checkup: checkbox3Data.prenatal_checkup || false,
+          pe_done: checkbox3Data.pe_done || false,
+          prenatal_record: checkbox3Data.prenatal_record || false,
+          reminded_importance: checkbox3Data.reminded_importance || false,
+          health_teachings: checkbox3Data.health_teachings || false,
+          reminded_dangers: checkbox3Data.reminded_dangers || false,
+          healthy_diet: checkbox3Data.healthy_diet || false,
+          breast_feeding: checkbox3Data.breast_feeding || false,
+          compliance_routine: checkbox3Data.compliance_routine || false,
+          referred_utz: checkbox3Data.referred_utz || false,
+          information_newborn: checkbox3Data.information_newborn || false,
+          fes04_folic: checkbox3Data.fes04_folic || false,
+          information_family: checkbox3Data.information_family || false,
+          folic_acid: checkbox3Data.folic_acid || '',
+          fhb: checkbox3Data.fhb || '',
+          position: checkbox3Data.position || '',
+          presentation: checkbox3Data.presentation || '',
+          fundal_height: checkbox3Data.fundal_height || ''
+        };
+      }
     };
-  },
-  methods: {
-  validateForm() {
-    this.errors = {}; // Reset errors
-    let isValid = true;
 
-    if (!this.form.date_of_visit) {
-      this.errors.date_of_visit = 'Date of Visit is required.';
-      isValid = false;
-    }
-    if (!this.form.weight) {
-      this.errors.weight = 'Weight is required.';
-      isValid = false;
-    }
-    if (!this.form.bp) {
-      this.errors.bp = 'Blood Pressure is required.';
-      isValid = false;
-    }
-    if (!this.form.heart_rate) {
-      this.errors.heart_rate = 'Heart Rate is required.';
-      isValid = false;
-    }
+    const validateForm = () => {
+      errors.value = {};
+      let isValid = true;
 
-    return isValid;
-  },
+      if (!form.value.date_of_visit) {
+        errors.value.date_of_visit = 'Date of Visit is required.';
+        isValid = false;
+      }
+      if (!form.value.weight) {
+        errors.value.weight = 'Weight is required.';
+        isValid = false;
+      }
+      if (!form.value.bp) {
+        errors.value.bp = 'Blood Pressure is required.';
+        isValid = false;
+      }
+      if (!form.value.heart_rate) {
+        errors.value.heart_rate = 'Heart Rate is required.';
+        isValid = false;
+      }
 
-  submitForm() {
-  if (this.validateForm()) {
-    // Ensure prenatalId is included in the form data
-      const formData = { ...this.form, prenatalId: this.prenatalId };
+      return isValid;
+    };
 
-      console.log('Form submitted with data:', formData);
+    const submitForm = () => {
+      if (validateForm()) {
+        loading.value = true;
+        const formData = { ...form.value, prenatalId: props.prenatalId };
 
-      Inertia.post('/trimester3/store', formData, {
-        onStart: () => {
-          // Show loading indicator or disable submit button
-          this.loading = true;
-        },
-        onFinish: () => {
-          // Hide loading indicator or enable submit button
-          this.loading = false;
-        },
-        onSuccess: () => {
-          // Handle successful form submission
-          console.log('Data saved successfully!');
-          this.resetForm();
-          alert('Form submitted successfully!');
-        },
-        onError: (response) => {
-          // Check for errors from the server and update the errors object
-          console.error('Form submission errors:', response.errors);
-          this.errors = response.errors; // Update the errors object with server errors
-        }
-      });
-    } else {
-      // If the form validation fails
-      this.successMessage = 'Please complete all required fields before submitting.';
-      alert(this.successMessage); // Show an alert with the validation message
-    }
-  },
+        Inertia.post('/trimester5/store', formData, {
+          onSuccess: () => {
+            loading.value = false;
+            alert('Form submitted successfully!');
+          },
+          onError: (errors) => {
+            loading.value = false;
+            errors.value = errors;
+          }
+        });
+      } else {
+        alert('Please complete all required fields before submitting.');
+      }
+    };
 
-    resetForm() {
-      this.form = {
+    const resetForm = () => {
+      form.value = {
         date_of_visit: '',
         weight: '',
         bp: '',
         heart_rate: '',
         aog_months: '',
         aog_days: '',
-        trimester: '',
-        prenatal_checkup: '',
-        pe_done: '',
-        prenatal_record: '',
-        reminded_importance: '',
-        health_teachings: '',
-        reminded_dangers: '',
-        healthy_diet: '',
-        breast_feeding: '',
-        compliance_routine: '',
-        referred_utz: '',
-        information_newborn: '',
-        fes04_folic: '',
-        folic_acid: '',
-        information_family: '',
+        trimester: '5',
+        prenatal_record: false,
+        reminded_importance: false,
+        health_teachings: false,
+        reminded_dangers: false,
+        healthy_diet: false,
+        breast_feeding: false,
+        compliane_routine: false,
+        referred_utz: false,
         fhb: '',
         position: '',
         presentation: '',
         fundal_height: ''
       };
-      this.errors = {}; // Reset error messages
-      this.successMessage = ''; // Reset success message
-    }
+      errors.value = {};
+    };
+
+    watch(() => props.prefilledData, (newData) => {
+      if (newData) {
+        populateForm(newData);
+      }
+    }, { immediate: true });
+
+    return {
+      form,
+      errors,
+      loading,
+      submitForm,
+      resetForm
+    };
   }
 };
 </script>

@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <Head title="PostPartum Check Up" />
     <NewLayout>
       <PostpartumForm :onSubmit="submitForm" />
@@ -27,4 +27,4 @@
     });
   }
   </script>
-  
+   -->

@@ -15,27 +15,46 @@
 
       <!-- Step 1: Search or Add Patient -->
       <div v-if="step === 1">
-        <h3 class="text-lg font-semibold mb-4">Search for a Patient</h3>
-        <div>
-          <label for="search" class="block text-sm font-medium text-gray-700">Search by Name</label>
-          <input type="text" v-model="searchQuery" @input="filterPatients" id="search" class="input"
-            placeholder="Enter patient name" />
-        </div>
-
-        <div v-if="filteredPatients.length > 0" class="mt-4">
-          <ul class="bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
-            <li v-for="patient in filteredPatients" :key="patient.id" @click="selectPatient(patient)" :class="{
-              'bg-gray-100': selectedPatient?.id === patient.id,
-              'hover:bg-gray-50': selectedPatient?.id !== patient.id,
-            }" class="cursor-pointer px-4 py-2">
-              {{ patient.name }} ({{ patient.age }} years)
-            </li>
-          </ul>
-        </div>
-
-        <div v-else-if="searchQuery.trim()" class="mt-4 text-sm text-gray-500">
-          No patients found. You can proceed to add a new patient.
-        </div>
+          <h3 class="text-lg font-semibold mb-4">Search for a Patient</h3>
+          <div>
+            <label for="search" class="block text-sm font-medium text-gray-700">Search by Name or ID</label>
+            <input type="text" v-model="searchQuery" @input="filterPatients" id="search" class="input"
+              placeholder="Enter patient name or ID" />
+          </div>
+  
+          <div v-if="loading" class="loading-indicator">
+            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Searching...
+          </div>
+  
+          <div v-else-if="filteredPatients.length > 0" class="patient-list">
+            <div v-for="patient in filteredPatients" :key="patient.personalId" 
+              @click="selectPatient(patient)"
+              :class="[
+                'patient-item',
+                { 'selected': selectedPatient?.personalId === patient.personalId }
+              ]">
+              <div class="flex justify-between items-center">
+                <div>
+                  <span class="font-medium">
+                    {{ patient.firstName }} {{ patient.middleName }} {{ patient.lastName }}
+                    {{ patient.suffix !== 'None' ? patient.suffix : '' }}
+                  </span>
+                  <p class="text-sm text-gray-500">ID: {{ patient.personalId }}</p>
+                </div>
+                <div class="text-sm text-gray-500">
+                  Age: {{ patient.age }}
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div v-else-if="searchQuery.trim()" class="mt-4 text-sm text-gray-500">
+            No patients found. You can proceed to add a new patient.
+          </div>
 
         <div class="flex justify-end space-x-4 mt-6">
           <button @click="closeModal" class="bg-gray-500 text-white py-2 px-4 rounded-md">Cancel</button>
@@ -48,13 +67,44 @@
 
       <!-- Step 2: Add Patient Details -->
       <div v-if="step === 2">
-        <h3 class="text-lg font-semibold mb-4">
-          {{ selectedPatient ? "Patient Details" : "Add New Patient" }}
-        </h3>
-        <div v-if="selectedPatient" class="mb-4">
-          <p><strong>Name:</strong> {{ selectedPatient.name }}</p>
-          <p><strong>Age:</strong> {{ selectedPatient.age }}</p>
-        </div>
+          <h3 class="text-lg font-semibold mb-4">
+            {{ selectedPatient ? "Patient Details" : "Add New Patient" }}
+          </h3>
+          <div v-if="selectedPatient" class="mb-4 p-4 bg-gray-50 rounded-lg">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Full Name</p>
+                <p class="font-medium">
+                  {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
+                  {{ selectedPatient.suffix !== 'None' ? selectedPatient.suffix : '' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Patient ID</p>
+                <p class="font-medium">{{ selectedPatient.personalId }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Gender</p>
+                <p class="font-medium">{{ selectedPatient.sex }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Birthdate</p>
+                <p class="font-medium">{{ selectedPatient.birthdate }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Age</p>
+                <p class="font-medium">{{ selectedPatient.age }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Address</p>
+                <p class="font-medium">{{ selectedPatient.purok }} {{ selectedPatient.barangay }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Contact</p>
+                <p class="font-medium">{{ selectedPatient.contact }}</p>
+              </div>
+            </div>
+          </div>
 
         <div v-else>
           <!-- Patient Information Form -->
@@ -270,87 +320,252 @@
         </div>
       </div>
 
+      </div>
     </div>
-  </div>
-</template>
+  </template>
+  
+  <script>
+  import { ref, computed } from 'vue';
+  import { Inertia } from '@inertiajs/inertia';
+  import { router } from '@inertiajs/vue3';
 
-<script>
-export default {
-  props: {
-    showModal: Boolean,
-  },
-  data() {
-    return {
-      step: 1,
-      searchQuery: "",
-      patients: [
-        { id: 1, name: "John Doe", age: 35 },
-        { id: 2, name: "Jane Smith", age: 29 },
-      ],
-      filteredPatients: [],
-      selectedPatient: null,
-      allowAddNewPatient: false,
-      form: {
-        firstName: '',
-        lastName: '',
-        middleName: '',
-        suffix: '',
-        purok: '',
-        barangay: '',
-        age: '',
-        birthdate: '',
-        contact: '',
-        sex: '',
-        name: "",
-        age: "",
-        foodIntake: "",
-        physicalActivity: "",
+  export default {
+    props: {
+      showModal: {
+        type: Boolean,
+        required: true
       },
-    };
-  },
-  methods: {
-    closeModal() {
-      this.$emit("close");
+      patients: {
+        type: Array,
+        required: true,
+        default: () => [],
+      },
     },
-    nextStep() {
-      if (this.step < 3) this.step++;
+    data() {
+      return {
+        step: 1,
+        searchQuery: '',
+        selectedPatient: null,
+        filteredPatients: this.patients,
+        allowAddNewPatient: true,
+        loading: false,
+        form: {
+          firstName: '',
+          lastName: '',
+          middleName: '',
+          suffix: '',
+          barangay: '',
+          purok: '',
+          birthdate: '',
+          contact: '',
+          sex: '',
+          foodIntake: '',
+          physicalActivity: '',
+          bloodGlucose: '',
+          fbsRbs: '',
+          bloodGlucoseDate: '',
+          bloodLipids: '',
+          totalCholesterol: '',
+          bloodLipidsDate: '',
+          urineKetones: '',
+          urineKetoneLevel: '',
+          urineKetonesDate: '',
+          urineProtein: '',
+          urineProteinLevel: '',
+          urineProteinDate: '',
+        }
+      };
     },
-    prevStep() {
-      if (this.step > 1) this.step--;
-    },
-    saveRiskData() {
-      this.$emit("save", this.form);
-      this.closeModal();
-    },
-    filterPatients() {
-      const query = this.searchQuery.trim().toLowerCase();
-      this.filteredPatients = this.patients.filter((patient) =>
-        patient.name.toLowerCase().includes(query)
-      );
-      this.allowAddNewPatient = this.filteredPatients.length === 0;
-    },
-    selectPatient(patient) {
-      this.selectedPatient = patient;
-      this.allowAddNewPatient = false;
-    },
-    addOrNextStep() {
-      if (this.allowAddNewPatient) {
-        this.step = 2;
-      } else if (this.selectedPatient) {
-        this.nextStep();
+    methods: {
+      searchPatients() {
+          this.loading = true; // Show loading indicator
+          try {
+              const response = Inertia.get('/path-to-your-endpoint', {
+                  query: this.searchQuery // Pass the search query
+              });
+
+              // Assuming the response contains the patients data
+              this.filteredPatients = response.data.patients; // Update with the fetched patients
+          } catch (error) {
+              console.error("Error fetching patients:", error);
+          } finally {
+              this.loading = false; // Hide loading indicator
+          }
+      },
+      filterPatients() {
+          if (this.searchQuery) {
+              this.filteredPatients = this.patients.filter(patient => {
+                const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+                return (
+                  fullName.includes(this.searchQuery.toLowerCase()) ||
+                  patient.firstName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                  patient.lastName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                  (patient.personalId && patient.personalId.toString().includes(this.searchQuery))
+                );
+              });
+
+              // Reset selectedPatient if no patients are found
+              if (this.filteredPatients.length === 0) {
+                  this.selectedPatient = null; // Ensure this is set to null when no matches
+              }
+          } else {
+              this.filteredPatients = this.patients; // Reset to all patients if search query is empty
+          }
+      },
+      selectPatient(patient) {
+        this.selectedPatient = patient;
+        // Pre-fill the form with selected patient's data
+        this.form = {
+          ...this.form,
+          firstName: patient.firstName,
+          lastName: patient.lastName,
+          middleName: patient.middleName || '',
+          suffix: patient.suffix || '',
+          barangay: patient.barangay,
+          purok: patient.purok,
+          birthdate: patient.birthdate,
+          contact: patient.contact,
+          sex: patient.sex
+        };
+      },
+      closeModal() {
+        this.$emit('close');
+      },
+      nextStep() {
+        this.step++;
+      },
+      prevStep() {
+        this.step--;
+      },
+      addOrNextStep() {
+        if (this.selectedPatient) {
+          this.nextStep();
+        } else {
+          // Clear form for new patient
+          Object.keys(this.form).forEach(key => {
+            if (!['foodIntake', 
+            'physicalActivity', 
+            'bloodGlucose', 
+            'fbsRbs', 
+            'bloodGlucoseDate',
+            'bloodLipids',
+            'totalCholesterol',
+            'bloodLipidsDate',
+            'urineKetones',
+            'urineKetoneLevel',
+            'urineKetonesDate',
+            'urineProtein', 
+            'urineProteinLevel', 
+            'urineProteinDate'].includes(key)) {
+              this.form[key] = '';
+            }
+          });
+          this.nextStep();
+        }
+      },
+      saveRiskData() {
+
+        const riskData = {
+          riskDetails: {
+            foodIntake: this.form.foodIntake,
+            physicalActivity: this.form.physicalActivity,
+            bloodGlucose: this.form.bloodGlucose,
+            fbsRbs: this.form.fbsRbs,
+            bloodGlucoseDate: this.form.bloodGlucoseDate,
+            bloodLipids: this.form.bloodLipids,
+            totalCholesterol: this.form.totalCholesterol,
+            bloodLipidsDate: this.form.bloodLipidsDate,
+            urineKetones: this.form.urineKetones,
+            urineKetoneLevel: this.form.urineKetoneLevel,
+            urineKetonesDate: this.form.urineKetonesDate,
+            urineProtein: this.form.urineProtein,
+            urineProteinLevel: this.form.urineProteinLevel,
+            urineProteinDate: this.form.urineProteinDate,
+          },
+        };
+
+        // For existing patients, only send the personalId
+        if (this.selectedPatient?.personalId) {
+          riskData.patient = {
+            personalId: this.selectedPatient.personalId,
+            isExisting: true // Add a flag to indicate this is an existing patient
+          };
+        } else {
+          // For new patients, include all details
+          riskData.patient = {
+            firstName: this.form.firstName,
+            lastName: this.form.lastName,
+            middleName: this.form.middleName,
+            suffix: this.form.suffix,
+            purok: this.form.purok,
+            barangay: this.form.barangay,
+            age: this.form.age,
+            birthdate: this.form.birthdate,
+            contact: this.form.contact,
+            sex: this.form.sex,
+            isExisting: false
+          };
+        }
+        Inertia.post('/risk-management/store', riskData, {
+          onSuccess: () => {
+            console.log("Risk Management Data Successfully Submitted:", riskData);
+            this.resetForm();
+            this.closeModal();
+          },
+          onError: (errors) => {
+            console.error("Submission failed:", errors);
+            this.errors = errors;
+            console.log("Risk Management Data Failed to Submit:", riskData);
+          },
+        });
       }
     },
-  },
-};
-</script>
+    computed: {
+      computedAge() {
+        if (!this.form.birthdate) return '';
+        const birthDate = new Date(this.form.birthdate);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        return age;
+      }
+    },
+    watch: {
+      searchQuery: {
+        handler(val) {
+          if (val.length >= 2) {
+            this.filterPatients();
+          } else {
+            this.filteredPatients = [];
+          }
+        },
+        debounce: 300
+      }
+    }
+  };
+  </script>
+  
+  <style scoped>
+  .input {
+    @apply mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
 
-<style scoped>
-.input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-</style>
+  .patient-list {
+    @apply mt-4 bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto divide-y divide-gray-200;
+  }
+
+  .patient-item {
+    @apply px-4 py-3 hover:bg-gray-50 cursor-pointer transition duration-150;
+  }
+
+  .patient-item.selected {
+    @apply bg-blue-50;
+  }
+
+  .loading-indicator {
+    @apply flex items-center justify-center py-4 text-gray-500;
+  }
+  </style>

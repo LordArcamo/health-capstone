@@ -222,7 +222,6 @@ methods: {
       });
     }
 
-    console.log('Filtered Patients:', this.filteredPatients);
   },
   selectPatient(patient) {
     console.log('Patient selected:', patient);

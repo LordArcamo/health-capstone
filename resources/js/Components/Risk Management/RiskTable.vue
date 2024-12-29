@@ -9,13 +9,15 @@
           placeholder="Search by Name..."
           class="border rounded-md px-4 py-2 shadow-md w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-green-600"
         />
-        <button
-          @click="toggleMegaFilter"
-          class="bg-green-700 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm ml-4"
-        >
-          Filter Options
-          <font-awesome-icon :icon="['fas', megaFilterOpen ? 'caret-up' : 'caret-down']" />
-        </button>
+        <div class="flex space-x-4">
+          <button
+            @click="toggleMegaFilter"
+            class="bg-green-700 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+          >
+            Filter Options
+            <font-awesome-icon :icon="['fas', megaFilterOpen ? 'caret-up' : 'caret-down']" />
+          </button>
+        </div>
       </div>
   
       <!-- Mega Filter Dropdown -->
@@ -95,52 +97,66 @@
               <th class="px-4 py-2">Food Intake</th>
               <th class="px-4 py-2">Physical Activity</th>
               <th class="px-4 py-2">Diabetes</th>
-              <th class="px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
+            <tr v-if="filteredPatients.length === 0">
+              <td colspan="5" class="text-center py-4">No data available</td>
+            </tr>
             <tr
-              v-for="(entry, index) in filteredData"
-              :key="index"
+              v-for="patient in filteredPatients" :key="patient.id"
               class="hover:bg-gray-100 transition"
             >
-              <td class="px-4 py-2">{{ entry.name }}</td>
-              <td class="px-4 py-2">{{ entry.foodIntake }}</td>
-              <td class="px-4 py-2">{{ entry.physicalActivity }}</td>
-              <td class="px-4 py-2">{{ entry.diabetes }}</td>
-              <td class="px-4 py-2">
-                <button @click="editEntry(index)" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">Edit</button>
-                <button @click="deleteEntry(index)" class="ml-2 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600">Delete</button>
-              </td>
+              <td class="px-4 py-2">{{ patient.firstName  }} {{ patient.middleName }} {{ patient.lastName }}</td>
+              <td class="px-4 py-2">{{ patient.foodIntake || 'N/A' }}</td>
+              <td class="px-4 py-2">{{ patient.physicalActivity || 'N/A' }}</td>
+              <td class="px-4 py-2">{{ patient.bloodGlucose || 'N/A' }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- Risk Modal -->
+    <RiskModal
+      v-if="showRiskModal"
+      @close="closeRiskModal"
+      @saved="handleRiskSaved"
+    />
   </template>
   
   <script>
+  import RiskModal from './RiskModal.vue';
+
   export default {
+    components: {
+      RiskModal
+    },
     props: {
-      data: Array,
+      riskPatients: {
+        type: Array,
+        default: () => [],
+      }
     },
     data() {
       return {
         megaFilterOpen: false,
-        filterName: "",
-        filterFoodIntake: "",
-        filterPhysicalActivity: "",
-        filterDiabetes: "",
+        filterName: '',
+        filterFoodIntake: '',
+        filterPhysicalActivity: '',
+        filterDiabetes: '',
+        showRiskModal: false,
+        selectedEntry: null,
       };
     },
     computed: {
-      filteredData() {
-        return this.data.filter((entry) => {
+      filteredPatients() {
+        return this.riskPatients.filter((patient) => {
           return (
-            (!this.filterName || entry.name.toLowerCase().includes(this.filterName.toLowerCase())) &&
-            (!this.filterFoodIntake || entry.foodIntake === this.filterFoodIntake) &&
-            (!this.filterPhysicalActivity || entry.physicalActivity === this.filterPhysicalActivity) &&
-            (!this.filterDiabetes || entry.diabetes === this.filterDiabetes)
+            (!this.filterName || `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(this.filterName.toLowerCase())) &&
+            (!this.filterFoodIntake || patient.foodIntake === this.filterFoodIntake) &&
+            (!this.filterPhysicalActivity || patient.physicalActivity === this.filterPhysicalActivity) &&
+            (!this.filterDiabetes || patient.bloodGlucose === this.filterDiabetes)
           );
         });
       },
@@ -150,18 +166,29 @@
         this.megaFilterOpen = !this.megaFilterOpen;
       },
       editEntry(index) {
-        this.$emit("edit", index);
+        this.selectedEntry = this.filteredPatients[index];
+        this.showRiskModal = true;
       },
-      deleteEntry(index) {
-        this.$emit("delete", index);
+      deleteEntry(patient) {
+        // Implementation for delete functionality
       },
       clearFilters() {
-        this.filterName = "";
-        this.filterFoodIntake = "";
-        this.filterPhysicalActivity = "";
-        this.filterDiabetes = "";
+        this.filterName = '';
+        this.filterFoodIntake = '';
+        this.filterPhysicalActivity = '';
+        this.filterDiabetes = '';
       },
+      closeRiskModal() {
+        this.showRiskModal = false;
+        this.selectedEntry = null;
+      },
+      handleRiskSaved(data) {
+        this.closeRiskModal();
+        this.$emit('risk-saved', data);
+      }
     },
+    mounted() {
+      console.log("Risk Patients:", this.riskPatients);
+    }
   };
   </script>
-  

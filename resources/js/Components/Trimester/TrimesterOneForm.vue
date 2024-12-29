@@ -124,30 +124,36 @@ export default {
     prenatalId: {
       type: Number,
       required: true,
-      default: 0,
     },
+    trimester: {
+      type: String,
+      required: true,
+    },
+    prefilledData: {
+      type: Object,
+      default: null
+    }
   },
   data() {
     return {
       form: {
-        prenatalId: this.prenatalId,
         date_of_visit: '',
         weight: '',
         bp: '',
         heart_rate: '',
         aog_months: '',
         aog_days: '',
-        trimester: '',
-        prenatal_checkup: '',
-        pe_done: '',
-        prenatal_record: '',
-        birth_plan_done: '',
-        nkfda: '',
-        health_teachings: '',
-        referred_for: '',
-        healthy_diet: '',
-        fes04_folic: '',
-        folic_acid: '',
+        trimester: '1',
+        prenatal_checkup: false,
+        pe_done: false,
+        prenatal_record: false,
+        birth_plan_done: false,
+        nkfda: false,
+        health_teachings: false,
+        referred_for: false,
+        healthy_diet: false,
+        fes04_folic: false,
+        folic_acid: false,
         fhb: '',
         position: '',
         presentation: '',
@@ -156,94 +162,149 @@ export default {
       errors: {}
     };
   },
-  methods: {
-  validateForm() {
-    this.errors = {}; // Reset errors
-    let isValid = true;
-
-    if (!this.form.date_of_visit) {
-      this.errors.date_of_visit = 'Date of Visit is required.';
-      isValid = false;
-    }
-    if (!this.form.weight) {
-      this.errors.weight = 'Weight is required.';
-      isValid = false;
-    }
-    if (!this.form.bp) {
-      this.errors.bp = 'Blood Pressure is required.';
-      isValid = false;
-    }
-    if (!this.form.heart_rate) {
-      this.errors.heart_rate = 'Heart Rate is required.';
-      isValid = false;
-    }
-
-    return isValid;
-  },
-
-  submitForm() {
-  if (this.validateForm()) {
-    // Ensure prenatalId is included in the form data
-      const formData = { ...this.form, prenatalId: this.prenatalId };
-
-      console.log('Form submitted with data:', formData);
-
-      Inertia.post('/trimester1/store', formData, {
-        onStart: () => {
-          // Show loading indicator or disable submit button
-          this.loading = true;
-        },
-        onFinish: () => {
-          // Hide loading indicator or enable submit button
-          this.loading = false;
-        },
-        onSuccess: () => {
-          // Handle successful form submission
-          console.log('Data saved successfully!');
-          this.resetForm();
-          alert('Form submitted successfully!');
-        },
-        onError: (response) => {
-          // Check for errors from the server and update the errors object
-          console.error('Form submission errors:', response.errors);
-          this.errors = response.errors; // Update the errors object with server errors
+  watch: {
+    prefilledData: {
+      handler(newData) {
+        if (newData) {
+          this.populateForm(newData);
         }
-      });
-    } else {
-      // If the form validation fails
-      this.successMessage = 'Please complete all required fields before submitting.';
-      alert(this.successMessage); // Show an alert with the validation message
+      },
+      immediate: true
     }
   },
+  methods: {
+    populateForm(data) {
+      if (!data) return;
 
-  resetForm() {
-    this.form = {
-      date_of_visit: '',
-      weight: '',
-      bp: '',
-      heart_rate: '',
-      aog_months: '',
-      aog_days: '',
-      trimester: '',
-      prenatal_checkup: '',
-      pe_done: '',
-      prenatal_record: '',
-      birth_plan_done: '',
-      nkfda: '',
-      health_teachings: '',
-      referred_for: '',
-      healthy_diet: '',
-      fes04_folic: '',
-      folic_acid: '',
-      fhb: '',
-      position: '',
-      presentation: '',
-      fundal_height: ''
-    };
-    this.errors = {}; // Reset error messages
-    this.successMessage = ''; // Reset success message
-  }
-}
+      if (data.generalTrimester) {
+        const gt = data.generalTrimester;
+        this.form = {
+          ...this.form,
+          date_of_visit: gt.date_of_visit || '',
+          weight: gt.weight || '',
+          bp: gt.bp || '',
+          heart_rate: gt.heart_rate || '',
+          aog_months: gt.aog_months || '',
+          aog_days: gt.aog_days || '',
+          trimester: gt.trimester || '1'
+        };
+      }
+
+      // Handle checkbox1 data from either location
+      const checkbox1Data = data.checkbox1 || (data.generalTrimester && data.generalTrimester.checkbox1);
+      if (checkbox1Data) {
+        this.form = {
+          ...this.form,
+          prenatal_checkup: checkbox1Data.prenatal_checkup || false,
+          pe_done: checkbox1Data.pe_done || false,
+          prenatal_record: checkbox1Data.prenatal_record || false,
+          birth_plan_done: checkbox1Data.birth_plan_done || false,
+          nkfda: checkbox1Data.nkfda || false,
+          health_teachings: checkbox1Data.health_teachings || false,
+          referred_for: checkbox1Data.referred_for || false,
+          healthy_diet: checkbox1Data.healthy_diet || false,
+          fes04_folic: checkbox1Data.fes04_folic || false,
+          folic_acid: checkbox1Data.folic_acid || false,
+          fhb: checkbox1Data.fhb || '',
+          position: checkbox1Data.position || '',
+          presentation: checkbox1Data.presentation || '',
+          fundal_height: checkbox1Data.fundal_height || ''
+        };
+      }
+    },
+
+    validateForm() {
+      this.errors = {}; // Reset errors
+      let isValid = true;
+
+      if (!this.form.date_of_visit) {
+        this.errors.date_of_visit = 'Date of Visit is required.';
+        isValid = false;
+      }
+      if (!this.form.weight) {
+        this.errors.weight = 'Weight is required.';
+        isValid = false;
+      }
+      if (!this.form.bp) {
+        this.errors.bp = 'Blood Pressure is required.';
+        isValid = false;
+      }
+      if (!this.form.heart_rate) {
+        this.errors.heart_rate = 'Heart Rate is required.';
+        isValid = false;
+      }
+
+      return isValid;
+    },
+
+    submitForm() {
+      if (this.validateForm()) {
+        // Ensure prenatalId is included in the form data
+        const formData = { ...this.form, prenatalId: this.prenatalId };
+
+        console.log('Form submitted with data:', formData);
+
+        Inertia.post('/trimester1/store', formData, {
+          onStart: () => {
+            // Show loading indicator or disable submit button
+            this.loading = true;
+          },
+          onFinish: () => {
+            // Hide loading indicator or enable submit button
+            this.loading = false;
+          },
+          onSuccess: () => {
+            // Handle successful form submission
+            console.log('Data saved successfully!');
+            this.resetForm();
+            alert('Form submitted successfully!');
+          },
+          onError: (response) => {
+            // Check for errors from the server and update the errors object
+            console.error('Form submission errors:', response.errors);
+            this.errors = response.errors; // Update the errors object with server errors
+          }
+        });
+      } else {
+        // If the form validation fails
+        this.successMessage = 'Please complete all required fields before submitting.';
+        alert(this.successMessage); // Show an alert with the validation message
+      }
+    },
+
+    resetForm() {
+      this.form = {
+        date_of_visit: '',
+        weight: '',
+        bp: '',
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
+        trimester: '',
+        prenatal_checkup: false,
+        pe_done: false,
+        prenatal_record: false,
+        birth_plan_done: false,
+        nkfda: false,
+        health_teachings: false,
+        referred_for: false,
+        healthy_diet: false,
+        fes04_folic: false,
+        folic_acid: '',
+        fhb: '',
+        position: '',
+        presentation: '',
+        fundal_height: '',
+      };
+      this.errors = {}; // Reset error messages
+      this.successMessage = ''; // Reset success message
+    }
+  },
+  mounted() {
+    if (this.prefilledData && Object.keys(this.prefilledData).length) {
+      this.form = { ...this.form, ...this.prefilledData };
+    }
+  },
 };
 </script>
 
@@ -258,4 +319,4 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
     -moz-appearance: textfield;
 }
-</style> 
+</style>

@@ -1,7 +1,12 @@
 <template>
   <Head title="Patient Records" />
   <NewLayout>
-    <PrenatalTable :patients="props.PRENATAL" />
+    <PrenatalTable 
+    :patients="props.PRENATAL" 
+    :prefilledData="props.prefilledData" 
+    :prenatalId="props.prenatalId" 
+    :trimester="props.trimester"
+    />
   </NewLayout>
 </template>
 
@@ -12,5 +17,8 @@ import PrenatalTable from '@/Components/PrenatalTable.vue';
 
 const props = defineProps({
   PRENATAL: Array,
+  prefilledData: Object,
+  prenatalId: Number,
+  trimester: String,
 });
 </script>
