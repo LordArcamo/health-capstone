@@ -217,50 +217,94 @@
       </button>
     </div>
       <!-- Modal -->
-      <div v-if="showModal && selectedPatient"
-      class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
-        <button @click="closeModal"
-          class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
-          &times;
-        </button>
+      <div
+  v-if="showModal && selectedPatient"
+  class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4"
+>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative">
+    <!-- Close Button -->
+    <button
+      @click="closeModal"
+      class="absolute top-4 right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-700 transition"
+    >
+      &times;
+    </button>
 
-        <h2 class="text-xl sm:text-2xl font-bold mb-4">
-          Details for {{ selectedPatient.fullName }}
-        </h2>
-        <ul class="flex gap-20">
-          <div class="flex flex-col gap-1">
-            <li>
-              <strong>Full Name:</strong>
-              {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
-            </li>
-            <li><strong>Suffix:</strong> {{ selectedPatient.suffix }}</li>
-            <li><strong>Address:</strong> {{ selectedPatient.purok }} {{ selectedPatient.barangay }}</li>
-            <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
-            <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
-            <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
-            <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
-            <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
-            <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
-            <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
-            <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
-            <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
-            <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
-            <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
-            <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
-            <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
-            <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
-            <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
-            <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
-          </div>
-        </ul>
-
+    <!-- Header Section -->
+    <div class="border-b pb-4 mb-6 flex items-center gap-4">
+      <div class="bg-green-100 text-green-700 rounded-full p-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">Individual Treatment Record</h2>
+        <p class="text-gray-600">Details for {{ selectedPatient.fullName }}</p>
       </div>
     </div>
+
+    <!-- Patient Details Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Column 1 -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
+        <ul class="space-y-2">
+          <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName || '' }} {{ selectedPatient.lastName }}</li>
+          <li><strong>Suffix:</strong> {{ selectedPatient.suffix || 'N/A' }}</li>
+          <li><strong>Address:</strong> {{ selectedPatient.purok }}, {{ selectedPatient.barangay }}</li>
+          <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
+          <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
+          <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
+          <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
+        </ul>
+      </div>
+
+      <!-- Column 2 -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Consultation Details</h3>
+        <ul class="space-y-2">
+          <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
+          <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
+          <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
+          <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
+          <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
+          <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
+          <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Additional Details -->
+    <div class="mt-8">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
+      <ul class="space-y-2">
+        <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
+        <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
+        <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
+        <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
+        <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
+        <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
+      </ul>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="mt-6 flex justify-end gap-4">
+      <button
+        @click="closeModal"
+        class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+      >
+        Close
+      </button>
+      <button
+        @click="printRecord(selectedPatient)"
+        class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+      >
+        Print Record
+      </button>
+    </div>
+  </div>
+</div>
+
   </div>
 </template>
 
@@ -383,6 +427,38 @@ export default {
     },
   },
   methods: {
+
+  printRecord(patient) {
+    const printContent = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5; padding: 20px;">
+        <h2 style="text-align: center; color: #38a169;">Individual Treatment Record</h2>
+        <p><strong>Full Name:</strong> ${patient.firstName} ${patient.middleName || ''} ${patient.lastName}</p>
+        <p><strong>Age:</strong> ${patient.age}</p>
+        <p><strong>Gender:</strong> ${patient.sex}</p>
+        <p><strong>Address:</strong> ${patient.purok}, ${patient.barangay}</p>
+        <p><strong>Nature of Visit:</strong> ${patient.natureOfVisit}</p>
+        <p><strong>Visit Type:</strong> ${patient.visitType}</p>
+        <p><strong>Date of Consultation:</strong> ${patient.consultationDate}</p>
+        <p><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
+        <p><strong>Medication/Treatment:</strong> ${patient.medication}</p>
+      </div>
+    `;
+
+    const newWindow = window.open('', '_blank', 'width=800,height=600');
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Record</title>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    newWindow.document.close();
+    newWindow.print();
+  },
+
     triggerImport() {
       this.$refs.fileInput.click(); // Trigger file input click
     },

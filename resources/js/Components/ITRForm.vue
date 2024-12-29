@@ -651,10 +651,6 @@ export default {
       // Update the form weight with the validated value
       this.form.weight = value;
     },
-    handleSubmit(event) {
-      event.preventDefault();
-      this.triggerSubmit();
-    },
     validateStep1() {
       this.errors = {};
       let valid = true;
@@ -820,63 +816,52 @@ export default {
       }
     },
     confirmSubmit() {
-      // Prepare the form data and parse weight and height as numbers
-      const payload = {
-        personalId: this.selectedPatient?.personalId || null,
-        firstName: this.form.firstName,
-        lastName: this.form.lastName,
-        middleName: this.form.middleName,
-        suffix: this.form.suffix,
-        purok: this.form.purok,
-        barangay: this.form.barangay,
-        age: this.form.age,
-        birthdate: this.form.birthdate,
-        contact: this.form.contact,
-        sex: this.form.sex,
-        consultationDate: this.form.consultationDate,
-        consultationTime: this.form.consultationTime,
-        modeOfTransaction: this.form.modeOfTransaction,
-        bloodPressure: this.form.bloodPressure,
-        temperature: this.form.temperature,
-        height: parseFloat(this.form.height),
-        weight: parseFloat(this.form.weight),
-        referredFrom: this.form.referredFrom || 'None',
-        referredTo: this.form.referredTo || 'None',
-        reasonsForReferral: this.form.reasonsForReferral || 'None',
-        referredBy: this.form.referredBy || 'None',
-        providerName: this.form.providerName,
-        natureOfVisit: this.form.natureOfVisit,
-        visitType: this.form.visitType,
-        chiefComplaints: this.form.chiefComplaints,
-        diagnosis: this.form.diagnosis,
-        medication: this.form.medication,
+  const payload = {
+    personalId: this.selectedPatient?.personalId || null,
+    firstName: this.form.firstName,
+    lastName: this.form.lastName,
+    middleName: this.form.middleName,
+    suffix: this.form.suffix,
+    purok: this.form.purok,
+    barangay: this.form.barangay,
+    age: this.form.age,
+    birthdate: this.form.birthdate,
+    contact: this.form.contact,
+    sex: this.form.sex,
+    consultationDate: this.form.consultationDate,
+    consultationTime: this.form.consultationTime,
+    modeOfTransaction: this.form.modeOfTransaction,
+    bloodPressure: this.form.bloodPressure,
+    temperature: this.form.temperature,
+    height: parseFloat(this.form.height),
+    weight: parseFloat(this.form.weight),
+    referredFrom: this.form.referredFrom || 'None',
+    referredTo: this.form.referredTo || 'None',
+    reasonsForReferral: this.form.reasonsForReferral || 'None',
+    referredBy: this.form.referredBy || 'None',
+    providerName: this.form.providerName,
+    natureOfVisit: this.form.natureOfVisit,
+    visitType: this.form.visitType,
+    chiefComplaints: this.form.chiefComplaints,
+    diagnosis: this.form.diagnosis,
+    medication: this.form.medication,
+  };
 
-      };
+  console.log('Submitting form with payload:', payload);
 
-      if (!this.selectedPatient?.personalId) {
-        Object.assign(payload, {
-          firstName: this.form.firstName,
-          lastName: this.form.lastName,
-          middleName: this.form.middleName,
-          suffix: this.form.suffix,
-          purok: this.form.purok,
-          barangay: this.form.barangay,
-          age: this.form.age,
-          birthdate: this.form.birthdate,
-          contact: this.form.contact,
-          sex: this.form.sex,
-        });
-      }
-      console.log('Submitting form with payload:', payload);
-      // Emit the parsed form data
-      this.$emit('submitForm', payload);
+  // Emit the form data for processing
+  this.$emit('submitForm', payload);
 
-      // Display success message
-      this.successMessage = 'Form submitted successfully!';
-      this.showModal = false; // Hide modal
-      this.errors = {};
-      this.resetForm();
-    },
+  // Redirect to the Thank You page
+  this.$inertia.visit('/checkup/thank-you', {
+    method: 'get',
+    preserveScroll: true, // Keep scroll position if needed
+    preserveState: false, // Reset state to prevent reinitialization
+  });
+
+  this.showModal = false; // Hide confirmation modal
+},
+
     cancelSubmit() {
       this.showModal = false; // Hide modal
     },

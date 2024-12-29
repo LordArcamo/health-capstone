@@ -153,9 +153,8 @@
         <th class="py-4 px-6 text-left border-b border-indigo-200">Full Name</th>
         <th class="py-4 px-6 text-left border-b border-indigo-200">Address</th>
         <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
-        <th class="py-4 px-6 text-left border-b border-indigo-200">Nature of Visit</th>
-        <th class="py-4 px-6 text-left border-b border-indigo-200">Visit Type</th>
         <th class="py-4 px-6 text-left border-b border-indigo-200">Gender</th>
+        <td class="py-3 px-6">Diagnosis</td>
       </tr>
     </thead>
     <tbody class="text-gray-600 text-sm">
@@ -168,9 +167,8 @@
         <td class="py-3 px-6">{{ patient.fullName }}</td>
         <td class="py-3 px-6">{{ patient.address }}</td>
         <td class="py-3 px-6">{{ patient.age }}</td>
-        <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
-        <td class="py-3 px-6">{{ patient.visitType }}</td>
         <td class="py-3 px-6">{{ patient.sex }}</td>
+        <td class="py-3 px-6">{{ patient.diagnosis }}</td>
       </tr>
     </tbody>
   </table>

@@ -202,9 +202,6 @@ export default {
 </script>
 
 
-
-
-
 <template>
   <div class="w-full min-h-screen px-11 py-5 bg-gradient-to-br from-green-100 to-blue-100 p-4">
      <!-- Header Section -->
@@ -285,7 +282,6 @@ export default {
       <table class="min-w-full divide-y divide-gray-200 bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-s font-bold">
-            <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">ID</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Name</th>
             <th class="px-6 py-3 text-left font-medium text-white uppercase tracking-wider">Age</th>
             <th class="px-6 py-3 text-left  font-medium text-white uppercase tracking-wider">Vaccine Type</th>
@@ -298,7 +294,6 @@ export default {
         <tbody class="bg-white divide-y divide-gray-200">
           <template v-for="patient in paginatedPatients" :key="patient.personalId">
             <tr v-for="record in patient.history" :key="record.id" class="hover:bg-gray-100">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.personalId }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.firstName }} {{ patient.middleName }} {{ patient.lastName }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ patient.age }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ record.vaccineType }}</td>

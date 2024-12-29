@@ -36,10 +36,26 @@ use App\Http\Controllers\VaccineAppointmentController;
 // });
 
 
-Route::get('/checkup/thank-you', function () {
-    return Inertia::render('ThankYou');
+Route::get('/checkup/thank-you/itr', function () {
+    return Inertia::render('ThankYou/ThankYouItr');
 })->name('thank-you');
 
+Route::get('/checkup/thank-you/prenatal', function () {
+    return Inertia::render('ThankYou/ThankYouPrenatal');
+})->name('thank-you');
+
+Route::get('/checkup/thank-you/nationalimmunization', function () {
+    return Inertia::render('ThankYou/ThankYouNational');
+})->name('thank-you');
+
+
+
+// Route for displaying the disease table
+Route::get('/patients/disease-table', [PatientController::class, 'disease'])->name('disease.table');
+
+
+// Route for filtering records by diagnosis
+Route::get('/patients/disease-table/filter', [PatientController::class, 'disease'])->name('disease.filter');
 
 Route::get('/', [AuthenticatedSessionController::class, 'index'])->name('home');
 

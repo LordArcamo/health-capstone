@@ -1,138 +1,138 @@
 <template>
-  <div class="container py-8 px-4">
-    <!-- Sessions Dropdown -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-green-700">Patient Records</h1>
-      <select
-        v-model="selectedSessionId"
-        class="border border-gray-300 py-2 px-4 rounded shadow-sm focus:outline-none focus:ring-green-500"
-      >
-        <option value="">All Sessions</option>
-        <option v-for="session in sessions" :key="session.id" :value="session.id">
-          {{ session.title }} ({{ session.date }})
-        </option>
-      </select>
-    </div>
-
-    <!-- Search and Filter Section -->
-    <div class="flex flex-col md:flex-row items-start gap-4 mb-6">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search by name, diagnosis, or visit type"
-        class="border border-gray-300 py-2 px-4 rounded w-full md:w-1/2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-      />
-      <div class="relative">
-        <button
-          @click="toggleMegaFilter"
-          class="bg-gray-100 text-gray-700 py-2 px-4 rounded-md shadow-md hover:bg-gray-200 transition focus:ring-2 focus:ring-green-500"
-        >
-          Filter Options
-        </button>
-        <transition name="fade">
-          <div
-            v-if="megaFilterOpen"
-            class="absolute mt-2 bg-white border border-gray-300 rounded-lg shadow-lg w-80 p-6 z-50"
-          >
-            <h3 class="text-lg font-semibold text-gray-700 mb-4">Filter Options</h3>
-            <div class="space-y-6">
-              <!-- Filter by Purok -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Filter by Purok</label>
-                <select
-                  v-model="filterPrk"
-                  class="border border-gray-300 py-2 px-4 rounded shadow-sm focus:outline-none focus:ring-green-500 w-full"
-                >
-                  <option value="">All Purok</option>
-                  <option v-for="purok in purokOptions" :key="purok" :value="purok">
-                    {{ purok }}
-                  </option>
-                </select>
-              </div>
-              <!-- Filter by Barangay -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Filter by Barangay</label>
-                <select
-                  v-model="filterBarangay"
-                  class="border border-gray-300 py-2 px-4 rounded shadow-sm focus:outline-none focus:ring-green-500 w-full"
-                >
-                  <option value="">All Barangay</option>
-                  <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
-                    {{ barangay }}
-                  </option>
-                </select>
-              </div>
-            </div>
-            <div class="flex justify-end mt-6">
-              <button
-                @click="resetFilters"
-                class="bg-red-500 text-white py-2 px-4 rounded shadow-md hover:bg-red-600"
-              >
-                Clear Filters
-              </button>
-            </div>
-          </div>
-        </transition>
+  <div class="container">
+  <!-- Header Section -->
+  <div class="bg-gradient-to-r from-blue-500 to-green-500 text-white py-8 px-6 shadow-md">
+      <div class="text-left container mx-auto">
+        <h1 class="text-4xl font-bold">Patient Records</h1>
+        <p class="text-lg">Search, filter, and manage patient records efficiently.</p>
       </div>
     </div>
 
-    <!-- Patient Table -->
-    <div class="overflow-x-auto bg-gray-100 rounded-lg shadow-md">
-      <table class="min-w-full bg-white">
-        <thead>
-          <tr class="bg-green-700 text-white text-sm font-bold">
-            <th class="py-4 px-6 text-left">Patient ID</th>
-            <th class="py-4 px-6 text-left">Name</th>
-            <th class="py-4 px-6 text-left">Age</th>
-            <th class="py-4 px-6 text-left">Barangay</th>
-            <th class="py-4 px-6 text-left">Visit Type</th>
-            <th class="py-4 px-6 text-left">Visit Date</th>
-            <th class="py-4 px-6 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="patient in paginatedPatients"
-            :key="patient.personalId"
-            class="border-b hover:bg-gray-50 transition-colors"
-          >
-            <td class="py-4 px-6">{{ patient.personalId }}</td>
-            <td class="py-4 px-6">{{ patient.firstName }} {{ patient.lastName }}</td>
-            <td class="py-4 px-6">{{ patient.age }}</td>
-            <td class="py-4 px-6">{{ patient.barangay }}</td>
-            <td class="py-4 px-6">{{ patient.visitType }}</td>
-            <td class="py-4 px-6">{{ formatDate(patient.visitDate) }}</td>
-            <td class="py-4 px-6">
-              <button
-                @click="openModal(patient)"
-                class="bg-green-500 text-white py-1 px-3 rounded hover:bg-yellow-300 hover:text-black transition"
+    <div class="container mx-auto py-8 px-6">
+
+      <!-- Search and Filter Section -->
+      <div class="flex flex-col md:flex-row items-start gap-4 mb-6">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search by name, diagnosis, or visit type"
+          class="border border-gray-300 py-3 px-4 rounded-lg w-full md:w-1/2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <button
+          @click="toggleMegaFilter"
+          class="bg-blue-500 text-white py-3 px-6 rounded-lg shadow-md hover:bg-blue-600 transition focus:ring-2 focus:ring-blue-500"
+        >
+          Filter Options
+        </button>
+      </div>
+
+      <!-- Collapsible Filter Panel -->
+      <transition name="fade">
+        <div
+          v-if="megaFilterOpen"
+          class="mb-6 bg-white border border-gray-300 rounded-lg p-6 shadow-lg"
+        >
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Filter Options</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Filter by Purok -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Filter by Purok</label>
+              <select
+                v-model="filterPrk"
+                class="border border-gray-300 py-2 px-4 rounded-lg w-full shadow-sm focus:outline-none focus:ring-blue-500"
               >
-                View
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <option value="">All Purok</option>
+                <option v-for="purok in purokOptions" :key="purok" :value="purok">
+                  {{ purok }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Filter by Barangay -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Filter by Barangay</label>
+              <select
+                v-model="filterBarangay"
+                class="border border-gray-300 py-2 px-4 rounded-lg w-full shadow-sm focus:outline-none focus:ring-blue-500"
+              >
+                <option value="">All Barangay</option>
+                <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
+                  {{ barangay }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end mt-6">
+            <button
+              @click="resetFilters"
+              class="bg-red-500 text-white py-3 px-6 rounded-lg shadow-md hover:bg-red-600 transition"
+            >
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </transition>
+
+      <!-- Patient Table -->
+      <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+        <table class="min-w-full bg-white">
+          <thead>
+            <tr class="bg-gradient-to-r from-green-500 to-blue-500 text-white uppercase text-sm font-bold">
+              <th class="py-4 px-6 text-left">Patient ID</th>
+              <th class="py-4 px-6 text-left">Name</th>
+              <th class="py-4 px-6 text-left">Age</th>
+              <th class="py-4 px-6 text-left">Barangay</th>
+              <th class="py-4 px-6 text-left">Visit Type</th>
+              <th class="py-4 px-6 text-left">Visit Date</th>
+              <th class="py-4 px-6 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="patient in paginatedPatients"
+              :key="patient.personalId"
+              class="border-b hover:bg-gray-50 transition-colors"
+            >
+              <td class="py-4 px-6">{{ patient.personalId }}</td>
+              <td class="py-4 px-6">{{ patient.firstName }} {{ patient.lastName }}</td>
+              <td class="py-4 px-6">{{ patient.age }}</td>
+              <td class="py-4 px-6">{{ patient.barangay }}</td>
+              <td class="py-4 px-6">{{ patient.visitType }}</td>
+              <td class="py-4 px-6">{{ formatDate(patient.visitDate) }}</td>
+              <td class="py-4 px-6">
+                <button
+                  @click="openModal(patient)"
+                  class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-6 flex justify-center space-x-4">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="bg-red-500 text-white py-3 px-6 rounded-lg shadow-md hover:bg-red-600 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="bg-green-500 text-white py-3 px-6 rounded-lg shadow-md hover:bg-green-600 disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="mt-6 flex justify-center space-x-4">
-      <button
-        @click="prevPage"
-        :disabled="currentPage === 1"
-        class="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-red-600 disabled:opacity-50"
-      >
-        Previous
-      </button>
-      <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button
-        @click="nextPage"
-        :disabled="currentPage === totalPages"
-        class="bg-green-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-600 disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
+    <!-- Modal -->
     <transition name="fade">
       <div
         v-if="showModal"
@@ -151,7 +151,7 @@
           <div class="flex justify-end mt-4">
             <button
               @click="closeModal"
-              class="bg-red-500 text-white py-2 px-4 rounded shadow hover:bg-red-600"
+              class="bg-red-500 text-white py-2 px-4 rounded shadow-md hover:bg-red-600"
             >
               Close
             </button>
