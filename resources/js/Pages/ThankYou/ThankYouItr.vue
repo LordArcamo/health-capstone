@@ -1,6 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Inertia } from '@inertiajs/inertia';
+import { Head } from '@inertiajs/vue3';
 
 // Props to dynamically determine the completed checkup type from the backend
 
@@ -20,6 +21,7 @@ function viewRecords() {
 
 <template>
   <NewLayout>
+    <Head title="Thank You General Checkup" />
     <div class="flex flex-col justify-center items-center bg-gradient-to-br from-indigo-50 via-blue-50 to-green-100 min-h-screen px-6 py-12">
       <div class="w-full max-w-4xl bg-white shadow-lg rounded-xl overflow-hidden">
         <!-- Header Section -->

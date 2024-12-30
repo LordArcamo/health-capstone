@@ -24,49 +24,7 @@ class PatientController extends Controller
             'patients' => $patients ?? [],
         ]);
     }
-    public function index()
-    {
-        // Temporarily increase memory limit
-        ini_set('memory_limit', '512M'); // Adjust as needed, e.g., 1024M for 1GB or more
-    
-        // Fetch total patients count in real-time
-        $totalPatients = PersonalInformation::count();
-    
-        // Fetch referred patients count in real-time
-        $referredPatientsCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
-    
-        // Fetch cases data for chart in real-time
-        $casesData = CheckUp::select('diagnosis', CheckUp::raw('COUNT(*) as count'))
-            ->whereNotNull('diagnosis') // Exclude null diagnoses
-            ->groupBy('diagnosis')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'diagnosis' => $item->diagnosis,
-                    'count' => $item->count,
-                ];
-            })
-            ->toArray();
-    
-        // Fetch patients with check-up data in real-time
-        $patientsWithCheckUp = PersonalInformation::leftJoin('itr', 'personal_information.personalId', '=', 'itr.personalId')
-            ->select(
-                'personal_information.personalId',
-                'personal_information.created_at',
-                'itr.modeOfTransaction'
-            )
-            ->distinct() // Avoid duplicates caused by JOIN
-            ->get()
-            ->toArray();
-    
-        // Return data to the frontend
-        return Inertia::render('Dashboard', [
-            'casesData' => $casesData, // Diagnosis and counts
-            'totalPatients' => $totalPatients, // Total patients count
-            'referredPatients' => $referredPatientsCount, // Referred patients count
-            'patients' => $patientsWithCheckUp, // All patients with check-up data
-        ]);
-    }
+
 
     public function disease(Request $request)
     {

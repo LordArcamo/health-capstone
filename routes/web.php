@@ -77,7 +77,7 @@ Route::get('/patients/search', [PatientController::class, 'search'])->name('pati
 
 // routes/web.php
 
-Route::get('/patients', [PatientController::class, 'index']);
+Route::get('/patients', [PatientController::class, 'show']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
