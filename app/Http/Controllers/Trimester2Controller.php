@@ -81,7 +81,7 @@ class Trimester2Controller extends Controller
             'compliane_routine' => $validatedData['compliane_routine'] ?? false,
             'referred_utz' => $validatedData['referred_utz'] ?? false,
             'fes04_folic' => $validatedData['fes04_folic'] ?? false,
-            'folic_acid' => $validatedData['folic_acid'],
+            'folic_acid' => $validatedData['folic_acid']  ?? false,
         ];
 
         // Save checkbox2 data to database

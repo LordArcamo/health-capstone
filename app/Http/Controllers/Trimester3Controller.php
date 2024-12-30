@@ -92,7 +92,7 @@ class Trimester3Controller extends Controller
             'referred_utz' => $validatedData['referred_utz'] ?? false,
             'information_newborn' => $validatedData['information_newborn'] ?? false,
             'fes04_folic' => $validatedData['fes04_folic'] ?? false,
-            'folic_acid' => $validatedData['folic_acid'],
+            'folic_acid' => $validatedData['folic_acid'] ?? false,
             'information_family' => $validatedData['information_family'] ?? null,
             'fhb' => $validatedData['fhb'],
             'position' => $validatedData['position'],

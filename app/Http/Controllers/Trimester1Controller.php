@@ -105,7 +105,7 @@ class Trimester1Controller extends Controller
             'referred_for' => $validatedData['referred_for'] ?? false,
             'healthy_diet' => $validatedData['healthy_diet'] ?? false,
             'fes04_folic' => $validatedData['fes04_folic'] ?? false,
-            'folic_acid' => $validatedData['folic_acid'],
+            'folic_acid' => $validatedData['folic_acid'] ?? false,
             'fhb' => $validatedData['fhb'],
             'position' => $validatedData['position'],
             'presentation' => $validatedData['presentation'],

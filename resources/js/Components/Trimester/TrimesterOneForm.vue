@@ -109,7 +109,7 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
+      <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-purple-700">
           Submit
         </button>
     </form>
@@ -231,6 +231,26 @@ export default {
       }
       if (!this.form.heart_rate) {
         this.errors.heart_rate = 'Heart Rate is required.';
+        isValid = false;
+      }
+      if (!this.form.heart_rate) {
+        this.errors.heart_rate = 'Heart Rate is required.';
+        isValid = false;
+      }
+      if (!this.form.fhb) {
+        this.fhb = 'FHB is required.';
+        isValid = false;
+      }
+      if (!this.form.position) {
+        this.errors.position = 'Position is required.';
+        isValid = false;
+      }
+      if (!this.form.presentation) {
+        this.errors.presentation = 'Presentation is required.';
+        isValid = false;
+      }
+      if (!this.form.fundal_height) {
+        this.errors.fundal_height = 'Fundal Height is required.';
         isValid = false;
       }
 
