@@ -1,31 +1,30 @@
 <template>
-  <div class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50" @click.self="close">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto"> 
-      
+  <div class="fixed inset-0 bg-purple-200 bg-opacity-90 flex items-center justify-center z-50" @click.self="close">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto">
       <!-- Step Indicator -->
-      <div class="flex justify-between items-center px-6 py-3 bg-green-100 rounded-t-lg">
-        <div class="flex items-center space-x-2 text-green-700 font-semibold">
-          <div class="w-5 h-5 rounded-full" :class="step === 1 ? 'bg-green-600' : 'bg-green-300'"></div>
+      <div class="flex justify-between items-center px-6 py-3 bg-purple-100 rounded-t-lg">
+        <div class="flex items-center space-x-2 text-purple-700 font-semibold">
+          <div class="w-5 h-5 rounded-full" :class="step === 1 ? 'bg-purple-600' : 'bg-purple-300'"></div>
           <span>Step 1: Select Trimester</span>
           <div v-if="step >= 2" class="ml-2 flex items-center space-x-2">
-            <div class="w-5 h-5 rounded-full" :class="step === 2 ? 'bg-green-600' : 'bg-green-300'"></div>
+            <div class="w-5 h-5 rounded-full" :class="step === 2 ? 'bg-purple-600' : 'bg-purple-300'"></div>
             <span>Step 2: Fill Out Form</span>
           </div>
           <div v-if="step === 3" class="ml-2 flex items-center space-x-2">
-            <div class="w-5 h-5 rounded-full bg-green-600"></div>
+            <div class="w-5 h-5 rounded-full bg-purple-600"></div>
             <span>Step 3: Submission Complete</span>
           </div>
         </div>
-      </div> 
+      </div>
 
       <!-- Header with Back Button -->
-      <header class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800">
+      <header class="flex justify-between items-center px-6 py-4 border-b border-purple-300">
+        <h3 class="text-lg font-semibold text-purple-800">
           <span v-if="step === 1">Select Trimester</span>
           <span v-else-if="step === 2">Trimester {{ selectedTrimester }} Form</span>
           <span v-else>Trimester Submitted!</span>
         </h3>
-        <button v-if="step === 2" @click="goBack" class="flex items-center text-green-600 hover:text-green-800">
+        <button v-if="step === 2" @click="goBack" class="flex items-center text-purple-600 hover:text-purple-800">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
@@ -34,11 +33,11 @@
       </header>
 
       <!-- Modal Body -->
-      <main class="px-6 py-6 text-gray-700 overflow-y-auto max-h-[70vh]"> 
+      <main class="px-6 py-6 text-purple-700 overflow-y-auto max-h-[70vh]">
         <!-- Step 1: Select Trimester -->
         <div v-if="step === 1">
-          <p>Select the appropriate trimester options here:</p>
-          <select v-model="selectedTrimester" @change="onTrimesterSelect" class="mt-4 border rounded-md w-full p-2">
+          <p class="font-semibold text-purple-600">Select the appropriate trimester:</p>
+          <select v-model="selectedTrimester" @change="onTrimesterSelect" class="mt-4 border-purple-300 rounded-md w-full p-2 shadow-sm focus:ring-purple-500 focus:border-purple-500">
             <option disabled value="">-- Please choose a trimester --</option>
             <option v-for="(trimester, index) in trimesters" :key="index" :value="trimester">
               {{ trimester }}
@@ -48,8 +47,8 @@
 
         <!-- Step 2: Show Selected Trimester Form -->
         <div v-else-if="step === 2">
-          <component 
-            :is="formComponent" 
+          <component
+            :is="formComponent"
             :prenatalId="prenatalId"
             :trimester="getTrimesterNumber(selectedTrimester)"
             :prefilledData="internalPrefilledData"
@@ -57,26 +56,25 @@
             @back="goBack"
           />
         </div>
+
         <!-- Step 3: Submission Complete Message -->
         <div v-else-if="step === 3" class="text-center">
-          <h2 class="text-xl font-semibold text-green-600">Trimester Submitted!</h2>
+          <h2 class="text-xl font-semibold text-purple-600">Trimester Submitted!</h2>
           <p class="mt-4">Thank you for submitting your trimester information. You can close this window or start again.</p>
         </div>
       </main>
 
       <!-- Footer Buttons -->
-      <footer class="flex justify-end px-6 py-4 border-t border-gray-200">
-        <button v-if="step === 1" @click="confirmSelection" :disabled="!selectedTrimester" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
+      <footer class="flex justify-end px-6 py-4 border-t border-purple-300">
+        <button v-if="step === 1" @click="confirmSelection" :disabled="!selectedTrimester" class="bg-purple-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-purple-700">
           Next
         </button>
-        <!--<button v-if="step === 2" @click="submitForm" type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-700">
-          Submit
-        </button>-->
         <button @click="close" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Close</button>
       </footer>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, defineAsyncComponent, computed, watch, onMounted } from 'vue';

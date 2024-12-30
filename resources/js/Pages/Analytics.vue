@@ -56,7 +56,7 @@ const applyFilters = () => {
 
   <NewLayout>
     <!-- Header Section -->
-    <div class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-6 px-4 lg:px-8 rounded-lg shadow-lg">
+    <div class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-6 px-4 lg:px-8 shadow-lg">
       <h1 class="text-4xl font-extrabold text-center">System Analytics Dashboard</h1>
       <p class="text-sm lg:text-base text-center mt-2">
         Monitor, analyze, and understand health trends with real-time insights.
@@ -149,11 +149,11 @@ const applyFilters = () => {
     <!-- Charts Section -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Monthly Trending Cases</h6>
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Total Patients</h6>
         <TotalPatients :filters="filters" />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Most Common Diagnoses</h6>
+        <h6 class="text-lg font-bold text-gray-800 mb-4">Referred Patients</h6>
         <ReferedPatients :filters="filters" />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">

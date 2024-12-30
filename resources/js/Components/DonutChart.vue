@@ -1,5 +1,5 @@
 <template>
-<div class="p-6 bg-white rounded-lg shadow-lg">
+<div>
   <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
     Most Common Diagnoses
   </h2>
