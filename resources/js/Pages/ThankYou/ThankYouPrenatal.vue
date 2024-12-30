@@ -3,12 +3,6 @@ import NewLayout from '@/Layouts/NewLayout.vue';
 import { Inertia } from '@inertiajs/inertia';
 
 // Props to dynamically determine the completed checkup type from the backend
-const props = defineProps({
-  completedCheckupType: {
-    type: String,
-    required: true,
-  },
-});
 
 // Methods
 function goToDashboard() {

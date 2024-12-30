@@ -3,12 +3,6 @@ import NewLayout from '@/Layouts/NewLayout.vue';
 import { Inertia } from '@inertiajs/inertia';
 
 // Props to dynamically determine the completed checkup type from the backend
-const props = defineProps({
-  completedCheckupType: {
-    type: String,
-    required: true,
-  },
-});
 
 // Methods
 function goToDashboard() {
@@ -32,7 +26,7 @@ function viewRecords() {
         <div class="bg-gradient-to-r from-green-500 via-green-500 to-green-400 text-white py-10 px-6">
           <h1 class="text-4xl font-extrabold">🎉 Thank You!</h1>
           <p class="mt-2 text-lg">
-            Your <span class="font-semibold capitalize">{{ completedCheckupType }}</span> checkup form has been successfully submitted.
+            Your <span class="font-semibold capitalize"> General </span> Checkup form has been successfully submitted.
           </p>
         </div>
 
