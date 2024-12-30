@@ -24,6 +24,9 @@ class SystemAnalyticsController extends Controller
         $vaccinations = $this->vaccinations($request);
         $cases = $this->cases($request);
         $monthlyStats = $this->getPatientStatistics();
+        $referredCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
+        $notReferredCount = PersonalInformation::count() - $referredCount;
+        $lineChart = $this->getVaccinationStatistics();
 
         return Inertia::render('Analytics', [
             'totalPatients' => $totalPatients,
@@ -31,6 +34,14 @@ class SystemAnalyticsController extends Controller
             'vaccinations' => $vaccinations,
             'cases' => $cases,
             'barChart' => $monthlyStats,
+            'pieChart' => [
+                'referred' => $referredCount,
+                'notReferred' => $notReferredCount,
+            ],
+            'lineChart' => [
+                'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                'data' => $lineChart,
+            ],
         ]);
     }
 
@@ -113,4 +124,33 @@ class SystemAnalyticsController extends Controller
 
         return $monthlyStats;
     }
+
+    public function getReferredPatientsStatistics()
+    {
+        $referredCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
+        $notReferredCount = PersonalInformation::count() - $referredCount;
+
+        return Inertia::render('Analytics', [
+            'pieChart' => [
+                'referred' => $referredCount,
+                'notReferred' => $notReferredCount,
+            ],
+        ]);
+    }
+
+    private function getVaccinationStatistics()
+    {
+        $monthlyVaccinations = [];
+        $currentYear = date('Y');
+    
+        for ($month = 1; $month <= 12; $month++) {
+            $count = VaccinationRecord::whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month)
+                ->count();
+            $monthlyVaccinations[] = $count;
+        }
+    
+        return $monthlyVaccinations;
+    }
+
 }

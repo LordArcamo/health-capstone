@@ -17,6 +17,17 @@ export default {
   components: {
     apexchart: VueApexCharts,
   },
+  props: {
+    vaccinationData: {
+      type: Array,
+      required: true,
+      default: () => Array(12).fill(0)
+    },
+    filters: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       chartOptions: {
@@ -27,7 +38,20 @@ export default {
           },
         },
         xaxis: {
-          categories: ["January", "February", "March", "April", "May", "June"],
+          categories: [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ],
         },
         stroke: {
           curve: "smooth",
@@ -47,18 +71,27 @@ export default {
         tooltip: {
           enabled: true,
           theme: "dark",
+          y: {
+            formatter: function(val) {
+              return val + " vaccinations"
+            }
+          }
         },
         grid: {
           borderColor: "#e7e7e7",
         },
       },
-      chartSeries: [
-        {
-          name: "Vaccinations",
-          data: [20, 40, 60, 80, 100, 120],
-        },
-      ],
     };
+  },
+  computed: {
+    chartSeries() {
+      return [
+        {
+          name: "Monthly Vaccinations",
+          data: this.vaccinationData || Array(12).fill(0)
+        },
+      ];
+    },
   },
 };
 </script>
@@ -72,6 +105,7 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
 .vaccinations-chart {
   height: 300px;
 }

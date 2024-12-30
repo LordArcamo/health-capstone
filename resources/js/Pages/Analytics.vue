@@ -13,13 +13,13 @@ const showFilters = ref(false);
 
 const props = defineProps({
   barChart: Array,
+  pieChart: Object,
   totalPatients: Number,
   vaccinations: Number,
   cases: Number,
-  risk: Number
+  risk: Number,
+  lineChart: Object,
 });
-
-console.log("Received barChart prop:", props.barChart);
 
 const totalPatients = ref(props.totalPatients || 0);
 const vaccinations = ref(props.vaccinations || 0);
@@ -36,8 +36,11 @@ const updateStats = (stats) => {
 const monthlyData = ref(Array(12).fill(0)); // Initialize with 12 months
 if (props.barChart && props.barChart.length === 12) {
   monthlyData.value = props.barChart; // Assign data directly
-} else {
-  console.error("barChart data is missing or incomplete");
+}
+
+const monthlyVaccination = ref(Array(12).fill(0)); // Default to zero for 12 months
+if (props.lineChart && props.lineChart.data) {
+  monthlyVaccination.value = props.lineChart.data;
 }
 
 const filters = ref({
@@ -182,15 +185,21 @@ const applyFilters = () => {
         <TotalPatients 
         :filters="filters"
         :monthly-data="monthlyData"
-        />
+          />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Referred Patients</h6>
-        <ReferedPatients :filters="filters" />
+        <ReferedPatients 
+          :filters="filters"
+          :pieChart="props.pieChart"
+        />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Vaccination Overview</h6>
-        <Vaccinations :filters="filters" />
+        <Vaccinations 
+          :filters="filters"
+          :vaccination-data="monthlyVaccination"
+        />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Cases Overview</h6>
