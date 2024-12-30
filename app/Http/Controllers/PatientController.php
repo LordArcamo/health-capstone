@@ -24,13 +24,14 @@ class PatientController extends Controller
             'patients' => $patients ?? [],
         ]);
     }
+
     public function index()
     {
         // Temporarily increase memory limit
         ini_set('memory_limit', '512M'); // Adjust as needed, e.g., 1024M for 1GB or more
     
         // Fetch total patients count in real-time
-        $totalPatients = PersonalInformation::count();
+        $totalPatientss = PersonalInformation::distinct('personalId')->count('personalId');
     
         // Fetch referred patients count in real-time
         $referredPatientsCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
@@ -62,7 +63,7 @@ class PatientController extends Controller
         // Return data to the frontend
         return Inertia::render('Dashboard', [
             'casesData' => $casesData, // Diagnosis and counts
-            'totalPatients' => $totalPatients, // Total patients count
+            'totalPatientss' => $totalPatientss, // Total patients count
             'referredPatients' => $referredPatientsCount, // Referred patients count
             'patients' => $patientsWithCheckUp, // All patients with check-up data
         ]);
@@ -115,33 +116,29 @@ class PatientController extends Controller
 
     public function show()
     {
-        // Use LEFT JOIN to include diagnosis and other fields
-        $patients = PersonalInformation::leftJoin('itr', 'personal_information.personalId', '=', 'itr.personalId')
-            ->select(
-                'personal_information.personalId',
-                'personal_information.created_at',
-                'personal_information.firstName',
-                'personal_information.lastName',
-                'personal_information.middleName',
-                'personal_information.suffix',
-                'personal_information.purok',
-                'personal_information.barangay',
-                'personal_information.age',
-                'personal_information.birthdate',
-                'personal_information.contact',
-                'personal_information.sex',
-                'itr.modeOfTransaction' ,
-                'itr.diagnosis' // Include diagnosis field
+        // Fetch unique personal information
+        $patients = PersonalInformation::select(
+                'personalId',
+                'created_at',
+                'firstName',
+                'lastName',
+                'middleName',
+                'suffix',
+                'purok',
+                'barangay',
+                'age',
+                'birthdate',
+                'contact',
+                'sex'
             )
             ->distinct() // Ensure no duplicate rows
-            ->get()
-            ->toArray();
-        
-
+            ->get();
+    
         return Inertia::render('Table/Patient', [
-            'totalPatients' => $patients, // Pass the joined data to the frontend
+            'totalPatients' => $patients, // Pass the unique patients to the frontend
         ]);
     }
+    
 
     public function showReferred(){
         $referredPatients = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')

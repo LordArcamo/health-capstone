@@ -99,7 +99,7 @@
               <input type="number" v-model="computedAge" class="input" readonly />
             </div>
             
-            <!-- <div>
+            <div>
               <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
               <div class="relative">
                 <input type="tel" v-model="form.contact" @input="formatContact"
@@ -110,7 +110,7 @@
                   +63
                 </span>
               </div>
-            </div> -->
+            </div>
 
           </div>
           <div class="mt-6 flex justify-center text-right">

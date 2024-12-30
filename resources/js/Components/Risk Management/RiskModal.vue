@@ -489,6 +489,8 @@ export default {
     },
     saveRiskData() {
 
+      this.form.age = this.computedAge;
+
       const riskData = {
         riskDetails: {
           foodIntake: this.form.foodIntake,

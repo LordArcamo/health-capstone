@@ -12,14 +12,33 @@ import { ref, onMounted } from 'vue';
 const showFilters = ref(false);
 
 const props = defineProps({
+  barChart: Array,
   totalPatients: Number,
+  vaccinations: Number,
+  cases: Number,
+  risk: Number
 });
 
+console.log("Received barChart prop:", props.barChart);
+
 const totalPatients = ref(props.totalPatients || 0);
+const vaccinations = ref(props.vaccinations || 0);
+const cases = ref(props.cases || 0);
+const risk = ref(props.risk || 0);
 
 const updateStats = (stats) => {
   totalPatients.value = stats.totalPatients || 0;
+  vaccinations = ref(props.vaccinations || 0);
+  cases = ref(props.cases || 0);
+  risk = ref(props.risk || 0);
 };
+
+const monthlyData = ref(Array(12).fill(0)); // Initialize with 12 months
+if (props.barChart && props.barChart.length === 12) {
+  monthlyData.value = props.barChart; // Assign data directly
+} else {
+  console.error("barChart data is missing or incomplete");
+}
 
 const filters = ref({
   date: '',
@@ -144,15 +163,15 @@ const applyFilters = () => {
       </div>
       <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-lg shadow-lg">
         <h2 class="text-lg font-bold text-gray-700">Vaccinations</h2>
-        <p class="text-3xl font-extrabold text-gray-800 mt-2">11,432</p>
+        <p class="text-2xl font-semibold">{{ vaccinations }}</p>
       </div>
       <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 p-6 rounded-lg shadow-lg">
         <h2 class="text-lg font-bold text-gray-700">Mental Health Cases</h2>
-        <p class="text-3xl font-extrabold text-gray-800 mt-2">245</p>
+        <p class="text-2xl font-semibold">{{ cases }}</p>
       </div>
       <div class="bg-gradient-to-br from-red-100 to-red-300 p-6 rounded-lg shadow-lg">
         <h2 class="text-lg font-bold text-gray-700">High-Risk Cases</h2>
-        <p class="text-3xl font-extrabold text-gray-800 mt-2">132</p>
+        <p class="text-2xl font-semibold">{{ risk }}</p>
       </div>
     </div>
 
@@ -160,7 +179,10 @@ const applyFilters = () => {
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Total Patients</h6>
-        <TotalPatients :filters="filters" />
+        <TotalPatients 
+        :filters="filters"
+        :monthly-data="monthlyData"
+        />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Referred Patients</h6>

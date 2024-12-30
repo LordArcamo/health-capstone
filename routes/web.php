@@ -203,10 +203,18 @@ Route::get('/mental-health', function () {
     return Inertia::render('About/MentalDescription');
 })->middleware(['auth', 'verified'])->name('mental-health');
 
-Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('system-analytics');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/api/patient-statistics', [PatientController::class, 'getPatientStatistics'])->name('patient.statistics');
 
+});
+// Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])
+//     ->middleware(['auth', 'verified'])
+//     ->name('system-analytics');
+
+    Route::get('/mental-health', function () {
+        return Inertia::render('Analytics');
+    })->middleware(['auth', 'verified'])->name('mental-health');
 
 Route::get('/patients/cases', function () {
     return Inertia::render('Table/DiseaseCases');

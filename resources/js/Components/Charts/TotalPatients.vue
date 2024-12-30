@@ -17,6 +17,13 @@ export default {
   components: {
     apexchart: VueApexCharts,
   },
+  props: {
+    monthlyData: {
+      type: Array,
+      required: true,
+      default: () => Array(12).fill(0)
+    },
+  },
   data() {
     return {
       chartOptions: {
@@ -25,6 +32,9 @@ export default {
           toolbar: {
             show: true,
           },
+          zoom: {
+            enabled: true
+          }
         },
         xaxis: {
           categories: [
@@ -45,9 +55,10 @@ export default {
         colors: ["#4BC0C0"],
         plotOptions: {
           bar: {
-            columnWidth: "50%",
             borderRadius: 4,
-          },
+            horizontal: false,
+            columnWidth: '70%',
+          }
         },
         dataLabels: {
           enabled: false,
@@ -56,9 +67,9 @@ export default {
           align: "center",
           margin: 10,
           style: {
-            fontSize: "20px",
-            fontWeight: "bold",
-          },
+            fontSize: '18px',
+            fontWeight: 'bold',
+          }
         },
         grid: {
           borderColor: "#e7e7e7",
@@ -66,16 +77,24 @@ export default {
         tooltip: {
           enabled: true,
           theme: "dark",
+          y: {
+            formatter: function(val) {
+              return val + " patients"
+            }
+          }
         },
       },
-      chartSeries: [
-        {
-          name: "Total Patients",
-          data: [50, 60, 70, 85, 90, 100, 110, 120, 130, 140, 150, 160],
-        },
-      ],
     };
   },
+  computed: {
+    chartSeries() {
+      console.log("Chart Series Data:", this.monthlyData);
+      return [{
+        name: 'Total Patients',
+        data: this.monthlyData
+      }];
+    }
+  }
 };
 </script>
 
