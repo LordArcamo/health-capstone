@@ -17,9 +17,9 @@ const props = defineProps({
 
 const totalPatients = ref(props.totalPatients || 0);
 
-// const updateStats = (stats) => {
-//   totalPatients.value = stats.totalPatients || 0;
-// };
+const updateStats = (stats) => {
+  totalPatients.value = stats.totalPatients || 0;
+};
 
 const filters = ref({
   date: '',
