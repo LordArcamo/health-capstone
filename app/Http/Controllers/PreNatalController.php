@@ -360,7 +360,7 @@ class PreNatalController extends Controller
             ]);
 
             // Redirect with success
-            return back()->with('success', 'Data saved successfully!');
+            return Inertia::location('/checkup/thank-you/prenatal');
         } catch (\Exception $e) {
             \Log::error('Error saving data:', [
                 'error' => $e->getMessage(),

@@ -252,7 +252,7 @@ class CheckUpController extends Controller
     {
         // Log the incoming request
         \Log::info('Incoming request data:', $request->all());
-
+    
         // Validate request data
         $validatedData = $request->validate([
             'personalId' => 'nullable|exists:personal_information,personalId',
@@ -283,13 +283,12 @@ class CheckUpController extends Controller
             'chiefComplaints' => 'required|string|max:255',
             'diagnosis' => 'required|string|max:255',
             'medication' => 'required|string|max:255',
-
         ]);
-
+    
         $personalInfo = null;
-
+    
         if (isset($validatedData['personalId'])) {
-            // Patient exists, update personal information
+            // Update existing patient
             $personalInfo = PersonalInformation::find($validatedData['personalId']);
             if ($personalInfo) {
                 $personalInfo->update([
@@ -308,7 +307,7 @@ class CheckUpController extends Controller
                 return back()->withErrors(['error' => 'Patient not found.']);
             }
         } else {
-            // Patient does not exist, create new record
+            // Create new patient
             $personalInfo = PersonalInformation::create([
                 'firstName' => $validatedData['firstName'],
                 'lastName' => $validatedData['lastName'],
@@ -322,7 +321,7 @@ class CheckUpController extends Controller
                 'sex' => $validatedData['sex'],
             ]);
         }
-
+    
         // Save the ITR (Individual Treatment Record) data
         CheckUp::create([
             'personalId' => $personalInfo->personalId,
@@ -343,16 +342,16 @@ class CheckUpController extends Controller
             'chiefComplaints' => $validatedData['chiefComplaints'],
             'diagnosis' => $validatedData['diagnosis'],
             'medication' => $validatedData['medication'],
-
         ]);
-
-        // Log the action and return success response
-        \Log::info('Patient and ITR saved successfully:', $personalInfo->toArray());
-        return back()->with([
-            'success' => 'Data saved successfully!',
-            'personalId' => $personalInfo->personalId,
-        ]);
+    
+        // Log success
+        \Log::info('Patient and ITR saved successfully.');
+    
+     // Redirect to the thank-you page with the checkUpType
+     return Inertia::location('/checkup/thank-you/itr');
     }
+    
+
 
 
     /**

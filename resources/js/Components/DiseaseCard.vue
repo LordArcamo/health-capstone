@@ -1,36 +1,31 @@
 <script>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import ShortBox from './ShortBox.vue';
+import { Inertia } from '@inertiajs/inertia';
 
 export default {
-  
   components: { ShortBox },
-  theme: {
-    extend: {
-      zIndex: {
-        100: '100', // Add custom z-index values if necessary
-        999: '999',
-      },
+  props: {
+    casesData: {
+      type: Array,
+      default: () => [],
     },
   },
-  props: { casesData: { type: Array, default: () => [] } },
   setup(props) {
     const isDropdownOpen = ref(false);
     const selectedDisease = ref('');
     const normalizedCasesData = computed(() =>
       Array.isArray(props.casesData) ? props.casesData : []
     );
-    const filteredCases = computed(() =>
-      selectedDisease.value
+    const totalCasesCount = computed(() =>
+      (selectedDisease.value
         ? normalizedCasesData.value.filter(
             (caseItem) =>
               caseItem.diagnosis &&
               caseItem.diagnosis.toLowerCase() === selectedDisease.value.toLowerCase()
           )
         : normalizedCasesData.value
-    );
-    const totalCasesCount = computed(() =>
-      filteredCases.value.reduce((sum, caseItem) => sum + (caseItem.count || 0), 0)
+      ).reduce((sum, caseItem) => sum + (caseItem.count || 0), 0)
     );
 
     const toggleDropdown = () => {
@@ -59,9 +54,11 @@ export default {
       }
     };
 
-    const filterCases = (disease) => {
+    const viewTableWithFilter = (disease) => {
       selectedDisease.value = disease;
-      closeDropdown();
+      Inertia.visit('/patients/disease-table', {
+        data: { diagnosis: disease || '' },
+      });
     };
 
     onMounted(() => {
@@ -78,15 +75,15 @@ export default {
       isDropdownOpen,
       toggleDropdown,
       closeDropdown,
-      filterCases,
+      viewTableWithFilter,
       selectedDisease,
-      filteredCases,
       totalCasesCount,
       normalizedCasesData,
     };
   },
 };
 </script>
+
 
 <template>
   <ShortBox class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-md transition-shadow relative">
@@ -112,34 +109,34 @@ export default {
 
     <!-- Dropdown Menu -->
     <transition name="fade">
-  <div
-    v-if="isDropdownOpen && normalizedCasesData.length"
-    class="absolute right-0 top-10 mt-2 w-64 bg-white border dropdown-menu border-yellow-300 rounded-lg shadow-lg z-9999 max-h-64 overflow-y-auto dropdown-menu"
-    @click.stop
-  >
-    <ul class="py-2">
-      <!-- Filter Items -->
-      <li
-        v-for="caseItem in normalizedCasesData"
-        :key="caseItem.diagnosis"
-        class="px-4 py-2 text-sm text-gray-700 hover:bg-yellow-100 cursor-pointer"
-        @click="filterCases(caseItem.diagnosis)"
+      <div
+        v-if="isDropdownOpen && normalizedCasesData.length"
+        class="absolute right-0 top-10 mt-2 w-64 bg-white border dropdown-menu border-yellow-300 rounded-lg shadow-lg z-9999 max-h-64 overflow-y-auto dropdown-menu"
+        @click.stop
       >
-        Filter by <span class="font-semibold">{{ caseItem.diagnosis }}</span>
-      </li>
-      <!-- Clear Filter -->
-      <li
-        class="px-4 py-2 text-sm text-gray-700 hover:bg-yellow-100 cursor-pointer"
-        @click="filterCases('')"
-      >
-        Clear Filter
-      </li>
-    </ul>
-  </div>
-</transition>
-
+        <ul class="py-2">
+          <!-- Filter Items -->
+          <li
+            v-for="caseItem in normalizedCasesData"
+            :key="caseItem.diagnosis"
+            class="px-4 py-2 text-sm text-gray-700 hover:bg-yellow-100 cursor-pointer"
+            @click="viewTableWithFilter(caseItem.diagnosis)"
+          >
+            View <span class="font-semibold">{{ caseItem.diagnosis }}</span> Records
+          </li>
+          <!-- View All Records -->
+          <li
+            class="px-4 py-2 text-sm text-gray-700 hover:bg-yellow-100 cursor-pointer"
+            @click="viewTableWithFilter('')"
+          >
+            View All Records
+          </li>
+        </ul>
+      </div>
+    </transition>
   </ShortBox>
 </template>
+
 
 <style scoped>
 /* Ensure the dropdown has the highest z-index */

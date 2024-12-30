@@ -115,21 +115,21 @@ onBeforeUnmount(() => {
                   :active="component === 'IndividualTreatmentRecord'"
                   class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
                 >
-                  ITR
+                  Individual Treatment Record
                 </NavLink>
                 <NavLink
                   href="/prenatal-postpartum-services"
                   :active="component === 'PrenatalPostpartum'"
                   class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
                 >
-                  Prenatal/Postpartum
+                  Prenatal Records
                 </NavLink>
                 <NavLink
                   href="/epi-records-services"
                   :active="component === 'EPIRecords'"
                   class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
                 >
-                  EPI Records
+                  National Immunization Records
                 </NavLink>
                 <NavLink
                   href="/vaccination-services"

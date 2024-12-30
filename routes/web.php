@@ -17,6 +17,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VaccineController;
+use App\Http\Controllers\SystemAnalyticsController;
+use App\Http\Controllers\ThankYouController;
 use App\Http\Controllers\PersonalInformationController;
 use App\Http\Controllers\RiskManagementController;
 use App\Http\Controllers\VaccineAppointmentController;
@@ -34,6 +36,26 @@ use App\Http\Controllers\VaccineAppointmentController;
 // });
 
 
+Route::get('/checkup/thank-you/itr', function () {
+    return Inertia::render('ThankYou/ThankYouItr');
+})->name('thank-you');
+
+Route::get('/checkup/thank-you/prenatal', function () {
+    return Inertia::render('ThankYou/ThankYouPrenatal');
+})->name('thank-you');
+
+Route::get('/checkup/thank-you/nationalimmunization', function () {
+    return Inertia::render('ThankYou/ThankYouNational');
+})->name('thank-you');
+
+
+
+// Route for displaying the disease table
+Route::get('/patients/disease-table', [PatientController::class, 'disease'])->name('disease.table');
+
+
+// Route for filtering records by diagnosis
+Route::get('/patients/disease-table/filter', [PatientController::class, 'disease'])->name('disease.filter');
 
 Route::get('/', [AuthenticatedSessionController::class, 'index'])->name('home');
 
@@ -60,7 +82,7 @@ Route::get('/patients', [PatientController::class, 'index']);
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
-    Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr'); 
+    Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr');
     Route::get('/services/patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
     Route::post('/services/patients/itrtable', [CheckUpController::class, 'import'])->name('itr.import');
 });
@@ -181,9 +203,9 @@ Route::get('/mental-health', function () {
     return Inertia::render('About/MentalDescription');
 })->middleware(['auth', 'verified'])->name('mental-health');
 
-Route::get('/system-analytics', function () {
-    return Inertia::render('Analytics');
-})->middleware(['auth', 'verified'])->name('system-analytics');
+Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('system-analytics');
 
 
 Route::get('/patients/cases', function () {
@@ -200,7 +222,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Appointments API route
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/appointments/vaccination/{id}', [VaccineAppointmentController::class, 'getAppointmentsForVaccination']);
     Route::post('/appointments/store', [VaccineAppointmentController::class, 'store'])->name('appointments.store');

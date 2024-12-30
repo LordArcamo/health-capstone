@@ -248,11 +248,9 @@ class NationalImmunizationProgramController extends Controller
         \Log::info('Data saved successfully for personalId:', [
             'personalId' => $personalInfo->personalId,
         ]);
-
-        return back()->with([
-            'success' => 'Data saved successfully!',
-            'personalId' => $personalInfo->personalId,
-        ]);
+    
+// Redirect to the thank-you page using Inertia
+return Inertia::location('/checkup/thank-you/nationalimmunization');
     }
 
 

@@ -1,9 +1,9 @@
 <template>
-  <div class="mx-auto py-8 px-10 bg-gradient-to-br from-green-100 to-blue-100 min-h-screen">
+  <div class="mx-auto py-8 px-10 bg-gradient-to-br from-pink-50 to-pink-200 min-h-screen">
     <!-- Header Section -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-green-600 text-center">Prenatal and Postpartum</h1>
-      <p class="text-gray-700 text-center">Search, filter, and manage patient records efficiently.</p>
+    <div class="mb-6 text-center">
+      <h1 class="text-3xl font-bold text-pink-600">Prenatal and Postpartum Records</h1>
+      <p class="text-gray-700">Search, filter, and manage patient records efficiently.</p>
     </div>
 
     <!-- Search and Filter Section -->
@@ -14,14 +14,14 @@
           v-model="searchQuery"
           type="text"
           placeholder="Search by name, diagnosis, or visit type"
-          class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
         />
       </div>
 
       <!-- Filter Panel Toggle -->
       <button
         @click="toggleFilterPanel"
-        class="flex items-center px-4 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 focus:outline-none w-full md:w-1/3"
+        class="flex items-center px-4 py-3 bg-pink-500 text-white font-medium rounded-lg shadow hover:bg-pink-600 focus:outline-none w-full md:w-1/3"
       >
         <span>Filters</span>
         <svg
@@ -55,7 +55,7 @@
                 min="0"
                 max="100"
                 step="5"
-                class="w-full accent-green-500"
+                class="w-full accent-pink-500"
               />
               <span class="text-sm text-gray-500">100+</span>
             </div>
@@ -67,7 +67,7 @@
             <label class="block text-base font-semibold mb-2">Purok</label>
             <select
               v-model="filterPrk"
-              class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+              class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
             >
               <option value="">All Purok</option>
               <option v-for="purok in purokOptions" :key="purok" :value="purok">{{ purok }}</option>
@@ -79,7 +79,7 @@
             <label class="block text-base font-semibold mb-2">Barangay</label>
             <select
               v-model="filterBarangay"
-              class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+              class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
             >
               <option value="">All Barangay</option>
               <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
@@ -95,13 +95,13 @@
     <div class="mb-6 flex gap-4">
       <button
         @click="generateReport"
-        class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none transition"
+        class="px-6 py-3 bg-pink-500 text-white font-semibold rounded-lg shadow hover:bg-pink-600 focus:outline-none transition"
       >
         Generate Report
       </button>
       <button
         @click="triggerImport"
-        class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition flex items-center gap-2"
+        class="px-6 py-3 bg-purple-500 text-white font-semibold rounded-lg shadow hover:bg-purple-600 focus:outline-none transition flex items-center gap-2"
       >
         Import CSV
       </button>
@@ -112,7 +112,7 @@
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
       <table class="min-w-full bg-white">
         <thead>
-          <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
+          <tr class="bg-gradient-to-r from-pink-500 to-purple-500 text-white uppercase text-sm font-bold">
             <th class="py-4 px-6 text-left">Full Name</th>
             <th class="py-4 px-6 text-left">Address</th>
             <th class="py-4 px-6 text-left">Age</th>
@@ -137,13 +137,13 @@
               <div class="flex gap-2">
                 <button
                     @click.stop="openModal('trimester', patient)"
-                  class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-green-600 transition"
+                  class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition"
                 >
                   Trimester
                 </button>
                 <button
                   @click.stop="openModal('postpartum', patient)"
-                  class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-yellow-600 transition"
+                  class="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition"
                 >
                   PostPartum
                 </button>
@@ -159,7 +159,7 @@
       <button
         @click="prevPage"
         :disabled="currentPage === 1"
-        class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow hover:bg-red-600 focus:outline-none transition disabled:opacity-50"
+        class="px-4 py-2 bg-pink-500 text-white font-semibold rounded-lg shadow hover:bg-pink-600 focus:outline-none transition disabled:opacity-50"
       >
         Previous
       </button>
@@ -167,75 +167,126 @@
       <button
         @click="nextPage"
         :disabled="currentPage === totalPages"
-        class="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 focus:outline-none transition disabled:opacity-50"
+        class="px-4 py-2 bg-purple-500 text-white font-semibold rounded-lg shadow hover:bg-purple-600 focus:outline-none transition disabled:opacity-50"
       >
         Next
       </button>
     </div>
   </div>
 
-     <!-- Modal -->
-     <div v-if="currentModal === 'inline'" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl p-6 relative">
-        <button @click="closeModal"
-          class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700">
-          &times;
-        </button>
-        <h2 class="text-xl sm:text-2xl font-bold mb-4">
-          Details for {{ selectedPatient.fullName }}
-        </h2>
-        <ul class="space-y-2 flex gap-10">
-          <div>
-            <li>
-              <strong>Full Name:</strong>
-              {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}
-            </li>
-            <li><strong>Address:</strong> {{ selectedPatient.purok }} {{ selectedPatient.barangay }}</li>
-            <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
-            <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
-            <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
-            <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
-            <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
-            <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
-            <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
-            <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
-            <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
-            <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
-            <li><strong>Name of Spouse:</strong> {{ selectedPatient.nameOfSpouse }}</li>
-            <li><strong>Emergency Contact Number:</strong> {{ selectedPatient.emergencyContact }}</li>
-            <li><strong>4ps?::</strong> {{ selectedPatient.fourMember }}</li>
-            <li><strong>Philhealth Status:</strong> {{ selectedPatient.philhealthStatus }}</li>
-            <li><strong>Philhealth ID Number:</strong> {{ selectedPatient.philhealthNo }}</li>
-            <li><strong>Menarche:</strong> {{ selectedPatient.menarche }}</li>
-            <li><strong>Onset of Sexual Intercourse:</strong> {{ selectedPatient.sexualOnset }}</li>
-            <li><strong>Period/Duration:</strong> {{ selectedPatient.periodDuration }}</li>
-            <li><strong>Birth Control Method:</strong> {{ selectedPatient.birthControl }}</li>
-          </div>
-          <div>
-            <li><strong>Interval/Cycle:</strong> {{ selectedPatient.intervalCycle }}</li>
-            <li><strong>Menopause? (Yes/No):</strong> {{ selectedPatient.menopause }}</li>
-            <li><strong>LMP (Last Menstrual Period):</strong> {{ selectedPatient.lmp }}</li>
-            <li><strong>EDC (Estimated Date of Confinement):</strong> {{ selectedPatient.edc }}</li>
-            <li><strong>Gravidity:</strong> {{ selectedPatient.gravidity }}</li>
-            <li><strong>Parity:</strong> {{ selectedPatient.parity }}</li>
-            <li><strong>Term:</strong> {{ selectedPatient.term }}</li>
-            <li><strong>Preterm:</strong> {{ selectedPatient.preterm }}</li>
-            <li><strong>Abortion:</strong> {{ selectedPatient.abortion }}</li>
-            <li><strong>Living:</strong> {{ selectedPatient.living }}</li>
-            <li><strong>Syphilis Test Result:</strong> {{ selectedPatient.syphilisResult }}</li>
-            <li><strong>Penicillin Given:</strong> {{ selectedPatient.penicillin }}</li>
-            <li><strong>Hemoglobin (gm/100ml):</strong> {{ selectedPatient.hemoglobin }}</li>
-            <li><strong>Hematocrit (vol %):</strong> {{ selectedPatient.hematocrit }}</li>
-            <li><strong>Urinalysis:</strong> {{ selectedPatient.urinalysis }}</li>
-            <li><strong>TT Status:</strong> {{ selectedPatient.ttStatus }}</li>
-            <li><strong>TD (Date Given):</strong> {{ selectedPatient.tdDate }}</li>
-          </div>
-        </ul>
+  <!-- Modal -->
+  <div
+  v-if="currentModal === 'inline'"
+  class="fixed inset-0 bg-pink-100 bg-opacity-80 flex items-center justify-center z-50 p-4"
+>
+<div
+    class="bg-white rounded-lg shadow-lg w-full max-w-4xl h-[90vh] p-8 relative overflow-hidden"
+  >
+    <!-- Close Button -->
+    <button
+      @click="closeModal"
+      class="absolute top-4 right-4 bg-pink-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-pink-700 transition"
+    >
+      &times;
+    </button>
 
+        <!-- Scrollable Content -->
+        <div class="overflow-y-auto h-full pr-4">
+    <!-- Header Section -->
+    <div class="border-b pb-4 mb-6 flex items-center gap-4">
+      <div class="bg-pink-200 text-pink-600 rounded-full p-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold text-pink-600">Prenatal Checkup Details</h2>
+        <p class="text-gray-600">Details for {{ selectedPatient.fullName }}</p>
       </div>
     </div>
 
-    <TrimesterModal
+    <!-- Patient Details Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Column 1 -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
+        <ul class="space-y-2">
+          <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName || '' }} {{ selectedPatient.lastName }}</li>
+          <li><strong>Address:</strong> {{ selectedPatient.purok }}, {{ selectedPatient.barangay }}</li>
+          <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
+          <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
+          <li><strong>Mode of Transaction:</strong> {{ selectedPatient.modeOfTransaction }}</li>
+          <li><strong>Date of Consultation:</strong> {{ selectedPatient.consultationDate }}</li>
+          <li><strong>Time of Consultation:</strong> {{ selectedPatient.consultationTime }}</li>
+        </ul>
+      </div>
+
+      <!-- Column 2 -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Health Details</h3>
+        <ul class="space-y-2">
+          <li><strong>Blood Pressure:</strong> {{ selectedPatient.bloodPressure }}</li>
+          <li><strong>Temperature:</strong> {{ selectedPatient.temperature }}</li>
+          <li><strong>Height:</strong> {{ selectedPatient.height }}</li>
+          <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
+          <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
+          <li><strong>Name of Spouse:</strong> {{ selectedPatient.nameOfSpouse }}</li>
+          <li><strong>Emergency Contact Number:</strong> {{ selectedPatient.emergencyContact }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Additional Details -->
+    <div class="mt-8">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">Reproductive History</h3>
+      <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <li><strong>4Ps Member:</strong> {{ selectedPatient.fourMember }}</li>
+        <li><strong>Philhealth Status:</strong> {{ selectedPatient.philhealthStatus }}</li>
+        <li><strong>Philhealth ID Number:</strong> {{ selectedPatient.philhealthNo }}</li>
+        <li><strong>Menarche:</strong> {{ selectedPatient.menarche }}</li>
+        <li><strong>Onset of Sexual Intercourse:</strong> {{ selectedPatient.sexualOnset }}</li>
+        <li><strong>Period/Duration:</strong> {{ selectedPatient.periodDuration }}</li>
+        <li><strong>Birth Control Method:</strong> {{ selectedPatient.birthControl }}</li>
+        <li><strong>Interval/Cycle:</strong> {{ selectedPatient.intervalCycle }}</li>
+        <li><strong>Menopause:</strong> {{ selectedPatient.menopause }}</li>
+        <li><strong>LMP (Last Menstrual Period):</strong> {{ selectedPatient.lmp }}</li>
+        <li><strong>EDC (Estimated Date of Confinement):</strong> {{ selectedPatient.edc }}</li>
+        <li><strong>Gravidity:</strong> {{ selectedPatient.gravidity }}</li>
+        <li><strong>Parity:</strong> {{ selectedPatient.parity }}</li>
+        <li><strong>Term:</strong> {{ selectedPatient.term }}</li>
+        <li><strong>Preterm:</strong> {{ selectedPatient.preterm }}</li>
+        <li><strong>Abortion:</strong> {{ selectedPatient.abortion }}</li>
+        <li><strong>Living:</strong> {{ selectedPatient.living }}</li>
+      </ul>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="mt-6 flex justify-end gap-4">
+      <button
+        @click="closeModal"
+        class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+      >
+        Close
+      </button>
+      <button
+        @click="printRecord(selectedPatient)"
+        class="px-6 py-2 bg-pink-600 text-white rounded-lg shadow-md hover:bg-pink-700 transition"
+      >
+        Print Record
+      </button>
+    </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <TrimesterModal
       v-if="currentModal === 'trimester'"
       :key="selectedPatient?.prenatalId"
       :prenatalId="selectedPatient?.prenatalId"
