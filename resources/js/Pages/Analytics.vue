@@ -7,9 +7,19 @@ import Vaccinations from '@/Components/Charts/Vaccinations.vue';
 import MentalHealth from '@/Components/Charts/MentalHealth.vue';
 import RiskManagement from '@/Components/Charts/RiskManagement.vue';
 import Cases from '@/Components/Charts/Cases.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const showFilters = ref(false);
+
+const props = defineProps({
+  totalPatients: Number,
+});
+
+const totalPatients = ref(props.totalPatients || 0);
+
+// const updateStats = (stats) => {
+//   totalPatients.value = stats.totalPatients || 0;
+// };
 
 const filters = ref({
   date: '',
@@ -130,7 +140,7 @@ const applyFilters = () => {
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
       <div class="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-lg shadow-lg">
         <h2 class="text-lg font-bold text-gray-700">Total Patients</h2>
-        <p class="text-3xl font-extrabold text-gray-800 mt-2">6,075</p>
+        <p class="text-2xl font-semibold">{{ totalPatients }}</p>
       </div>
       <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-lg shadow-lg">
         <h2 class="text-lg font-bold text-gray-700">Vaccinations</h2>
