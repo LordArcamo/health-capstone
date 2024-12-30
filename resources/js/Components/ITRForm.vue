@@ -852,13 +852,6 @@ export default {
   // Emit the form data for processing
   this.$emit('submitForm', payload);
 
-  // Redirect to the Thank You page
-  this.$inertia.visit('/checkup/thank-you', {
-    method: 'get',
-    preserveScroll: true, // Keep scroll position if needed
-    preserveState: false, // Reset state to prevent reinitialization
-  });
-
   this.showModal = false; // Hide confirmation modal
 },
 
