@@ -73,33 +73,29 @@ class PatientController extends Controller
 
     public function show()
     {
-        // Use LEFT JOIN to include diagnosis and other fields
-        $patients = PersonalInformation::leftJoin('itr', 'personal_information.personalId', '=', 'itr.personalId')
-            ->select(
-                'personal_information.personalId',
-                'personal_information.created_at',
-                'personal_information.firstName',
-                'personal_information.lastName',
-                'personal_information.middleName',
-                'personal_information.suffix',
-                'personal_information.purok',
-                'personal_information.barangay',
-                'personal_information.age',
-                'personal_information.birthdate',
-                'personal_information.contact',
-                'personal_information.sex',
-                'itr.modeOfTransaction' ,
-                'itr.diagnosis' // Include diagnosis field
+        // Fetch unique personal information
+        $patients = PersonalInformation::select(
+                'personalId',
+                'created_at',
+                'firstName',
+                'lastName',
+                'middleName',
+                'suffix',
+                'purok',
+                'barangay',
+                'age',
+                'birthdate',
+                'contact',
+                'sex'
             )
             ->distinct() // Ensure no duplicate rows
-            ->get()
-            ->toArray();
-        
-
+            ->get();
+    
         return Inertia::render('Table/Patient', [
-            'totalPatients' => $patients, // Pass the joined data to the frontend
+            'totalPatients' => $patients, // Pass the unique patients to the frontend
         ]);
     }
+    
 
     public function showReferred(){
         $referredPatients = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
