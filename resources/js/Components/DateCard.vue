@@ -132,6 +132,15 @@ const filteredPatients = computed(() => {
     return [];
   }
 
+  // Deduplicate patients by `personalId`
+  const uniquePatients = [
+    ...new Map(
+      props.patients.map((patient) => [patient.personalId, patient])
+    ).values(),
+  ];
+
+  console.log('Unique Patients Count:', uniquePatients.length);
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -143,12 +152,8 @@ const filteredPatients = computed(() => {
   console.log('Current Filter:', currentFilter.value);
   console.log('Start of Month:', startOfMonth, 'End of Month:', endOfMonth);
 
-  return props.patients.filter((patient) => {
-    if (!patient.created_at) {
-      console.warn('Skipping patient with missing created_at:', patient);
-      return false;
-    }
-
+  // Apply filtering logic
+  return uniquePatients.filter((patient) => {
     const patientDate = new Date(patient.created_at);
     if (isNaN(patientDate)) {
       console.warn('Skipping patient with invalid created_at:', patient.created_at);
@@ -156,7 +161,6 @@ const filteredPatients = computed(() => {
     }
 
     if (currentFilter.value === 'month') {
-      // Strictly check for current month range
       return patientDate >= startOfMonth && patientDate <= endOfMonth;
     } else if (currentFilter.value === 'today') {
       return patientDate.toDateString() === today.toDateString();
@@ -169,6 +173,8 @@ const filteredPatients = computed(() => {
     return true; // Default to showing all patients
   });
 });
+
+
 
 // Debugging Watcher
 watch(() => props.patients, (newPatients) => {

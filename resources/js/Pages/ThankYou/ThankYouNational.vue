@@ -1,14 +1,10 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
 import { Inertia } from '@inertiajs/inertia';
+import { Head } from '@inertiajs/vue3';
 
-// Props to dynamically determine the completed checkup type from the backend
-const props = defineProps({
-  completedCheckupType: {
-    type: String,
-    required: true,
-  },
-});
+
+// Props to dynamically determine the completed checkup type from the backen
 
 // Methods
 function goToDashboard() {
@@ -26,13 +22,14 @@ function viewRecords() {
 
 <template>
   <NewLayout>
+    <Head title="Thank You National Immunization Checkup" />
     <div class="flex flex-col justify-center items-center bg-gradient-to-br from-teal-50 via-teal-100 to-blue-100 min-h-screen px-6 py-12">
       <div class="w-full max-w-4xl bg-white shadow-lg rounded-xl overflow-hidden">
         <!-- Header Section -->
         <div class="bg-gradient-to-r from-teal-400 via-teal-500 to-blue-400 text-white py-10 px-6">
           <h1 class="text-4xl font-extrabold">💉 Thank You!</h1>
           <p class="mt-2 text-lg">
-            Your <span class="font-semibold capitalize">{{ completedCheckupType }}</span> checkup form has been successfully submitted.
+            Your <span class="font-semibold capitalize"> National Immunization </span>Checkup form has been successfully submitted.
           </p>
         </div>
 

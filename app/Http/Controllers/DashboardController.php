@@ -18,7 +18,8 @@ class DashboardController extends Controller
         ini_set('memory_limit', '512M'); // Adjust as needed, e.g., 1024M for 1GB or more
     
         // Fetch total patients count in real-time
-        $totalPatients = PersonalInformation::count();
+        $totalPatients = PersonalInformation::select('created_at')->count();
+
     
         // Fetch referred patients count in real-time
         $referredPatientsCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
