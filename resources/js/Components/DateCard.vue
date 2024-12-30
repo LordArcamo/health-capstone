@@ -132,28 +132,27 @@ const filteredPatients = computed(() => {
     return [];
   }
 
-  // Deduplicate patients by `personalId`
-  const uniquePatients = [
-    ...new Map(
-      props.patients.map((patient) => [patient.personalId, patient])
-    ).values(),
-  ];
-
-  console.log('Unique Patients Count:', uniquePatients.length);
+  // Log total patients for debugging
+  console.log('Total Patients (Including Redundancy):', props.patients.length);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Get start and end of the current month
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  endOfMonth.setHours(23, 59, 59, 999);
+  const getStartOfMonth = () => new Date(today.getFullYear(), today.getMonth(), 1);
+  const getEndOfMonth = () => {
+    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    end.setHours(23, 59, 59, 999);
+    return end;
+  };
+
+  const startOfMonth = getStartOfMonth();
+  const endOfMonth = getEndOfMonth();
 
   console.log('Current Filter:', currentFilter.value);
   console.log('Start of Month:', startOfMonth, 'End of Month:', endOfMonth);
 
-  // Apply filtering logic
-  return uniquePatients.filter((patient) => {
+  // Apply filtering logic without deduplication
+  return props.patients.filter((patient) => {
     const patientDate = new Date(patient.created_at);
     if (isNaN(patientDate)) {
       console.warn('Skipping patient with invalid created_at:', patient.created_at);
@@ -175,7 +174,6 @@ const filteredPatients = computed(() => {
 });
 
 
-
 // Debugging Watcher
 watch(() => props.patients, (newPatients) => {
   console.log('Updated Patients:', newPatients);
@@ -187,15 +185,37 @@ watch(() => props.patients, (newPatients) => {
     const updateStats = () => {
   console.log('Filtered Patients:', filteredPatients.value);
 
+  // Validate filteredPatients
+  if (!Array.isArray(filteredPatients.value)) {
+    console.warn('Filtered Patients is not an array');
+    return;
+  }
+
+  if (filteredPatients.value.length === 0) {
+    console.warn('No patients available in filteredPatients');
+  }
+
+  // Calculate stats
+  const totalPatients = filteredPatients.value.length;
   const referredPatients = filteredPatients.value.filter(
     (patient) => patient.modeOfTransaction === 'Referral'
   ).length;
 
-  console.log('Total Patients:', filteredPatients.value.length);
+  console.log('Total Patients:', totalPatients);
   console.log('Referred Patients:', referredPatients);
 
+  // Add specific warnings for edge cases
+  if (totalPatients === 0) {
+    console.warn('Total Patients count is zero');
+  }
+
+  if (referredPatients === 0) {
+    console.warn('No referred patients found');
+  }
+
+  // Emit stats
   emit('updateStats', {
-    totalPatients: filteredPatients.value.length || 0,
+    totalPatients: totalPatients || 0,
     referredPatients: referredPatients || 0,
   });
 };

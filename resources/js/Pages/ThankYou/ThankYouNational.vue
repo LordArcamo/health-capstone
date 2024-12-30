@@ -1,23 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
-import { Inertia } from '@inertiajs/inertia';
 import { Head } from '@inertiajs/vue3';
-
-
-// Props to dynamically determine the completed checkup type from the backen
-
-// Methods
-function goToDashboard() {
-  Inertia.visit('/dashboard');
-}
-
-function checkAgain() {
-  Inertia.visit('/checkup');
-}
-
-function viewRecords() {
-  Inertia.visit('/services/patients/epi-records');
-}
+import { Link } from '@inertiajs/vue3';
 </script>
 
 <template>
@@ -39,12 +23,12 @@ function viewRecords() {
             You can now navigate to your dashboard, submit another checkup form, or view national immunization records.
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Dashboard Button -->
-            <button @click="goToDashboard" class="btn-teal-gradient">Go to Dashboard</button>
-            <!-- Check Again Button -->
-            <button @click="checkAgain" class="btn-teal-gradient">Submit Another Form</button>
-            <!-- View Records Button -->
-            <button @click="viewRecords" class="btn-teal-gradient">View National Immunization Records</button>
+            <!-- Dashboard Link -->
+            <Link href="/dashboard" class="btn-teal-gradient flex items-center justify-center">Go to Dashboard</Link>
+            <!-- Check Again Link -->
+            <Link href="/checkup" class="btn-teal-gradient flex items-center justify-center">Checkup Another Patient</Link>
+            <!-- View Records Link -->
+            <Link href="/services/patients/epi-records" class="btn-teal-gradient flex items-center justify-center">View National Immunization Records</Link>
           </div>
         </div>
       </div>

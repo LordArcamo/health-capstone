@@ -1,22 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
-import { Inertia } from '@inertiajs/inertia';
 import { Head } from '@inertiajs/vue3';
-
-// Props to dynamically determine the completed checkup type from the backend
-
-// Methods
-function goToDashboard() {
-  Inertia.visit('/dashboard');
-}
-
-function checkAgain() {
-  Inertia.visit('/checkup');
-}
-
-function viewRecords() {
-  Inertia.visit('/services/patients/prenatal-postpartum');
-}
+import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
 </script>
 
 <template>
@@ -38,12 +23,12 @@ function viewRecords() {
             You can now navigate to your dashboard, submit another checkup form, or view prenatal records.
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Dashboard Button -->
-            <button @click="goToDashboard" class="btn-pink-gradient">Go to Dashboard</button>
-            <!-- Check Again Button -->
-            <button @click="checkAgain" class="btn-pink-gradient">Submit Another Form</button>
-            <!-- View Records Button -->
-            <button @click="viewRecords" class="btn-pink-gradient">View Prenatal Records</button>
+            <!-- Dashboard Link -->
+            <Link href="/dashboard" class="btn-pink-gradient">Go to Dashboard</Link>
+            <!-- Check Again Link -->
+            <Link href="/checkup" class="btn-pink-gradient">Submit Another Form</Link>
+            <!-- View Records Link -->
+            <Link href="/services/patients/prenatal-postpartum" class="btn-pink-gradient">View Prenatal Records</Link>
           </div>
         </div>
       </div>

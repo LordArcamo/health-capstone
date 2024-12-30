@@ -38,15 +38,15 @@ use App\Http\Controllers\VaccineAppointmentController;
 
 Route::get('/checkup/thank-you/itr', function () {
     return Inertia::render('ThankYou/ThankYouItr');
-})->name('thank-you');
+})->middleware(['auth', 'verified'])->name('thank-you');
 
 Route::get('/checkup/thank-you/prenatal', function () {
     return Inertia::render('ThankYou/ThankYouPrenatal');
-})->name('thank-you');
+})->middleware(['auth', 'verified'])->name('thank-you');
 
 Route::get('/checkup/thank-you/nationalimmunization', function () {
     return Inertia::render('ThankYou/ThankYouNational');
-})->name('thank-you');
+})->middleware(['auth', 'verified'])->name('thank-you');
 
 
 

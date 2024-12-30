@@ -1,22 +1,7 @@
 <script setup>
 import NewLayout from '@/Layouts/NewLayout.vue';
-import { Inertia } from '@inertiajs/inertia';
 import { Head } from '@inertiajs/vue3';
-
-// Props to dynamically determine the completed checkup type from the backend
-
-// Methods
-function goToDashboard() {
-  Inertia.visit('/dashboard');
-}
-
-function checkAgain() {
-  Inertia.visit('/checkup');
-}
-
-function viewRecords() {
-  Inertia.visit('/services/patients/itrtable');
-}
+import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
 </script>
 
 <template>
@@ -38,12 +23,12 @@ function viewRecords() {
             You can now navigate to your dashboard, submit another checkup form, or view general checkup records.
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Dashboard Button -->
-            <button @click="goToDashboard" class="btn-gradient">Go to Dashboard</button>
-            <!-- Check Again Button -->
-            <button @click="checkAgain" class="btn-gradient">CheckUp a Patient Again</button>
-            <!-- View Records Button -->
-            <button @click="viewRecords" class="btn-gradient">View General Checkup</button>
+            <!-- Dashboard Link -->
+            <Link href="/dashboard" class="btn-gradient">Go to Dashboard</Link>
+            <!-- Check Again Link -->
+            <Link href="/checkup" class="btn-gradient">CheckUp a Patient Again</Link>
+            <!-- View Records Link -->
+            <Link href="/services/patients/itrtable" class="btn-gradient">View General Checkup</Link>
           </div>
         </div>
       </div>
