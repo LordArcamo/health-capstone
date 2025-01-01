@@ -131,7 +131,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::post('/trimester3/store', [Trimester3Controller::class, 'store'])->name('trimester3.store');
+    Route::post('/trimester3-4-5/store', [Trimester3Controller::class, 'store'])->name('trimester3.store');
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/services/mental-health', [SessionController::class, 'index'])->name('mental-health.index');
