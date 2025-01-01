@@ -234,21 +234,13 @@
           <label for="referred_utz" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.fhb" type="checkbox" id="fhb" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fhb" class="ml-2 text-sm text-gray-600">FHB</label>
+          <input v-model="form.fes04_folic" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.position" type="checkbox" id="position" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="position" class="ml-2 text-sm text-gray-600">Position</label>
-        </div>
-        <div class="flex items-center">
-          <input v-model="form.presentation" type="checkbox" id="presentation" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="presentation" class="ml-2 text-sm text-gray-600">Presentation</label>
-        </div>
-        <div class="flex items-center">
-          <input v-model="form.fundal_height" type="checkbox" id="fundal_height" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fundal_height" class="ml-2 text-sm text-gray-600">Fundal Height</label>
-        </div>
+          <input v-model="form.information_family_planning" type="checkbox" id="information_family_planning" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_family_planning" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
+          </div>
         <!-- Checkbox Items-->
       </div>
 
