@@ -206,6 +206,10 @@
           <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
         </div>
         <div class="flex items-center">
+          <input v-model="form.peDone" type="checkbox" id="pe_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="pe_done" class="ml-2 text-sm text-gray-600">PE done,</label>
+        </div>
+        <div class="flex items-center">
           <input v-model="form.reminded_importance" type="checkbox" id="reminded_importance" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="reminded_importance" class="ml-2 text-sm text-gray-600">Reminded on importance of FBD</label>
         </div>
