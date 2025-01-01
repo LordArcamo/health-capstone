@@ -213,7 +213,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //     ->name('system-analytics');
 
     Route::get('/mental-health', function () {
-        return Inertia::render('Analytics');
+        return Inertia::render('About/MentalDescription');
     })->middleware(['auth', 'verified'])->name('mental-health');
 
 Route::get('/patients/cases', function () {
