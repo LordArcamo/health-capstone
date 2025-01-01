@@ -9,7 +9,56 @@
           ✕
         </button>
 
+        <!-- Check if existingData exists -->
+        <div v-if="existingData && !isEditing">
+          <h2 class="text-xl font-bold text-pink-600">Prenatal Checkup Details</h2>
+          <p class="text-sm text-gray-600 mb-6">Details for {{ existingData.firstName }}  {{ existingData.middleName }} {{ existingData.lastName }}</p>
+
+          <!-- Display Existing Data -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <h3 class="font-semibold text-pink-500">Baby Information</h3>
+              <p>Full Name: {{ existingData.firstName }} {{ existingData.lastName }}</p>
+              <p>Sex: {{ existingData.sex }}</p>
+              <!-- Add other fields as needed -->
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-pink-500">Delivery Details</h3>
+              <p>Birth Length: {{ existingData.birthLength }}</p>
+              <p>Birth Weight: {{ existingData.birthWeight }}</p>
+              <p>Delivery Date: {{ existingData.deliveryDate }}</p>
+              <p>Delivery Time: {{ existingData.deliveryTime }}</p>
+              <!-- Add other fields as needed -->
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-pink-500">Breastfeeding</h3>
+              <p>Date Initiated Breastfeeding: {{ existingData.dateInitiatedBreastfeeding }}</p>
+              <p>Time Initiated Breastfeeding: {{ existingData.timeInitiatedBreastfeeding }}</p>
+              <!-- Add other fields as needed -->
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-pink-500">Breastfeeding</h3>
+              <p>Date Vitamin A: {{ existingData.dateVitaminA }}</p>
+              <p>Danger Signs Mother: {{ existingData.dangerSignsMother }}</p>
+              <!-- Add other fields as needed -->
+            </div>
+          </div>
+
+          <!-- Edit Button -->
+          <div class="mt-4">
+            <button
+              @click="enableEdit"
+              class="px-4 py-2 bg-pink-500 text-white rounded-md shadow hover:bg-pink-600 transition">
+              Edit Details
+            </button>
+          </div>
+        </div>
+
         <!-- Form -->
+        <div v-else>
         <form @submit.prevent="handleSubmit" class="space-y-6">
           <!-- Step Navigation -->
           <div class="flex justify-between items-center pb-4 border-b border-pink-300">
@@ -158,6 +207,7 @@
 
         </form>
       </div>
+      </div>
     </div>
   </div>
 </template>
@@ -180,6 +230,7 @@ export default {
   },
   data() {
     return {
+      isEditing: false, // Determines if we are in edit mode
       currentStep: 0,
       steps: [
         { title: 'Basic Info' },
@@ -219,6 +270,10 @@ export default {
     },
   },
   methods: {
+    enableEdit() {
+      this.isEditing = true;
+      this.form = { ...this.existingData }; // Pre-fill form with existing data
+    },
     navigateToStep(index) {
       if (index > this.currentStep && !this.validateStep()) {
         // Prevent moving to the next step if validation fails
