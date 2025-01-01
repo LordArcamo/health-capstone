@@ -12,6 +12,12 @@ Chart.register(PieController, ArcElement, Tooltip, Legend);
 
 export default {
   name: "ReferredPatientsChart",
+  props: {
+    pieChart: {
+      type: Object,
+      required: true,
+    },
+  },
   mounted() {
     const ctx = document.getElementById("referredPatientsChart").getContext("2d");
     new Chart(ctx, {
@@ -20,7 +26,10 @@ export default {
         labels: ["Referred", "Not Referred"],
         datasets: [
           {
-            data: [40, 60],
+            data: [
+              this.pieChart.referred || 0,
+              this.pieChart.notReferred || 0,
+            ],
             backgroundColor: ["#FF6384", "#36A2EB"],
           },
         ],
@@ -28,6 +37,17 @@ export default {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const label = context.label || "";
+                const value = context.raw || 0;
+                return `${label}: ${value}`;
+              },
+            },
+          },
+        },
       },
     });
   },

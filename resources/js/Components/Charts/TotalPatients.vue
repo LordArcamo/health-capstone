@@ -88,7 +88,6 @@ export default {
   },
   computed: {
     chartSeries() {
-      console.log("Chart Series Data:", this.monthlyData);
       return [{
         name: 'Total Patients',
         data: this.monthlyData

@@ -205,7 +205,9 @@ Route::get('/mental-health', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])->name('analytics.index');
-    Route::get('/api/patient-statistics', [PatientController::class, 'getPatientStatistics'])->name('patient.statistics');
+    Route::get('/analytics-barchart', [PatientController::class, 'getPatientStatistics'])->name('analytics.barchart');
+    Route::get('/analytics-piechart', [SystemAnalyticsController::class, 'getReferredPatientsStatistics'])->name('analytics.piechart');
+    Route::get('/analytics-lineChart', [SystemAnalyticsController::class, 'getVaccinationStatistics'])->name('analytics.lineChart');
 
 });
 // Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])
