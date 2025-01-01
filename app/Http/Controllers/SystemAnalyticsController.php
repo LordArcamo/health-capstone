@@ -27,6 +27,7 @@ class SystemAnalyticsController extends Controller
         $referredCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
         $notReferredCount = PersonalInformation::count() - $referredCount;
         $lineChart = $this->getVaccinationStatistics();
+        $casesStats = $this->getCasesStatistics();
 
         return Inertia::render('Analytics', [
             'totalPatients' => $totalPatients,
@@ -42,6 +43,7 @@ class SystemAnalyticsController extends Controller
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 'data' => $lineChart,
             ],
+            'casesData' => $casesStats
         ]);
     }
 
@@ -144,13 +146,28 @@ class SystemAnalyticsController extends Controller
         $currentYear = date('Y');
     
         for ($month = 1; $month <= 12; $month++) {
-            $count = VaccinationRecord::whereYear('created_at', $currentYear)
-                ->whereMonth('created_at', $month)
+            $count = VaccinationRecord::whereYear('dateOfVisit', $currentYear)
+                ->whereMonth('dateOfVisit', $month)
                 ->count();
             $monthlyVaccinations[] = $count;
         }
     
         return $monthlyVaccinations;
+    }
+    
+    private function getCasesStatistics()
+    {
+        $monthlyCases = [];
+        $currentYear = date('Y');
+    
+        for ($month = 1; $month <= 12; $month++) {
+            $count = CheckUp::whereYear('consultationDate', $currentYear)
+                ->whereMonth('consultationDate', $month)
+                ->count();
+            $monthlyCases[] = $count;
+        }
+
+        return $monthlyCases;
     }
 
 }

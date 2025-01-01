@@ -19,6 +19,8 @@ const props = defineProps({
   cases: Number,
   risk: Number,
   lineChart: Object,
+  lineChart2: Object,
+  casesData: Array,
 });
 
 const totalPatients = ref(props.totalPatients || 0);
@@ -41,6 +43,11 @@ if (props.barChart && props.barChart.length === 12) {
 const monthlyVaccination = ref(Array(12).fill(0)); // Default to zero for 12 months
 if (props.lineChart && props.lineChart.data) {
   monthlyVaccination.value = props.lineChart.data;
+}
+
+const monthlyCases = ref(Array(12).fill(0)); // Initialize with 12 months
+if (props.casesData && props.casesData.length === 12) {
+  monthlyCases.value = props.casesData;
 }
 
 const filters = ref({
@@ -203,7 +210,10 @@ const applyFilters = () => {
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Cases Overview</h6>
-        <Cases :filters="filters" />
+        <Cases
+         :filters="filters"
+         :cases-data="monthlyCases"
+          />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Mental Health</h6>
