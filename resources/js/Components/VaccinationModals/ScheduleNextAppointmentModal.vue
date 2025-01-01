@@ -14,7 +14,6 @@
       <!-- Patient Details -->
       <div class="mb-6 border-b pb-4 text-sm text-gray-700">
         <p><strong>Name:</strong> {{ patient.firstName || "N/A" }} {{ patient.middleName || "" }} {{ patient.lastName || "N/A" }}</p>
-        <p><strong>Age:</strong> {{ patient.age || "N/A" }}</p>
         <p><strong>Vaccine Category:</strong> {{ form.vaccineCategory || "N/A" }}</p>
         <p><strong>Vaccine Type:</strong> {{ form.vaccineType || "N/A" }}</p>
       </div>
@@ -30,6 +29,21 @@
             </label>
             <input type="date" v-model="form.dateOfVisit" id="dateOfVisit" class="input" required />
             <span v-if="errors.dateOfVisit" class="text-red-600 text-sm">{{ errors.dateOfVisit }}</span>
+          </div>
+
+          <!-- Age in Months or Years -->
+          <div>
+            <label for="age" class="block text-sm font-medium text-gray-700">
+              {{ isUnderOneYear ? "Age in Months" : "Age in Years" }}
+            </label>
+            <input
+              type="number"
+              id="age"
+              v-model="ageInInput"
+              class="input"
+              :placeholder="isUnderOneYear ? 'Age in months' : 'Age in years'"
+              readonly
+            />
           </div>
 
           <!-- Weight -->
@@ -68,21 +82,18 @@
             <span v-if="errors.antigenGiven" class="text-red-600 text-sm">{{ errors.antigenGiven }}</span>
           </div>
 
-
+          <!-- Exclusively Breastfed -->
           <div v-if="isUnderOneYear">
-  <label for="exclusivelyBreastfed" class="block text-sm font-medium text-gray-700">
-    Exclusively Breastfed
-  </label>
-  <select v-model="form.exclusivelyBreastfed" id="exclusivelyBreastfed" class="input">
-    <option disabled value="">Select</option>
-    <option value="Yes">Yes</option>
-    <option value="No">No</option>
-  </select>
-  <span v-if="errors.exclusivelyBreastfed" class="text-red-600 text-sm">
-    {{ errors.exclusivelyBreastfed }}
-  </span>
-</div>
-
+            <label for="exclusivelyBreastfed" class="block text-sm font-medium text-gray-700">
+              Exclusively Breastfed
+            </label>
+            <select v-model="form.exclusivelyBreastfed" id="exclusivelyBreastfed" class="input">
+              <option disabled value="">Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+            <span v-if="errors.exclusivelyBreastfed" class="text-red-600 text-sm">{{ errors.exclusivelyBreastfed }}</span>
+          </div>
 
           <!-- Injected By -->
           <div>
@@ -126,6 +137,7 @@
   </div>
 </template>
 
+
 <script>
 import { ref, computed } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
@@ -137,7 +149,7 @@ export default {
       required: true,
     },
   },
-  emits: ['close'], // Declare the 'close' event
+  emits: ['close'],
   setup(props, { emit }) {
     const form = ref({
       vaccineCategory: props.patient.vaccineCategory || '',
@@ -149,18 +161,31 @@ export default {
       antigenGiven: '',
       injectedBy: '',
       nextAppointment: '',
-      exclusivelyBreastfed: '', // New field
+      exclusivelyBreastfed: '',
     });
 
     const errors = ref({});
     const loading = ref(false);
 
-    // Determine if the patient is under one year old
     const isUnderOneYear = computed(() => {
-      return props.patient.age && props.patient.age < 1; // Adjust this logic based on your data structure
+      return form.value.vaccineCategory === 'Under 1 Year';
     });
 
-    // Handle scheduling form submission
+    const ageInMonths = computed(() => {
+      if (!props.patient.birthdate) return "N/A";
+      const birthdate = new Date(props.patient.birthdate);
+      const currentDate = new Date();
+
+      const months =
+        (currentDate.getFullYear() - birthdate.getFullYear()) * 12 +
+        currentDate.getMonth() -
+        birthdate.getMonth();
+
+      return months >= 0 ? months : "Invalid date";
+    });
+
+    const ageInInput = computed(() => (isUnderOneYear.value ? ageInMonths.value : Math.floor(ageInMonths.value / 12)));
+
     const handleSchedule = async () => {
       loading.value = true;
       errors.value = {};
@@ -168,7 +193,7 @@ export default {
       try {
         await Inertia.post('/appointments/store', form.value);
         alert('Appointment saved successfully!');
-        closeModal(); // Close the modal after successful submission
+        closeModal();
       } catch (error) {
         console.error(error);
         errors.value = error.response?.data?.errors || {};
@@ -177,12 +202,10 @@ export default {
       }
     };
 
-    // Close the modal and reset the form
     const closeModal = () => {
-      // Reset form data
       form.value = {
-        vaccineCategory: '',
-        vaccineType: '',
+        vaccineCategory: props.patient.vaccineCategory || '',
+        vaccineType: props.patient.vaccineType || '',
         dateOfVisit: '',
         weight: '',
         height: '',
@@ -190,10 +213,8 @@ export default {
         antigenGiven: '',
         injectedBy: '',
         nextAppointment: '',
-        exclusivelyBreastfed: '', // New field
+        exclusivelyBreastfed: '',
       };
-
-      // Emit the close event to the parent
       emit('close');
     };
 
@@ -203,10 +224,13 @@ export default {
       loading,
       handleSchedule,
       isUnderOneYear,
+      ageInMonths,
+      ageInInput,
       closeModal,
     };
   },
 };
+
 </script>
 
 <style>

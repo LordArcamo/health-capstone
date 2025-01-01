@@ -102,15 +102,6 @@
       <p class="text-lg font-medium text-purple-800">{{ form.fes04_folic ? `Yes, ${form.folic_acid} tabs` : 'No' }}</p>
     </div>
   </div>
-
-  <!-- Edit Button -->
-  <div class="mt-6 flex justify-end">
-    <button
-      @click="enableEditing"
-      class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition">
-      Edit
-    </button>
-  </div>
     </div>
 
     <form v-else @submit.prevent="submitForm" class="space-y-4">
