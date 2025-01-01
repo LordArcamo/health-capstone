@@ -21,6 +21,14 @@ const props = defineProps({
   lineChart: Object,
   lineChart2: Object,
   casesData: Array,
+  mentalHealthStats: {
+    type: Object,
+    required: true,
+    default: () => ({
+      labels: [],
+      data: []
+    })
+  }
 });
 
 const totalPatients = ref(props.totalPatients || 0);
@@ -48,6 +56,15 @@ if (props.lineChart && props.lineChart.data) {
 const monthlyCases = ref(Array(12).fill(0)); // Initialize with 12 months
 if (props.casesData && props.casesData.length === 12) {
   monthlyCases.value = props.casesData;
+}
+
+const mentalHealthData = ref({
+  labels: [],
+  data: []
+});
+
+if (props.mentalHealthStats) {
+  mentalHealthData.value = props.mentalHealthStats;
 }
 
 const filters = ref({
@@ -217,7 +234,10 @@ const applyFilters = () => {
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Mental Health</h6>
-        <MentalHealth :filters="filters" />
+        <MentalHealth 
+          :filters="filters"
+          :mental-health-stats="mentalHealthData"
+        />
       </div>
       <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
         <h6 class="text-lg font-bold text-gray-800 mb-4">Risk Management</h6>
