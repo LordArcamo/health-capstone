@@ -17,6 +17,17 @@ export default {
   components: {
     apexchart: VueApexCharts
   },
+  props: {
+    casesData: {
+      type: Array,
+      required: true,
+      default: () => Array(12).fill(0)
+    },
+    filters: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
       chartOptions: {
@@ -28,37 +39,59 @@ export default {
         },
         xaxis: {
           categories: [
-            "January", "February", "March", "April", "May", "June", 
-            "July", "August", "September", "October", "November", "December"
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
           ],
         },
         stroke: {
           curve: "smooth",
-          width: 2,
+          width: 3,
         },
+        colors: ["#FF9F40"],
         markers: {
-          size: 4,
+          size: 5,
         },
-        colors: ["#FF6384"],
         title: {
           align: "center",
-          margin: 10,
           style: {
-            fontSize: "18px",
+            fontSize: "20px",
             fontWeight: "bold",
           },
+        },
+        tooltip: {
+          enabled: true,
+          theme: "dark",
+          y: {
+            formatter: function(val) {
+              return val + " cases"
+            }
+          }
         },
         grid: {
           borderColor: "#e7e7e7",
         },
       },
-      chartSeries: [
-        {
-          name: "Cases",
-          data: [65, 59, 80, 81, 56, 55, 70, 75, 85, 90, 60, 50],
-        },
-      ],
     };
+  },
+  computed: {
+    chartSeries() {
+      return [
+        {
+          name: "Monthly Cases",
+          data: this.casesData || Array(12).fill(0),
+        },
+      ];
+    },
   },
 };
 </script>
@@ -72,7 +105,8 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
 .cases-chart {
-  height: 400px;
+  height: 300px;
 }
 </style>

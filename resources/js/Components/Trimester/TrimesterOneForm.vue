@@ -5,7 +5,7 @@
       <div>
         <label for="date_of_visit" class="block text-sm font-medium text-gray-700">Date of Visit</label>
         <input v-model="form.date_of_visit" type="date" id="date_of_visit" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-        <p v-if="errors.date_of_visit" class="text-red-500 text-sm">{{ errors.date_of_visit }}</p>
+        <!-- <p v-if="errors.date_of_visit" class="text-red-500 text-sm">{{ errors.date_of_visit }}</p> -->
       </div>
 
       <!-- Weight -->

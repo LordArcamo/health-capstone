@@ -208,6 +208,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics-barchart', [PatientController::class, 'getPatientStatistics'])->name('analytics.barchart');
     Route::get('/analytics-piechart', [SystemAnalyticsController::class, 'getReferredPatientsStatistics'])->name('analytics.piechart');
     Route::get('/analytics-lineChart', [SystemAnalyticsController::class, 'getVaccinationStatistics'])->name('analytics.lineChart');
+    Route::get('/analytics-line2Chart', [SystemAnalyticsController::class, 'getCasesStatistics'])->name('analytics.lineChart2');
 
 });
 // Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])
