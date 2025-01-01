@@ -341,38 +341,37 @@ export default {
         const gt = data.generalTrimester;
         this.form = {
           ...this.form,
+          generalTrimesterID: gt.generalTrimesterID || null, // Include the ID
           date_of_visit: gt.date_of_visit || '',
           weight: gt.weight || '',
           bp: gt.bp || '',
           heart_rate: gt.heart_rate || '',
           aog_months: gt.aog_months || '',
           aog_days: gt.aog_days || '',
-          trimester: gt.trimester || '1'
+          trimester: gt.trimester || '1',
         };
       }
 
-      // Handle checkbox1 data from either location
-      const checkbox1Data = data.checkbox1 || (data.generalTrimester && data.generalTrimester.checkbox1);
-      if (checkbox1Data) {
-        this.form = {
-          ...this.form,
-          prenatal_checkup: checkbox1Data.prenatal_checkup || false,
-          pe_done: checkbox1Data.pe_done || false,
-          prenatal_record: checkbox1Data.prenatal_record || false,
-          birth_plan_done: checkbox1Data.birth_plan_done || false,
-          nkfda: checkbox1Data.nkfda || false,
-          health_teachings: checkbox1Data.health_teachings || false,
-          referred_for: checkbox1Data.referred_for || false,
-          healthy_diet: checkbox1Data.healthy_diet || false,
-          fes04_folic: checkbox1Data.fes04_folic || false,
-          folic_acid: checkbox1Data.folic_acid || '',
-          fhb: checkbox1Data.fhb || '',
-          position: checkbox1Data.position || '',
-          presentation: checkbox1Data.presentation || '',
-          fundal_height: checkbox1Data.fundal_height || ''
-        };
-      }
+      const checkbox1Data = data.checkbox1 || {};
+      this.form = {
+        ...this.form,
+        prenatal_checkup: checkbox1Data.prenatal_checkup || false,
+        pe_done: checkbox1Data.pe_done || false,
+        prenatal_record: checkbox1Data.prenatal_record || false,
+        birth_plan_done: checkbox1Data.birth_plan_done || false,
+        nkfda: checkbox1Data.nkfda || false,
+        health_teachings: checkbox1Data.health_teachings || false,
+        referred_for: checkbox1Data.referred_for || false,
+        healthy_diet: checkbox1Data.healthy_diet || false,
+        fes04_folic: checkbox1Data.fes04_folic || false,
+        folic_acid: checkbox1Data.folic_acid || '',
+        fhb: checkbox1Data.fhb || '',
+        position: checkbox1Data.position || '',
+        presentation: checkbox1Data.presentation || '',
+        fundal_height: checkbox1Data.fundal_height || '',
+      };
     },
+
 
     validateForm() {
       this.errors = {}; // Reset errors
@@ -421,37 +420,31 @@ export default {
     submitForm() {
       if (this.isSubmitting) return; // Prevent duplicate submissions
       this.isSubmitting = true;
-      if (this.validateForm()) {
-        // Ensure prenatalId is included in the form data
-        const formData = { ...this.form, prenatalId: this.prenatalId };
 
-        console.log('Form submitted with data:', formData);
+      if (this.validateForm()) {
+        const formData = { ...this.form, prenatalId: this.prenatalId };
 
         Inertia.post('/trimester1/store', formData, {
           onStart: () => {
-            // Show loading indicator or disable submit button
             this.loading = true;
           },
           onFinish: () => {
-            // Hide loading indicator or enable submit button
             this.loading = false;
+            this.isSubmitting = false;
           },
           onSuccess: () => {
-            // Handle successful form submission
-            console.log('Data saved successfully!');
+            alert('Data saved successfully!');
             this.resetForm();
-            alert('Form submitted successfully!');
           },
           onError: (response) => {
-            // Check for errors from the server and update the errors object
-            console.error('Form submission errors:', response.errors);
-            this.errors = response.errors; // Update the errors object with server errors
-          }
+            console.error('Error:', response.errors);
+            this.errors = response.errors;
+            this.isSubmitting = false;
+          },
         });
       } else {
-        // If the form validation fails
-        this.successMessage = 'Please complete all required fields before submitting.';
-        alert(this.successMessage); // Show an alert with the validation message
+        alert('Please complete all required fields.');
+        this.isSubmitting = false;
       }
     },
 
