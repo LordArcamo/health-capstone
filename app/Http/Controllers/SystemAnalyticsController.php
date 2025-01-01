@@ -8,7 +8,7 @@ use App\Models\PersonalInformation;
 use App\Models\VaccinationRecord;
 use App\Models\CheckUp;
 use App\Models\RiskManagement;
-
+use Illuminate\Support\Facades\DB;
 
 class SystemAnalyticsController extends Controller
 {
@@ -23,11 +23,12 @@ class SystemAnalyticsController extends Controller
         $risk = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
         $cases = $this->cases($request);
-        $monthlyStats = $this->getPatientStatistics();
+        $monthlyStats = $this->getPatientStatistics($request);
         $referredCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
         $notReferredCount = PersonalInformation::count() - $referredCount;
-        $lineChart = $this->getVaccinationStatistics();
-        $casesStats = $this->getCasesStatistics();
+        $lineChart = $this->getVaccinationStatistics($request);
+        $casesStats = $this->getCasesStatistics($request);
+        $mentalHealthStats = $this->getMentalHealthStatistics($request);
 
         return Inertia::render('Analytics', [
             'totalPatients' => $totalPatients,
@@ -43,7 +44,8 @@ class SystemAnalyticsController extends Controller
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 'data' => $lineChart,
             ],
-            'casesData' => $casesStats
+            'casesData' => $casesStats,
+            'mentalHealthStats' => $mentalHealthStats,
         ]);
     }
 
@@ -112,7 +114,7 @@ class SystemAnalyticsController extends Controller
         return $query->count();
     }
 
-    private function getPatientStatistics()
+    private function getPatientStatistics($request)
     {
         $monthlyStats = [];
         $currentYear = date('Y');
@@ -170,4 +172,21 @@ class SystemAnalyticsController extends Controller
         return $monthlyCases;
     }
 
+    private function getMentalHealthStatistics()
+    {
+        $stats = CheckUp::select('diagnosis', DB::raw('COUNT(*) as total'))
+            ->where('visitType', 'Mental Health')
+            ->whereNotNull('diagnosis')
+            ->groupBy('diagnosis')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->diagnosis => $item->total];
+            })
+            ->toArray();
+
+        return [
+            'labels' => array_keys($stats),
+            'data' => array_values($stats)
+        ];
+    }
 }
