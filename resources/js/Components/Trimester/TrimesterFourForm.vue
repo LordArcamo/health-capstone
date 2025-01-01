@@ -95,7 +95,7 @@
 
     <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
       <p class="text-sm text-purple-500">Compliance to Routine Immunization encouraged<</p>
-      <p class="text-lg font-medium text-purple-800">{{ form.compliane_routine ? 'Yes' : 'No' }}</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.compliance_routine ? 'Yes' : 'No' }}</p>
     </div>
 
     <!-- Referred for UTZ -->
@@ -117,7 +117,7 @@
 
     <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
       <p class="text-sm text-purple-500">Information on Family Planning methods imparted</p>
-      <p class="text-lg font-medium text-purple-800">{{ form.information_family_planning ? 'Yes' : 'No' }}</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.information_family ? 'Yes' : 'No' }}</p>
     </div>
 
     <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
@@ -230,8 +230,8 @@
           <label for="breast_feeding" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.compliane_routine" type="checkbox" id="compliane_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="compliane_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
+          <input v-model="form.compliance_routine" type="checkbox" id="compliane_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="compliance_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.referred_utz" type="checkbox" id="referred_utz" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
@@ -246,8 +246,8 @@
           <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.information_family_planning" type="checkbox" id="information_family_planning" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="information_family_planning" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
+          <input v-model="form.information_family" type="checkbox" id="information_family" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_family" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
         </div>
 
 
@@ -282,7 +282,6 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 
 export default {
@@ -297,125 +296,13 @@ export default {
     },
     prefilledData: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
-  setup(props) {
-    const form = ref({
-      date_of_visit: '',
-      weight: '',
-      bp: '',
-      heart_rate: '',
-      aog_months: '',
-      aog_days: '',
-      trimester: '4',
-      prenatal_record: false,
-      reminded_importance: false,
-      health_teachings: false,
-      reminded_dangers: false,
-      healthy_diet: false,
-      breast_feeding: false,
-      compliane_routine: false,
-      referred_utz: false,
-      fhb: '',
-      position: '',
-      presentation: '',
-      fundal_height: ''
-    });
-
-    const errors = ref({});
-    const loading = ref(false);
-    const isEditing = ref(false);
-
-    const populateForm = (data) => {
-      if (!data) return;
-
-      if (data.generalTrimester) {
-        const gt = data.generalTrimester;
-        form.value = {
-          ...form.value,
-          date_of_visit: gt.date_of_visit || '',
-          weight: gt.weight || '',
-          bp: gt.bp || '',
-          heart_rate: gt.heart_rate || '',
-          aog_months: gt.aog_months || '',
-          aog_days: gt.aog_days || '',
-          trimester: gt.trimester || '4'
-        };
-      }
-
-      const checkbox3Data = data.checkbox4 || (data.generalTrimester && data.generalTrimester.checkbox3);
-      if (checkbox3Data) {
-        form.value = {
-          ...form.value,
-          prenatal_checkup: checkbox3Data.prenatal_checkup || false,
-          pe_done: checkbox3Data.pe_done || false,
-          prenatal_record: checkbox3Data.prenatal_record || false,
-          reminded_importance: checkbox3Data.reminded_importance || false,
-          health_teachings: checkbox3Data.health_teachings || false,
-          reminded_dangers: checkbox3Data.reminded_dangers || false,
-          healthy_diet: checkbox3Data.healthy_diet || false,
-          breast_feeding: checkbox3Data.breast_feeding || false,
-          compliance_routine: checkbox3Data.compliance_routine || false,
-          referred_utz: checkbox3Data.referred_utz || false,
-          information_newborn: checkbox3Data.information_newborn || false,
-          fes04_folic: checkbox3Data.fes04_folic || false,
-          information_family: checkbox3Data.information_family || false,
-          folic_acid: checkbox3Data.folic_acid || '',
-          fhb: checkbox3Data.fhb || '',
-          position: checkbox3Data.position || '',
-          presentation: checkbox3Data.presentation || '',
-          fundal_height: checkbox3Data.fundal_height || ''
-        };
-      }
-    };
-
-    const validateForm = () => {
-      errors.value = {};
-      let isValid = true;
-
-      if (!form.value.date_of_visit) {
-        errors.value.date_of_visit = 'Date of Visit is required.';
-        isValid = false;
-      }
-      if (!form.value.weight) {
-        errors.value.weight = 'Weight is required.';
-        isValid = false;
-      }
-      if (!form.value.bp) {
-        errors.value.bp = 'Blood Pressure is required.';
-        isValid = false;
-      }
-      if (!form.value.heart_rate) {
-        errors.value.heart_rate = 'Heart Rate is required.';
-        isValid = false;
-      }
-
-      return isValid;
-    };
-
-    const submitForm = () => {
-      if (validateForm()) {
-        loading.value = true;
-        const formData = { ...form.value, prenatalId: props.prenatalId };
-
-        Inertia.post('/trimester3-4-5/store', formData, {
-          onSuccess: () => {
-            loading.value = false;
-            alert('Form submitted successfully!');
-          },
-          onError: (errors) => {
-            loading.value = false;
-            errors.value = errors;
-          }
-        });
-      } else {
-        alert('Please complete all required fields before submitting.');
-      }
-    };
-
-    const resetForm = () => {
-      form.value = {
+  data() {
+    return {
+      isSubmitting: false,
+      form: {
         date_of_visit: '',
         weight: '',
         bp: '',
@@ -429,38 +316,155 @@ export default {
         reminded_dangers: false,
         healthy_diet: false,
         breast_feeding: false,
-        compliane_routine: false,
+        compliance_routine: false,
         referred_utz: false,
+        information_newborn: false,
+        fes04_folic: false,
+        information_family: false,
+        folic_acid: '',
         fhb: '',
         position: '',
         presentation: '',
-        fundal_height: ''
-      };
-      errors.value = {};
+        fundal_height: '',
+      },
+      errors: {},
+      isEditing: false,
     };
+  },
+  watch: {
+    prefilledData: {
+      handler(newData) {
+        if (newData) {
+          this.populateForm(newData);
+        }
+      },
+      immediate: true,
+    },
+  },
+  methods: {
+    enableEditing() {
+      this.isEditing = true;
+    },
+    populateForm(data) {
+      if (!data) return;
 
-    const enableEditing = () => {
-      isEditing.value = true;
-    };
-
-
-
-    watch(() => props.prefilledData, (newData) => {
-      if (newData) {
-        populateForm(newData);
+      if (data.generalTrimester) {
+        const gt = data.generalTrimester;
+        this.form = {
+          ...this.form,
+          date_of_visit: gt.date_of_visit || '',
+          weight: gt.weight || '',
+          bp: gt.bp || '',
+          heart_rate: gt.heart_rate || '',
+          aog_months: gt.aog_months || '',
+          aog_days: gt.aog_days || '',
+          trimester: gt.trimester || '3',
+        };
       }
-    }, { immediate: true });
 
-    return {
-      form,
-      errors,
-      loading,
-      submitForm,
-      isEditing,
-      enableEditing,
-      resetForm
-    };
-  }
+      const checkbox3Data = data.checkbox3 || (data.generalTrimester && data.generalTrimester.checkbox3);
+      if (checkbox3Data) {
+        this.form = {
+          ...this.form,
+          prenatal_record: checkbox3Data.prenatal_record || false,
+          reminded_importance: checkbox3Data.reminded_importance || false,
+          health_teachings: checkbox3Data.health_teachings || false,
+          reminded_dangers: checkbox3Data.reminded_dangers || false,
+          healthy_diet: checkbox3Data.healthy_diet || false,
+          breast_feeding: checkbox3Data.breast_feeding || false,
+          compliance_routine: checkbox3Data.compliance_routine || false,
+          referred_utz: checkbox3Data.referred_utz || false,
+          information_newborn: checkbox3Data.information_newborn || false,
+          fes04_folic: checkbox3Data.fes04_folic || false,
+          fes04_folic: checkbox3Data.fes04_folic || false,
+          information_family: checkbox3Data.information_family || '',
+          fhb: checkbox3Data.fhb || '',
+          position: checkbox3Data.position || '',
+          presentation: checkbox3Data.presentation || '',
+          fundal_height: checkbox3Data.fundal_height || '',
+        };
+      }
+    },
+    validateForm() {
+      this.errors = {}; // Reset errors
+      let isValid = true;
+
+      if (!this.form.date_of_visit) {
+        this.errors.date_of_visit = 'Date of Visit is required.';
+        isValid = false;
+      }
+      if (!this.form.weight) {
+        this.errors.weight = 'Weight is required.';
+        isValid = false;
+      }
+      if (!this.form.bp) {
+        this.errors.bp = 'Blood Pressure is required.';
+        isValid = false;
+      }
+      if (!this.form.heart_rate) {
+        this.errors.heart_rate = 'Heart Rate is required.';
+        isValid = false;
+      }
+
+      return isValid;
+    },
+    submitForm() {
+      if (this.isSubmitting) return; // Prevent duplicate submissions
+      this.isSubmitting = true;
+
+      if (this.validateForm()) {
+        const formData = { ...this.form, prenatalId: this.prenatalId };
+
+        Inertia.post('/trimester3-4-5/store', formData, {
+          onSuccess: () => {
+            this.isSubmitting = false;
+            alert('Form submitted successfully!');
+            this.resetForm();
+          },
+          onError: (errors) => {
+            this.isSubmitting = false;
+            this.errors = errors;
+          },
+        });
+      } else {
+        alert('Please complete all required fields before submitting.');
+        this.isSubmitting = false;
+      }
+    },
+    resetForm() {
+      this.form = {
+        date_of_visit: '',
+        weight: '',
+        bp: '',
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
+        trimester: '3',
+        prenatal_record: false,
+        reminded_importance: false,
+        health_teachings: false,
+        reminded_dangers: false,
+        healthy_diet: false,
+        breast_feeding: false,
+        compliance_routine: false,
+        referred_utz: false,
+        information_newborn: false,
+        fes04_folic: false,
+        information_family: false,
+        folic_acid: '',
+        fhb: '',
+        position: '',
+        presentation: '',
+        fundal_height: '',
+      };
+      this.errors = {};
+    },
+  },
+  mounted() {
+    if (this.prefilledData && Object.keys(this.prefilledData).length) {
+      this.populateForm(this.prefilledData);
+    }
+  },
 };
 </script>
 
