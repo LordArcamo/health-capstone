@@ -109,6 +109,7 @@ const trimesters = ref([
   'Trimester 5'
 ]);
 
+const isSubmitting = ref(false);
 const selectedTrimester = ref('');
 const step = ref(1);
 const formData = ref({});
@@ -136,8 +137,16 @@ const getTrimesterNumber = (trimester) => {
 };
 
 const handleFormSubmit = (formData) => {
+  if (isSubmitting.value) return; // Ignore if already submitting
+  isSubmitting.value = true; // Set flag
+
   console.log('Form submitted:', formData);
   props.onConfirm(formData);
+
+  // Reset the flag after the form is successfully submitted
+  setTimeout(() => {
+    isSubmitting.value = false;
+  }, 500); // Add a small timeout to prevent rapid re-submissions
 };
 
 const onTrimesterSelect = () => {

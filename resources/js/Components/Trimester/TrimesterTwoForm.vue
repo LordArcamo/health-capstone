@@ -87,7 +87,7 @@
 
     <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
       <p class="text-sm text-purple-500">Compliance to Routine Immunization encouraged<</p>
-      <p class="text-lg font-medium text-purple-800">{{ form.compliane_routine ? 'Yes' : 'No' }}</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.compliance_routine ? 'Yes' : 'No' }}</p>
     </div>
 
     <!-- Referred for UTZ -->
@@ -184,8 +184,8 @@
           <label for="breast_feeding" class="ml-2 text-sm text-gray-600">Breast feeding after delivery encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.compliane_routine" type="checkbox" id="compliane_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="compliane_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
+          <input v-model="form.compliance_routine" type="checkbox" id="compliance_routine" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="compliance_routine" class="ml-2 text-sm text-gray-600">Compliance to Routine Immunization encouraged</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.referred_utz" type="checkbox" id="referred_utz" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
@@ -207,7 +207,7 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+// import { ref, watch } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 
 export default {
@@ -222,122 +222,13 @@ export default {
     },
     prefilledData: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
-  setup(props) {
-    const form = ref({
-      date_of_visit: '',
-      weight: '',
-      bp: '',
-      heart_rate: '',
-      aog_months: '',
-      aog_days: '',
-      trimester: '2',
-      prenatal_record: false,
-      reminded_importance: false,
-      health_teachings: false,
-      reminded_dangers: false,
-      healthy_diet: false,
-      breast_feeding: false,
-      compliane_routine: false,
-      referred_utz: false,
-      fhb: '',
-      position: '',
-      presentation: '',
-      fundal_height: ''
-    });
-
-    const errors = ref({});
-    const loading = ref(false);
-    const isEditing = ref(false);
-
-    const populateForm = (data) => {
-      if (!data) return;
-
-      if (data.generalTrimester) {
-        const gt = data.generalTrimester;
-        form.value = {
-          ...form.value,
-          date_of_visit: gt.date_of_visit || '',
-          weight: gt.weight || '',
-          bp: gt.bp || '',
-          heart_rate: gt.heart_rate || '',
-          aog_months: gt.aog_months || '',
-          aog_days: gt.aog_days || '',
-          trimester: gt.trimester || '2'
-        };
-      }
-
-      const checkbox2Data = data.checkbox2 || (data.generalTrimester && data.generalTrimester.checkbox2);
-      if (checkbox2Data) {
-        form.value = {
-          ...form.value,
-          prenatal_record: checkbox2Data.prenatal_record || false,
-          reminded_importance: checkbox2Data.reminded_importance || false,
-          health_teachings: checkbox2Data.health_teachings || false,
-          reminded_dangers: checkbox2Data.reminded_dangers || false,
-          healthy_diet: checkbox2Data.healthy_diet || false,
-          breast_feeding: checkbox2Data.breast_feeding || false,
-          compliane_routine: checkbox2Data.compliane_routine || false,
-          referred_utz: checkbox2Data.referred_utz || false,
-          fes04_folic: checkbox2Data.fes04_folic || false,
-          folic_acid: checkbox2Data.folic_acid || ''
-        };
-      }
-    };
-
-    const validateForm = () => {
-      errors.value = {};
-      let isValid = true;
-
-      if (!form.value.date_of_visit) {
-        errors.value.date_of_visit = 'Date of Visit is required.';
-        isValid = false;
-      }
-      if (!form.value.weight) {
-        errors.value.weight = 'Weight is required.';
-        isValid = false;
-      }
-      if (!form.value.bp) {
-        errors.value.bp = 'Blood Pressure is required.';
-        isValid = false;
-      }
-      if (!form.value.heart_rate) {
-        errors.value.heart_rate = 'Heart Rate is required.';
-        isValid = false;
-      }
-
-      return isValid;
-    };
-
-    const submitForm = () => {
-      if (validateForm()) {
-        loading.value = true;
-        const formData = { ...form.value, prenatalId: props.prenatalId };
-
-        Inertia.post('/trimester2/store', formData, {
-          onSuccess: () => {
-            loading.value = false;
-            alert('Form submitted successfully!');
-          },
-          onError: (errors) => {
-            loading.value = false;
-            errors.value = errors;
-          }
-        });
-      } else {
-        alert('Please complete all required fields before submitting.');
-      }
-    };
-
-
-    const enableEditing = () => {
-      isEditing.value = true;
-    };
-
-    const resetForm = () => {
-      form.value = {
+  data() {
+    return {
+      isSubmitting: false,
+      form: {
         date_of_visit: '',
         weight: '',
         bp: '',
@@ -353,32 +244,138 @@ export default {
         breast_feeding: false,
         compliane_routine: false,
         referred_utz: false,
-        fhb: '',
-        position: '',
-        presentation: '',
-        fundal_height: ''
-      };
-      errors.value = {};
+        fes04_folic: false,
+        folic_acid: '',
+      },
+      errors: {},
+      isEditing: false,
     };
+  },
+  watch: {
+    prefilledData: {
+      handler(newData) {
+        if (newData) {
+          this.populateForm(newData);
+        }
+      },
+      immediate: true,
+    },
+  },
+  methods: {
+    enableEditing() {
+      this.isEditing = true;
+    },
+    populateForm(data) {
+      if (!data) return;
 
-    watch(() => props.prefilledData, (newData) => {
-      if (newData) {
-        populateForm(newData);
+      if (data.generalTrimester) {
+        const gt = data.generalTrimester;
+        this.form = {
+          ...this.form,
+          date_of_visit: gt.date_of_visit || '',
+          weight: gt.weight || '',
+          bp: gt.bp || '',
+          heart_rate: gt.heart_rate || '',
+          aog_months: gt.aog_months || '',
+          aog_days: gt.aog_days || '',
+          trimester: gt.trimester || '2',
+        };
       }
-    }, { immediate: true });
 
-    return {
-      form,
-      errors,
-      loading,
-      submitForm,
-      isEditing,
-      enableEditing,
-      resetForm
-    };
-  }
+      const checkbox2Data = data.checkbox2 || (data.generalTrimester && data.generalTrimester.checkbox2);
+      if (checkbox2Data) {
+        this.form = {
+          ...this.form,
+          prenatal_record: checkbox2Data.prenatal_record || false,
+          reminded_importance: checkbox2Data.reminded_importance || false,
+          health_teachings: checkbox2Data.health_teachings || false,
+          reminded_dangers: checkbox2Data.reminded_dangers || false,
+          healthy_diet: checkbox2Data.healthy_diet || false,
+          breast_feeding: checkbox2Data.breast_feeding || false,
+          compliane_routine: checkbox2Data.compliane_routine || false,
+          referred_utz: checkbox2Data.referred_utz || false,
+          fes04_folic: checkbox2Data.fes04_folic || false,
+          folic_acid: checkbox2Data.folic_acid || '',
+        };
+      }
+    },
+    validateForm() {
+      this.errors = {}; // Reset errors
+      let isValid = true;
+
+      if (!this.form.date_of_visit) {
+        this.errors.date_of_visit = 'Date of Visit is required.';
+        isValid = false;
+      }
+      if (!this.form.weight) {
+        this.errors.weight = 'Weight is required.';
+        isValid = false;
+      }
+      if (!this.form.bp) {
+        this.errors.bp = 'Blood Pressure is required.';
+        isValid = false;
+      }
+      if (!this.form.heart_rate) {
+        this.errors.heart_rate = 'Heart Rate is required.';
+        isValid = false;
+      }
+
+      return isValid;
+    },
+    submitForm() {
+      if (this.isSubmitting) return; // Prevent duplicate submissions
+      this.isSubmitting = true;
+      if (this.validateForm()) {
+        const formData = { ...this.form, prenatalId: this.prenatalId };
+
+        Inertia.post('/trimester2/store', formData, {
+          onSuccess: () => {
+            this.isSubmitting = false;
+            alert('Form submitted successfully!');
+            this.resetForm();
+          },
+          onError: (errors) => {
+            this.isSubmitting = false;
+            this.errors = errors;
+          },
+        });
+      } else {
+        alert('Please complete all required fields before submitting.');
+        this.isSubmitting = false;
+      }
+    },
+    resetForm() {
+      this.form = {
+        date_of_visit: '',
+        weight: '',
+        bp: '',
+        heart_rate: '',
+        aog_months: '',
+        aog_days: '',
+        trimester: '2',
+        prenatal_record: false,
+        reminded_importance: false,
+        health_teachings: false,
+        reminded_dangers: false,
+        healthy_diet: false,
+        breast_feeding: false,
+        compliane_routine: false,
+        referred_utz: false,
+        fes04_folic: false,
+        folic_acid: '',
+
+      };
+      this.errors = {}; // Reset errors
+    },
+  },
+  mounted() {
+    if (this.prefilledData && Object.keys(this.prefilledData).length) {
+      this.populateForm(this.prefilledData);
+    }
+  },
 };
 </script>
+
 
 <style scoped>
 /* Add any custom styling here */

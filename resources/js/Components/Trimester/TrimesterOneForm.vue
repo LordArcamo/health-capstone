@@ -292,6 +292,7 @@ export default {
   },
   data() {
     return {
+      isSubmitting: false,
       form: {
         date_of_visit: '',
         weight: '',
@@ -309,7 +310,7 @@ export default {
         referred_for: false,
         healthy_diet: false,
         fes04_folic: false,
-        folic_acid: false,
+        folic_acid: '',
         fhb: '',
         position: '',
         presentation: '',
@@ -364,7 +365,7 @@ export default {
           referred_for: checkbox1Data.referred_for || false,
           healthy_diet: checkbox1Data.healthy_diet || false,
           fes04_folic: checkbox1Data.fes04_folic || false,
-          folic_acid: checkbox1Data.folic_acid || false,
+          folic_acid: checkbox1Data.folic_acid || '',
           fhb: checkbox1Data.fhb || '',
           position: checkbox1Data.position || '',
           presentation: checkbox1Data.presentation || '',
@@ -418,6 +419,8 @@ export default {
     },
 
     submitForm() {
+      if (this.isSubmitting) return; // Prevent duplicate submissions
+      this.isSubmitting = true;
       if (this.validateForm()) {
         // Ensure prenatalId is included in the form data
         const formData = { ...this.form, prenatalId: this.prenatalId };
