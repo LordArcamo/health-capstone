@@ -194,12 +194,16 @@
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700">Check Items</label>
         <div class="flex items-center">
-          <input v-model="form.prenatal_record" type="checkbox" id="prenatal_record" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
+          <input v-model="form.prenatal_checkup" type="checkbox" id="prenatal_checkup" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="prenatal_checkup" class="ml-2 text-sm text-gray-600">In for prenatal check-up</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.peDone" type="checkbox" id="pe_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="pe_done" class="ml-2 text-sm text-gray-600">PE done,</label>
+          <input v-model="form.pe_done" type="checkbox" id="pe_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="pe_done" class="ml-2 text-sm text-gray-600">PE done</label>
+        </div>
+        <div class="flex items-center">
+          <input v-model="form.prenatal_record" type="checkbox" id="prenatal_record" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book updated</label>
         </div>
         <div class="flex items-center">
           <input v-model="form.reminded_importance" type="checkbox" id="reminded_importance" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
@@ -302,6 +306,8 @@ export default {
         aog_months: '',
         aog_days: '',
         trimester: '4',
+        prenatal_checkup: false,
+        pe_done: false,
         prenatal_record: false,
         reminded_importance: false,
         health_teachings: false,
@@ -358,6 +364,8 @@ export default {
       if (checkbox3Data) {
         this.form = {
           ...this.form,
+          prenatal_checkup: checkbox3Data.prenatal_checkup || false,
+          pe_done: checkbox3Data.pe_done || false,
           prenatal_record: checkbox3Data.prenatal_record || false,
           reminded_importance: checkbox3Data.reminded_importance || false,
           health_teachings: checkbox3Data.health_teachings || false,
@@ -368,8 +376,8 @@ export default {
           referred_utz: checkbox3Data.referred_utz || false,
           information_newborn: checkbox3Data.information_newborn || false,
           fes04_folic: checkbox3Data.fes04_folic || false,
-          fes04_folic: checkbox3Data.fes04_folic || false,
-          information_family: checkbox3Data.information_family || '',
+          information_family: checkbox3Data.information_family || false,
+          folic_acid: checkbox3Data.folic_acid || '',
           fhb: checkbox3Data.fhb || '',
           position: checkbox3Data.position || '',
           presentation: checkbox3Data.presentation || '',
@@ -431,7 +439,9 @@ export default {
         heart_rate: '',
         aog_months: '',
         aog_days: '',
-        trimester: '3',
+        trimester: '4',
+        prenatal_checkup: false,
+        pe_done: false,
         prenatal_record: false,
         reminded_importance: false,
         health_teachings: false,
