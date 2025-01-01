@@ -1,6 +1,161 @@
 <template>
   <div class="max-h-screen overflow-y-scroll p-6 bg-white shadow rounded-lg">
-    <form @submit.prevent="submitForm" class="space-y-4">
+    <div v-if="prefilledData && !isEditing" class="p-6 bg-purple-50 rounded-lg shadow-md">
+  <h2 class="text-xl font-semibold text-purple-700 mb-4">Trimester 4 Details</h2>
+
+  <!-- Grid Layout for Fields -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Date of Visit -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Date of Visit</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.date_of_visit }}</p>
+    </div>
+
+    <!-- Weight -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Weight (kg)</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.weight }}</p>
+    </div>
+
+    <!-- Blood Pressure -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Blood Pressure</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.bp }}</p>
+    </div>
+
+    <!-- Heart Rate -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Heart Rate</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.heart_rate }}</p>
+    </div>
+
+    <!-- Age of Gestation (Months) -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">AOG (Months)</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.aog_months }}</p>
+    </div>
+
+    <!-- Age of Gestation (Days) -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">AOG (Days)</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.aog_days }}</p>
+    </div>
+
+    <!-- Trimester -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Trimester Visit</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.trimester }}</p>
+    </div>
+
+    <!-- Prenatal Check-up -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">In for prenatal check-up</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.prenatal_checkup ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">PE done</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.pe_done ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Prenatal record/book updated</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.prenatal_record ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- PE Done -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Reminded on importance of FBD</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.reminded_importance ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Prenatal Record Given -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Health teachings given, light exercise daily</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.health_teachings ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Birth Plan Done -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Reminded on the Dangers Signs of Pregnancy</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.reminded_dangers ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- NKFDA -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Healthy diet and increase fluid intake encouraged</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.healthy_diet ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Health Teachings -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Breast feeding after delivery encouraged</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.breast_feeding ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Compliance to Routine Immunization encouraged<</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.compliane_routine ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Referred for UTZ -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Referred for UTZ – evaluation of pregnancy</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.referred_utz ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Information on Newborn Screening given</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.information_newborn ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Folic Acid -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">FES04 + Folic Acid Given</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.fes04_folic ? `Yes, ${form.folic_acid} tabs` : 'No' }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Information on Family Planning methods imparted</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.information_family_planning ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">FHB</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.fhb  }}</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Position</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.position  }}</p>
+    </div>
+
+        <!-- Presentation -->
+        <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Presentation</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.presentation }}</p>
+    </div>
+
+    <!-- Fundal Height -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Fundal Height</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.fundal_height }}</p>
+      </div>
+
+  </div>
+
+  <!-- Edit Button -->
+  <div class="mt-6 flex justify-end">
+    <button
+      @click="enableEditing"
+      class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition">
+      Edit
+    </button>
+  </div>
+    </div>
+
+
+    <form v-else @submit.prevent="submitForm" class="space-y-4">
       <!-- Date of Visit -->
       <div>
         <label for="date_of_visit" class="block text-sm font-medium text-gray-700">Date of Visit</label>
@@ -79,21 +234,38 @@
           <label for="referred_utz" class="ml-2 text-sm text-gray-600">Referred for UTZ – evaluation of pregnancy</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.fhb" type="checkbox" id="fhb" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fhb" class="ml-2 text-sm text-gray-600">FHB</label>
+          <input v-model="form.information_newborn" type="checkbox" id="information_newborn" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_newborn" class="ml-2 text-sm text-gray-600">Information on Newborn Screening given</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.position" type="checkbox" id="position" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="position" class="ml-2 text-sm text-gray-600">Position</label>
+          <input v-model="form.fes04_folic" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" >     -given</input> </label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.presentation" type="checkbox" id="presentation" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="presentation" class="ml-2 text-sm text-gray-600">Presentation</label>
+          <input v-model="form.information_family_planning" type="checkbox" id="information_family_planning" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="information_family_planning" class="ml-2 text-sm text-gray-600">Information on Family Planning methods imparted</label>
         </div>
-        <div class="flex items-center">
-          <input v-model="form.fundal_height" type="checkbox" id="fundal_height" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fundal_height" class="ml-2 text-sm text-gray-600">Fundal Height</label>
+
+
+   <!-- Observations: FHB, Position, Presentation, Fundal Height -->
+   <div class="grid grid-cols-2 mt-5 gap-4">
+        <div>
+          <label for="fhb" class="block text-sm font-medium text-gray-700">FHB</label>
+          <input v-model="form.fhb" type="text" id="fhb" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
+        <div>
+          <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
+          <input v-model="form.position" type="text" id="position" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+        <div>
+          <label for="presentation" class="block text-sm font-medium text-gray-700">Presentation</label>
+          <input v-model="form.presentation" type="text" id="presentation" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+        <div>
+          <label for="fundal_height" class="block text-sm font-medium text-gray-700">Fundal Height</label>
+          <input v-model="form.fundal_height" type="text" id="fundal_height" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        </div>
+      </div>
         <!-- Checkbox Items-->
       </div>
 
@@ -149,6 +321,7 @@ export default {
 
     const errors = ref({});
     const loading = ref(false);
+    const isEditing = ref(false);
 
     const populateForm = (data) => {
       if (!data) return;
@@ -222,7 +395,7 @@ export default {
         loading.value = true;
         const formData = { ...form.value, prenatalId: props.prenatalId };
 
-        Inertia.post('/trimester4/store', formData, {
+        Inertia.post('/trimester3-4-5/store', formData, {
           onSuccess: () => {
             loading.value = false;
             alert('Form submitted successfully!');
@@ -262,6 +435,12 @@ export default {
       errors.value = {};
     };
 
+    const enableEditing = () => {
+      isEditing.value = true;
+    };
+
+
+
     watch(() => props.prefilledData, (newData) => {
       if (newData) {
         populateForm(newData);
@@ -273,6 +452,8 @@ export default {
       errors,
       loading,
       submitForm,
+      isEditing,
+      enableEditing,
       resetForm
     };
   }

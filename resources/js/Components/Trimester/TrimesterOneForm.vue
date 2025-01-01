@@ -1,6 +1,139 @@
 <template>
   <div class="max-h-screen overflow-y-scroll p-6 bg-white shadow rounded-lg">
-    <form @submit.prevent="submitForm" class="space-y-4">
+
+    <div v-if="prefilledData && !isEditing" class="p-6 bg-purple-50 rounded-lg shadow-md">
+  <h2 class="text-xl font-semibold text-purple-700 mb-4">Trimester 1 Details</h2>
+
+  <!-- Grid Layout for Fields -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Date of Visit -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Date of Visit</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.date_of_visit }}</p>
+    </div>
+
+    <!-- Weight -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Weight (kg)</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.weight }}</p>
+    </div>
+
+    <!-- Blood Pressure -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Blood Pressure</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.bp }}</p>
+    </div>
+
+    <!-- Heart Rate -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Heart Rate</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.heart_rate }}</p>
+    </div>
+
+    <!-- Age of Gestation (Months) -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">AOG (Months)</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.aog_months }}</p>
+    </div>
+
+    <!-- Age of Gestation (Days) -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">AOG (Days)</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.aog_days }}</p>
+    </div>
+
+    <!-- Trimester -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Trimester</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.trimester }}</p>
+    </div>
+
+    <!-- Prenatal Check-up -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">In for Prenatal Check-up</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.prenatal_checkup ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- PE Done -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">PE Done, TT Status Assessed</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.pe_done ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Prenatal Record Given -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Prenatal Record/Book Given and Filled Up</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.prenatal_record ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Birth Plan Done -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Birth Plan Done</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.birth_plan_done ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- NKFDA -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">NKFDA</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.nkfda ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Health Teachings -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Health Teachings Given (Danger Signs of Pregnancy Imparted)</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.health_teachings ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Referred for Urinalysis -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Referred for Urinalysis, HCT - HGB Count</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.referred_for ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Healthy Diet -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Healthy Diet and Increase Fluid Intake Encouraged</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.healthy_diet ? 'Yes' : 'No' }}</p>
+    </div>
+
+    <!-- Folic Acid -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">FES04 + Folic Acid Given</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.fes04_folic ? `Yes, ${form.folic_acid} tabs` : 'No' }}</p>
+    </div>
+
+    <!-- FHB -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">FHB</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.fhb }}</p>
+    </div>
+
+    <!-- Presentation -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Presentation</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.presentation }}</p>
+    </div>
+
+    <!-- Fundal Height -->
+    <div class="bg-white p-4 rounded-md shadow-sm border-l-4 border-purple-500">
+      <p class="text-sm text-purple-500">Fundal Height</p>
+      <p class="text-lg font-medium text-purple-800">{{ form.fundal_height }}</p>
+    </div>
+  </div>
+
+  <!-- Edit Button -->
+  <div class="mt-6 flex justify-end">
+    <button
+      @click="enableEditing"
+      class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition">
+      Edit
+    </button>
+  </div>
+    </div>
+
+
+
+    <form v-else @submit.prevent="submitForm" class="space-y-4">
       <!-- Date of Visit -->
       <div>
         <label for="date_of_visit" class="block text-sm font-medium text-gray-700">Date of Visit</label>
@@ -11,7 +144,8 @@
       <!-- Weight -->
       <div>
         <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
-        <input v-model="form.weight" type="number" step="0.1" id="weight" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        <input v-model="form.weight" type="number" step="0.1" id="weight"
+          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         <p v-if="errors.weight" class="text-red-500 text-sm">{{ errors.weight }}</p>
       </div>
 
@@ -24,7 +158,8 @@
         </div>
         <div>
           <label for="heart_rate" class="block text-sm font-medium text-gray-700">Heart Rate</label>
-          <input v-model="form.heart_rate" type="number" id="heart_rate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.heart_rate" type="number" id="heart_rate"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
           <p v-if="errors.heart_rate" class="text-red-500 text-sm">{{ errors.heart_rate }}</p>
         </div>
       </div>
@@ -33,58 +168,75 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label for="aog_months" class="block text-sm font-medium text-gray-700">AOG (Months)</label>
-          <input v-model="form.aog_months" type="number" id="aog_months" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.aog_months" type="number" id="aog_months"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
         <div>
           <label for="aog_days" class="block text-sm font-medium text-gray-700">AOG (Days)</label>
-          <input v-model="form.aog_days" type="number" id="aog_days" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.aog_days" type="number" id="aog_days"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
       </div>
 
       <!-- Trimester Visit -->
       <div>
         <label for="trimester" class="block text-sm font-medium text-gray-700">Trimester Visit</label>
-        <input v-model="form.trimester" type="text" id="trimester" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+        <input v-model="form.trimester" type="text" id="trimester"
+          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
       </div>
 
       <!-- Additional Checkboxes -->
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-700">Check Items</label>
         <div class="flex items-center">
-          <input v-model="form.prenatal_checkup" type="checkbox" id="prenatal_checkup" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <input v-model="form.prenatal_checkup" type="checkbox" id="prenatal_checkup"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="prenatal_checkup" class="ml-2 text-sm text-gray-600">In for prenatal check-up</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.pe_done" type="checkbox" id="pe_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <input v-model="form.pe_done" type="checkbox" id="pe_done"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="pe_done" class="ml-2 text-sm text-gray-600">PE done, TT status assessed</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.prenatal_record" type="checkbox" id="prenatal_record" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book given and filled up</label>
+          <input v-model="form.prenatal_record" type="checkbox" id="prenatal_record"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="prenatal_record" class="ml-2 text-sm text-gray-600">Prenatal record/book given and filled
+            up</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.birth_plan_done" type="checkbox" id="birth_plan_done" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <input v-model="form.birth_plan_done" type="checkbox" id="birth_plan_done"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="birth_plan_done" class="ml-2 text-sm text-gray-600">Birth plan done</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.nkfda" type="checkbox" id="nkfda" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <input v-model="form.nkfda" type="checkbox" id="nkfda"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="nkfda" class="ml-2 text-sm text-gray-600">NKFDA</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.health_teachings" type="checkbox" id="health_teachings" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="health_teachings" class="ml-2 text-sm text-gray-600">Health teachings given; danger signs of pregnancy imparted</label>
+          <input v-model="form.health_teachings" type="checkbox" id="health_teachings"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="health_teachings" class="ml-2 text-sm text-gray-600">Health teachings given; danger signs of
+            pregnancy imparted</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.referred_for" type="checkbox" id="referred_for" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <input v-model="form.referred_for" type="checkbox" id="referred_for"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
           <label for="referred_for" class="ml-2 text-sm text-gray-600">Referred for Urinalysis, HCT - HGB count</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.healthy_diet" type="checkbox" id="healthy_diet" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="healthy_diet" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake encouraged</label>
+          <input v-model="form.healthy_diet" type="checkbox" id="healthy_diet"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="healthy_diet" class="ml-2 text-sm text-gray-600">Healthy diet and increase fluid intake
+            encouraged</label>
         </div>
         <div class="flex items-center">
-          <input v-model="form.fes04_folic" type="checkbox" id="fes04_folic" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
-          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input v-model="form.folic_acid" type="number" id="folic_acid_tabs" class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded" > -given</input></label>
+          <input v-model="form.fes04_folic" type="checkbox" id="fes04_folic"
+            class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+          <label for="fes04_folic" class="ml-2 text-sm text-gray-600">FES04 + folic acid given - # tabs <input
+              v-model="form.folic_acid" type="number" id="folic_acid_tabs"
+              class="h-4 w-10 text-xs text-blue-600 border-gray-300 rounded"> -given</input></label>
         </div>
       </div>
 
@@ -92,26 +244,30 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label for="fhb" class="block text-sm font-medium text-gray-700">FHB</label>
-          <input v-model="form.fhb" type="text" id="fhb" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.fhb" type="text" id="fhb"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
         <div>
           <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
-          <input v-model="form.position" type="text" id="position" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.position" type="text" id="position"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
         <div>
           <label for="presentation" class="block text-sm font-medium text-gray-700">Presentation</label>
-          <input v-model="form.presentation" type="text" id="presentation" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.presentation" type="text" id="presentation"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
         <div>
           <label for="fundal_height" class="block text-sm font-medium text-gray-700">Fundal Height</label>
-          <input v-model="form.fundal_height" type="text" id="fundal_height" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.fundal_height" type="text" id="fundal_height"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-purple-700">
-          Submit
-        </button>
+      <button @click="submitForm" class="bg-purple-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-purple-700">
+        Submit
+      </button>
     </form>
   </div>
 </template>
@@ -159,7 +315,8 @@ export default {
         presentation: '',
         fundal_height: ''
       },
-      errors: {}
+      errors: {},
+      isEditing: false,
     };
   },
   watch: {
@@ -173,6 +330,9 @@ export default {
     }
   },
   methods: {
+    enableEditing() {
+      this.isEditing = true;
+    },
     populateForm(data) {
       if (!data) return;
 
@@ -331,12 +491,12 @@ export default {
 <style scoped>
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* Firefox */
 input[type="number"] {
-    -moz-appearance: textfield;
+  -moz-appearance: textfield;
 }
 </style>
