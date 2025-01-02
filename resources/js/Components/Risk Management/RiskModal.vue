@@ -230,102 +230,172 @@
 
       <!-- Step 3: Risk Factors -->
       <div v-if="step === 3">
-        <h3 class="text-lg font-semibold mb-4">Risk Factors</h3>
         <div class="grid grid-cols-1 gap-4">
           <!-- High Fat/High Salt Food Intake -->
           <div>
-            <label class="block text-sm font-medium text-gray-700">High Fat/High Salt Food Intake</label>
+            <h3 class="block text-lg font-bold text-gray-700">High Fat/High Salt Food Intake </h3>
+            <label>
+              Eats processed/fastfoods (e.g., instant noodles, hamburgers,fries,fried chicken skin, etc.,) and ihaw-ihaw
+              (e.g., isaw,etc.,)
+              weekly.
+            </label>
             <div class="flex gap-4 mt-2">
               <label><input type="radio" v-model="form.foodIntake" value="Yes" /> Yes</label>
               <label><input type="radio" v-model="form.foodIntake" value="No" /> No</label>
             </div>
           </div>
 
+          <!-- Dietary Fiber Intake -->
+          <div class="mb-5 mt-5">
+            <h3 class="block text-lg font-bold text-gray-700">Dietary Fiber Intake</h3>
+
+            <!-- 3 Servings of Vegetables -->
+            <div class="mt-2">
+              <label class="block text-sm text-gray-700">3 servings of vegetables daily</label>
+              <div class="mt-2 flex gap-4">
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.vegetableIntake" value="Yes" class="radio" />
+                  Yes
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.vegetableIntake" value="No" class="radio" />
+                  No
+                </label>
+              </div>
+            </div>
+
+            <!-- 2-3 Servings of Fruits -->
+            <div class="mt-4">
+              <label class="block text-sm text-gray-700">2-3 servings of fruits daily</label>
+              <div class="mt-2 flex gap-4">
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.fruitIntake" value="Yes" class="radio" />
+                  Yes
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.fruitIntake" value="No" class="radio" />
+                  No
+                </label>
+              </div>
+            </div>
+          </div>
+
           <!-- Physical Activity -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Physical Activities</label>
+          <div class="mb-5">
+            <h3 class="block text-lg font-bold text-gray-700">Physical Activities <br /> </h3>
+            <label>
+              Does at least 2.5 hours a week of moderate-intensity physical activity.
+            </label>
             <div class="mt-2 flex gap-4">
               <label><input type="radio" v-model="form.physicalActivity" value="Yes" /> Yes</label>
               <label><input type="radio" v-model="form.physicalActivity" value="No" /> No</label>
             </div>
           </div>
 
-          <!-- Raised Blood Glucose -->
           <div>
-            <label class="block text-sm font-medium text-gray-700">Raised Blood Glucose</label>
-            <div class="mt-2 flex gap-4">
-              <label><input type="radio" v-model="form.bloodGlucose" value="Yes" /> Yes</label>
-              <label><input type="radio" v-model="form.bloodGlucose" value="No" /> No</label>
-            </div>
-            <div v-if="form.bloodGlucose === 'Yes'" class="mt-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">FBS/RBS (mg/dL)</label>
-                  <input type="number" v-model="form.fbsRbs" class="input" placeholder="Enter mg/dL" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Date Taken</label>
-                  <input type="date" v-model="form.bloodGlucoseDate" class="input" />
-                </div>
+            <!-- Question 1 -->
+            <div class="mb-2">
+              <h3 class="block text-lg font-bold text-gray-700">Presence or absence of Diabetes</h3>
+              <label class="block text-sm font-medium text-gray-700">
+                1. Was the patient diagnosed as having diabetes?
+              </label>
+              <div class="mt-2 flex gap-4">
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.diabetesDiagnosis" value="Yes" class="radio" />
+                  Yes
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.diabetesDiagnosis" value="No" class="radio" />
+                  No
+                </label>
               </div>
             </div>
-          </div>
 
-          <!-- Raised Blood Lipids -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Raised Blood Lipids</label>
-            <div class="mt-2 flex gap-4">
-              <label><input type="radio" v-model="form.bloodLipids" value="Yes" /> Yes</label>
-              <label><input type="radio" v-model="form.bloodLipids" value="No" /> No</label>
-            </div>
-            <div v-if="form.bloodLipids === 'Yes'" class="mt-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Total Cholesterol (mmol/L)</label>
-                  <input type="number" v-model="form.totalCholesterol" class="input" placeholder="Enter mmol/L" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Date Taken</label>
-                  <input type="date" v-model="form.bloodLipidsDate" class="input" />
-                </div>
+            <!-- Follow-up for "Yes" -->
+            <div v-if="form.diabetesDiagnosis === 'Yes'" class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">
+                If yes, is the patient:
+              </label>
+              <div class="mt-2 flex gap-4">
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.diabetesMedication" value="With Medication" class="radio" />
+                  With Medication
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" v-model="form.diabetesMedication" value="Without Medication" class="radio" />
+                  Without Medication
+                </label>
               </div>
-            </div>
-          </div>
+              <p class="mt-2 font-bold text-sm text-red-900">
+                AND PERFORM URINE TEST FOR KETONES.
+              </p>
 
-          <!-- Presence of Urine Ketones -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Presence of Urine Ketones</label>
-            <div class="mt-2 flex gap-4">
-              <label><input type="radio" v-model="form.urineKetones" value="Yes" /> Yes</label>
-              <label><input type="radio" v-model="form.urineKetones" value="No" /> No</label>
-            </div>
-            <div v-if="form.urineKetones === 'Yes'" class="mt-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Urine Ketone (mg/dL)</label>
-                <input type="number" v-model="form.urineKetoneLevel" class="input" placeholder="Enter mg/dL" />
+              <!-- Urine Ketones Input -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Presence of Urine Ketones</label>
+                <div class="mt-2 flex gap-4">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" v-model="form.urineKetones" value="Yes" class="radio" />
+                    Yes
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" v-model="form.urineKetones" value="No" class="radio" />
+                    No
+                  </label>
+                </div>
+                <div v-if="form.urineKetones === 'Yes'" class="mt-4">
+                  <label for="urineKetoneLevel" class="block text-sm font-medium text-gray-700">Urine Ketone
+                    Level</label>
+                  <input type="text" id="urineKetoneLevel" v-model="form.urineKetoneLevel" class="input"
+                    placeholder="Enter value" />
+                  <label for="ketonesDate" class="block text-sm font-medium text-gray-700 mt-4">Date Taken</label>
+                  <input type="date" id="ketonesDate" v-model="form.ketonesDate" class="input" />
+                </div>
               </div>
+            </div>
+
+            <!-- Question 2 -->
+            <!-- Question 2 -->
+            <div v-if="form.diabetesDiagnosis === 'No'" class="mb-2">
+              <label class="block text-sm font-medium text-gray-700">
+                2. Does the patient have the following symptoms?
+              </label>
               <div class="mt-2">
-                <label class="block text-sm font-medium text-gray-700">Date Taken</label>
-                <input type="date" v-model="form.urineKetonesDate" class="input" />
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" v-model="form.symptoms" value="Polyphagia" class="checkbox" />
+                  Polyphagia
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" v-model="form.symptoms" value="Polyuria" class="checkbox" />
+                  Polyuria
+                </label>
               </div>
-            </div>
-          </div>
+              <p class="mt-2 text-sm text-gray-500">
+                If two or more of the above symptoms are present, perform a blood glucose test.
+              </p>
 
-          <!-- Presence of Urine Protein -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Presence of Urine Protein</label>
-            <div class="mt-2 flex gap-4">
-              <label><input type="radio" v-model="form.urineProtein" value="Yes" /> Yes</label>
-              <label><input type="radio" v-model="form.urineProtein" value="No" /> No</label>
-            </div>
-            <div v-if="form.urineProtein === 'Yes'" class="mt-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Urine Protein Level (mg/dL)</label>
-                <input type="number" v-model="form.urineProteinLevel" class="input" placeholder="Enter mg/dL" />
-              </div>
-              <div class="mt-2">
-                <label class="block text-sm font-medium text-gray-700">Date Taken</label>
-                <input type="date" v-model="form.urineProteinDate" class="input" />
+              <!-- Raised Blood Glucose Input -->
+              <div v-if="form.symptoms.length >= 2" class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Raised Blood Glucose</label>
+                <div class="mt-2 flex gap-4">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" v-model="form.raisedBloodGlucose" value="Yes" class="radio" />
+                    Yes
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" v-model="form.raisedBloodGlucose" value="No" class="radio" />
+                    No
+                  </label>
+                </div>
+                <div v-if="form.raisedBloodGlucose === 'Yes'" class="mt-4">
+                  <label for="fbsRbs" class="block text-sm font-medium text-gray-700">FBS/RBS</label>
+                  <input type="text" id="fbsRbs" v-model="form.fbsRbsMg" class="input"
+                    placeholder="Enter value (e.g., 100 mg/dL)" />
+                  <input type="text" id="fbsRbsMmol" v-model="form.fbsRbsMmol" class="input mt-2"
+                    placeholder="Enter value (e.g., 5.6 mmol/L)" />
+                  <label for="glucoseDate" class="block text-sm font-medium text-gray-700 mt-4">Date Taken</label>
+                  <input type="date" id="glucoseDate" v-model="form.glucoseDate" class="input" />
+                </div>
               </div>
             </div>
           </div>
@@ -336,11 +406,43 @@
             class="bg-orange-400 text-white py-2 px-4 rounded-md hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 shadow-md transition-all">
             Back
           </button>
-          <button @click="saveRiskData"
+          <button @click="nextStep"
             class="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 px-4 rounded-md hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-300 shadow-md transition-all">
-            Save
+            Next
           </button>
 
+        </div>
+      </div>
+
+      <div v-if="step === 4">
+        <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Loop through form fields to display data -->
+          <div v-for="(value, key) in reviewFields" :key="key" class="border-b pb-2">
+            <label class="block font-medium">{{ formatLabel(key) }}:</label>
+            <p class="text-gray-600">{{ value || 'Not Provided' }}</p>
+          </div>
+        </div>
+        <div class="flex justify-between mt-6">
+          <button @click="prevStep" class="bg-orange-400 text-white py-2 px-4 rounded-md hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 shadow-md transition-all">Back</button>
+          <button @click="showConfirmationModal = true"
+          class="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 px-4 rounded-md hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-300 shadow-md transition-all">
+            Save
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirmation Modal -->
+      <div v-if="showConfirmationModal"
+        class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-60">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <h3 class="text-lg font-semibold mb-4">Confirm Submission</h3>
+          <p class="mb-6">Are you sure you want to submit this vaccination record?</p>
+          <div class="flex justify-end space-x-4">
+            <button @click="showConfirmationModal = false"
+             class="bg-orange-400 text-white py-2 px-4 rounded-md hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 shadow-md transition-all" >Cancel</button>
+            <button @click="saveVaccination"  class="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 px-4 rounded-md hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-300 shadow-md transition-all">Yes, Submit</button>
+          </div>
         </div>
       </div>
 
@@ -372,6 +474,7 @@ export default {
       selectedPatient: null,
       filteredPatients: this.patients,
       allowAddNewPatient: true,
+      showConfirmationModal: false,
       loading: false,
       form: {
         firstName: '',
@@ -384,13 +487,19 @@ export default {
         contact: '',
         sex: '',
         foodIntake: '',
+        fruitIntake: '',
+        vegetableIntake: '',
+        diabetesDiagnosis: '',
+        diabetesMedication: '',
+        symptoms: [],
         physicalActivity: '',
-        bloodGlucose: '',
-        fbsRbs: '',
-        bloodGlucoseDate: '',
-        bloodLipids: '',
+        raisedBloodGlucose: '',
+        fbsRbsMg: '',
+        fbsRbsMmol: '',
+        raisedBloodGlucoseDate: '',
+        raisedBloodLipids: '',
         totalCholesterol: '',
-        bloodLipidsDate: '',
+        raisedBloodLipidsDate: '',
         urineKetones: '',
         urineKetoneLevel: '',
         urineKetonesDate: '',
@@ -399,8 +508,172 @@ export default {
         urineProteinDate: '',
       }
     };
+
   },
   methods: {
+    capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .split(" ") // Split the input by spaces
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter
+          .join(" "); // Join the words back together
+      }
+    },
+    formatLabel(key) {
+      // Convert camelCase or snake_case keys to readable labels
+      return key
+        .replace(/([A-Z])/g, " $1") // Add space before uppercase letters
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
+    },
+    openConfirmationModal() {
+      if (!this.validateStep3()) {
+        this.alertMessage = "Please complete all required fields before submission.";
+        this.showAlert = true;
+        return;
+      }
+      this.showConfirmationModal = true; // Open the confirmation modal if validation passes
+    },
+    confirmSave() {
+      this.saveRiskData(); // Call the save function if the user confirms
+      this.showConfirmationModal = false; // Close the confirmation modal
+    },
+    cancelConfirmation() {
+      this.showConfirmationModal = false; // Close the confirmation modal without saving
+    },
+    validateStep1() {
+      this.errors = {};
+      if (!this.selectedPatient && !this.allowAddNewPatient) {
+        this.errors.step1 = 'Please select a patient or proceed to add a new one.';
+        return false;
+      }
+      return true;
+    },
+    validateStep2() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.firstName) {
+        this.errors.firstName = 'First name is required.';
+        valid = false;
+      }
+      if (!this.form.lastName) {
+        this.errors.lastName = 'Last name is required.';
+        valid = false;
+      }
+      if (!this.form.purok) {
+        this.errors.purok = 'Purok is required.';
+        valid = false;
+      }
+      if (!this.form.barangay) {
+        this.errors.barangay = 'Barangay is required.';
+        valid = false;
+      }
+      if (!this.form.birthdate) {
+        this.errors.birthdate = 'Birthdate is required.';
+        valid = false;
+      }
+
+      return valid;
+    },
+    validateStep3() {
+      this.errors = {};
+      let valid = true;
+
+      // Validate Food Intake
+      if (!this.form.foodIntake) {
+        this.errors.foodIntake = 'Food intake is required.';
+        valid = false;
+      }
+
+      // Validate Fruit Intake
+      if (!this.form.fruitIntake) {
+        this.errors.fruitIntake = 'Fruit intake is required.';
+        valid = false;
+      }
+
+      // Validate Vegetable Intake
+      if (!this.form.vegetableIntake) {
+        this.errors.vegetableIntake = 'Vegetable intake is required.';
+        valid = false;
+      }
+
+      // Validate Diabetes Diagnosis
+      if (!this.form.diabetesDiagnosis) {
+        this.errors.diabetesDiagnosis = 'Diabetes diagnosis is required.';
+        valid = false;
+      }
+
+      // Validate Diabetes Medication (if diagnosed)
+      if (
+        this.form.diabetesDiagnosis === 'Yes' &&
+        !this.form.diabetesMedication
+      ) {
+        this.errors.diabetesMedication = 'Diabetes medication status is required.';
+        valid = false;
+      }
+
+      // Validate Symptoms (if no diagnosis)
+      if (
+        this.form.diabetesDiagnosis === 'No' &&
+        this.form.symptoms.length < 2
+      ) {
+        this.errors.symptoms = 'At least two symptoms are required for further tests.';
+        valid = false;
+      }
+
+      // Validate Physical Activity
+      if (!this.form.physicalActivity) {
+        this.errors.physicalActivity = 'Physical activity is required.';
+        valid = false;
+      }
+
+      // Validate Raised Blood Glucose (if applicable)
+      if (
+        this.form.symptoms.length >= 2 &&
+        !this.form.raisedBloodGlucose
+      ) {
+        this.errors.raisedBloodGlucose = 'Raised blood glucose status is required.';
+        valid = false;
+      }
+
+      if (
+        this.form.raisedBloodGlucose === 'Yes' &&
+        (!this.form.fbsRbsMg || !this.form.fbsRbsMmol || !this.form.raisedBloodGlucoseDate)
+      ) {
+        this.errors.raisedBloodGlucoseDetails = 'FBS/RBS details and date are required.';
+        valid = false;
+      }
+
+      // Validate Raised Blood Lipids (if applicable)
+      if (
+        this.form.raisedBloodLipids === 'Yes' &&
+        (!this.form.totalCholesterol || !this.form.raisedBloodLipidsDate)
+      ) {
+        this.errors.raisedBloodLipidsDetails = 'Total cholesterol and date are required.';
+        valid = false;
+      }
+
+      // Validate Urine Ketones (if applicable)
+      if (
+        this.form.urineKetones === 'Yes' &&
+        (!this.form.urineKetoneLevel || !this.form.urineKetonesDate)
+      ) {
+        this.errors.urineKetonesDetails = 'Urine ketone level and date are required.';
+        valid = false;
+      }
+
+      // Validate Urine Protein (if applicable)
+      if (
+        this.form.urineProtein === 'Yes' &&
+        (!this.form.urineProteinLevel || !this.form.urineProteinDate)
+      ) {
+        this.errors.urineProteinDetails = 'Urine protein level and date are required.';
+        valid = false;
+      }
+
+      return valid;
+    },
     searchPatients() {
       this.loading = true; // Show loading indicator
       try {
@@ -456,10 +729,22 @@ export default {
       this.$emit('close');
     },
     nextStep() {
-      this.step++;
+      if (this.step === 1 && this.selectedPatient) {
+        this.step = 3; // Skip to vaccine selection if patient exists
+      } else if (this.step === 1 && this.validateStep1()) {
+        this.step++;
+      } else if (this.step === 2 && this.validateStep2()) {
+        this.step++;
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.step++;
+      } else if (this.step === 4) {
+        this.saveRiskData();
+      }
     },
     prevStep() {
-      this.step--;
+      if (this.step > 1) {
+        this.step--;
+      }
     },
     addOrNextStep() {
       if (this.selectedPatient) {
@@ -488,7 +773,14 @@ export default {
       }
     },
     saveRiskData() {
-
+      if (!this.validateStep3()) {
+        this.alertMessage = "Please complete all required fields";
+        this.showAlert = true;
+        return;
+      }
+      console.log("Risk Management data saved:", this.form); // Verify the form object
+      this.showConfirmationModal = false;
+      this.closeModal();
       this.form.age = this.computedAge;
 
       const riskData = {
@@ -547,6 +839,32 @@ export default {
     }
   },
   computed: {
+    reviewFields() {
+    return {
+      'Food Intake': this.form.foodIntake || 'Not Provided',
+      'Fruit Intake': this.form.fruitIntake || 'Not Provided',
+      'Vegetable Intake': this.form.vegetableIntake || 'Not Provided',
+      'Diabetes Diagnosis': this.form.diabetesDiagnosis || 'Not Provided',
+      'Diabetes Medication': this.form.diabetesMedication || 'Not Provided',
+      'Symptoms': this.form.symptoms.length
+        ? this.form.symptoms.join(', ')
+        : 'Not Provided',
+      'Physical Activity': this.form.physicalActivity || 'Not Provided',
+      'Raised Blood Glucose': this.form.raisedBloodGlucose || 'Not Provided',
+      'FBS/RBS (mg/dL)': this.form.fbsRbsMg || 'Not Provided',
+      'FBS/RBS (mmol/L)': this.form.fbsRbsMmol || 'Not Provided',
+      'Raised Blood Glucose Date': this.form.raisedBloodGlucoseDate || 'Not Provided',
+      'Raised Blood Lipids': this.form.raisedBloodLipids || 'Not Provided',
+      'Total Cholesterol': this.form.totalCholesterol || 'Not Provided',
+      'Raised Blood Lipids Date': this.form.raisedBloodLipidsDate || 'Not Provided',
+      'Urine Ketones': this.form.urineKetones || 'Not Provided',
+      'Urine Ketone Level': this.form.urineKetoneLevel || 'Not Provided',
+      'Urine Ketones Date': this.form.urineKetonesDate || 'Not Provided',
+      'Urine Protein': this.form.urineProtein || 'Not Provided',
+      'Urine Protein Level': this.form.urineProteinLevel || 'Not Provided',
+      'Urine Protein Date': this.form.urineProteinDate || 'Not Provided',
+    };
+  },
     computedAge() {
       if (!this.form.birthdate) return '';
       const birthDate = new Date(this.form.birthdate);
@@ -575,6 +893,15 @@ export default {
 </script>
 
 <style scoped>
+.radio {
+  accent-color: #4a90e2;
+  /* Tailwind accent color */
+}
+
+.checkbox {
+  accent-color: #4a90e2;
+}
+
 .input {
   @apply mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500;
 }
@@ -594,11 +921,13 @@ export default {
 .loading-indicator {
   @apply flex items-center justify-center py-4 text-gray-500;
 }
-[type='checkbox']:checked, [type='radio']:checked {
-    border-color: transparent;
-    background-color: hsla(11, 80%, 45%, 1);
-    background-size: 100% 100%;
-    background-position: center;
-    background-repeat: no-repeat;
+
+[type='checkbox']:checked,
+[type='radio']:checked {
+  border-color: transparent;
+  background-color: hsla(11, 80%, 45%, 1);
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 </style>
