@@ -35,7 +35,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|string|in:Staff,Doctor', // Validate the role
+            'role' => 'required|string|in:staff,doctor', // Validate the role
         ]);
 
         // Ensure unauthorized role manipulation is avoided

@@ -11,7 +11,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
-    role: 'Staff', // Default role
+    role: 'staff', // Default role
 });
 
 const submit = () => {
@@ -95,8 +95,8 @@ const submit = () => {
                     v-model="form.role"
                     required
                 >
-                    <option value="Staff">Staff</option>
-                    <option value="Doctor">Doctor</option>
+                    <option value="staff">Staff</option>
+                    <option value="doctor">Doctor</option>
                 </select>
 
                 <InputError class="mt-2" :message="form.errors.role" />
