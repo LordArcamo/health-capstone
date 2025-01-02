@@ -55,8 +55,11 @@
           {{ selectedPatient ? "Patient Details" : "Add New Patient" }}
         </h3>
         <div v-if="selectedPatient" class="mb-4">
-          <p><strong>Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</p>
+          <p><strong>Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}</p>
+          <p><strong>Gender:</strong> {{ selectedPatient.sex }}</p>
+          <p><strong>Birthdate:</strong> {{ selectedPatient.birthdate }}</p>
           <p><strong>Age:</strong> {{ selectedPatient.age }}</p>
+          <p><strong>Address:</strong> {{ selectedPatient.purok }} {{ selectedPatient.barangay }}</p>
           <p><strong>Contact:</strong> {{ selectedPatient.contact }}</p>
         </div>
 
