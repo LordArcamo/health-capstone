@@ -12,19 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Add the 'role' column without a default value to enforce explicit assignment
-            $table->string('role')->nullable(false)->default(null)->change();
+            $table->string('role')->default('Staff'); // Default role is Staff
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Revert 'role' column to its previous state (if necessary)
-            $table->string('role')->default('user')->change();
+            $table->dropColumn('role');
         });
     }
 };
