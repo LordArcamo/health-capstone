@@ -18,10 +18,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VaccineController;
 use App\Http\Controllers\SystemAnalyticsController;
-use App\Http\Controllers\ThankYouController;
 use App\Http\Controllers\PersonalInformationController;
 use App\Http\Controllers\RiskManagementController;
 use App\Http\Controllers\VaccineAppointmentController;
+use App\Http\Controllers\AdminController;
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
@@ -174,6 +174,10 @@ Route::get('/checkup', function () {
 })->middleware(['auth', 'verified'])->name('checkup');
 
 Route::get('/patients/{personalId}', [PatientController::class, 'show'])->name('patients.show');
+
+Route::middleware(['role:admin'])->group(function () {
+    Route::get('/admin-dashboard', [AdminController::class, 'index']);
+});
 
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');

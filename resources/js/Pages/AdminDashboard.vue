@@ -1,5 +1,5 @@
 <script setup>
-import NewLayout from '@/Layouts/DoctorLayout.vue';
+import NewLayout from '@/Layouts/AdminLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref, onMounted, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
