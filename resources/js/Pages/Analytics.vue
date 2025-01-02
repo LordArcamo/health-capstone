@@ -169,7 +169,7 @@ watch(() => props.lineChart, (newVal) => {
       </div>
       <div v-if="showFilters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Date Range</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Datee Range</label>
           <select
             v-model="filters.date"
             class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
