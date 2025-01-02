@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-screen flex flex-col justify-center items-center">
     <div class="bg-white shadow-md rounded-lg p-8 max-w-4xl w-full">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Patient Information Record</h2>
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Individual Treatment Record</h2>
+
       <!-- Step Navigation -->
       <div class="relative z-10 flex justify-between items-center pb-4 border-b">
         <div class="absolute inset-0 flex items-center justify-between px-4">
@@ -260,7 +261,7 @@
         </div>
 
         <!-- Step 3: Visit Information -->
-        <!-- <div v-if="step === 3">
+        <div v-if="step === 3">
           <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -290,10 +291,10 @@
             <button @click="prevStep" class="btn">Back</button>
             <button @click="nextStep" class="btn">Next</button>
           </div>
-        </div> -->
+        </div>
 
         <!-- Step 4: Review Submitted Data -->
-        <div v-if="step === 3">
+        <div v-if="step === 4">
           <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <!-- Loop through form fields to display data -->
@@ -355,6 +356,7 @@ export default {
       showModal: false, // Tracks modal visibility
       stepTitles: ['Patient Information',
         'Consultation Details',
+        'Visit Information',
         'Review Information'
       ],
       step: 1,
@@ -380,12 +382,12 @@ export default {
         referredTo: '',
         reasonsForReferral: '',
         referredBy: '',
-        // providerName: '',
+        providerName: '',
         natureOfVisit: '',
         visitType: '',
-        // chiefComplaints: '',
-        // diagnosis: '',
-        // medication: '',
+        chiefComplaints: '',
+        diagnosis: '',
+        medication: '',
       },
       errors: {
         contact: '',
@@ -724,44 +726,46 @@ export default {
   return valid;
 },
 
-    // validateStep3() {
-    //   this.errors = {};
-    //   let valid = true;
+    validateStep3() {
+      this.errors = {};
+      let valid = true;
 
-    //   if (!this.form.providerName) {
-    //     this.errors.providerName = 'Provider name is required.';
-    //     valid = false;
-    //   }
-    //   if (!this.form.natureOfVisit) {
-    //     this.errors.natureOfVisit = 'Nature of visit is required.';
-    //     valid = false;
-    //   }
-    //   if (!this.form.visitType) {
-    //     this.errors.visitType = 'Visit type is required.';
-    //     valid = false;
-    //   }
-    //   if (!this.form.chiefComplaints) {
-    //     this.errors.chiefComplaints = 'Chief Complaints is required.';
-    //     valid = false;
-    //   }
-    //   if (!this.form.diagnosis) {
-    //     this.errors.diagnosis = 'Diagnosis is required.';
-    //     valid = false;
-    //   }
-    //   if (!this.form.medication) {
-    //     this.errors.medication = 'Medication is required.';
-    //     valid = false;
-    //   }
-    //   return valid;
-    // },
+      if (!this.form.providerName) {
+        this.errors.providerName = 'Provider name is required.';
+        valid = false;
+      }
+      if (!this.form.natureOfVisit) {
+        this.errors.natureOfVisit = 'Nature of visit is required.';
+        valid = false;
+      }
+      if (!this.form.visitType) {
+        this.errors.visitType = 'Visit type is required.';
+        valid = false;
+      }
+      if (!this.form.chiefComplaints) {
+        this.errors.chiefComplaints = 'Chief Complaints is required.';
+        valid = false;
+      }
+      if (!this.form.diagnosis) {
+        this.errors.diagnosis = 'Diagnosis is required.';
+        valid = false;
+      }
+      if (!this.form.medication) {
+        this.errors.medication = 'Medication is required.';
+        valid = false;
+      }
+      return valid;
+    },
     nextStep() {
       if (this.step === 1 && this.validateStep1()) {
         this.step++;
       } else if (this.step === 2 && this.validateStep2()) {
         this.step++;
       } else if (this.step === 3 && this.validateStep3()) {
-        this.step = 3;;
-      } 
+        this.step++;
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.step = 4;
+      }
     },
     prevStep() {
       this.step--;
@@ -771,7 +775,8 @@ export default {
         // Validate the current step before proceeding
         const isCurrentStepValid =
           (this.step === 1 && this.validateStep1()) ||
-          (this.step === 2 && this.validateStep2());
+          (this.step === 2 && this.validateStep2()) ||
+          (this.step === 3 && this.validateStep3());
 
         if (!isCurrentStepValid) {
           this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
@@ -803,7 +808,7 @@ export default {
       }
     },
     triggerSubmit() {
-      if (this.validateStep1() && this.validateStep2()) {
+      if (this.validateStep1() && this.validateStep2() && this.validateStep3()) {
         this.showModal = true; // Show confirmation modal
       } else {
         this.successMessage = 'Please complete all required fields before submitting.';
@@ -833,8 +838,12 @@ export default {
     referredTo: this.form.referredTo || 'None',
     reasonsForReferral: this.form.reasonsForReferral || 'None',
     referredBy: this.form.referredBy || 'None',
+    providerName: this.form.providerName,
     natureOfVisit: this.form.natureOfVisit,
     visitType: this.form.visitType,
+    chiefComplaints: this.form.chiefComplaints,
+    diagnosis: this.form.diagnosis,
+    medication: this.form.medication,
   };
 
   console.log('Submitting form with payload:', payload);

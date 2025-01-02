@@ -8,7 +8,7 @@
 
 <script setup>
 import NationalImmunizationTable from '@/Components/NationalImmunizationTable.vue';
-import NewLayout from '@/Layouts/NewLayout.vue';
+import NewLayout from '@/Layouts/PersonnelLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({

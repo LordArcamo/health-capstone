@@ -1,5 +1,5 @@
 <script setup>
-import NewLayout from '@/Layouts/NewLayout.vue';
+import NewLayout from '@/Layouts/PersonnelLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import ITRForm from '@/Components/ITRForm.vue';
 import { Inertia } from '@inertiajs/inertia';

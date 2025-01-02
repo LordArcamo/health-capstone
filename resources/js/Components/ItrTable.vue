@@ -10,7 +10,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
       <!-- Search Bar -->
       <div class="w-full md:w-3/3 flex items-center border border-gray-300 rounded-lg shadow-sm bg-white">
-        <font-awesome-icon icon="search" class="text-gray-400 mx-3" />
+        <!-- <font-awesome-icon icon="search" class="text-gray-400 mx-3" /> -->
         <input
           v-model="searchQuery"
           type="text"
@@ -39,7 +39,7 @@
         @click="toggleFilterPanel"
         class="flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition"
       >
-        <font-awesome-icon icon="filter" />
+        <!-- <font-awesome-icon icon="filter" /> -->
         Filters
       </button>
     </div>
@@ -151,13 +151,14 @@
         @click="generateReport"
         class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 transition"
       >
+      <!-- <font-awesome-icon icon="file-import" /> -->
         Generate Report
       </button>
       <button
         @click="triggerImport"
         class="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition"
       >
-        <font-awesome-icon icon="file-import" />
+        <!-- <font-awesome-icon icon="file-import" /> -->
         Import CSV
       </button>
       <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />

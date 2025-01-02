@@ -7,7 +7,7 @@
 </template>
 
 <script setup>
-import NewLayout from '@/Layouts/NewLayout.vue';
+import NewLayout from '@/Layouts/PersonnelLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import DiseaseTable from '@/Components/DiseaseTable.vue';
 

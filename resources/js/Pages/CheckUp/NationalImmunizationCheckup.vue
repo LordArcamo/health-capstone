@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import NewLayout from '@/Layouts/NewLayout.vue';
+import NewLayout from '@/Layouts/PersonnelLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import NationalImmunizationForm from '@/Components/NationalImmunizationProgramForm.vue';
 import { Inertia } from '@inertiajs/inertia';

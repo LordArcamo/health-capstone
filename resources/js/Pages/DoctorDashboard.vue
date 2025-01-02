@@ -14,8 +14,6 @@ import Logo from "@/Images/RHU Logo.png";
 
 // Props from backend
 const props = defineProps({
-  auth: Object,
-  flash: Object,
   totalPatients: Number,
   patients: Array,
   casesData: [Array, Object],
@@ -63,22 +61,6 @@ watch(() => props.casesData, (newCasesData) => {
   <Head title="Initao RHU Dashboard" />
 
   <NewLayout>
-    <div>
-    <h1>Welcome, {{ auth.user.name }}</h1>
-    <p>Your role is: {{ auth.user.role }}</p>
-    <div v-if="auth.user.role === 'admin'">
-      <p>Admin doctor dashboard content goes here.</p>
-    </div>
-    <div v-else-if="auth.user.role === 'staff'">
-      <p>Staff dashboard content goes here.</p>
-    </div>
-    <div v-if="flash.success" class="alert alert-success">
-      {{ flash.success }}
-    </div>
-    <div v-if="flash.error" class="alert alert-danger">
-      {{ flash.error }}
-    </div>
-  </div>
     <div class="overflow-y-auto w-full min-h-screen bg-gray-50">
       <!-- Branding Section -->
       <div class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-10 py-6 text-white shadow-md">

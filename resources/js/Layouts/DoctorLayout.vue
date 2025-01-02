@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import TopBar from '../Components/TopBar.vue';
+import TopBar from '../Components/PersonnelTopbar.vue';
 
 // Reactive variable to manage the visibility of the topbar
 const showTopBar = ref(true);
