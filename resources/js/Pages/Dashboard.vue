@@ -63,35 +63,26 @@ watch(() => props.casesData, (newCasesData) => {
   <Head title="Initao RHU Dashboard" />
 
   <NewLayout>
-    <div>
-    <h1>Welcome, {{ auth.user.name }}</h1>
-    <p>Your role is: {{ auth.user.role }}</p>
-    <div v-if="auth.user.role === 'admin'">
-      <p>Admin doctor dashboard content goes here.</p>
-    </div>
-    <div v-else-if="auth.user.role === 'staff'">
-      <p>Staff dashboard content goes here.</p>
-    </div>
-    <!-- <div v-if="flash.success" class="alert alert-success">
-      {{ flash.success }}
-    </div>
-    <div v-if="flash.error" class="alert alert-danger">
-      {{ flash.error }}
-    </div> -->
-  </div>
     <div class="overflow-y-auto w-full min-h-screen bg-gray-50">
-      <!-- Branding Section -->
-      <div class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-10 py-6 text-white shadow-md">
-        <div>
-          <h1 class="text-2xl font-bold">Initao RHU Dashboard</h1>
-          <p class="text-sm">Welcome to the Rural Health Unit of Initao, empowering community health with data-driven insights.</p>
-        </div>
-        <!-- <img :src="Logo" alt="Initao RHU Logo" class="h-16"> -->
-      </div>
+<!-- Branding Section -->
+<div class="flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-10 py-6 text-white shadow-md">
+  <!-- Left Section: Branding -->
+  <div class="mb-4 md:mb-0">
+    <h1 class="text-2xl font-bold">Initao RHU Dashboard</h1>
+    <p class="text-sm">Welcome to the Rural Health Unit of Initao, empowering community health with data-driven insights.</p>
+  </div>
+
+  <!-- Right Section: User Info -->
+  <div class="flex flex-col items-start md:items-end">
+    <h2 class="text-xl font-bold">Welcome, {{ auth.user.name }}</h2>
+  </div>
+</div>
+
 
       <!-- Stats Section -->
    <!-- Stats Section -->
 <div class="w-full gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+  
   <!-- Total Patients -->
   <ShortBox class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-md transition-shadow">
     <div class="flex flex-col items-start gap-2">

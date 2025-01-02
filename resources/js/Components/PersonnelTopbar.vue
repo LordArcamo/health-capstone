@@ -104,13 +104,6 @@ onBeforeUnmount(() => {
             >
               <div class="grid grid-cols-1 gap-4 p-4">
                 <NavLink
-                  href="/mental-health"
-                  :active="component === 'MentalHealth'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
-                  Mental Health
-                </NavLink>
-                <NavLink
                   href="/itr-services"
                   :active="component === 'IndividualTreatmentRecord'"
                   class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
@@ -137,13 +130,6 @@ onBeforeUnmount(() => {
                   class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
                 >
                   Vaccination
-                </NavLink>
-                <NavLink
-                  href="/risk-management-services"
-                  :active="component === 'RiskManagement'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
-                  Risk Management
                 </NavLink>
               </div>
             </div>

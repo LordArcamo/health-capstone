@@ -168,7 +168,7 @@ Route::get('/checkup', function () {
     $patients = PersonalInformation::all();
 
     // Pass patients to the Inertia page
-    return Inertia::render('AdminCheckup', [
+    return Inertia::render('Checkup', [
         'patients' => $patients, // Pass the patients data
     ]);
 })->middleware(['auth', 'verified'])->name('checkup');
