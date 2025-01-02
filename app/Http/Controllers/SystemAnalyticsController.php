@@ -14,18 +14,13 @@ class SystemAnalyticsController extends Controller
 {
     public function index(Request $request) 
     {
-        if($request->gender) {
-            $genderCount = PersonalInformation::where('sex', $request->gender)->count();
-            dd($genderCount);
-        }
-
         $totalPatients = $this->totalPatients($request);
         $risk = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
         $cases = $this->cases($request);
+        
         $monthlyStats = $this->getPatientStatistics($request);
-        $referredCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
-        $notReferredCount = PersonalInformation::count() - $referredCount;
+        $referredStats = $this->getReferredStats($request);
         $lineChart = $this->getVaccinationStatistics($request);
         $casesStats = $this->getCasesStatistics($request);
         $mentalHealthStats = $this->getMentalHealthStatistics($request);
@@ -36,10 +31,7 @@ class SystemAnalyticsController extends Controller
             'vaccinations' => $vaccinations,
             'cases' => $cases,
             'barChart' => $monthlyStats,
-            'pieChart' => [
-                'referred' => $referredCount,
-                'notReferred' => $notReferredCount,
-            ],
+            'pieChart' => $referredStats,
             'lineChart' => [
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 'data' => $lineChart,
@@ -56,10 +48,30 @@ class SystemAnalyticsController extends Controller
         if ($request->gender) {
             $query->where('sex', $request->gender);
         }
+
+        if ($request->ageRange) {
+            $ages = explode('-', $request->ageRange);
+            if (count($ages) === 2) {
+                $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+            } else {
+                $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+            }
+        }
     
         if ($request->date) {
-            // Example: Filter by a specific date range
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $today = now();
+            switch ($request->date) {
+                case '7days':
+                    $query->where('created_at', '>=', $today->subDays(7));
+                    break;
+                case '30days':
+                    $query->where('created_at', '>=', $today->subDays(30));
+                    break;
+                case 'year':
+                    $query->whereYear('created_at', $today->year);
+                    break;
+            }
         }
     
         return $query->count();
@@ -70,16 +82,39 @@ class SystemAnalyticsController extends Controller
         $query = RiskManagement::query();
     
         if ($request->gender) {
-            $query->where('sex', $request->gender);
+            $query->whereHas('patient', function($q) use ($request) {
+                $q->where('sex', $request->gender);
+            });
         }
     
         if ($request->date) {
-            // Example: Filter by a specific date range
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $today = now();
+            switch ($request->date) {
+                case '7days':
+                    $query->where('created_at', '>=', $today->subDays(7));
+                    break;
+                case '30days':
+                    $query->where('created_at', '>=', $today->subDays(30));
+                    break;
+                case 'year':
+                    $query->whereYear('created_at', $today->year);
+                    break;
+            }
+        }
+
+        if ($request->ageRange) {
+            $query->whereHas('patient', function($q) use ($request) {
+                $ages = explode('-', $request->ageRange);
+                if (count($ages) === 2) {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+                } else {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+                }
+            });
         }
     
         return $query->count();
-
     }
 
     private function vaccinations($request) 
@@ -87,12 +122,36 @@ class SystemAnalyticsController extends Controller
         $query = VaccinationRecord::query();
 
         if ($request->gender) {
-            $query->where('sex', $request->gender);
+            $query->whereHas('patient', function($q) use ($request) {
+                $q->where('sex', $request->gender);
+            });
         }
     
         if ($request->date) {
-            // Example: Filter by a specific date range
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $today = now();
+            switch ($request->date) {
+                case '7days':
+                    $query->where('dateOfVisit', '>=', $today->subDays(7));
+                    break;
+                case '30days':
+                    $query->where('dateOfVisit', '>=', $today->subDays(30));
+                    break;
+                case 'year':
+                    $query->whereYear('dateOfVisit', $today->year);
+                    break;
+            }
+        }
+
+        if ($request->ageRange) {
+            $query->whereHas('patient', function($q) use ($request) {
+                $ages = explode('-', $request->ageRange);
+                if (count($ages) === 2) {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+                } else {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+                }
+            });
         }
     
         return $query->count();
@@ -100,15 +159,54 @@ class SystemAnalyticsController extends Controller
 
     private function cases($request) 
     {
-        $query = CheckUp::where('itr.visitType', 'Mental Health');
+        $query = CheckUp::where('visitType', 'Mental Health');
 
         if ($request->gender) {
-            $query->where('sex', $request->gender);
+            $query->whereHas('personalInformation', function($q) use ($request) {
+                $q->where('sex', $request->gender);
+            });
         }
     
         if ($request->date) {
-            // Example: Filter by a specific date range
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+            $today = now();
+            switch ($request->date) {
+                case '7days':
+                    $query->where('consultationDate', '>=', $today->subDays(7));
+                    break;
+                case '30days':
+                    $query->where('consultationDate', '>=', $today->subDays(30));
+                    break;
+                case 'year':
+                    $query->whereYear('consultationDate', $today->year);
+                    break;
+            }
+        }
+
+        if ($request->ageRange) {
+            $query->whereHas('personalInformation', function($q) use ($request) {
+                $ages = explode('-', $request->ageRange);
+                if (count($ages) === 2) {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+                } else {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+                }
+            });
+        }
+
+        if ($request->casesType) {
+            switch ($request->casesType) {
+                case 'confirmed':
+                    $query->whereNotNull('diagnosis');
+                    break;
+                case 'recovered':
+                    $query->where('natureOfVisit', 'Follow-up')
+                          ->where('diagnosis', 'like', '%Recovered%');
+                    break;
+                case 'deaths':
+                    $query->where('diagnosis', 'like', '%Deceased%');
+                    break;
+            }
         }
     
         return $query->count();
@@ -120,26 +218,96 @@ class SystemAnalyticsController extends Controller
         $currentYear = date('Y');
 
         for ($month = 1; $month <= 12; $month++) {
-            $count = PersonalInformation::whereYear('created_at', $currentYear)
-                ->whereMonth('created_at', $month)
-                ->count();
-            $monthlyStats[] = $count;
+            $query = PersonalInformation::whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month);
+
+            if ($request->gender) {
+                $query->where('sex', $request->gender);
+            }
+
+            if ($request->ageRange) {
+                $ages = explode('-', $request->ageRange);
+                if (count($ages) === 2) {
+                    $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+                          ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+                } else {
+                    $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+                }
+            }
+
+            if ($request->date) {
+                $today = now();
+                switch ($request->date) {
+                    case '7days':
+                        $query->where('created_at', '>=', $today->subDays(7));
+                        break;
+                    case '30days':
+                        $query->where('created_at', '>=', $today->subDays(30));
+                        break;
+                    case 'year':
+                        $query->whereYear('created_at', $today->year);
+                        break;
+                }
+            }
+
+            $monthlyStats[] = $query->count();
         }
 
         return $monthlyStats;
     }
 
-    public function getReferredPatientsStatistics()
+    private function getReferredStats($request)
     {
-        $referredCount = CheckUp::where('modeOfTransaction', 'Referral')->count();
-        $notReferredCount = PersonalInformation::count() - $referredCount;
+        $query = CheckUp::query();
 
-        return Inertia::render('Analytics', [
-            'pieChart' => [
-                'referred' => $referredCount,
-                'notReferred' => $notReferredCount,
-            ],
-        ]);
+        if ($request->gender) {
+            $query->whereHas('personalInformation', function($q) use ($request) {
+                $q->where('sex', $request->gender);
+            });
+        }
+    
+        if ($request->date) {
+            $today = now();
+            switch ($request->date) {
+                case '7days':
+                    $query->where('consultationDate', '>=', now()->subDays(7))
+                          ->where('consultationDate', '<=', now());
+                    break;
+                case '30days':
+                    $query->where('consultationDate', '>=', now()->subDays(30))
+                          ->where('consultationDate', '<=', now());
+                    break;
+                case 'year':
+                    $query->whereYear('consultationDate', now()->year);
+                    break;
+            }
+        }
+
+        if ($request->ageRange) {
+            $query->whereHas('personalInformation', function($q) use ($request) {
+                $ages = explode('-', $request->ageRange);
+                if (count($ages) === 2) {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+                } else {
+                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+                }
+            });
+        }
+
+        // Clone the query before adding the Referral condition
+        $baseQuery = clone $query;
+        
+        // Get referred count
+        $referredCount = $query->where('modeOfTransaction', 'Referral')->count();
+        
+        // Get total count from the base query
+        $totalCount = $baseQuery->count();
+        
+        return [
+            'referred' => $referredCount,
+            'notReferred' => $totalCount - $referredCount
+        ];
     }
 
     private function getVaccinationStatistics()
