@@ -30,36 +30,34 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validate the request
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|string|in:Staff,Doctor', // Validate the role
         ]);
 
-        // Assign a default role as 'user'
-        $role = 'user';
-
-        // Optionally allow admin creation only for authorized users
-        if ($request->has('role') && $request->role === 'admin') {
-            if (Auth::check() && Auth::user()->role === 'admin') {
-                $role = 'admin';
-            } else {
-                abort(403, 'Unauthorized role assignment.');
-            }
+        // Ensure unauthorized role manipulation is avoided
+        if ($request->role === 'admin') {
+            abort(403, 'Unauthorized role assignment.');
         }
 
-        // Create the user
+        // Create the user with the specified role
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $role, // Assign the determined role
+            'role' => $request->role, // Save the selected role (Staff or Doctor)
         ]);
 
+        // Trigger the registered event
         event(new Registered($user));
 
+        // Log the user in
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirect to the intended dashboard
+        return redirect()->route('dashboard');
     }
 }
