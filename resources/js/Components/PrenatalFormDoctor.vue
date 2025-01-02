@@ -237,8 +237,186 @@
           </div>
         </div>
 
-        <!-- Step 6: Review Submitted Data -->
+        <!-- Step 3: Visit Information -->
         <div v-if="step === 3">
+          <!-- Menstrual History Section -->
+          <h2 class="font-bold">Menstrual History</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block">Menarche:</label>
+              <input type="text" v-model="form.menarche" class="input" placeholder="Enter age at menarche" required />
+              <span v-if="errors.menarche" class="text-red-600 text-sm">{{ errors.menarche }}</span>
+            </div>
+
+            <div>
+              <label class="block">Onset of Sexual Intercourse:</label>
+              <input type="text" v-model="form.sexualOnset" class="input" placeholder="Enter age" />
+              <span v-if="errors.sexualOnset" class="text-red-600 text-sm">{{ errors.sexualOnset }}</span>
+            </div>
+
+            <div>
+              <label class="block">Period/Duration:</label>
+              <input type="text" v-model="form.periodDuration" class="input" placeholder="e.g., 5-7 days" required />
+              <span v-if="errors.periodDuration" class="text-red-600 text-sm">{{ errors.periodDuration }}</span>
+            </div>
+
+            <div>
+              <label class="block">Birth Control Method:</label>
+              <input type="text" v-model="form.birthControl" class="input" placeholder="Enter method" />
+              <span v-if="errors.birthControl" class="text-red-600 text-sm">{{ errors.birthControl }}</span>
+            </div>
+
+            <div>
+              <label class="block">Interval/Cycle:</label>
+              <input type="text" v-model="form.intervalCycle" class="input" placeholder="e.g., 28 days" required />
+              <span v-if="errors.intervalCycle" class="text-red-600 text-sm">{{ errors.intervalCycle }}</span>
+            </div>
+
+            <div>
+              <label class="block">Menopause? (Yes/No):</label>
+              <select v-model="form.menopause" class="input" required>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+              <span v-if="errors.menopause" class="text-red-600 text-sm">{{ errors.menopause }}</span>
+            </div>
+
+            <div>
+              <label class="block">LMP (Last Menstrual Period):</label>
+              <input type="date" v-model="form.lmp" class="input" required />
+              <span v-if="errors.lmp" class="text-red-600 text-sm">{{ errors.lmp }}</span>
+            </div>
+
+            <div>
+              <label class="block">EDC (Estimated Date of Confinement):</label>
+              <input type="date" v-model="form.edc" class="input" required />
+              <span v-if="errors.edc" class="text-red-600 text-sm">{{ errors.edc }}</span>
+            </div>
+          </div>
+
+
+          <div class="mt-6 flex justify-between">
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="nextStep" class="btn">Next</button>
+          </div>
+        </div>
+
+        <div v-if="step === 4">
+          <!-- Prenatal Section -->
+          <h2 class="font-bold mt-4">Prenatal</h2>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block">Gravidity:</label>
+              <input type="text" v-model="form.gravidity" class="input" placeholder="Enter number of pregnancies"
+                required />
+              <span v-if="errors.gravidity" class="text-red-600 text-sm">{{ errors.gravidity }}</span>
+            </div>
+
+            <div>
+              <label class="block">Parity:</label>
+              <input type="text" v-model="form.parity" class="input" placeholder="Enter number of live births"
+                required />
+              <span v-if="errors.parity" class="text-red-600 text-sm">{{ errors.parity }}</span>
+            </div>
+
+            <div>
+              <label class="block">Term:</label>
+              <input type="text" v-model="form.term" class="input" placeholder="Enter term pregnancies" />
+              <span v-if="errors.term" class="text-red-600 text-sm">{{ errors.term }}</span>
+            </div>
+
+            <div>
+              <label class="block">Preterm:</label>
+              <input type="text" v-model="form.preterm" class="input" placeholder="Enter preterm pregnancies" />
+              <span v-if="errors.preterm" class="text-red-600 text-sm">{{ errors.preterm }}</span>
+            </div>
+
+            <div>
+              <label class="block">Abortion:</label>
+              <input type="text" v-model="form.abortion" class="input" placeholder="Enter abortions" />
+            </div>
+
+            <div>
+              <label class="block">Living:</label>
+              <input type="text" v-model="form.living" class="input" placeholder="Enter number of living children" />
+              <span v-if="errors.living" class="text-red-600 text-sm">{{ errors.living }}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mt-4">
+            <div>
+              <label class="block">Syphilis Test Result:</label>
+              <select v-model="form.syphilisResult" class="input" required>
+                <option value="" disabled selected>Select a result</option>
+                <option value="Negative">Negative</option>
+                <option value="Positive">Positive</option>
+              </select>
+              <span v-if="errors.syphilisResult" class="text-red-600 text-sm">{{ errors.syphilisResult }}</span>
+            </div>
+
+            <div>
+              <label class="block">Penicillin Given:</label>
+              <select v-model="form.penicillin" class="input" required>
+                <option value="" disabled selected>Has penicillin been given?</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+              <span v-if="errors.penicillin" class="text-red-600 text-sm">{{ errors.penicillin }}</span>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-between">
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="nextStep" class="btn">Next</button>
+          </div>
+        </div>
+
+
+        <div v-if="step === 5">
+          <!-- Labs Section -->
+          <h2 class="font-bold mt-4">Labs Done On:</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block">Hemoglobin (gm/100ml):</label>
+              <input type="number" v-model="form.hemoglobin" step="0.1" class="input"
+                placeholder="Enter hemoglobin level" required />
+              <span v-if="errors.hemoglobin" class="text-red-600 text-sm">{{ errors.hemoglobin }}</span>
+            </div>
+
+            <div>
+              <label class="block">Hematocrit (vol %):</label>
+              <input type="number" v-model="form.hematocrit" step="0.1" class="input"
+                placeholder="Enter hematocrit level" required />
+              <span v-if="errors.hematocrit" class="text-red-600 text-sm">{{ errors.hematocrit }}</span>
+            </div>
+
+            <div>
+              <label class="block">Urinalysis:</label>
+              <input type="text" v-model="form.urinalysis" class="input" placeholder="Enter urinalysis result" />
+              <span v-if="errors.urinalysis" class="text-red-600 text-sm">{{ errors.urinalysis }}</span>
+            </div>
+            <div>
+              <label class="block">TT Status:</label>
+              <input type="text" v-model="form.ttStatus" class="input" placeholder="Enter TT status" />
+              <span v-if="errors.ttStatus" class="text-red-600 text-sm">{{ errors.ttStatus }}</span>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <label class="block">TD (Date Given):</label>
+            <input type="date" v-model="form.tdDate" class="input" placeholder="Select date given" />
+            <span v-if="errors.tdDate" class="text-red-600 text-sm">{{ errors.tdDate }}</span>
+          </div>
+
+          <div class="mt-6 flex justify-between">
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="nextStep" class="btn">Next</button>
+          </div>
+        </div>
+
+
+        <!-- Step 6: Review Submitted Data -->
+        <div v-if="step === 6">
           <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <!-- Loop through form fields to display data -->
@@ -300,6 +478,9 @@ export default {
       stepTitles: [
         'Patient Information',
         'For CHU/RHU Personnel Only',
+        'Menstrual History',
+        'Prenatal',
+        'Labs Done On:',
         'Review Information'
       ],
       step: 1,
@@ -324,7 +505,28 @@ export default {
         emergencyContact: '',
         fourMember: '',
         philhealthStatus: '',
-        philhealthNo: ''
+        philhealthNo: '',
+        menarche: '',
+        sexualOnset: '',
+        periodDuration: '',
+        birthControl: '',
+        intervalCycle: '',
+        menopause: '',
+        lmp: '',
+        edc: '',
+        gravidity: '',
+        parity: '',
+        term: '',
+        preterm: '',
+        abortion: '',
+        living: '',
+        syphilisResult: '',
+        penicillin: '',
+        hemoglobin: '',
+        hematocrit: '',
+        urinalysis: '',
+        ttStatus: '',
+        tdDate: '',
       },
       errors: {
         emergencyContact: '',
@@ -633,14 +835,116 @@ export default {
       }
       return valid;
     },
+    validateStep3() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.menarche) {
+        this.errors.menarche = 'Menarche is required.';
+        valid = false;
+      }
+      if (!this.form.sexualOnset) {
+        this.errors.sexualOnset = 'Sexual Onset of visit is required.';
+        valid = false;
+      }
+      if (!this.form.periodDuration) {
+        this.errors.periodDuration = 'Period Duration is required.';
+        valid = false;
+      }
+      if (!this.form.birthControl) {
+        this.errors.birthControl = 'Birth Control is required.';
+        valid = false;
+      }
+      if (!this.form.intervalCycle) {
+        this.errors.intervalCycle = 'Interval Cycle is required.';
+        valid = false;
+      }
+      if (!this.form.menopause) {
+        this.errors.menopause = 'Menopause is required.';
+        valid = false;
+      }
+      if (!this.form.lmp) {
+        this.errors.lmp = 'LMP is required.';
+        valid = false;
+      }
+      if (!this.form.edc) {
+        this.errors.edc = 'EDC is required.';
+        valid = false;
+      }
+      return valid;
+    },
+    validateStep4() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.gravidity) {
+        this.errors.gravidity = 'Gravidity is required.';
+        valid = false;
+      }
+      if (!this.form.parity) {
+        this.errors.parity = 'Parity is required.';
+        valid = false;
+      }
+      if (!this.form.term) {
+        this.errors.term = 'Term is required.';
+        valid = false;
+      }
+      if (!this.form.preterm) {
+        this.errors.preterm = 'Pre-Term is required.';
+        valid = false;
+      }
+      if (!this.form.living) {
+        this.errors.living = 'Living is required.';
+        valid = false;
+      }
+      if (!this.form.syphilisResult) {
+        this.errors.syphilisResult = 'Syphilis Result is required.';
+        valid = false;
+      }
+      if (!this.form.penicillin) {
+        this.errors.penicillin = 'Penicillin is required.';
+        valid = false;
+      }
+      return valid;
+    },
+    validateStep5() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.hemoglobin) {
+        this.errors.hemoglobin = 'Hemoglobin is required.';
+        valid = false;
+      }
+      if (!this.form.hematocrit) {
+        this.errors.hematocrit = 'Hematocrit is required.';
+        valid = false;
+      }
+      if (!this.form.urinalysis) {
+        this.errors.urinalysis = 'Urinalysis is required.';
+        valid = false;
+      }
+      if (!this.form.ttStatus) {
+        this.errors.ttStatus = 'TT Status is required.';
+        valid = false;
+      }
+      if (!this.form.tdDate) {
+        this.errors.tdDate = 'TD Date is required.';
+        valid = false;
+      }
+      return valid;
+    },
     nextStep() {
       if (this.step === 1 && this.validateStep1()) {
         this.step++;
       } else if (this.step === 2 && this.validateStep2()) {
         this.step++;
-      }  else if (this.step === 3 && this.validateStep3()) {
-        this.step = 3;;
-      } 
+      } else if (this.step === 3 && this.validateStep3()) {
+        this.step++;
+      } else if (this.step === 4 && this.validateStep4()) {
+        this.step++;
+      } else if (this.step === 5 && this.validateStep5()) {
+        this.step++;
+      }
 
     },
     prevStep() {
@@ -651,7 +955,10 @@ export default {
         // Validate the current step before proceeding
         const isCurrentStepValid =
           (this.step === 1 && this.validateStep1()) ||
-          (this.step === 2 && this.validateStep2());
+          (this.step === 2 && this.validateStep2()) ||
+          (this.step === 3 && this.validateStep3()) ||
+          (this.step === 4 && this.validateStep4()) ||
+          (this.step === 5 && this.validateStep5());
 
         if (!isCurrentStepValid) {
           this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
@@ -687,7 +994,7 @@ export default {
       }
     },
     triggerSubmit() {
-      if (this.validateStep1() && this.validateStep2()) {
+      if (this.validateStep1() && this.validateStep2()&& this.validateStep3() && this.validateStep4() && this.validateStep5()) {
         this.showModal = true; // Show confirmation modal
       } else {
         this.successMessage = 'Please complete all required fields before submitting.';
@@ -718,6 +1025,27 @@ export default {
         fourMember: this.form.fourMember,
         philhealthStatus: this.form.philhealthStatus,
         philhealthNo: this.form.philhealthNo || 'None',
+        menarche: this.form.menarche,
+        sexualOnset: this.form.sexualOnset,
+        periodDuration: this.form.periodDuration,
+        birthControl: this.form.birthControl,
+        intervalCycle: this.form.intervalCycle,
+        menopause: this.form.menopause,
+        lmp: this.form.lmp,
+        edc: this.form.edc,
+        gravidity: this.form.gravidity,
+        parity: this.form.parity,
+        term: this.form.term,
+        preterm: this.form.preterm,
+        abortion: this.form.abortion,
+        living: this.form.living,
+        syphilisResult: this.form.syphilisResult,
+        penicillin: this.form.penicillin,
+        hemoglobin: this.form.hemoglobin,
+        hematocrit: this.form.hematocrit,
+        urinalysis: this.form.urinalysis,
+        ttStatus: this.form.ttStatus,
+        tdDate: this.form.tdDate,
       };
       if (this.selectedPatient?.personalId) {
         // Use existing values for suffix and sex
