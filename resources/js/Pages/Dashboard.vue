@@ -69,7 +69,7 @@ watch(() => props.casesData, (newCasesData) => {
     <div v-if="auth.user.role === 'admin'">
       <p>Admin doctor dashboard content goes here.</p>
     </div>
-    <div v-else-if="auth.user.role === 'staff'">
+    <div v-else-if="auth.user.role === 'personel'">
       <p>Staff dashboard content goes here.</p>
     </div>
     <div v-if="flash.success" class="alert alert-success">
