@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { Chart, PieController, ArcElement, Tooltip, Legend } from "chart.js";
 
 // Register components for Pie Chart

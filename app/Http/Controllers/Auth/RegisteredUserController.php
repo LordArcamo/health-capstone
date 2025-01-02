@@ -36,10 +36,24 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Assign a default role as 'user'
+        $role = 'user';
+
+        // Optionally allow admin creation only for authorized users
+        if ($request->has('role') && $request->role === 'admin') {
+            if (Auth::check() && Auth::user()->role === 'admin') {
+                $role = 'admin';
+            } else {
+                abort(403, 'Unauthorized role assignment.');
+            }
+        }
+
+        // Create the user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $role, // Assign the determined role
         ]);
 
         event(new Registered($user));

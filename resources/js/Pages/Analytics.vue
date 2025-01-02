@@ -138,6 +138,10 @@ watch(() => props.barChart, (newVal) => {
 watch(() => props.pieChart, (newVal) => {
   referredData.value = newVal;
 }, { immediate: true });
+
+watch(() => props.lineChart, (newVal) => {
+  monthlyVaccination.value = newVal.data || Array(12).fill(0);
+}, { immediate: true });
 </script>
 
 <template>

@@ -87,7 +87,7 @@ export default {
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return `${context.label}: ${context.raw} cases`;
+                  return '${context.label}: ${context.raw} cases';
                 }
               }
             }

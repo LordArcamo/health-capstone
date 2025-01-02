@@ -30,16 +30,16 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         return [
-            ...parent::share($request), // Spread parent shares
+            ...parent::share($request),
 
-            // Auth information
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'role' => $request->user()->role, // Include the role
+                ] : null,
             ],
-
-            // // Route information
-            // 'currentRouteName' => $request->route()->getName(),  // Share route name
-            // 'currentRouteParams' => $request->route()->parameters(),  // Share route parameters
         ];
     }
 }

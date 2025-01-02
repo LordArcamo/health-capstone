@@ -310,16 +310,50 @@ class SystemAnalyticsController extends Controller
         ];
     }
 
-    private function getVaccinationStatistics()
+    private function getVaccinationStatistics($request)
     {
         $monthlyVaccinations = [];
         $currentYear = date('Y');
     
         for ($month = 1; $month <= 12; $month++) {
-            $count = VaccinationRecord::whereYear('dateOfVisit', $currentYear)
-                ->whereMonth('dateOfVisit', $month)
-                ->count();
-            $monthlyVaccinations[] = $count;
+            $query = VaccinationRecord::whereYear('dateOfVisit', $currentYear)
+                ->whereMonth('dateOfVisit', $month);
+
+            if ($request->gender) {
+                $query->whereHas('patient', function($q) use ($request) {
+                    $q->where('sex', $request->gender);
+                });
+            }
+
+            if ($request->date) {
+                switch ($request->date) {
+                    case '7days':
+                        $query->where('dateOfVisit', '>=', now()->subDays(7))
+                              ->where('dateOfVisit', '<=', now());
+                        break;
+                    case '30days':
+                        $query->where('dateOfVisit', '>=', now()->subDays(30))
+                              ->where('dateOfVisit', '<=', now());
+                        break;
+                    case 'year':
+                        $query->whereYear('dateOfVisit', now()->year);
+                        break;
+                }
+            }
+
+            if ($request->ageRange) {
+                $query->whereHas('patient', function($q) use ($request) {
+                    $ages = explode('-', $request->ageRange);
+                    if (count($ages) === 2) {
+                        $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+                          ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+                    } else {
+                        $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+                    }
+                });
+            }
+
+            $monthlyVaccinations[] = $query->count();
         }
     
         return $monthlyVaccinations;
