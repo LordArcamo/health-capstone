@@ -1,6 +1,6 @@
 <script setup> 
 import ItrInfo from '@/Components/Info/ItrInfo.vue';
-import NewLayout from '@/Layouts/NewLayout.vue';
+import NewLayout from '@/Layouts/PersonnelLayout.vue';
 import { Head } from '@inertiajs/vue3';
 </script>
 

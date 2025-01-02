@@ -1,7 +1,7 @@
 <script setup> 
 
 import EpiInfo from '@/Components/Info/EpiInfo.vue';
-import NewLayout from '@/Layouts/NewLayout.vue';
+import NewLayout from '@/Layouts/PersonnelLayout.vue';
 import { Head } from '@inertiajs/vue3';
 </script>
 
