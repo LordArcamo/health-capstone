@@ -130,7 +130,7 @@ const applyFilters = () => {
           Toggle Filters
         </button>
       </div>
-      <div v-if="showFilters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div v-if="showFilters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-2">Date Range</label>
           <select
@@ -167,23 +167,11 @@ const applyFilters = () => {
             </option>
           </select>
         </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Cases Type</label>
-          <select
-            v-model="filters.casesType"
-            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="" disabled>Select Cases Type</option>
-            <option v-for="type in casesTypes" :key="type.value" :value="type.value">
-              {{ type.label }}
-            </option>
-          </select>
-        </div>
       </div>
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
       <div class="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-lg shadow-lg">
         <h2 class="text-lg font-bold text-gray-700">Total Patients</h2>
         <p class="text-2xl font-semibold">{{ totalPatients }}</p>
@@ -195,10 +183,6 @@ const applyFilters = () => {
       <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 p-6 rounded-lg shadow-lg">
         <h2 class="text-lg font-bold text-gray-700">Mental Health Cases</h2>
         <p class="text-2xl font-semibold">{{ cases }}</p>
-      </div>
-      <div class="bg-gradient-to-br from-red-100 to-red-300 p-6 rounded-lg shadow-lg">
-        <h2 class="text-lg font-bold text-gray-700">High-Risk Cases</h2>
-        <p class="text-2xl font-semibold">{{ risk }}</p>
       </div>
     </div>
 
