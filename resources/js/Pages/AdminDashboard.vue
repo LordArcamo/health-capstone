@@ -1,5 +1,5 @@
 <script setup>
-import NewLayout from '@/Layouts/AdminLayout.vue';
+import MainLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref, onMounted, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
@@ -60,7 +60,7 @@ watch(() => props.casesData, (newCasesData) => {
 <template>
   <Head title="Initao RHU Dashboard" />
 
-  <NewLayout>
+  <MainLayout>
     <div class="overflow-y-auto w-full min-h-screen bg-gray-50">
       <!-- Branding Section -->
       <div class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-10 py-6 text-white shadow-md">
@@ -127,7 +127,7 @@ watch(() => props.casesData, (newCasesData) => {
         </div>
       </div>
     </div>
-  </NewLayout>
+  </MainLayout>
 </template>
 
 <style scoped>
