@@ -1,43 +1,48 @@
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { computed, ref, onMounted, watch } from 'vue';
-import { Link } from '@inertiajs/vue3';
-
-import ShortBox from '@/Components/ShortBox.vue';
-import DateCard from '@/Components/DateCard.vue';
-import DiseaseCard from '@/Components/DiseaseCard.vue';
-import DonutChart from '@/Components/DonutChart.vue';
-import PatientChart from '@/Components/PatientChart.vue';
-import Logo from "@/Images/RHU Logo.png";
-
+import { Head, router } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
+import Chart from 'chart.js/auto';
 
 // Props from backend
 const props = defineProps({
   totalPatients: Number,
-  patients: Array,
-  casesData: [Array, Object],
-  nonReferredData: { type: Array, default: () => [] },
+  patientsInQueue: Array,
+  latestPatients: Array,
+  todayAppointments: Number,
+  criticalCases: Number,
+  notifications: Array,
 });
 
 // Reactive states
 const totalPatients = ref(props.totalPatients || 0);
-const referredPatients = ref(0);
-const patients = ref(props.patients || []);
-const casesData = ref([]);
+const patientsInQueue = ref(props.patientsInQueue || []);
+const latestPatients = ref(props.latestPatients || []);
+const todayAppointments = ref(props.todayAppointments || 0);
+const criticalCases = ref(props.criticalCases || 0);
+const notifications = ref(props.notifications || []);
+const searchQueue = ref('');
+const showNotifications = ref(false);
 
-// Normalized cases data
-const normalizedCasesData = computed(() => {
-  if (Array.isArray(props.casesData)) return props.casesData;
-  if (typeof props.casesData === 'object') return Object.values(props.casesData);
-  return [];
+// Computed property for filtered patients in queue
+const filteredPatientsInQueue = computed(() => {
+  if (!searchQueue.value) return patientsInQueue.value;
+  return patientsInQueue.value.filter((patient) =>
+    patient.name.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
+    patient.reason.toLowerCase().includes(searchQueue.value.toLowerCase())
+  );
 });
 
-// Update stats from DateCard
-const updateStats = (stats) => {
-  totalPatients.value = stats.totalPatients || 0;
-  referredPatients.value = stats.referredPatients || 0;
-  casesData.value = stats.diseaseCounts || [];
+// Navigate to the checkup page
+const startCheckup = (patient) => {
+  if (patient?.id) {
+    router.visit(`/doctor-checkup/${patient.id}`, {
+      method: 'get',
+      onSuccess: () => console.log(`Navigated to checkup page for ${patient.name}`),
+    });
+  } else {
+    console.warn('Invalid patient data: Missing patient ID.');
+  }
 };
 
 // Dynamic date
@@ -46,95 +51,226 @@ const updateDate = () => {
   const options = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Manila' };
   currentDate.value = new Date().toLocaleDateString('en-PH', options);
 };
+// Initialize Charts
+const initCharts = () => {
+  // Patient Demographics (Bar Chart)
+  const demographicsCtx = document.getElementById('demographicsChart').getContext('2d');
+  new Chart(demographicsCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Male', 'Female', 'Other'],
+      datasets: [
+        {
+          label: 'Number of Patients',
+          data: [50, 70, 10], // Replace with actual data
+          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726'],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      },
+    },
+  });
+
+  // Appointments Overview (Line Chart)
+  const appointmentsCtx = document.getElementById('appointmentsChart').getContext('2d');
+  new Chart(appointmentsCtx, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Replace with actual months
+      datasets: [
+        {
+          label: 'Appointments',
+          data: [30, 50, 70, 60, 90], // Replace with actual data
+          borderColor: '#42A5F5',
+          backgroundColor: 'rgba(66, 165, 245, 0.2)',
+          borderWidth: 2,
+          tension: 0.3, // Smooth curve
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      },
+    },
+  });
+};
 
 onMounted(() => {
   updateDate();
   setInterval(updateDate, 1000);
-});
-
-watch(() => props.casesData, (newCasesData) => {
-  casesData.value = newCasesData || [];
+  initCharts();
 });
 </script>
-
 <template>
   <Head title="Initao RHU Dashboard" />
 
   <MainLayout>
-    <div class="overflow-y-auto w-full min-h-screen bg-gray-50">
+    <div class="relative overflow-y-auto w-full min-h-screen bg-gray-50">
       <!-- Branding Section -->
-      <div class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-10 py-6 text-white shadow-md">
+      <div class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-8 py-6 text-white shadow-md rounded-b-xl">
         <div>
-          <h1 class="text-2xl font-bold">Initao RHU Dashboard</h1>
-          <p class="text-sm">Welcome to the Rural Health Unit of Initao, empowering community health with data-driven insights.</p>
+          <h1 class="text-3xl font-semibold">Initao RHU Dashboard</h1>
+          <p class="text-lg">Empowering community health with data-driven insights.</p>
         </div>
-        <!-- <img :src="Logo" alt="Initao RHU Logo" class="h-16"> -->
+        <div class="text-right">
+          <p class="text-lg font-semibold">Date: {{ currentDate }}</p>
+        </div>
       </div>
 
       <!-- Stats Section -->
-   <!-- Stats Section -->
-<div class="w-full gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
-  <!-- Total Patients -->
-  <ShortBox class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-md transition-shadow">
-    <div class="flex flex-col items-start gap-2">
-      <div class="flex justify-between w-full">
-        <h2 class="font-bold text-lg">Total Patients</h2>
-        <Link href="/services/patients" class="bg-green-500 text-white rounded px-3 py-1 shadow hover:opacity-90">
-          View
-        </Link>
-      </div>
-      <div class="flex items-center">
-        <font-awesome-icon :icon="['fas', 'user']" class="mr-2 text-lg text-green-600" />
-        <p class="text-2xl font-semibold">{{ totalPatients }}</p>
-      </div>
-    </div>
-  </ShortBox>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-10 px-8">
+        <!-- Total Patients -->
+        <div class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-lg p-6 rounded-xl shadow-md">
+          <h2 class="font-semibold text-lg">Total Patients Checked Up</h2>
+          <p class="text-3xl font-bold">{{ totalPatients }}</p>
+        </div>
 
-  <!-- Date Card -->
-  <DateCard class="z-30" :patients="patients" @updateStats="updateStats" />
+        <!-- Patients in Queue -->
+        <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-lg p-6 rounded-xl shadow-md">
+          <h2 class="font-semibold text-lg">Patients in Queue</h2>
+          <p class="text-3xl font-bold">{{ patientsInQueue.length }}</p>
+        </div>
 
-  <!-- Referred Patients -->
-  <ShortBox class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-md transition-shadow">
-    <div class="flex flex-col items-start gap-2">
-      <div class="flex justify-between w-full">
-        <h2 class="font-bold text-lg">Referred Patients</h2>
-        <Link href="/services/patients/referred" class="bg-blue-500 text-white rounded px-3 py-1 shadow hover:opacity-90">
-          View
-        </Link>
+        <!-- Today's Appointments -->
+        <div class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-lg p-6 rounded-xl shadow-md">
+          <h2 class="font-semibold text-lg">Today's Appointments</h2>
+          <p class="text-3xl font-bold">{{ todayAppointments }}</p>
+        </div>
+
+        <!-- Critical Cases -->
+        <div class="bg-gradient-to-br from-red-100 to-red-300 text-red-800 hover:shadow-lg p-6 rounded-xl shadow-md">
+          <h2 class="font-semibold text-lg">Critical Cases</h2>
+          <p class="text-3xl font-bold">{{ criticalCases }}</p>
+        </div>
       </div>
-      <div class="flex items-center">
-        <font-awesome-icon :icon="['fas', 'user']" class="mr-2 text-lg text-blue-600" />
-        <p class="text-2xl font-semibold">{{ referredPatients }}</p>
+
+      <!-- Patients Section -->
+      <div class="px-8 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Patients in Queue -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Patients in Queue</h2>
+            <input
+              type="text"
+              v-model="searchQueue"
+              placeholder="Search for a patient..."
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4"
+            />
+            <div v-if="filteredPatientsInQueue.length" class="space-y-4">
+              <div
+                v-for="(patient, index) in filteredPatientsInQueue"
+                :key="index"
+                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition"
+              >
+                <h3 class="text-lg font-semibold text-gray-700">{{ patient.name }}</h3>
+                <p class="text-sm text-gray-500">Age: {{ patient.age }}</p>
+                <p class="text-sm text-gray-500">Reason: {{ patient.reason }}</p>
+                <button
+                  @click="startCheckup(patient)"
+                  class="mt-3 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600"
+                >
+                  Start Checkup
+                </button>
+              </div>
+            </div>
+            <p v-else class="text-center text-gray-500">No patients in queue.</p>
+          </div>
+
+          <!-- Latest Patients -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Latest Patients</h2>
+            <div class="space-y-4">
+              <div
+                v-for="(patient, index) in latestPatients"
+                :key="index"
+                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition"
+              >
+                <h3 class="text-lg font-semibold text-gray-700">{{ patient.name }}</h3>
+                <p class="text-sm text-gray-500">Checked In: {{ patient.checkInTime }}</p>
+                <p class="text-sm text-gray-500">Diagnosis: {{ patient.diagnosis }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </ShortBox>
-
-  <!-- Disease Distribution -->
-  <DiseaseCard  class="z-30" :casesData="normalizedCasesData" />
-</div>
-
 
       <!-- Charts Section -->
-      <div class="flex flex-wrap lg:flex-nowrap gap-8 px-10">
-         <!-- Patient Chart -->
-         <div class="flex-1 z-0 bg-white rounded p-6 shadow hover:shadow-lg transition-shadow border-l-4 border-green-500">
-          <PatientChart :nonReferredData="nonReferredData" />
-        </div>
+      <div class="px-8 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Patient Demographics</h2>
+            <canvas id="demographicsChart"></canvas>
+          </div>
 
-        <!-- Donut Chart -->
-        <div class="w-full lg:w-1/3 bg-white rounded p-6 shadow hover:shadow-lg transition-shadow border-l-4 border-blue-500">
-          <DonutChart :nonReferredData="nonReferredData" />
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Appointments Overview</h2>
+            <canvas id="appointmentsChart"></canvas>
+          </div>
         </div>
+      </div>
+
+      <!-- Notifications Section -->
+      <button
+        class="fixed bottom-4 right-4 bg-yellow-500 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-yellow-600"
+        @click="showNotifications = !showNotifications"
+      >
+        Notifications ({{ notifications.length }})
+      </button>
+      <div
+        v-if="showNotifications"
+        class="fixed top-16 right-4 bg-white shadow-xl rounded-lg w-80 overflow-y-auto max-h-96"
+      >
+        <h2 class="font-bold text-lg bg-yellow-500 text-white p-4">Notifications</h2>
+        <ul>
+          <li
+            v-for="(notification, index) in notifications"
+            :key="index"
+            class="p-4 border-b hover:bg-gray-100 transition"
+          >
+            {{ notification.message }}
+          </li>
+        </ul>
       </div>
     </div>
   </MainLayout>
 </template>
-
 <style scoped>
-.avatar-icon {
-  font-size: 24px;
-}
-
 .bg-gradient-to-r {
   background: linear-gradient(to right, var(--tw-gradient-stops));
 }

@@ -83,7 +83,12 @@ onBeforeUnmount(() => {
           </NavLink>
 
           <!-- Checkup Link (Visible for Doctors) -->
-          <NavLink v-if="role === 'doctor'" href="/checkup" :active="false">
+          <NavLink  v-if="role === 'staff'" href="/checkup" :active="false">
+            <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-2" />
+            Checkup
+          </NavLink>
+
+          <NavLink v-if="role === 'doctor'" href="/doctor-checkup" :active="false">
             <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-2" />
             Checkup
           </NavLink>
