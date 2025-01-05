@@ -472,13 +472,8 @@ export default {
         temperature: '',
         height: '',
         weight: '',
-        providerName: '',
         natureOfVisit: '',
         visitType: '',
-        session: '',
-        chiefComplaints: '',
-        diagnosis: '',
-        medication: '',
         referredFrom: '',
         referredTo: '',
         reasonsForReferral: '',
@@ -812,6 +807,7 @@ export default {
     confirmSubmit() {
   const payload = {
     personalId: this.selectedPatient?.personalId || null,
+    id: this.id,
     firstName: this.form.firstName,
     lastName: this.form.lastName,
     middleName: this.form.middleName,

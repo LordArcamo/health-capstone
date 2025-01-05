@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\VaccineAppointment;
-use App\Models\VaccinationRecord;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class VaccineAppointmentController extends Controller
@@ -38,27 +36,41 @@ class VaccineAppointmentController extends Controller
      */
     public function store(Request $request)
     {
+        // Log incoming request
+        \Log::info('Incoming appointment request:', $request->all());
+
+        // Validate the request data
         $validatedData = $request->validate([
             'vaccinationId' => 'required|exists:vaccination_records,vaccinationId',
-            'appointmentDate' => 'required|date|after_or_equal:today',
-            'vaccineType' => 'required|string',
-            'notes' => 'nullable|string',
+            'dateOfVisit' => 'required|date',
+            'weight' => 'required|numeric|min:0',
+            'height' => 'required|numeric|min:0',
+            'temperature' => 'required|numeric|between:35,42',
+            'antigenGiven' => 'required|string',
+            'injectedBy' => 'required|string',
+            'nextAppointment' => 'required|date|after:dateOfVisit',
+            'exclusivelyBreastfed' => 'required|in:Yes,No,None',
         ]);
 
         try {
-            $appointment = VaccineAppointment::create([
-                'vaccinationId' => $validatedData['vaccinationId'],
-                'appointmentDate' => $validatedData['appointmentDate'],
-                'vaccineType' => $validatedData['vaccineType'],
-                'notes' => $validatedData['notes'] ?? null,
-                'status' => 'scheduled'
+            // Create and save the appointment
+            VaccineAppointment::create($validatedData);
+
+            // Log success
+            \Log::info('Appointment saved successfully', ['data' => $validatedData]);
+
+            // Redirect to the vaccination services page with a success message
+            return redirect()->with('success', 'Appointment scheduled successfully');
+        } catch (\Exception $e) {
+            // Log any unexpected errors
+            \Log::error('Failed to schedule appointment', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->back()->with('success', 'Appointment scheduled successfully');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to schedule appointment: ' . $e->getMessage());
         }
     }
+
 
     /**
      * Update appointment status.
@@ -88,24 +100,64 @@ class VaccineAppointmentController extends Controller
     {
         try {
             $appointments = VaccineAppointment::where('vaccinationId', $id)
-                ->orderBy('appointmentDate', 'desc')
+                ->orderBy('dateOfVisit', 'desc')
                 ->get()
                 ->map(function ($appointment) {
                     return [
                         'vacAppointmentId' => $appointment->vacAppointmentId,
-                        'appointmentDate' => $appointment->appointmentDate,
-                        'status' => $appointment->status,
-                        'notes' => $appointment->notes,
-                        'vaccineType' => $appointment->vaccineType
+                        'dateOfVisit' => $appointment->dateOfVisit,
+                        'weight' => $appointment->weight,
+                        'height' => $appointment->height,
+                        'temperature' => $appointment->temperature,
+                        'antigenGiven' => $appointment->antigenGiven,
+                        'injectedBy' => $appointment->injectedBy,
+                        'exclusivelyBreastfed' => $appointment->exclusivelyBreastfed,
+                        'nextAppointment' => $appointment->nextAppointment
                     ];
                 });
 
             return response()->json([
+                'success' => true,
                 'appointments' => $appointments
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to fetch appointments'
+                'success' => false,
+                'message' => 'Failed to fetch appointments: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get appointments history for a specific vaccination record
+     */
+    public function getHistory($vaccinationId)
+    {
+        try {
+            $appointments = VaccineAppointment::where('vaccinationId', $vaccinationId)
+                ->orderBy('dateOfVisit', 'desc')
+                ->get()
+                ->map(function ($appointment) {
+                    return [
+                        'vacAppointmentId' => $appointment->vacAppointmentId,
+                        'dateOfVisit' => $appointment->dateOfVisit,
+                        'weight' => $appointment->weight,
+                        'height' => $appointment->height,
+                        'temperature' => $appointment->temperature,
+                        'antigenGiven' => $appointment->antigenGiven,
+                        'injectedBy' => $appointment->injectedBy,
+                        'exclusivelyBreastfed' => $appointment->exclusivelyBreastfed,
+                        'nextAppointment' => $appointment->nextAppointment
+                    ];
+                });
+
+            return response()->json([
+                'history' => $appointments
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to fetch appointment history',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

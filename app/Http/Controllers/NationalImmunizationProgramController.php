@@ -152,6 +152,7 @@ class NationalImmunizationProgramController extends Controller
         $validatedData = $request->validate([
             // Personal Information
             'personalId' => 'nullable|exists:personal_information,personalId',
+            'id' => 'nullable|exists:users,id',
             'firstName' => 'required_without:personalId|string|max:100',
             'lastName' => 'required_without:personalId|string|max:100',
             'middleName' => 'nullable|string|max:100',
@@ -182,6 +183,12 @@ class NationalImmunizationProgramController extends Controller
             'place' => 'required|string|max:100',
             'guardian' => 'required|string|max:100',
         ]);
+
+        $userId = auth()->id() ?? $validatedData['id'];
+
+        if (!$userId) {
+            return back()->withErrors(['error' => 'User ID is required.']);
+        }
 
         $personalInfo = null;
 
@@ -224,7 +231,8 @@ class NationalImmunizationProgramController extends Controller
 
         // Save the immunization data
         NationalImmunizationProgram::create([
-            'personalId' => $personalInfo->personalId, // Link to personal information record
+            'personalId' => $personalInfo->personalId,
+            'id' => $userId,
             'birthplace' => $validatedData['birthplace'],
             'bloodtype' => $validatedData['bloodtype'],
             'mothername' => $validatedData['mothername'],

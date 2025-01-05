@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('vaccination_records', function (Blueprint $table) {
             $table->bigIncrements('vaccinationId');
             $table->unsignedBigInteger('personalId');
+            $table->unsignedBigInteger('id');
             $table->string('vaccineCategory', 50);  // Limited to 50 chars
             $table->string('vaccineType', 100);     // Limited to 100 chars
             $table->date('dateOfVisit');
@@ -32,6 +33,11 @@ return new class extends Migration
             $table->foreign('personalId')
                   ->references('personalId')
                   ->on('personal_information')
+                  ->onDelete('cascade');
+            
+            $table->foreign('id')
+                  ->references('id')
+                  ->on('users')
                   ->onDelete('cascade');
 
             // Indexes for better query performance

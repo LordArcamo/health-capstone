@@ -17,7 +17,7 @@ export default {
       default: () => [],
     },
   },
-  
+
   components: {
     VaccinationModal,
     ScheduleNextAppointmentModal,
@@ -126,7 +126,7 @@ export default {
     openScheduleModal(patient) {
       this.activePatient = patient;
       this.showScheduleModal = true;
-      
+
       // Fetch existing appointments for this vaccination
       axios.get(`/api/appointments/vaccination/${patient.vaccinationId}`)
         .then(response => {
@@ -327,18 +327,18 @@ export default {
       :key="modalKey"
       @close="closeVaccinationModal"
     />
-    <ScheduleNextAppointmentModal 
-      v-if="showScheduleModal" 
-      :patient="activePatient" 
+    <ScheduleNextAppointmentModal
+      v-if="showScheduleModal"
+      :patient="activePatient"
       :vaccinationId="activePatient?.vaccinationId"
       @close="closeAllModals"
-      @schedule="scheduleAppointment" 
+      @schedule="scheduleAppointment"
     />
-    <ViewHistoryModal 
-      v-if="showHistoryModal" 
-      :patient="activePatient" 
-      :history="activePatientHistory" 
-      @close="closeAllModals" 
+    <ViewHistoryModal
+      v-if="showHistoryModal"
+      :patient="activePatient"
+      :history="activePatientHistory"
+      @close="closeAllModals"
     />
 
           <!-- Pagination -->

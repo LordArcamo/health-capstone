@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Postpartum;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PostpartumController extends Controller
 {
@@ -38,27 +40,73 @@ class PostpartumController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'prenatalId' => 'required|exists:prenatal,prenatalId',
-            'lastName' => 'required|string|max:100',
-            'firstName' => 'required|string|max:100',
-            'middleName' => 'required|string|max:100',
-            'sex' => 'required|in:M,F',
-            'birthLength' => 'required|numeric|between:0,500',
-            'birthWeight' => 'required|numeric|between:0,100',
-            'deliveryDate' => 'required|date',
-            'deliveryTime' => 'required|date_format:H:i',
-            'dateInitiatedBreastfeeding' => 'required|date',
-            'timeInitiatedBreastfeeding' => 'required|date_format:H:i',
-            'dateVitaminA' => 'required|date',
-            'dangerSignsMother' => 'required|string|max:100',
-        ]);
-
         try {
+            // Add the authenticated user's ID to the request
+            $requestData = $request->all();
+            $requestData['id'] = auth()->id();
+            
+            $validatedData = validator($requestData, [
+                'prenatalId' => 'nullable|exists:prenatal,prenatalId',
+                'id' => 'required|exists:users,id',
+                'lastName' => 'required|string|max:100',
+                'firstName' => 'required|string|max:100',
+                'middleName' => 'required|string|max:100',
+                'sex' => 'required|string|max:10',
+                'prenatalDelivered' => 'required|string|max:100',
+                'placeDelivered' => 'required|string|max:100',
+                'modeOfDelivery' => 'required|string|max:100',
+                'birthLength' => 'required|numeric|between:0,500',
+                'birthWeight' => 'required|numeric|between:0,100',
+                'deliveryDate' => 'required|date',
+                'deliveryTime' => 'required|date_format:H:i',
+                'attendantBirth' => 'required|string|max:100',
+                'dateInitiatedBreastfeeding' => 'required|date',
+                'timeInitiatedBreastfeeding' => 'required|date_format:H:i',
+                'dateOfPostpartumVisitTwentyFourHoursDelivery' => 'required|date',
+                'dateOfPostpartumVisitOneWeekDelivery' => 'required|date',
+                'dateVitaminA' => 'required|date',
+                'dateIronGiven' => 'required|date',
+                'noIronGiven' => 'required|numeric|between:0,100',
+                'dangerSignsMother' => 'required|string|max:100',
+                'dangerSignsBaby' => 'required|string|max:100',
+            ])->validate();
+
+            DB::beginTransaction();
+            
+            // Log incoming data for debugging
+            Log::info('Creating postpartum record with data:', array_merge(
+                ['user_id' => auth()->id()],
+                collect($validatedData)->except(['password'])->toArray()
+            ));
+
             $postpartum = Postpartum::create($validatedData);
-            return back()->with('Success', 'Data saved successfully!');
+
+            DB::commit();
+
+            Log::info('Successfully created postpartum record', [
+                'postpartum_id' => $postpartum->postpartumId,
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()->back()->with('success', 'Postpartum record created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Validation failed for postpartum data', [
+                'errors' => $e->errors(),
+                'user_id' => auth()->id()
+            ]);
+            throw $e;
         } catch (\Exception $e) {
-            return back()->with('Error', 'Failed to save data.');
+            DB::rollBack();
+
+            Log::error('Failed to create postpartum record', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to save postpartum data. ' . $e->getMessage()
+            ]);
         }
     }
 

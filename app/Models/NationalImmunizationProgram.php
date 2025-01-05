@@ -22,6 +22,7 @@ class NationalImmunizationProgram extends Model
 
     protected $fillable = [
         'personalId',
+        'id',
         'birthplace',
         'bloodtype',
         'mothername',
@@ -48,6 +49,11 @@ class NationalImmunizationProgram extends Model
      */
     public function personalInformation()
     {
-        return $this->belongsTo(PersonalInformation::class, 'personalId', 'personalId');
+        return $this->belongsTo(PersonalInformation::class, 'personalId');
+    }
+
+    public function users()
+    {
+        return $this->belongsTo(User::class, 'id');
     }
 }

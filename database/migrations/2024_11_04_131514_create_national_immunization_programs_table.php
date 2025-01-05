@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('national_immunization_programs', function (Blueprint $table) {
             $table->bigIncrements('immunizationId'); 
             $table->unsignedBigInteger('personalId'); // Foreign key column
+            $table->unsignedBigInteger('id');
             $table->string('birthplace', 100);
             $table->string('bloodtype', 5);
             $table->string('mothername', 100);
@@ -35,6 +36,7 @@ return new class extends Migration
 
             // Setting up the foreign key constraint
             $table->foreign('personalId')->references('personalId')->on('personal_information')->onDelete('cascade');
+            $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

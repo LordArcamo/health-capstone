@@ -16,13 +16,22 @@ class VaccineAppointment extends Model
 
     protected $fillable = [
         'vaccinationId',
-        'appointmentDate',
-        'status',
-        'notes'
+        'dateOfVisit',
+        'weight',
+        'height',
+        'temperature',
+        'antigenGiven',
+        'injectedBy',
+        'nextAppointment',
+        'exclusivelyBreastfed'
     ];
 
     protected $casts = [
-        'appointmentDate' => 'datetime',
+        'dateOfVisit' => 'date',
+        'nextAppointment' => 'date',
+        'weight' => 'decimal:2',
+        'height' => 'decimal:2',
+        'temperature' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

@@ -88,7 +88,7 @@
               Exclusively Breastfed
             </label>
             <select v-model="form.exclusivelyBreastfed" id="exclusivelyBreastfed" class="input">
-              <option disabled value="">Select</option>
+              <option value="None">None</option>
               <option value="Yes">Yes</option>
               <option value="No">No</option>
             </select>
@@ -139,7 +139,6 @@
 
 
 <script>
-import { ref, computed } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 
 export default {
@@ -148,64 +147,17 @@ export default {
       type: Object,
       required: true,
     },
+    vaccinationId: {
+      type: [Number, String],
+      required: true,
+    },
   },
-  emits: ['close'],
-  setup(props, { emit }) {
-    const form = ref({
-      vaccineCategory: props.patient.vaccineCategory || '',
-      vaccineType: props.patient.vaccineType || '',
-      dateOfVisit: '',
-      weight: '',
-      height: '',
-      temperature: '',
-      antigenGiven: '',
-      injectedBy: '',
-      nextAppointment: '',
-      exclusivelyBreastfed: '',
-    });
-
-    const errors = ref({});
-    const loading = ref(false);
-
-    const isUnderOneYear = computed(() => {
-      return form.value.vaccineCategory === 'Under 1 Year';
-    });
-
-    const ageInMonths = computed(() => {
-      if (!props.patient.birthdate) return "N/A";
-      const birthdate = new Date(props.patient.birthdate);
-      const currentDate = new Date();
-
-      const months =
-        (currentDate.getFullYear() - birthdate.getFullYear()) * 12 +
-        currentDate.getMonth() -
-        birthdate.getMonth();
-
-      return months >= 0 ? months : "Invalid date";
-    });
-
-    const ageInInput = computed(() => (isUnderOneYear.value ? ageInMonths.value : Math.floor(ageInMonths.value / 12)));
-
-    const handleSchedule = async () => {
-      loading.value = true;
-      errors.value = {};
-
-      try {
-        await Inertia.post('/appointments/store', form.value);
-        alert('Appointment saved successfully!');
-        closeModal();
-      } catch (error) {
-        console.error(error);
-        errors.value = error.response?.data?.errors || {};
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const closeModal = () => {
-      form.value = {
-        vaccineCategory: props.patient.vaccineCategory || '',
-        vaccineType: props.patient.vaccineType || '',
+  data() {
+    return {
+      form: {
+        vaccinationId: this.vaccinationId,
+        vaccineCategory: this.patient.vaccineCategory || '',
+        vaccineType: this.patient.vaccineType || '',
         dateOfVisit: '',
         weight: '',
         height: '',
@@ -213,25 +165,105 @@ export default {
         antigenGiven: '',
         injectedBy: '',
         nextAppointment: '',
-        exclusivelyBreastfed: '',
-      };
-      emit('close');
-    };
-
-    return {
-      form,
-      errors,
-      loading,
-      handleSchedule,
-      isUnderOneYear,
-      ageInMonths,
-      ageInInput,
-      closeModal,
+        exclusivelyBreastfed: 'None',
+      },
+      errors: {},
+      loading: false,
     };
   },
-};
+  computed: {
+    isUnderOneYear() {
+      return this.form.vaccineCategory === 'Under 1 Year';
+    },
+    ageInMonths() {
+      if (!this.patient.birthdate) return 'N/A';
+      const birthdate = new Date(this.patient.birthdate);
+      const currentDate = new Date();
+      const months =
+        (currentDate.getFullYear() - birthdate.getFullYear()) * 12 +
+        currentDate.getMonth() -
+        birthdate.getMonth();
+      return months >= 0 ? months : 'Invalid date';
+    },
+    ageInInput() {
+      return this.isUnderOneYear
+        ? this.ageInMonths
+        : Math.floor(this.ageInMonths / 12);
+    },
+  },
+  methods: {
+    resetForm() {
+      this.form = {
+        vaccinationId: this.vaccinationId,
+        vaccineCategory: this.patient.vaccineCategory || '',
+        vaccineType: this.patient.vaccineType || '',
+        dateOfVisit: '',
+        weight: '',
+        height: '',
+        temperature: '',
+        antigenGiven: '',
+        injectedBy: '',
+        nextAppointment: '',
+        exclusivelyBreastfed: 'None',
+      };
+      this.errors = {};
+    },
+    async handleSchedule() {
+      this.loading = true;
+      this.errors = {};
 
+      try {
+        // Convert form values to appropriate types
+        const formData = {
+          vaccinationId: parseInt(this.form.vaccinationId),
+          dateOfVisit: this.form.dateOfVisit,
+          weight: parseFloat(this.form.weight),
+          height: parseFloat(this.form.height),
+          temperature: parseFloat(this.form.temperature),
+          antigenGiven: this.form.antigenGiven,
+          injectedBy: this.form.injectedBy,
+          nextAppointment: this.form.nextAppointment,
+          exclusivelyBreastfed: this.form.exclusivelyBreastfed || 'None'
+        };
+
+        console.log('Sending appointment data:', formData);
+
+        await Inertia.post('/appointments/store', formData, {
+          onSuccess: (page) => {
+            if (page.props.flash.success) {
+              alert('Appointment saved successfully!');
+              this.resetForm();
+              this.$emit('close');
+            } else if (page.props.flash.error) {
+              this.errors = { general: page.props.flash.error };
+            }
+          },
+          onError: (errors) => {
+            console.error('Validation errors:', errors);
+            this.errors = errors;
+          },
+          preserveState: true,
+          preserveScroll: true
+        });
+      } catch (error) {
+        console.error('Error saving appointment:', error);
+        this.errors = { general: 'Failed to save appointment' };
+      } finally {
+        this.loading = false;
+      }
+    },
+    closeModal() {
+      this.resetForm();
+      this.$emit('close');
+    },
+  },
+  mounted() {
+    console.log('Component mounted with patient:', this.patient);
+    console.log('Vaccination ID:', this.vaccinationId);
+  },
+};
 </script>
+
 
 <style>
 .input {

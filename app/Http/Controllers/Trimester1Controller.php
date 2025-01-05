@@ -53,6 +53,7 @@ class Trimester1Controller extends Controller
         // Validate request data
         $validatedData = $request->validate([
             'prenatalId' => 'required|exists:prenatal,prenatalId',
+            'id' => 'nullable|exists:users,id',
             'date_of_visit' => 'required|date',
             'weight' => 'required|numeric',
             'bp' => 'required|string|max:20',
@@ -78,9 +79,16 @@ class Trimester1Controller extends Controller
             'fundal_height' => 'nullable|string|max:50',
         ]);
 
+        $userId = auth()->id() ?? $validatedData['id'];
+
+        if (!$userId) {
+            return back()->withErrors(['error' => 'User ID is required.']);
+        }
+
         // Split validated data for GeneralTrimester
         $generalTrimesterData = [
             'prenatalId' => $validatedData['prenatalId'],
+            'id' => $userId,
             'date_of_visit' => $validatedData['date_of_visit'],
             'weight' => $validatedData['weight'],
             'bp' => $validatedData['bp'],

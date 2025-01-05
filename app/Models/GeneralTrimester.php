@@ -23,6 +23,7 @@ class GeneralTrimester extends Model
     // Define the fillable fields for mass assignment
     protected $fillable = [
         'prenatalId',
+        'id', // Foreign key for users table
         'date_of_visit',
         'weight',
         'bp',
@@ -50,5 +51,10 @@ class GeneralTrimester extends Model
     public function checkbox3()
     {
         return $this->hasOne(Checkbox3::class, 'generalTrimesterID', 'generalTrimesterID');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id', 'id');
     }
 }
