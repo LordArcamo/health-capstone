@@ -1,30 +1,33 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
-import { usePage } from "@inertiajs/vue3";
 import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import Logo from "@/Images/RHU Logo.png";
 
-// State for dropdown visibility
+defineProps({
+  role: {
+    type: String,
+    required: true, // Ensure role is always passed
+  },
+});
+
+// Dropdown state management
 const showingNavigationDropdown = ref(false);
 const patientsDropdownOpen = ref(false);
-const profileDropdownOpen = ref(false); // State for profile dropdown
+const profileDropdownOpen = ref(false);
 
-// Access current page/component from Inertia
-const { component } = usePage();
-
-// Toggles dropdowns based on input
+// Toggle dropdown visibility
 const toggleDropdown = (dropdown) => {
   if (dropdown === "patients") {
     patientsDropdownOpen.value = !patientsDropdownOpen.value;
-    profileDropdownOpen.value = false; // Close other dropdown
+    profileDropdownOpen.value = false;
   } else if (dropdown === "profile") {
     profileDropdownOpen.value = !profileDropdownOpen.value;
-    patientsDropdownOpen.value = false; // Close other dropdown
+    patientsDropdownOpen.value = false;
   }
 };
 
-// Close dropdowns when clicking outside
+// Close dropdowns on outside click
 const closeDropdowns = (event) => {
   if (!event.target.closest(".dropdown-menu") && !event.target.closest(".dropdown-button")) {
     patientsDropdownOpen.value = false;
@@ -39,13 +42,6 @@ const handleKeydown = (event) => {
     profileDropdownOpen.value = false;
   }
 };
-
-// Close dropdowns on route/component change
-watch(() => component, () => {
-  showingNavigationDropdown.value = false;
-  patientsDropdownOpen.value = false;
-  profileDropdownOpen.value = false; // Close profile dropdown
-});
 
 // Add event listeners on mount
 onMounted(() => {
@@ -62,28 +58,43 @@ onBeforeUnmount(() => {
 
 <template>
   <nav class="bg-white shadow-md border-b border-gray-200">
-    <div class=" mx-auto px-6 sm:px-6 lg:px-8">
+    <div class="mx-auto px-6 sm:px-6 lg:px-8">
       <div class="flex justify-between h-20 items-center">
         <!-- Logo Section -->
-        <div @click="$inertia.visit('/dashboard')" class="flex items-center space-x-4 cursor-pointer">
-          <img :src="Logo" alt="RHU Logo" class="h-20 w-auto" />
-          <h1 class="text-lg font-black">Initao Regional Health Unit</h1>
-        </div>
+        <a
+  :href="role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard'"
+  @click.prevent="$inertia.visit(role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard')"
+  class="flex items-center space-x-4 cursor-pointer"
+>
+  <img :src="Logo" alt="RHU Logo" class="h-20 w-auto" />
+  <h1 class="text-lg font-black">Initao Regional Health Unit</h1>
+</a>
+
 
         <!-- Desktop Navigation -->
         <div class="hidden sm:flex items-center space-x-6">
-          <NavLink href="/dashboard" :active="component === 'Dashboard'">
+          <!-- Dashboard Link -->
+          <NavLink
+            :href="role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard'"
+            :active="false"
+          >
             <font-awesome-icon :icon="['fas', 'home']" class="mr-2" />
             Dashboard
           </NavLink>
 
-          <NavLink href="/checkup" :active="component === 'Checkup'">
+          <!-- Checkup Link (Visible for Doctors) -->
+          <NavLink  v-if="role === 'staff'" href="/checkup" :active="false">
             <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-2" />
             Checkup
           </NavLink>
 
-     <!-- Services Dropdown -->
-     <div class="relative">
+          <NavLink v-if="role === 'doctor'" href="/doctor-checkup" :active="false">
+            <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-2" />
+            Checkup
+          </NavLink>
+
+          <!-- Services Dropdown -->
+          <div class="relative">
             <button
               @click="toggleDropdown('patients')"
               class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 dropdown-button"
@@ -103,56 +114,37 @@ onBeforeUnmount(() => {
               class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-60 z-50 dropdown-menu"
             >
               <div class="grid grid-cols-1 gap-4 p-4">
-                <NavLink
-                  href="/mental-health"
-                  :active="component === 'MentalHealth'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
-                  Mental Health
-                </NavLink>
-                <NavLink
-                  href="/itr-services"
-                  :active="component === 'IndividualTreatmentRecord'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
+                <NavLink href="/itr-services" class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
                   Individual Treatment Record
                 </NavLink>
-                <NavLink
-                  href="/prenatal-postpartum-services"
-                  :active="component === 'PrenatalPostpartum'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
+                <NavLink href="/prenatal-postpartum-services" class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
                   Prenatal Records
                 </NavLink>
-                <NavLink
-                  href="/epi-records-services"
-                  :active="component === 'EPIRecords'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
+                <NavLink href="/epi-records-services" class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
                   National Immunization Records
                 </NavLink>
-                <NavLink
-                  href="/vaccination-services"
-                  :active="component === 'Vaccination'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
+                <NavLink href="/vaccination-services" class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
                   Vaccination
-                </NavLink>
-                <NavLink
-                  href="/risk-management-services"
-                  :active="component === 'RiskManagement'"
-                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
-                >
-                  Risk Management
                 </NavLink>
               </div>
             </div>
           </div>
-          <NavLink href="/system-analytics" :active="component === 'Analytics'">
+
+          <!-- Analytics Link (Admin Only) -->
+          <NavLink  href="/system-analytics" :active="false">
             <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
             System Analytics
           </NavLink>
 
+          <NavLink v-if="role === 'admin'" href="/system-analytics" :active="component === 'Analytics'">
+            <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
+            RHU Personnels
+          </NavLink>
+
+          <NavLink v-if="role === 'admin'"  href="/system-analytics" :active="component === 'Analytics'">
+            <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
+            Register Staff
+          </NavLink>
           <!-- Profile Dropdown -->
           <div class="relative">
             <button
@@ -167,24 +159,17 @@ onBeforeUnmount(() => {
                 class="ml-2 transition-transform duration-200"
               />
             </button>
+
             <!-- Dropdown Menu -->
             <div
               v-if="profileDropdownOpen"
               class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-full z-10"
             >
-              <NavLink
-                href="/profile"
-                :active="component === 'Profile'"
-                class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-t"
-              >
+              <NavLink href="/profile" class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-t">
                 <font-awesome-icon :icon="['fas', 'cog']" class="mr-2" />
                 Account Settings
               </NavLink>
-              <NavLink
-                :href="route('logout')"
-                method="post"
-                class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-b"
-              >
+              <NavLink :href="route('logout')" method="post" class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-b">
                 <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
                 Logout
               </NavLink>
@@ -198,10 +183,7 @@ onBeforeUnmount(() => {
             @click="showingNavigationDropdown = !showingNavigationDropdown"
             class="p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none"
           >
-            <font-awesome-icon
-              :icon="showingNavigationDropdown ? 'times' : 'bars'"
-              class="h-6 w-6"
-            />
+            <font-awesome-icon :icon="showingNavigationDropdown ? 'times' : 'bars'" class="h-6 w-6" />
           </button>
         </div>
       </div>

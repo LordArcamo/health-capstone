@@ -1,5 +1,5 @@
 <script setup>
-import NewLayout from '@/Layouts/MainLayout.vue';
+import MainLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref, onMounted, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
@@ -14,8 +14,6 @@ import Logo from "@/Images/RHU Logo.png";
 
 // Props from backend
 const props = defineProps({
-  auth: Object,
-  flash: Object,
   totalPatients: Number,
   patients: Array,
   casesData: [Array, Object],
@@ -62,27 +60,20 @@ watch(() => props.casesData, (newCasesData) => {
 <template>
   <Head title="Initao RHU Dashboard" />
 
-  <NewLayout>
+  <MainLayout>
     <div class="overflow-y-auto w-full min-h-screen bg-gray-50">
-<!-- Branding Section -->
-<div class="flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-10 py-6 text-white shadow-md">
-  <!-- Left Section: Branding -->
-  <div class="mb-4 md:mb-0">
-    <h1 class="text-2xl font-bold">Initao RHU Dashboard</h1>
-    <p class="text-sm">Welcome to the Rural Health Unit of Initao, empowering community health with data-driven insights.</p>
-  </div>
-
-  <!-- Right Section: User Info -->
-  <div class="flex flex-col items-start md:items-end">
-    <h2 class="text-xl font-bold">Welcome, {{ auth.user.name }}</h2>
-  </div>
-</div>
-
+      <!-- Branding Section -->
+      <div class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-10 py-6 text-white shadow-md">
+        <div>
+          <h1 class="text-2xl font-bold">Initao RHU Dashboard</h1>
+          <p class="text-sm">Welcome to the Rural Health Unit of Initao, empowering community health with data-driven insights.</p>
+        </div>
+        <!-- <img :src="Logo" alt="Initao RHU Logo" class="h-16"> -->
+      </div>
 
       <!-- Stats Section -->
    <!-- Stats Section -->
 <div class="w-full gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
-  
   <!-- Total Patients -->
   <ShortBox class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-md transition-shadow">
     <div class="flex flex-col items-start gap-2">
@@ -136,7 +127,7 @@ watch(() => props.casesData, (newCasesData) => {
         </div>
       </div>
     </div>
-  </NewLayout>
+  </MainLayout>
 </template>
 
 <style scoped>

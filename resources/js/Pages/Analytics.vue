@@ -1,5 +1,5 @@
 <script setup>
-import NewLayout from '@/Layouts/PersonnelLayout.vue';
+import NewLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import TotalPatients from '@/Components/Charts/TotalPatients.vue';
 import ReferedPatients from '@/Components/Charts/ReferedPatients.vue';

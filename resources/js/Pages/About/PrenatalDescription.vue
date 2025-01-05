@@ -1,6 +1,6 @@
 <script setup> 
 import PrenatalInfo from '@/Components/Info/PrenatalInfo.vue';
-import NewLayout from '@/Layouts/PersonnelLayout.vue';
+import NewLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 </script>
 

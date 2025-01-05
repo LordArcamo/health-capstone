@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import NewLayout from '@/Layouts/PersonnelLayout.vue';
+import NewLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import MentalHealthTable from '@/Components/MentalHealthTable.vue';
 import MentalHealthSessions from '@/Components/MentalHealthSessions.vue';

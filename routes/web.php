@@ -18,10 +18,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VaccineController;
 use App\Http\Controllers\SystemAnalyticsController;
-use App\Http\Controllers\ThankYouController;
 use App\Http\Controllers\PersonalInformationController;
 use App\Http\Controllers\RiskManagementController;
 use App\Http\Controllers\VaccineAppointmentController;
+use App\Http\Controllers\AuthorizationRolesController;
+use App\Http\Controllers\DoctorDashboardController;
+
+use App\Http\Middleware\RoleMiddleware;
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
@@ -176,6 +179,27 @@ Route::get('/checkup', function () {
 
 Route::get('/patients/{personalId}', [PatientController::class, 'show'])->name('patients.show');
 
+Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
+    ->middleware(RoleMiddleware::class . ':admin')
+    ->name('admin.dashboard');
+
+// Route to display the main doctor dashboard with static data
+Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
+    ->name('doctor.dashboard');
+
+    Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
+    ->middleware(RoleMiddleware::class . ':doctor')
+    ->name('doctor.checkup');
+
+    Route::get('/doctor-checkup', [DoctorDashboardController::class, 'checkup'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Restrict access to doctors
+    ->name('doctor.checkup');
+    
+// Route to display a tailored doctor dashboard with user data
+Route::get('/doctor-dashboard/user', [DoctorDashboardController::class, 'doctor'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
+    ->name('doctor.dashboard.user');
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');
 })->middleware(['auth', 'verified'])->name('mortality');
