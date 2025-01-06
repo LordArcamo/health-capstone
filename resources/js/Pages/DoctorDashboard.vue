@@ -129,7 +129,115 @@ const initCharts = () => {
         },
       },
     },
+
   });
+
+  // Critical Cases (Line Chart)
+  const criticalCasesCtx = document.getElementById('criticalCasesLineChart').getContext('2d');
+  new Chart(criticalCasesCtx, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Replace with actual months or dates
+      datasets: [
+        {
+          label: 'Heart Attack',
+          data: [5, 10, 8, 12, 15], // Replace with actual data for Heart Attack cases
+          borderColor: '#FF5252', // Red color
+          backgroundColor: 'rgba(255, 82, 82, 0.2)',
+          borderWidth: 2,
+          tension: 0.3, // Smooth curve
+        },
+        {
+          label: 'Stroke',
+          data: [3, 5, 7, 6, 9], // Replace with actual data for Stroke cases
+          borderColor: '#FF9800', // Orange color
+          backgroundColor: 'rgba(255, 152, 0, 0.2)',
+          borderWidth: 2,
+          tension: 0.3, // Smooth curve
+        },
+        {
+          label: 'Diabetes',
+          data: [2, 4, 5, 3, 7], // Replace with actual data for Diabetes cases
+          borderColor: '#4CAF50', // Green color
+          backgroundColor: 'rgba(76, 175, 80, 0.2)',
+          borderWidth: 2,
+          tension: 0.3, // Smooth curve
+        },
+        // You can add more datasets for other critical cases as needed
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      },
+    },
+  });
+
+  const totalPatientsCtx = document.getElementById('totalPatientsChart').getContext('2d');
+  new Chart(totalPatientsCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Replace with the months or dates you have
+      datasets: [
+        {
+          label: 'Total Patients',
+          data: [200, 250, 300, 275, 350], // Replace with the actual total patients data for each month
+          backgroundColor: '#66BB6A', // Green color for the bar
+          borderColor: '#388E3C', // Dark green for border color
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false, // Hides the legend since we only have one dataset
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false, // Hides the grid lines for x-axis
+          },
+          ticks: {
+            font: {
+              size: 12,
+            },
+          },
+        },
+        y: {
+          grid: {
+            display: true, // Keeps the grid lines for y-axis
+          },
+          ticks: {
+            beginAtZero: true, // Ensures the y-axis starts at 0
+            stepSize: 50, // Adjust the step size for better readability
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+    },
+  });
+
 };
 
 onMounted(() => {
@@ -139,12 +247,14 @@ onMounted(() => {
 });
 </script>
 <template>
+
   <Head title="Initao RHU Dashboard" />
 
   <MainLayout>
     <div class="relative overflow-y-auto w-full min-h-screen bg-gray-50">
       <!-- Branding Section -->
-      <div class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-8 py-6 text-white shadow-md rounded-b-xl">
+      <div
+        class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-8 py-6 text-white shadow-md rounded-b-xl">
         <div>
           <h1 class="text-3xl font-semibold">Initao RHU Dashboard</h1>
           <p class="text-lg">Empowering community health with data-driven insights.</p>
@@ -157,13 +267,15 @@ onMounted(() => {
       <!-- Stats Section -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-10 px-8">
         <!-- Total Patients -->
-        <div class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-lg p-6 rounded-xl shadow-md">
+        <div
+          class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <h2 class="font-semibold text-lg">Total Patients Checked Up</h2>
           <p class="text-3xl font-bold">{{ totalPatients }}</p>
         </div>
 
         <!-- Patients in Queue -->
-        <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-lg p-6 rounded-xl shadow-md">
+        <div
+          class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <h2 class="font-semibold text-lg">Patients in Queue</h2>
           <p class="text-3xl font-bold">{{ ITRConsultation.length }}</p>
         </div>
@@ -217,11 +329,8 @@ onMounted(() => {
           <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Latest Patients</h2>
             <div class="space-y-4">
-              <div
-                v-for="(patient, index) in latestPatients"
-                :key="index"
-                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition"
-              >
+              <div v-for="(patient, index) in latestPatients" :key="index"
+                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition">
                 <h3 class="text-lg font-semibold text-gray-700">{{ patient.name }}</h3>
                 <p class="text-sm text-gray-500">Checked In: {{ patient.checkInTime }}</p>
                 <p class="text-sm text-gray-500">Diagnosis: {{ patient.diagnosis }}</p>
@@ -238,10 +347,20 @@ onMounted(() => {
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Patient Demographics</h2>
             <canvas id="demographicsChart"></canvas>
           </div>
+          <!-- Critical Cases Line Chart -->
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Critical Cases Overview</h2>
+            <canvas id="criticalCasesLineChart"></canvas>
+          </div>
 
           <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Appointments Overview</h2>
             <canvas id="appointmentsChart"></canvas>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Total Patients</h2>
+            <canvas id="totalPatientsChart"></canvas>
           </div>
         </div>
       </div>
@@ -249,21 +368,15 @@ onMounted(() => {
       <!-- Notifications Section -->
       <button
         class="fixed bottom-4 right-4 bg-yellow-500 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-yellow-600"
-        @click="showNotifications = !showNotifications"
-      >
+        @click="showNotifications = !showNotifications">
         Notifications ({{ notifications.length }})
       </button>
-      <div
-        v-if="showNotifications"
-        class="fixed top-16 right-4 bg-white shadow-xl rounded-lg w-80 overflow-y-auto max-h-96"
-      >
+      <div v-if="showNotifications"
+        class="fixed top-16 right-4 bg-white shadow-xl rounded-lg w-80 overflow-y-auto max-h-96">
         <h2 class="font-bold text-lg bg-yellow-500 text-white p-4">Notifications</h2>
         <ul>
-          <li
-            v-for="(notification, index) in notifications"
-            :key="index"
-            class="p-4 border-b hover:bg-gray-100 transition"
-          >
+          <li v-for="(notification, index) in notifications" :key="index"
+            class="p-4 border-b hover:bg-gray-100 transition">
             {{ notification.message }}
           </li>
         </ul>

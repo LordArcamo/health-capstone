@@ -39,236 +39,11 @@
 
 
       <form @submit.prevent="triggerSubmit">
-        <!-- Step 1: Patient Information -->
-        <div v-if="step === 1">
-          <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" @input="capitalizeName('firstName')" class="input"
-                placeholder="Example: Juan" required />
-              <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName }}</span>
-            </div>
-            <div>
-              <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName" class="input" @input="capitalizeName('lastName')"
-                placeholder="Example: Dela Cruz" required />
-              <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName }}</span>
-            </div>
-            <div>
-              <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName" class="input" @input="capitalizeName('middleName')"
-                placeholder="Example: Penduko" required />
-              <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
-            </div>
-            <div>
-              <label for="suffix" class="block text-sm font-medium text-gray-700">Suffix:</label>
-              <select v-model="form.suffix"
-                class="input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <!-- Placeholder option for selecting suffix -->
-                <option value="" disabled selected>Select a Suffix</option>
-                <option value="None">None</option>
-                <option value="Jr.">Jr.</option>
-                <option value="Sr.">Sr.</option>
-                <option value="I">I</option>
-                <option value="II">II</option>
-                <option value="III">III</option>
-                <option value="IV">IV</option>
-                <option value="V">V</option>
-              </select>
-
-              <!-- Error message if no suffix is selected -->
-              <span v-if="errors.suffix" class="text-red-600 text-sm">{{ errors.suffix }}</span>
-            </div>
-            <div>
-              <label for="barangay" class="block mb-1">Barangay:</label>
-              <select id="barangay" v-model="form.barangay" class="input" required>
-                <option disabled value="">Select a Barangay</option>
-                <option value="Apas">Apas</option>
-                <option value="Aluna">Aluna</option>
-                <option value="Andales">Andales</option>
-                <option value="Calacapan">Calacapan</option>
-                <option value="Gimangpang">Gimangpang</option>
-                <option value="Jampason">Jampason</option>
-                <option value="Kamelon">Kamelon</option>
-                <option value="Kanitoan">Kanitoan</option>
-                <option value="Oguis">Oguis</option>
-                <option value="Pagahan">Pagahan</option>
-                <option value="Poblacion">Poblacion</option>
-                <option value="Pontacon">Pontacon</option>
-                <option value="San Pedro">San Pedro</option>
-                <option value="Sinalac">Sinalac</option>
-                <option value="Tawantawan">Tawantawan</option>
-                <option value="Tubigan">Tubigan</option>
-              </select>
-              <span v-if="errors.barangay" class="text-red-600 text-sm">{{ errors.barangay }}</span>
-            </div>
-
-
-            <div>
-              <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" @input="capitalizeName('purok')"
-                placeholder="Example: Purok 1A" required />
-              <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
-            </div>
-            <div>
-              <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input" required @input="restrictBirthdateInput"
-                @change="validateBirthdate" />
-              <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
-            </div>
-            <div>
-              <label class="block">Age:</label>
-              <input type="number" v-model="computedAge" class="input" readonly />
-            </div>
-            <!-- Contact Number -->
-            <div>
-              <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
-              <div class="relative">
-                <input type="tel" v-model="form.contact" @input="formatContact"
-                  class="pl-14 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 w-full"
-                  placeholder="Enter 10 digits" required />
-                <span
-                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
-                  +63
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <label class="block">Gender</label>
-              <select v-model="form.sex" class="input" required>
-                <!-- Placeholder option for selecting suffix -->
-                <option value="" disabled selected>Select a Gender</option>
-                <option>Male</option>
-                <option>Female</option>
-              </select>
-            </div>
-          </div>
-          <div class="mt-6 flex justify-center text-right">
-            <button @click="nextStep" class="btn">Next</button>
-          </div>
-        </div>
-
-        <!-- Step 2: Consultation Details -->
-        <div v-if="step === 2">
-          <h3 class="text-lg font-semibold mb-4">Consultation Details</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block">Consultation Date:</label>
-              <input type="date" v-model="form.consultationDate" class="input" required />
-              <span v-if="errors.consultationDate" class="text-red-600 text-sm">{{ errors.consultationDate }}</span>
-            </div>
-            <div>
-              <label class="block">Consultation Time:</label>
-              <input type="time" v-model="form.consultationTime" class="input" required    @input="handleTimeSelection" />
-              <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
-            </div>
-            <div>
-              <label class="block">Mode of Transaction:</label>
-              <select v-model="form.modeOfTransaction" class="input" required>
-                <!-- Placeholder option for selecting suffix -->
-                <option value="" disabled selected>Select a Mode of Transaction</option>
-                <option value="Walk-in">Consultation</option>
-                <option value="Visited">Emergency</option>
-                <option value="Referral">Referral</option>
-              </select>
-              <span v-if="errors.modeOfTransaction" class="text-red-600 text-sm">{{ errors.modeOfTransaction }}</span>
-            </div>
-            <div>
-              <label class="block">Nature of Visit:</label>
-              <select v-model="form.natureOfVisit" class="input" required>
-                <option value="" disabled selected>Select a Nature of Visit</option>
-                <option>New Consultation/Case</option>
-                <option>New Admission</option>
-                <option>Follow-up Visit</option>
-              </select>
-              <span v-if="errors.natureOfVisit" class="text-red-600 text-sm">{{ errors.natureOfVisit }}</span>
-            </div>
-            <div>
-              <label class="block">Type of Consultation/Purpose of Visit:</label>
-              <select v-model="form.visitType" class="input" @change="checkMentalHealth" required>
-                <option value="" disabled selected>Select a Type</option>
-                <option value="General">General</option>
-                <option value="Dental Care">Dental Care</option>
-                <option value="Child Care">Child Care</option>
-                <option value="Injury">Injury</option>
-                <option value="Adult Immunization">Adult Immunization</option>
-                <option value="Family Planning">Family Planning</option>
-                <option value="Postpartum">Postpartum</option>
-                <option value="Tuberculosis">Tuberculosis</option>
-                <option value="Child Immunization">Child Immunization</option>
-                <option value="Sick Children">Sick Children</option>
-                <option value="Firecracker Injury">Firecracker Injury</option>
-                <option value="Mental Health">Psychological Status</option>
-              </select>
-              <span v-if="errors.visitType" class="text-red-600 text-sm">{{ errors.visitType }}</span>
-            </div>
-            <div>
-              <label class="block">Blood Pressure:</label>
-              <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80"
-                class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatBloodPressure" required/>
-                <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
-            </div>
-            <div>
-              <label class="block">Temperature (°C):</label>
-              <input type="text" v-model="form.temperature" placeholder="Example: 37.5°C"
-                class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatTemperature" required/>
-                <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
-            </div>
-            <div>
-              <label class="block">Height (cm):</label>
-              <input type="text" v-model="form.height" placeholder="Example: 180" class="input"
-                @input="validateHeight" required/>
-                <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
-            </div>
-            <div>
-              <label class="block">Weight (kg):</label>
-              <input type="text" v-model="form.weight" placeholder="Example: 70" class="input"
-                @input="validateWeight" required/>
-                <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
-            </div>
-
-          </div>
-          <div v-if="form.modeOfTransaction === 'Referral'" class="mt-4">
-            <h3 class="text-lg font-semibold mb-4">Referred Transaction Details</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block">Referred From:</label>
-                <input type="text" v-model="form.referredFrom" class="input" placeholder="Referred From" />
-              </div>
-              <div>
-                <label class="block">Referred To:</label>
-                <input type="text" v-model="form.referredTo" class="input" placeholder="Referred To" />
-              </div>
-              <div>
-                <label class="block">Reasons for Referral:</label>
-                <textarea v-model="form.reasonsForReferral" class="input"
-                  placeholder="Describe reasons for referral"></textarea>
-              </div>
-              <div>
-                <label class="block">Referred By:</label>
-                <input type="text" v-model="form.referredBy" class="input" placeholder="Referred By" />
-              </div>
-            </div>
-          </div>
-          <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="btn">Back</button>
-            <button @click="nextStep" class="btn">Next</button>
-          </div>
-        </div>
 
         <!-- Step 3: Visit Information -->
-        <div v-if="step === 3">
+        <div v-if="step === 1">
           <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
           <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block">Name of Attending Physician:</label>
-              <input type="text" v-model="form.providerName" @input="capitalizeName('providerName')" placeholder="Example: Dr. Jose Legazpi" class="input" />
-              <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
-            </div>
 
             <div>
               <label class="block">Chief Complaints:</label>
@@ -294,7 +69,7 @@
         </div>
 
         <!-- Step 4: Review Submitted Data -->
-        <div v-if="step === 4">
+        <div v-if="step === 2">
           <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <!-- Loop through form fields to display data -->
@@ -650,98 +425,11 @@ export default {
       // Update the form weight with the validated value
       this.form.weight = value;
     },
+
     validateStep1() {
       this.errors = {};
       let valid = true;
 
-      if (!this.form.firstName) {
-        this.errors.firstName = 'First name is required.';
-        valid = false;
-      }
-      if (!this.form.lastName) {
-        this.errors.lastName = 'Last name is required.';
-        valid = false;
-      }
-      if (!this.form.middleName) {
-        this.errors.middleName = 'Middle name is required.';
-        valid = false;
-      }
-      if (!this.form.purok) {
-        this.errors.purok = 'Purok is required.';
-        valid = false;
-      }
-      if (!this.form.barangay) {
-        this.errors.barangay = 'Barangay is required.';
-        valid = false;
-      }
-      if (!this.form.birthdate) {
-        this.errors.birthdate = 'Birthdate is required.';
-        valid = false;
-      }
-      return valid;
-    },
-    validateStep2() {
-  this.errors = {};
-  let valid = true;
-
-  const today = new Date();
-  const consultationDate = new Date(this.form.consultationDate);
-
-  if (!this.form.consultationDate) {
-    this.errors.consultationDate = "Consultation date is required.";
-    valid = false;
-  } else if (isNaN(consultationDate.getTime())) {
-    this.errors.consultationDate = "Please enter a valid date.";
-    valid = false;
-  } else if (consultationDate > today) {
-    this.errors.consultationDate = "Consultation date cannot be in the future.";
-    valid = false;
-  }
-
-  if (!this.form.consultationTime) {
-    this.errors.consultationTime = "Consultation time is required.";
-    valid = false;
-  }
-  if (!this.form.modeOfTransaction) {
-    this.errors.modeOfTransaction = "Mode of Transaction is required.";
-    valid = false;
-  }
-  if (!this.form.bloodPressure) {
-    this.errors.bloodPressure = "Blood Pressure is required.";
-    valid = false;
-  }
-  if (!this.form.temperature) {
-    this.errors.temperature = "Temperature is required.";
-    valid = false;
-  }
-  if (!this.form.height) {
-    this.errors.height = "Height is required.";
-    valid = false;
-  }
-  if (!this.form.weight) {
-    this.errors.weight = "Weight is required.";
-    valid = false;
-  }
-
-  return valid;
-},
-
-    validateStep3() {
-      this.errors = {};
-      let valid = true;
-
-      if (!this.form.providerName) {
-        this.errors.providerName = 'Provider name is required.';
-        valid = false;
-      }
-      if (!this.form.natureOfVisit) {
-        this.errors.natureOfVisit = 'Nature of visit is required.';
-        valid = false;
-      }
-      if (!this.form.visitType) {
-        this.errors.visitType = 'Visit type is required.';
-        valid = false;
-      }
       if (!this.form.chiefComplaints) {
         this.errors.chiefComplaints = 'Chief Complaints is required.';
         valid = false;
@@ -759,12 +447,8 @@ export default {
     nextStep() {
       if (this.step === 1 && this.validateStep1()) {
         this.step++;
-      } else if (this.step === 2 && this.validateStep2()) {
-        this.step++;
-      } else if (this.step === 3 && this.validateStep3()) {
-        this.step++;
-      } else if (this.step === 3 && this.validateStep3()) {
-        this.step = 4;
+      } else if (this.step === 1 && this.validateStep1()) {
+        this.step = 1;
       }
     },
     prevStep() {
@@ -774,10 +458,7 @@ export default {
       if (targetStep > this.step) {
         // Validate the current step before proceeding
         const isCurrentStepValid =
-          (this.step === 1 && this.validateStep1()) ||
-          (this.step === 2 && this.validateStep2()) ||
-          (this.step === 3 && this.validateStep3());
-
+          (this.step === 1 && this.validateStep1())
         if (!isCurrentStepValid) {
           this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
 

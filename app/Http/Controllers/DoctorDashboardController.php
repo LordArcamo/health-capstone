@@ -139,4 +139,6 @@ class DoctorDashboardController extends Controller
             'patient' => $nextPatient,
         ]);
     }
+
+    
 }
