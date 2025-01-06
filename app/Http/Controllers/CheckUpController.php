@@ -16,27 +16,27 @@ class CheckUpController extends Controller
     public function import(Request $request)
     {
         set_time_limit(300); // Increase time limit to 5 minutes
-        
+
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
         ]);
-    
+
         $file = $request->file('file');
         $data = array_map('str_getcsv', file($file->getRealPath()));
         $header = array_shift($data); // Extract the header row
-    
+
         DB::transaction(function () use ($data, $header) {
             foreach ($data as $row) {
                 $patientData = array_combine($header, $row);
-    
+
                 // Convert consultationTime to MySQL TIME format
                 $patientData['consultationTime'] = date('H:i:s', strtotime($patientData['consultationTime']));
-    
+
                 // Convert numeric fields to proper types
                 $patientData['temperature'] = (float) $patientData['temperature'];
                 $patientData['height'] = (int) $patientData['height'];
                 $patientData['weight'] = (int) $patientData['weight'];
-    
+
                 // Validate the row
                 $validator = Validator::make($patientData, [
                     'firstName' => 'required|string|max:100',
@@ -63,13 +63,13 @@ class CheckUpController extends Controller
                     'diagnosis' => 'required|string|max:255',
                     'medication' => 'required|string|max:255',
                 ]);
-    
+
                 if ($validator->fails()) {
                     \Log::error('Validation failed for row: ' . json_encode($patientData));
                     \Log::error('Validation errors: ' . json_encode($validator->errors()->all()));
                     throw new \Exception('Validation failed for row: ' . json_encode($patientData));
                 }
-    
+
                 // Create or update records in the database
                 $personalInfo = PersonalInformation::create([
                     'firstName' => $patientData['firstName'],
@@ -83,7 +83,7 @@ class CheckUpController extends Controller
                     'contact' => $patientData['contact'],
                     'sex' => $patientData['sex'],
                 ]);
-    
+
                 CheckUp::create([
                     'personalId' => $personalInfo->personalId,
                     'consultationDate' => $patientData['consultationDate'],
@@ -106,11 +106,11 @@ class CheckUpController extends Controller
                 ]);
             }
         });
-    
+
         return redirect()->back()->with('success', 'Patients imported successfully!');
     }
-    
-    
+
+
     /**
      * Display a listing of the resource.
      */
@@ -146,7 +146,7 @@ class CheckUpController extends Controller
             )
             ->distinct() // Ensure no duplicate entries
             ->get();
-    
+
         // Pass the joined data to the view
         return Inertia::render('Table/IndividualTreatmentRecord', [
             'ITR' => $data,
@@ -154,9 +154,9 @@ class CheckUpController extends Controller
 
     // Query the CheckUp model to get the data needed for the chart
     $checkups = CheckUp::selectRaw('
-            MONTH(consultationDate) as month, 
-            YEAR(consultationDate) as year, 
-            sex, 
+            MONTH(consultationDate) as month,
+            YEAR(consultationDate) as year,
+            sex,
             count(*) as case_count
         ')
         ->groupByRaw('MONTH(consultationDate), YEAR(consultationDate), sex')
@@ -175,13 +175,13 @@ class CheckUpController extends Controller
             });
         }),
     ];
-    
+
 
     return Inertia::render('ChartPage', [
         'chartData' => $chartData,
     ]);
     }
-    
+
 
 
     public function testPatient()
@@ -216,7 +216,7 @@ class CheckUpController extends Controller
          )
          ->distinct() // Ensure no duplicate entries
          ->get();
- 
+
      // Pass the joined data to the view
      return Inertia::render('Table/Patient', [
          'ITR' => $data,
@@ -254,7 +254,7 @@ class CheckUpController extends Controller
     {
         // Log the incoming request
         \Log::info('Incoming request data:', $request->all());
-    
+
         // Validate request data
         $validatedData = $request->validate([
             'personalId' => 'nullable|exists:personal_information,personalId',
@@ -286,9 +286,9 @@ class CheckUpController extends Controller
             'diagnosis' => 'required|string|max:255',
             'medication' => 'required|string|max:255',
         ]);
-    
+
         $personalInfo = null;
-    
+
         if (isset($validatedData['personalId'])) {
             // Update existing patient
             $personalInfo = PersonalInformation::find($validatedData['personalId']);
@@ -323,7 +323,7 @@ class CheckUpController extends Controller
                 'sex' => $validatedData['sex'],
             ]);
         }
-    
+
         // Save the ITR (Individual Treatment Record) data
         CheckUp::create([
             'personalId' => $personalInfo->personalId,
@@ -345,10 +345,10 @@ class CheckUpController extends Controller
             'diagnosis' => $validatedData['diagnosis'],
             'medication' => $validatedData['medication'],
         ]);
-    
+
         // Log success
         \Log::info('Patient and ITR saved successfully.');
-    
+
      // Redirect to the thank-you page with the checkUpType
      return Inertia::location('/checkup/thank-you/itr');
     }
@@ -385,6 +385,7 @@ class CheckUpController extends Controller
             'referredBy' => 'nullable|string|max:255',
             'natureOfVisit' => 'required|string|max:100',
             'visitType' => 'required|string|max:50',
+            'providerName' => 'required|string|max:100',
         ]);
 
         // Use the authenticated user's ID or validate the `id` field from the request
@@ -448,6 +449,7 @@ class CheckUpController extends Controller
             'referredBy' => $validatedData['referredBy'] ?? 'None',
             'natureOfVisit' => $validatedData['natureOfVisit'],
             'visitType' => $validatedData['visitType'],
+            'providerName' => $validatedData['providerName'],
         ]);
 
         // Log success
@@ -457,7 +459,7 @@ class CheckUpController extends Controller
         return Inertia::location('/checkup/thank-you/itr');
     }
 
-    
+
 
 
 

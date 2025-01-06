@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ConsultationDetails extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'consultation_details';
 
     // Specify the primary key
@@ -16,7 +16,7 @@ class ConsultationDetails extends Model
 
     // Set the primary key type
     protected $keyType = 'int';
-    
+
     // Ensure the primary key is auto-incrementing
     public $incrementing = true;
 
@@ -37,6 +37,7 @@ class ConsultationDetails extends Model
         'referredBy',
         'natureOfVisit',
         'visitType',
+        'providerName',
 
     ];
 

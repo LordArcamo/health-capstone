@@ -16,7 +16,6 @@ return new class extends Migration
                 $table->bigIncrements('visitInformationID'); // Primary key
                 $table->unsignedBigInteger('consultationDetailsID'); // Foreign key
                 $table->unsignedBigInteger('id');
-                $table->string('providerName', 100);
                 $table->string('chiefComplaints', 255);
                 $table->string('diagnosis', 255);
                 $table->string('medication', 255);
