@@ -32,7 +32,7 @@
                 <div class="space-y-2">
                   <h3 class="text-xl font-semibold text-green-600">{{ patient.firstName }} {{ patient.lastName }}</h3>
                   <p class="text-sm text-gray-500">Age: {{ patient.age }}</p>
-                  <p class="text-sm text-gray-500">Reason: {{ patient.reason }}</p>
+                  <p class="text-sm text-gray-500">Reason: {{ patient.visitType }}</p>
                 </div>
                 <button class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
                   View
@@ -65,14 +65,13 @@
         <!-- Right Column: Patient Details & Checkup -->
         <div class="bg-white rounded-md shadow-xl p-8 space-y-6 max-h-[80vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-transparent">
           <h2 class="text-4xl font-extrabold text-green-600">Patient Details</h2>
-          
+
           <div v-if="selectedPatient">
             <h3 class="text-2xl font-semibold text-green-600">{{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</h3>
             <p class="text-lg text-gray-500">Age: {{ selectedPatient.age }}</p>
             <p class="text-lg text-gray-500">Gender: {{ selectedPatient.sex }}</p>
-            <p class="text-lg text-gray-500">Reason: {{ selectedPatient.reason }}</p>
             <p class="text-lg text-gray-500">Checkup Type: <span class="font-bold text-green-600">{{ selectedPatient.checkupType }}</span></p>
-            
+
             <div v-if="selectedPatient.medicalRecord" class="mt-6">
               <h4 class="font-semibold text-green-600">Medical Record</h4>
               <p class="text-lg text-gray-500">{{ selectedPatient.medicalRecord }}</p>
@@ -109,54 +108,54 @@ export default {
   props: {
     patientsInQueue: {
       type: Array,
-      required: true,
+      default: () => [],
     },
   },
   data() {
     return {
       // Use the passed prop `patientsInQueue` in the parent, but here is the test data for local testing
-      patientsInQueue: [
-        {
-          firstName: 'John',
-          lastName: 'Doe',
-          age: 34,
-          sex: 'Male',
-          reason: 'Fever',
-          checkupType: 'General Checkup',
-          medicalRecord: 'No chronic diseases.',
-          queueTime: '2025-01-05 10:00:00',
-        },
-        {
-          firstName: 'Jane',
-          lastName: 'Smith',
-          age: 28,
-          sex: 'Female',
-          reason: 'Pregnancy check-up',
-          checkupType: 'Prenatal Checkup',
-          medicalRecord: 'Healthy, first pregnancy.',
-          queueTime: '2025-01-05 10:15:00',
-        },
-        {
-          firstName: 'Alice',
-          lastName: 'Johnson',
-          age: 45,
-          sex: 'Female',
-          reason: 'Routine check-up',
-          checkupType: 'General Checkup',
-          medicalRecord: 'High blood pressure.',
-          queueTime: '2025-01-05 10:30:00',
-        },
-        {
-          firstName: 'Robert',
-          lastName: 'Brown',
-          age: 51,
-          sex: 'Male',
-          reason: 'Chest pain',
-          checkupType: 'General Checkup',
-          medicalRecord: 'History of heart disease.',
-          queueTime: '2025-01-05 10:45:00',
-        },
-      ],
+    //   patientsInQueue: [
+    //     {
+    //       firstName: 'John',
+    //       lastName: 'Doe',
+    //       age: 34,
+    //       sex: 'Male',
+    //       reason: 'Fever',
+    //       checkupType: 'General Checkup',
+    //       medicalRecord: 'No chronic diseases.',
+    //       queueTime: '2025-01-05 10:00:00',
+    //     },
+    //     {
+    //       firstName: 'Jane',
+    //       lastName: 'Smith',
+    //       age: 28,
+    //       sex: 'Female',
+    //       reason: 'Pregnancy check-up',
+    //       checkupType: 'Prenatal Checkup',
+    //       medicalRecord: 'Healthy, first pregnancy.',
+    //       queueTime: '2025-01-05 10:15:00',
+    //     },
+    //     {
+    //       firstName: 'Alice',
+    //       lastName: 'Johnson',
+    //       age: 45,
+    //       sex: 'Female',
+    //       reason: 'Routine check-up',
+    //       checkupType: 'General Checkup',
+    //       medicalRecord: 'High blood pressure.',
+    //       queueTime: '2025-01-05 10:30:00',
+    //     },
+    //     {
+    //       firstName: 'Robert',
+    //       lastName: 'Brown',
+    //       age: 51,
+    //       sex: 'Male',
+    //       reason: 'Chest pain',
+    //       checkupType: 'General Checkup',
+    //       medicalRecord: 'History of heart disease.',
+    //       queueTime: '2025-01-05 10:45:00',
+    //     },
+    //   ],
       searchQuery: '',
       selectedPatient: null,
       currentPage: 1,
@@ -165,12 +164,15 @@ export default {
   },
   computed: {
     filteredPatients() {
-      return this.patientsInQueue.filter((patient) => {
-        return (
-          patient.firstName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          patient.lastName.toLowerCase().includes(this.searchQuery.toLowerCase())
-        );
-      });
+    console.log('Search Query:', this.searchQuery);
+        const filtered = this.patientsInQueue.filter((patient) => {
+            return (
+            patient.firstName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            patient.lastName.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+        });
+        console.log('Filtered Patients:', filtered);
+        return filtered;
     },
     totalPages() {
       return Math.ceil(this.filteredPatients.length / this.patientsPerPage);
@@ -205,6 +207,9 @@ export default {
       }
     },
   },
+  mounted() {
+    console.log('Received patientsInQueue:', this.patientsInQueue);
+    }
 };
 </script>
 

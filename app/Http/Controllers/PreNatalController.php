@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\PreNatal;
 use App\Models\PersonalInformation;
 use App\Models\GeneralTrimester;
+use App\Models\PrenatalConsultationDetails;
 use Illuminate\Support\Facades\DB;
 
 
@@ -352,6 +353,118 @@ class PreNatalController extends Controller
                 'urinalysis' => $validatedData['urinalysis'],
                 'ttStatus' => $validatedData['ttStatus'],
                 'tdDate' => $validatedData['tdDate'],
+            ]);
+
+            // Log the success
+            \Log::info('Data saved successfully for personalId:', [
+                'personalId' => $personalInfo->personalId,
+            ]);
+
+            // Redirect with success
+            return Inertia::location('/checkup/thank-you/prenatal');
+        } catch (\Exception $e) {
+            \Log::error('Error saving data:', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['error' => 'An unexpected error occurred. Please try again later.']);
+        }
+    }
+
+    public function storeDetails(Request $request)
+    {
+        // Log the incoming request
+        \Log::info('Incoming request data:', $request->all());
+
+        // Validate request data
+        $validatedData = $request->validate([
+            // Personal Information
+            'personalId' => 'nullable|exists:personal_information,personalId',
+            'id' => 'nullable|exists:users,id',
+            'firstName' => 'required_without:personalId|string|max:255',
+            'lastName' => 'required_without:personalId|string|max:255',
+            'middleName' => 'nullable|string|max:255',
+            'purok' => 'nullable|string|max:100',
+            'barangay' => 'nullable|string|max:100',
+            'age' => 'required|numeric',
+            'birthdate' => 'required|date',
+            'contact' => 'required|string|max:15',
+            'sex' => 'required|string|max:15',
+
+            // PreNatal Data
+            'modeOfTransaction' => 'required|string|max:255',
+            'consultationDate' => 'required|date',
+            'consultationTime' => 'required|date_format:H:i',
+            'bloodPressure' => 'required|string|max:255',
+            'temperature' => 'required|numeric|between:0,999.99',
+            'height' => 'required|numeric|between:0,999.99',
+            'weight' => 'required|numeric|between:0,999.99',
+            'providerName' => 'required|string|max:255',
+            'nameOfSpouse' => 'required|string|max:255',
+            'emergencyContact' => 'required|string|max:255',
+            'fourMember' => 'required|string|max:255',
+            'philhealthStatus' => 'required|string|max:255',
+            'philhealthNo' => 'nullable|string|max:255',
+        ]);
+
+        $userId = auth()->id() ?? $validatedData['id'];
+
+        if (!$userId) {
+            return back()->withErrors(['error' => 'User ID is required.']);
+        }
+
+        try {
+            $personalInfo = null;
+
+            // Handle existing or new personal information
+            if (!empty($validatedData['personalId'])) {
+                // Update existing personal information
+                $personalInfo = PersonalInformation::findOrFail($validatedData['personalId']);
+                $personalInfo->update([
+                    'firstName' => $validatedData['firstName'] ?? $personalInfo->firstName,
+                    'lastName' => $validatedData['lastName'] ?? $personalInfo->lastName,
+                    'middleName' => $validatedData['middleName'] ?? $personalInfo->middleName,
+                    'suffix' => $validatedData['suffix'] ?? $personalInfo->suffix,
+                    'purok' => $validatedData['purok'] ?? $personalInfo->purok,
+                    'barangay' => $validatedData['barangay'] ?? $personalInfo->barangay,
+                    'age' => $validatedData['age'] ?? $personalInfo->age,
+                    'birthdate' => $validatedData['birthdate'] ?? $personalInfo->birthdate,
+                    'contact' => $validatedData['contact'] ?? $personalInfo->contact,
+                    'sex' => $validatedData['sex'] ?? $personalInfo->sex,
+                ]);
+            } else {
+                // Create new personal information
+                $personalInfo = PersonalInformation::create([
+                    'firstName' => $validatedData['firstName'],
+                    'lastName' => $validatedData['lastName'],
+                    'middleName' => $validatedData['middleName'],
+                    'suffix' => 'None',
+                    'purok' => $validatedData['purok'],
+                    'barangay' => $validatedData['barangay'],
+                    'age' => $validatedData['age'],
+                    'birthdate' => $validatedData['birthdate'],
+                    'contact' => $validatedData['contact'],
+                    'sex' => 'Female',
+                ]);
+            }
+
+            // Save PreNatal data
+            PrenatalConsultationDetails::create([
+                'personalId' => $personalInfo->personalId,
+                'id' => $userId,
+                'modeOfTransaction' => $validatedData['modeOfTransaction'],
+                'consultationDate' => $validatedData['consultationDate'],
+                'consultationTime' => $validatedData['consultationTime'],
+                'bloodPressure' => $validatedData['bloodPressure'],
+                'temperature' => $validatedData['temperature'],
+                'height' => $validatedData['height'],
+                'weight' => $validatedData['weight'],
+                'providerName' => $validatedData['providerName'],
+                'nameOfSpouse' => $validatedData['nameOfSpouse'],
+                'emergencyContact' => $validatedData['emergencyContact'],
+                'fourMember' => $validatedData['fourMember'],
+                'philhealthStatus' => $validatedData['philhealthStatus'],
+                'philhealthNo' => $validatedData['philhealthNo'] ?? null,
             ]);
 
             // Log the success

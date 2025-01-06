@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\CheckUp;
 use App\Models\PersonalInformation;
+use App\Models\ConsultationDetails;
+use App\Models\User;
 
 class CheckUpController extends Controller
 {
@@ -350,6 +352,111 @@ class CheckUpController extends Controller
      // Redirect to the thank-you page with the checkUpType
      return Inertia::location('/checkup/thank-you/itr');
     }
+
+    public function storeDetails(Request $request)
+    {
+        // Log the incoming request
+        \Log::info('Incoming request data:', $request->all());
+
+        // Validate request data
+        $validatedData = $request->validate([
+            'personalId' => 'nullable|exists:personal_information,personalId',
+            'id' => 'nullable|exists:users,id', // Validate against the users table
+            'firstName' => 'required_without:personalId|string|max:100',
+            'lastName' => 'required_without:personalId|string|max:100',
+            'middleName' => 'required_without:personalId|string|max:100',
+            'suffix' => 'nullable|string|max:10',
+            'purok' => 'nullable|string|max:100',
+            'barangay' => 'nullable|string|max:100',
+            'age' => 'nullable|numeric',
+            'birthdate' => 'nullable|date',
+            'contact' => 'nullable|string|max:15',
+            'sex' => 'nullable|string|max:10',
+            'consultationDate' => 'required|date',
+            'consultationTime' => 'required|date_format:H:i',
+            'modeOfTransaction' => 'required|string|max:50',
+            'bloodPressure' => 'nullable|string|max:20',
+            'temperature' => 'nullable|numeric|between:0,100',
+            'height' => 'nullable|numeric|between:0,300',
+            'weight' => 'nullable|numeric|between:0,500',
+            'referredFrom' => 'nullable|string|max:255',
+            'referredTo' => 'nullable|string|max:255',
+            'reasonsForReferral' => 'nullable|string|max:255',
+            'referredBy' => 'nullable|string|max:255',
+            'natureOfVisit' => 'required|string|max:100',
+            'visitType' => 'required|string|max:50',
+        ]);
+
+        // Use the authenticated user's ID or validate the `id` field from the request
+        $userId = auth()->id() ?? $validatedData['id'];
+
+        if (!$userId) {
+            return back()->withErrors(['error' => 'User ID is required.']);
+        }
+
+        $personalInfo = null;
+
+        if (isset($validatedData['personalId'])) {
+            // Update existing patient
+            $personalInfo = PersonalInformation::find($validatedData['personalId']);
+            if ($personalInfo) {
+                $personalInfo->update([
+                    'firstName' => $validatedData['firstName'] ?? $personalInfo->firstName,
+                    'lastName' => $validatedData['lastName'] ?? $personalInfo->lastName,
+                    'middleName' => $validatedData['middleName'] ?? $personalInfo->middleName,
+                    'suffix' => $validatedData['suffix'] ?? $personalInfo->suffix,
+                    'purok' => $validatedData['purok'] ?? $personalInfo->purok,
+                    'barangay' => $validatedData['barangay'] ?? $personalInfo->barangay,
+                    'age' => $validatedData['age'] ?? $personalInfo->age,
+                    'birthdate' => $validatedData['birthdate'] ?? $personalInfo->birthdate,
+                    'contact' => $validatedData['contact'] ?? $personalInfo->contact,
+                    'sex' => $validatedData['sex'] ?? $personalInfo->sex,
+                ]);
+            } else {
+                return back()->withErrors(['error' => 'Patient not found.']);
+            }
+        } else {
+            // Create new patient
+            $personalInfo = PersonalInformation::create([
+                'firstName' => $validatedData['firstName'],
+                'lastName' => $validatedData['lastName'],
+                'middleName' => $validatedData['middleName'],
+                'suffix' => $validatedData['suffix'],
+                'purok' => $validatedData['purok'],
+                'barangay' => $validatedData['barangay'],
+                'age' => $validatedData['age'],
+                'birthdate' => $validatedData['birthdate'],
+                'contact' => $validatedData['contact'],
+                'sex' => $validatedData['sex'],
+            ]);
+        }
+
+        // Save the ITR (Individual Treatment Record) data
+        ConsultationDetails::create([
+            'personalId' => $personalInfo->personalId,
+            'id' => $userId, // Save the user ID as a foreign key
+            'consultationDate' => $validatedData['consultationDate'],
+            'consultationTime' => $validatedData['consultationTime'],
+            'modeOfTransaction' => $validatedData['modeOfTransaction'],
+            'bloodPressure' => $validatedData['bloodPressure'],
+            'temperature' => $validatedData['temperature'],
+            'height' => $validatedData['height'],
+            'weight' => $validatedData['weight'],
+            'referredFrom' => $validatedData['referredFrom'] ?? 'None',
+            'referredTo' => $validatedData['referredTo'] ?? 'None',
+            'reasonsForReferral' => $validatedData['reasonsForReferral'] ?? 'None',
+            'referredBy' => $validatedData['referredBy'] ?? 'None',
+            'natureOfVisit' => $validatedData['natureOfVisit'],
+            'visitType' => $validatedData['visitType'],
+        ]);
+
+        // Log success
+        \Log::info('Patient and ITR saved successfully.');
+
+        // Redirect to the thank-you page
+        return Inertia::location('/checkup/thank-you/itr');
+    }
+
     
 
 

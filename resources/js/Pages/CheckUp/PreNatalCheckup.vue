@@ -24,7 +24,7 @@ function submitForm(payload) {
 
   if (payload.personalId) {
     // Update existing patient
-    Inertia.post("/prenatal/store", payload, {
+    Inertia.post("/prenatalConstultationDetails/store", payload, {
       onSuccess: () => {
         alert("Existing patient's record updated successfully!");
       },
@@ -35,7 +35,7 @@ function submitForm(payload) {
     });
   } else {
     // Create new patient
-    Inertia.post("/prenatal/store", payload, {
+    Inertia.post("/prenatalConstultationDetails/store", payload, {
       onSuccess: ({ props }) => {
         if (props.personalId) {
           payload.personalId = props.personalId; // Update payload with the new ID

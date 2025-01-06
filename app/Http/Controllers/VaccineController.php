@@ -153,6 +153,7 @@ class VaccineController extends Controller
         // Validate request data
         $validatedData = $request->validate([
             'patient.personalId' => 'nullable|exists:personal_information,personalId',
+            'id' => 'nullable|exists:users,id',
             'patient.isExisting' => 'required|boolean',
             'patient.firstName' => 'required_without:patient.personalId|string|max:100',
             'patient.lastName' => 'required_without:patient.personalId|string|max:100',
@@ -176,6 +177,12 @@ class VaccineController extends Controller
             'vaccinationDetails.exclusivelyBreastfed' => 'nullable|string|max:20',
             'vaccinationDetails.nextAppointment' => 'nullable|date',
         ]);
+
+        $userId = auth()->id() ?? $validatedData['id'];
+
+        if (!$userId) {
+            return back()->withErrors(['error' => 'User ID is required.']);
+        }
 
         $personalInfo = null;
 
@@ -201,6 +208,7 @@ class VaccineController extends Controller
         // Save the vaccination details
         VaccinationRecord::create([
             'personalId' => $personalInfo->personalId,
+            'id' => $userId,
             'vaccineCategory' => $validatedData['vaccinationDetails']['vaccineCategory'],
             'vaccineType' => $validatedData['vaccinationDetails']['vaccineType'],
             'dateOfVisit' => $validatedData['vaccinationDetails']['dateOfVisit'],

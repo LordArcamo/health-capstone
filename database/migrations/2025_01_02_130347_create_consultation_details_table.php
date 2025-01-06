@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('consultation_details', function (Blueprint $table) {
             $table->bigIncrements('consultationDetailsID'); // Primary key for ITR table
             $table->unsignedBigInteger('personalId'); // Foreign key referencing personal_information
+            $table->unsignedBigInteger('id');
             $table->date('consultationDate');
             $table->time('consultationTime');
             $table->string('modeOfTransaction', 50);
@@ -35,6 +36,11 @@ return new class extends Migration
             $table->foreign('personalId')
                 ->references('personalId')
                 ->on('personal_information')
+                ->onDelete('cascade');
+
+            $table->foreign('id')
+                ->references('id')
+                ->on('users')
                 ->onDelete('cascade');
         });
     }

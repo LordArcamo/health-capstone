@@ -932,6 +932,7 @@ export default {
       // Prepare the vaccination data
       const vaccinationData = {
         vaccinationDetails: {
+          id: this.id,
           vaccineCategory: this.form.vaccineCategory,
           vaccineType: this.form.vaccineType,
           dateOfVisit: this.form.dateOfVisit,

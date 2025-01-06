@@ -409,27 +409,6 @@ export default {
         fourMember: '',
         philhealthStatus: '',
         philhealthNo: '',
-        menarche: '',
-        sexualOnset: '',
-        periodDuration: '',
-        birthControl: '',
-        intervalCycle: '',
-        menopause: '',
-        lmp: '',
-        edc: '',
-        gravidity: '',
-        parity: '',
-        term: '',
-        preterm: '',
-        abortion: '',
-        living: '',
-        syphilisResult: '',
-        penicillin: '',
-        hemoglobin: '',
-        hematocrit: '',
-        urinalysis: '',
-        ttStatus: '',
-        tdDate: '',
       };
       this.errors = {};
     },
@@ -696,7 +675,8 @@ export default {
     confirmSubmit() {
       // Prepare the form data and parse weight and height as numbers
       const payload = {
-        personalId: this.selectedPatient?.personalId || null, // Include personalId if it exists
+        personalId: this.selectedPatient?.personalId || null,
+        id: this.id,
         firstName: this.form.firstName,
         lastName: this.form.lastName,
         middleName: this.form.middleName,

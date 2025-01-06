@@ -736,6 +736,7 @@ export default {
       // Prepare the form data and parse weight and height as numbers
       const payload = {
         personalId: this.selectedPatient?.personalId || null,
+        id: this.id,
         firstName: this.form.firstName,
         lastName: this.form.lastName,
         middleName: this.form.middleName,

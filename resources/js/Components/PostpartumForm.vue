@@ -311,25 +311,25 @@
   </div>
 </template>
 
-
-
 <script>
 import { router } from '@inertiajs/vue3';
 
 export default {
+  name: 'PostpartumForm',
+  emits: ['close'],
   props: {
     patient: {
       type: Object,
-      required: true,
+      required: true
     },
     existingData: {
       type: Object,
-      default: null,
-    },
+      default: null
+    }
   },
   data() {
     return {
-      isEditing: false, // Determines if we are in edit mode
+      isEditing: false,
       currentStep: 0,
       steps: [
         { title: 'Basic Info' },
@@ -338,7 +338,7 @@ export default {
         { title: 'Postpartum Details' },
       ],
       form: {
-        prenatalId: this.patient?.prenatalId || '',
+        prenatalId: this.patient?.prenatalId || null,
         lastName: '',
         firstName: '',
         middleName: '',
@@ -346,18 +346,18 @@ export default {
         prenatalDelivered: '',
         placeDelivered: '',
         modeOfDelivery: '',
-        attendantBirth: '',
         birthLength: '',
         birthWeight: '',
         deliveryDate: '',
         deliveryTime: '',
-        dateOfPostpartumVisitTwentyFourHoursDelivery: '',
-        dateOfPostpartumVisitOneWeekDelivery: '',
-        dateIronGiven: '',
-        noIronGiven: '',
+        attendantBirth: '',
         dateInitiatedBreastfeeding: '',
         timeInitiatedBreastfeeding: '',
+        dateOfPostpartumVisitTwentyFourHoursDelivery: '',
+        dateOfPostpartumVisitOneWeekDelivery: '',
         dateVitaminA: '',
+        dateIronGiven: '',
+        noIronGiven: '',
         dangerSignsMother: '',
         dangerSignsBaby: '',
       },
@@ -369,10 +369,7 @@ export default {
       immediate: true,
       handler(newData) {
         if (newData) {
-          this.form = {
-            ...this.form,
-            ...newData,
-          };
+          this.form = { ...this.form, ...newData };
         }
       },
     },
@@ -449,38 +446,59 @@ export default {
       }
     },
     handleSubmit() {
+      if (!this.validateStep()) {
+        return;
+      }
+
+      const formData = {
+        prenatalId: this.form.prenatalId,
+        lastName: this.form.lastName,
+        firstName: this.form.firstName,
+        middleName: this.form.middleName,
+        sex: this.form.sex,
+        prenatalDelivered: this.form.prenatalDelivered,
+        placeDelivered: this.form.placeDelivered,
+        modeOfDelivery: this.form.modeOfDelivery,
+        birthLength: parseFloat(this.form.birthLength) || 0,
+        birthWeight: parseFloat(this.form.birthWeight) || 0,
+        deliveryDate: this.form.deliveryDate,
+        deliveryTime: this.form.deliveryTime,
+        attendantBirth: this.form.attendantBirth,
+        dateInitiatedBreastfeeding: this.form.dateInitiatedBreastfeeding,
+        timeInitiatedBreastfeeding: this.form.timeInitiatedBreastfeeding,
+        dateOfPostpartumVisitTwentyFourHoursDelivery: this.form.dateOfPostpartumVisitTwentyFourHoursDelivery,
+        dateOfPostpartumVisitOneWeekDelivery: this.form.dateOfPostpartumVisitOneWeekDelivery,
+        dateVitaminA: this.form.dateVitaminA,
+        dateIronGiven: this.form.dateIronGiven,
+        noIronGiven: parseInt(this.form.noIronGiven) || 0,
+        dangerSignsMother: this.form.dangerSignsMother,
+        dangerSignsBaby: this.form.dangerSignsBaby,
+      };
+
+      console.log('Submitting form data:', formData); // Debug log
+
       if (this.existingData) {
-        // No validation for existing data; directly submit it
-        const url = `/postpartum/${this.existingData.postpartumId}`;
-        router.post(url, this.form, {
-          onSuccess: (response) => {
-            console.log('Form updated successfully:', response);
+        router.put(`/postpartum/${this.existingData.postpartumId}`, formData, {
+          onSuccess: () => {
             this.$emit('close');
           },
           onError: (errors) => {
             console.error('Error updating form:', errors);
-            if (errors.response && errors.response.data) {
-              this.errors = errors.response.data.errors || {}; // Handle server-side validation errors
-            }
+            this.errors = errors;
           },
+          preserveState: true,
         });
       } else {
-        // Validate new data before submission
-        if (this.validateStep()) {
-          const url = '/postpartum/store';
-          router.post(url, this.form, {
-            onSuccess: (response) => {
-              console.log('Form submitted successfully:', response);
-              this.$emit('close');
-            },
-            onError: (errors) => {
-              console.error('Error submitting form:', errors);
-              if (errors.response && errors.response.data) {
-                this.errors = errors.response.data.errors || {};
-              }
-            },
-          });
-        }
+        router.post('/postpartum', formData, {
+          onSuccess: () => {
+            this.$emit('close');
+          },
+          onError: (errors) => {
+            console.error('Error submitting form:', errors);
+            this.errors = errors;
+          },
+          preserveState: true,
+        });
       }
     },
 

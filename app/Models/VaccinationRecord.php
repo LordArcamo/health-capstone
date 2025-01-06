@@ -19,6 +19,7 @@ class VaccinationRecord extends Model
 
     protected $fillable = [
         'personalId',
+        'id',
         'vaccineCategory',
         'vaccineType',
         'dateOfVisit',
@@ -51,5 +52,10 @@ class VaccinationRecord extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(PersonalInformation::class, 'personalId');
+    }
+
+    public function users()
+    {
+        return $this->belongsTo(User::class, 'id');
     }
 }

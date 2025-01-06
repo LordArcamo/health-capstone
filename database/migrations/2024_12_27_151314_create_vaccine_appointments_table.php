@@ -14,9 +14,14 @@ return new class extends Migration
         Schema::create('vaccine_appointments', function (Blueprint $table) {
             $table->bigIncrements('vacAppointmentId');
             $table->unsignedBigInteger('vaccinationId');
-            $table->date('appointmentDate');
-            $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
-            $table->text('notes')->nullable();
+            $table->date('dateOfVisit');
+            $table->decimal('weight', 5, 2);
+            $table->decimal('height', 5, 2);
+            $table->decimal('temperature', 4, 2);
+            $table->string('antigenGiven');
+            $table->enum('exclusivelyBreastfed', ['Yes', 'No', 'None'])->default('None');
+            $table->string('injectedBy');
+            $table->date('nextAppointment');
             $table->timestamps();
 
             $table->foreign('vaccinationId')->references('vaccinationId')->on('vaccination_records')->onDelete('cascade');

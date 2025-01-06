@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('general_trimester', function (Blueprint $table) {
             $table->bigIncrements('generalTrimesterID');
             $table->unsignedBigInteger('prenatalId');
+            $table->unsignedBigInteger('id'); 
             $table->date('date_of_visit');
             $table->decimal('weight', 5, 2);
             $table->string('bp', 20);
@@ -26,6 +27,11 @@ return new class extends Migration
             $table->foreign('prenatalId')
                   ->references('prenatalId')
                   ->on('prenatal')
+                  ->onDelete('cascade');
+
+            $table->foreign('id')
+                  ->references('id')
+                  ->on('users')
                   ->onDelete('cascade');
         });
     }

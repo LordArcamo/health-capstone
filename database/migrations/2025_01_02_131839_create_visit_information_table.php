@@ -15,6 +15,7 @@ return new class extends Migration
             Schema::create('visit_information', function (Blueprint $table) {
                 $table->bigIncrements('visitInformationID'); // Primary key
                 $table->unsignedBigInteger('consultationDetailsID'); // Foreign key
+                $table->unsignedBigInteger('id');
                 $table->string('providerName', 100);
                 $table->string('chiefComplaints', 255);
                 $table->string('diagnosis', 255);
@@ -24,6 +25,11 @@ return new class extends Migration
                 $table->foreign('consultationDetailsID')
                     ->references('consultationDetailsID')
                     ->on('consultation_details')
+                    ->onDelete('cascade');
+
+                $table->foreign('id')
+                    ->references('id')
+                    ->on('users')
                     ->onDelete('cascade');
             });
         }

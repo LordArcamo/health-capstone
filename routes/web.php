@@ -23,6 +23,7 @@ use App\Http\Controllers\RiskManagementController;
 use App\Http\Controllers\VaccineAppointmentController;
 use App\Http\Controllers\AuthorizationRolesController;
 use App\Http\Controllers\DoctorDashboardController;
+use App\Http\Controllers\DoctorCheckupController;
 
 use App\Http\Middleware\RoleMiddleware;
 
@@ -71,6 +72,12 @@ Route::get('/login', function () {
     ]);
 });
 
+Route::middleware(['auth', 'verified', 'role: admin'])->group(function () {
+    Route::get('/register', function () {
+        return Inertia::render('Register');
+    })->name('register');
+});
+
 // Route::get('/', function () {
 //     return Inertia::render('Home');
 // })->name('home');
@@ -85,6 +92,7 @@ Route::get('/patients', [PatientController::class, 'show']);
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/itr', CheckUpController::class);
     Route::post('/itr/store', [CheckUpController::class, 'store'])->name('itr.store');
+    Route::post('/consultationDetails/store', [CheckUpController::class, 'storeDetails'])->name('consultationDetails.store');
     Route::get('/checkup/itr', [CheckUpController::class, 'create'])->name('itr');
     Route::get('/services/patients/itrtable', [CheckUpController::class, 'index'])->name('itr.index');
     Route::post('/services/patients/itrtable', [CheckUpController::class, 'import'])->name('itr.import');
@@ -110,6 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/prenatal', PreNatalController::class);
     Route::get('/checkup/prenatal', [PreNatalController::class, 'create'])->name('prenatal');
     Route::post('/prenatal/store', [PreNatalController::class, 'store'])->name('prenatal.store');
+    Route::post('/prenatalConstultationDetails/store', [PreNatalController::class, 'storeDetails'])->name('prenatalConstultationDetails.store');
     Route::get('/services/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
     Route::post('/services/patients/prenatal-postpartum', [PreNatalController::class, 'import'])->name('prenatal-postpartum.import');
     Route::get('/prenatal/{prenatalId}/trimester/{trimester}', [PreNatalController::class, 'fetchTrimesterData']);
@@ -138,7 +147,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/services/mental-health', [SessionController::class, 'index'])->name('mental-health.index');
-    
+
     // Mental Health Session Management
     Route::post('/mental-health-sessions', [SessionController::class, 'store']);
     Route::put('/mental-health-sessions/{id}', [SessionController::class, 'update']);
@@ -154,17 +163,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/vaccination/store', [VaccineController::class, 'store'])->name('vaccination.store');
     Route::get('/vaccination/history/{personalId}', [VaccineController::class, 'getHistory'])->name('vaccination.history');
 });
-
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/services/risk-management', [RiskManagementController::class, 'handle'])->name('risk-management.handle');
     Route::get('/patients/search-risk', [RiskManagementController::class, 'search'])->name('risk.search');
     Route::get('/patients/{personalId}', [RiskManagementController::class, 'show'])->name('risk.show');
     Route::post('/risk-management/store', [RiskManagementController::class, 'store'])->name('risk-management.store');
     Route::post('/risk-management{personalId}', [RiskManagementController::class, 'destroy'])->name('risk-management.destroy');
-    
+
 });
 
-Route::get('/api/personal-information/search', [PersonalInformationController::class, 'search'])->name('personal-information.search');
+// Route::get('/api/personal-information/search', [PersonalInformationController::class, 'search'])->name('personal-information.search');
 
 Route::get('/checkup', function () {
     // Retrieve all patients from the database
@@ -191,18 +199,25 @@ Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
     ->name('doctor.dashboard');
 
-    Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
+Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
     ->middleware(RoleMiddleware::class . ':doctor')
     ->name('doctor.checkup');
 
-    Route::get('/doctor-checkup', [DoctorDashboardController::class, 'checkup'])
+Route::get('/doctor-checkup', [DoctorDashboardController::class, 'checkup'])
     ->middleware(RoleMiddleware::class . ':doctor') // Restrict access to doctors
     ->name('doctor.checkup');
-    
+
 // Route to display a tailored doctor dashboard with user data
 Route::get('/doctor-dashboard/user', [DoctorDashboardController::class, 'doctor'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
     ->name('doctor.dashboard.user');
+
+Route::get('/doctor-checkup', [DoctorCheckupController::class, 'index'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Restrict access to doctors
+    ->name('ITRConsultation.checkup');
+
+
+
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');
 })->middleware(['auth', 'verified'])->name('mortality');
@@ -267,6 +282,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/appointments/store', [VaccineAppointmentController::class, 'store'])->name('appointments.store');
     Route::put('/appointments/{id}', [VaccineAppointmentController::class, 'update'])->name('appointments.update');
     Route::delete('/appointments/{id}', [VaccineAppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::get('/appointments/history/{vaccinationId}', [VaccineAppointmentController::class, 'getHistory']);
+    Route::get('/appointments/vaccination/{id}', [VaccineAppointmentController::class, 'getAppointmentsForVaccination']);
 });
 
 require __DIR__.'/auth.php';
