@@ -187,6 +187,10 @@ Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
     ->name('doctor.dashboard');
 
+    Route::get('/doctor-checkup/itr', [DoctorDashboardController::class, 'index'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
+    ->name('doctor.dashboard');
+
     Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
     ->middleware(RoleMiddleware::class . ':doctor')
     ->name('doctor.checkup');

@@ -17,54 +17,23 @@
             </p>
           </div>
           
-          <!-- Right Column - Contact Form -->
-          <div class="p-8 bg-white shadow-2xl rounded-xl">
-            <form action="#" method="POST" class="space-y-6">
-              <!-- Name and Email -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label for="name" class="block text-lg font-semibold text-gray-700 mb-2">Name</label>
-                  <input 
-                    type="text" 
-                    id="name" 
-                    name="name" 
-                    placeholder="Enter your name"
-                    class="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-lg"
-                  />
-                </div>
-                <div>
-                  <label for="email" class="block text-lg font-semibold text-gray-700 mb-2">Email Address</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    placeholder="Enter your email"
-                    class="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-lg"
-                  />
-                </div>
-              </div>
-  
-              <!-- Message -->
-              <div>
-                <label for="message" class="block text-lg font-semibold text-gray-700 mb-2">Message</label>
-                <textarea 
-                  id="message" 
-                  name="message" 
-                  rows="6" 
-                  placeholder="Write your message here..."
-                  class="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-lg"
-                ></textarea>
-              </div>
-  
-              <!-- Submit Button -->
-              <button 
-                type="submit" 
-                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-lg shadow-md hover:bg-green-700 transition-all focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                Send Message
-              </button>
-            </form>
-          </div>
+  <!-- Right Column - Contact Details -->
+<div class="p-8 bg-white shadow-2xl rounded-xl">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Contact Information</h2>
+  <p class="text-lg text-gray-700 mb-2">
+    📍 <strong>Address:</strong> RHU Initao, Poblacion, Initao, Misamis Oriental
+  </p>
+  <p class="text-lg text-gray-700 mb-2">
+    📞 <strong>Phone:</strong> (Insert contact number here)
+  </p>
+  <p class="text-lg text-gray-700 mb-2">
+    ✉️ <strong>Email:</strong> (Insert contact email here)
+  </p>
+  <p class="text-lg text-gray-700">
+    🕒 <strong>Operating Hours:</strong> Monday to Friday, 8:00 AM - 5:00 PM
+  </p>
+</div>
+
         </div>
       </div>
     </section>
