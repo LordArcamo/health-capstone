@@ -6,14 +6,13 @@ import { ref } from 'vue';
 
 // Receive patients from Inertia props
 const props = defineProps({
-  patients: {
-    type: Array,
-    required: true,
-  },
+  ITRConsultation: Array, // Declare the ITRConsultation prop coming from the server
 });
+
 
 // Declare reactive variables
 const selectedPatient = ref(null);
+
 
 // Emit custom events
 const emit = defineEmits(['patientsUpdated', 'patientSelected']);
@@ -42,6 +41,8 @@ function updatePatients(newPatients) {
   console.log('Updating patients in parent component:', newPatients);
   emit('patientsUpdated', newPatients); // Emit updated patients back to the parent
 }
+
+
 </script>
 
 <template>
@@ -50,7 +51,7 @@ function updatePatients(newPatients) {
 
     <!-- Modal for searching and selecting patients -->
     <DoctorCheckupModal
-      :patients="props.patients"
+      :patientsInQueue="props.ITRConsultation"
       @patientSelected="handlePatientSelected"
       @patients-updated="updatePatients"
     />

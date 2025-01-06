@@ -7,7 +7,7 @@ import Chart from 'chart.js/auto';
 // Props from backend
 const props = defineProps({
   totalPatients: Number,
-  patientsInQueue: Array,
+  ITRConsultation: Array,
   latestPatients: Array,
   todayAppointments: Number,
   criticalCases: Number,
@@ -16,7 +16,7 @@ const props = defineProps({
 
 // Reactive states
 const totalPatients = ref(props.totalPatients || 0);
-const patientsInQueue = ref(props.patientsInQueue || []);
+const ITRConsultation = ref(props.ITRConsultation || []);
 const latestPatients = ref(props.latestPatients || []);
 const todayAppointments = ref(props.todayAppointments || 0);
 const criticalCases = ref(props.criticalCases || 0);
@@ -25,11 +25,12 @@ const searchQueue = ref('');
 const showNotifications = ref(false);
 
 // Computed property for filtered patients in queue
-const filteredPatientsInQueue = computed(() => {
-  if (!searchQueue.value) return patientsInQueue.value;
-  return patientsInQueue.value.filter((patient) =>
-    patient.name.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
-    patient.reason.toLowerCase().includes(searchQueue.value.toLowerCase())
+const filteredITRConsultation = computed(() => {
+  if (!searchQueue.value) return ITRConsultation.value;
+  return ITRConsultation.value.filter((patient) =>
+    patient.firstName.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
+    patient.lastName.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
+    patient.visitType.toLowerCase().includes(searchQueue.value.toLowerCase())
   );
 });
 
@@ -164,7 +165,7 @@ onMounted(() => {
         <!-- Patients in Queue -->
         <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <h2 class="font-semibold text-lg">Patients in Queue</h2>
-          <p class="text-3xl font-bold">{{ patientsInQueue.length }}</p>
+          <p class="text-3xl font-bold">{{ ITRConsultation.length }}</p>
         </div>
 
         <!-- Today's Appointments -->
@@ -192,15 +193,15 @@ onMounted(() => {
               placeholder="Search for a patient..."
               class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4"
             />
-            <div v-if="filteredPatientsInQueue.length" class="space-y-4">
+            <div v-if="filteredITRConsultation.length" class="space-y-4">
               <div
-                v-for="(patient, index) in filteredPatientsInQueue"
+                v-for="(patient, index) in filteredITRConsultation"
                 :key="index"
                 class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition"
               >
-                <h3 class="text-lg font-semibold text-gray-700">{{ patient.name }}</h3>
+                <h3 class="text-lg font-semibold text-gray-700">{{ patient.firstName }} {{ patient.lastName }}</h3>
                 <p class="text-sm text-gray-500">Age: {{ patient.age }}</p>
-                <p class="text-sm text-gray-500">Reason: {{ patient.reason }}</p>
+                <p class="text-sm text-gray-500">Reason: {{ patient.visitType }}</p>
                 <button
                   @click="startCheckup(patient)"
                   class="mt-3 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600"

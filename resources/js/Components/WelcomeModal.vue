@@ -19,7 +19,7 @@
           Welcome to Initao RHU! <span class="ml-2">🌿</span>
         </h2>
         <p class="text-md text-gray-500 mt-2">
-          The Initao Regional Health Unit is dedicated to providing top-notch healthcare services to the community. 
+          The Initao Regional Health Unit is dedicated to providing top-notch healthcare services to the community.
           From preventive care to specialized checkups, we are here to ensure the well-being of every individual.
         </p>
       </div>
@@ -124,7 +124,7 @@
               General Checkup
             </Link>
             <Link
-              v-if="!selectedPatient.personalId || selectedPatient.sex === 'Female'"
+              v-if="!selectedPatient.personalId || selectedPatient.sex === 'Female' || selectedPatient.age >= 8"
               :href="route('prenatal', { patient_personalId: selectedPatient.personalId || 'new' })"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105"
             >

@@ -15,8 +15,9 @@ defineProps({
 const showingNavigationDropdown = ref(false);
 const patientsDropdownOpen = ref(false);
 const profileDropdownOpen = ref(false);
-
+const component = ref(route.name || "");
 // Toggle dropdown visibility
+
 const toggleDropdown = (dropdown) => {
   if (dropdown === "patients") {
     patientsDropdownOpen.value = !patientsDropdownOpen.value;
@@ -141,7 +142,7 @@ onBeforeUnmount(() => {
             RHU Personnels
           </NavLink>
 
-          <NavLink v-if="role === 'admin'"  href="/system-analytics" :active="component === 'Analytics'">
+          <NavLink v-if="role === 'admin'"  href="/register" :active="component === 'Register'">
             <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
             Register Staff
           </NavLink>

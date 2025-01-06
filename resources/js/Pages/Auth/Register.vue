@@ -5,6 +5,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { onMounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
 const form = useForm({
     name: '',
@@ -14,11 +16,21 @@ const form = useForm({
     role: 'staff', // Default role
 });
 
+const { auth } = usePage().props; // Get the current user data
+
 const submit = () => {
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+onMounted(() => {
+    // Redirect non-admin users
+    if (auth?.user?.role !== 'admin') {
+        window.location.href = '/'; // Redirect to homepage
+        console.warn('Access denied: Only admins can access this page.');
+    }
+});
 </script>
 <template>
     <GuestLayout>

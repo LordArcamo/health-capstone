@@ -23,6 +23,7 @@ use App\Http\Controllers\RiskManagementController;
 use App\Http\Controllers\VaccineAppointmentController;
 use App\Http\Controllers\AuthorizationRolesController;
 use App\Http\Controllers\DoctorDashboardController;
+use App\Http\Controllers\DoctorCheckupController;
 
 use App\Http\Middleware\RoleMiddleware;
 
@@ -69,6 +70,12 @@ Route::get('/login', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
+});
+
+Route::middleware(['auth', 'verified', 'role: admin'])->group(function () {
+    Route::get('/register', function () {
+        return Inertia::render('Register');
+    })->name('register');
 });
 
 // Route::get('/', function () {
@@ -188,18 +195,25 @@ Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
     ->name('doctor.dashboard');
 
-    Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
+Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
     ->middleware(RoleMiddleware::class . ':doctor')
     ->name('doctor.checkup');
 
-    Route::get('/doctor-checkup', [DoctorDashboardController::class, 'checkup'])
+Route::get('/doctor-checkup', [DoctorDashboardController::class, 'checkup'])
     ->middleware(RoleMiddleware::class . ':doctor') // Restrict access to doctors
     ->name('doctor.checkup');
-    
+
 // Route to display a tailored doctor dashboard with user data
 Route::get('/doctor-dashboard/user', [DoctorDashboardController::class, 'doctor'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
     ->name('doctor.dashboard.user');
+
+Route::get('/doctor-checkup', [DoctorCheckupController::class, 'index'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Restrict access to doctors
+    ->name('ITRConsultation.checkup');
+
+
+
 Route::get('/mortality', function () {
     return Inertia::render('Mortality');
 })->middleware(['auth', 'verified'])->name('mortality');
