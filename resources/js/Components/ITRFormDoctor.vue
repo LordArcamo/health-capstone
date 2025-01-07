@@ -174,7 +174,9 @@
           </div>
         </div>
         <div v-if="step === 2">
-          <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
+          <h3 class="text-lg font-semibold mb-4">Visit Informations
+          
+          </h3>
           <div class="grid grid-cols-2 gap-4">
 
             <div>
