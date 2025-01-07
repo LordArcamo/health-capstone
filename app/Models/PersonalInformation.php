@@ -39,4 +39,8 @@ class PersonalInformation extends Model
     {
         return $this->hasMany(RiskManagement::class, 'personalId', 'personalId');
     }
+    public function consultations()
+    {
+        return $this->hasMany(ConsultationDetail::class, 'personalId', 'personalId');
+    }
 }

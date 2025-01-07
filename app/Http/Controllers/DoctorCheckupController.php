@@ -23,6 +23,7 @@ class DoctorCheckupController extends Controller
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->whereDate('consultation_details.consultationDate', $today) // Filter for today's date
             ->select(
+                'consultation_details.consultationDetailsID',
                 'personal_information.personalId',
                 'personal_information.firstName',
                 'personal_information.lastName',
@@ -57,6 +58,7 @@ class DoctorCheckupController extends Controller
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
             ->whereDate('prenatal_consultation_details.consultationDate', $today) // Filter for today's date
             ->select(
+                'prenatal_consultation_details.prenatalConsultationDetailsID',
                 'personal_information.personalId',
                 'personal_information.firstName',
                 'personal_information.lastName',
@@ -102,10 +104,45 @@ class DoctorCheckupController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $consultationDetailsID = $request->get('consultationDetailsID');
+
+        if (!$consultationDetailsID) {
+            return Inertia::render('CheckUp/ItrDoctorCheckup', [
+                'consultationDetails' => null,
+            ]);
+        }
+
+        // Fetch consultation details and related patient information
+        $consultationDetail = DB::table('consultation_details')
+            ->join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
+            ->where('consultation_details.consultationDetailsID', $consultationDetailsID)
+            ->select(
+                'consultation_details.*',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.age',
+                'personal_information.sex',
+                'personal_information.contact',
+                'personal_information.purok',
+                'personal_information.barangay'
+            )
+            ->first();
+
+        if (!$consultationDetail) {
+            return Inertia::render('CheckUp/ItrDoctorCheckup', [
+                'consultationDetails' => null,
+            ]);
+        }
+
+        // Pass data to Inertia
+        return Inertia::render('CheckUp/ItrDoctorCheckup', [
+            'consultationDetails' => $consultationDetail,
+        ]);
     }
+
+
 
     /**
      * Store a newly created resource in storage.

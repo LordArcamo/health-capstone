@@ -23,6 +23,7 @@ class DoctorDashboardController extends Controller
                 ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
                 ->whereDate('consultation_details.consultationDate', $today) // Filter for today's date
                 ->select(
+                    'consultation_details.consultationDetailsID',
                     'personal_information.personalId',
                     'personal_information.firstName',
                     'personal_information.lastName',
@@ -57,6 +58,7 @@ class DoctorDashboardController extends Controller
                 ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
                 ->whereDate('prenatal_consultation_details.consultationDate', $today) // Filter for today's date
                 ->select(
+                    'prenatal_consultation_details.prenatalConsultationDetailsID',
                     'personal_information.personalId',
                     'personal_information.firstName',
                     'personal_information.lastName',

@@ -36,10 +36,10 @@ const filteredITRConsultation = computed(() => {
 
 // Navigate to the checkup page
 const startCheckup = (patient) => {
-  if (patient?.id) {
-    router.visit(`/doctor-checkup/${patient.id}`, {
+  if (patient?.consultationDetailsID) {
+    router.visit(`/doctor-checkup/itr`, {
       method: 'get',
-      onSuccess: () => console.log(`Navigated to checkup page for ${patient.name}`),
+      data: { consultationDetailsID : patient.consultationDetailsID  },
     });
   } else {
     console.warn('Invalid patient data: Missing patient ID.');

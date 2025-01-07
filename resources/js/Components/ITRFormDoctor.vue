@@ -250,10 +250,9 @@
 <script>
 export default {
   props: {
-    selectedPatient: {
-      type: Object,
-      required: false,
-      default: () => ({}),
+    consultationDetails: {
+        type: Object,
+        default: null,
     },
     onSubmit: Function,
   },
@@ -326,72 +325,36 @@ export default {
     },
   },
   watch: {
-    selectedPatient: {
-      immediate: true,
-      handler(newPatient) {
-        if (newPatient && newPatient.personalId === null) {
-          // Clear the form for a new patient
-          this.resetForm();
-        } else if (newPatient && Object.keys(newPatient).length > 0) {
-          // Populate the form with selected patient data
-          this.populateForm(newPatient);
+    consultationDetails: {
+      handler(newDetails) {
+        if (newDetails) {
+          this.form = {
+            consultationDate: newDetails.consultationDate || '',
+            consultationTime: newDetails.consultationTime || '',
+            modeOfTransaction: newDetails.modeOfTransaction || '',
+            bloodPressure: newDetails.bloodPressure || '',
+            temperature: newDetails.temperature || '',
+            height: newDetails.height || '',
+            weight: newDetails.weight || '',
+            referredFrom: newDetails.referredFrom || '',
+            referredTo: newDetails.referredTo || '',
+            reasonsForReferral: newDetails.reasonsForReferral || '',
+            referredBy: newDetails.referredBy || '',
+            natureOfVisit: newDetails.natureOfVisit || '',
+            visitType: newDetails.visitType || '',
+            providerName: newDetails.providerName || '',
+          };
         }
       },
-    },
-    // Watch for changes in birthdate and update the age field
-    computedAge(newAge) {
-      this.form.age = newAge;
-    },
-    'form.birthdate': function () {
-      this.form.age = this.computedAge; // Update age when birthdate changes
-    },
-    'form.modeOfTransaction': function (newVal) {
-      if (newVal === 'Referral') {
-        // Reset the fields to empty when Referral is selected
-        this.form.referredFrom = '';
-        this.form.referredTo = '';
-        this.form.reasonsForReferral = '';
-        this.form.referredBy = '';
-      } else {
-        // Set the fields to "None" when not Referral
-        this.form.referredFrom = 'None';
-        this.form.referredTo = 'None';
-        this.form.reasonsForReferral = 'None';
-        this.form.referredBy = 'None';
-      }
+      immediate: true, // Trigger immediately on component load
     },
   },
   methods: {
     resetForm() {
       this.form = {
-        firstName: '',
-        lastName: '',
-        middleName: '',
-        suffix: '',
-        purok: '',
-        barangay: '',
-        age: '',
-        birthdate: '',
-        contact: '',
-        sex: '',
-        consultationDate: '',
-        consultationTime: '',
-        modeOfTransaction: '',
-        bloodPressure: '',
-        temperature: '',
-        height: '',
-        weight: '',
-        providerName: '',
-        natureOfVisit: '',
-        visitType: '',
-        session: '',
         chiefComplaints: '',
         diagnosis: '',
         medication: '',
-        referredFrom: '',
-        referredTo: '',
-        reasonsForReferral: '',
-        referredBy: '',
       };
       this.errors = {};
     },
@@ -631,31 +594,8 @@ export default {
     },
     confirmSubmit() {
       const payload = {
-        personalId: this.selectedPatient?.personalId || null,
-        firstName: this.form.firstName,
-        lastName: this.form.lastName,
-        middleName: this.form.middleName,
-        suffix: this.form.suffix,
-        purok: this.form.purok,
-        barangay: this.form.barangay,
-        age: this.form.age,
-        birthdate: this.form.birthdate,
-        contact: this.form.contact,
-        sex: this.form.sex,
-        consultationDate: this.form.consultationDate,
-        consultationTime: this.form.consultationTime,
-        modeOfTransaction: this.form.modeOfTransaction,
-        bloodPressure: this.form.bloodPressure,
-        temperature: this.form.temperature,
-        height: parseFloat(this.form.height),
-        weight: parseFloat(this.form.weight),
-        referredFrom: this.form.referredFrom || 'None',
-        referredTo: this.form.referredTo || 'None',
-        reasonsForReferral: this.form.reasonsForReferral || 'None',
-        referredBy: this.form.referredBy || 'None',
-        providerName: this.form.providerName,
-        natureOfVisit: this.form.natureOfVisit,
-        visitType: this.form.visitType,
+        consultationDetailsID: this.selectedPatient?.consultationDetailsID || null,
+        id:this.id,
         chiefComplaints: this.form.chiefComplaints,
         diagnosis: this.form.diagnosis,
         medication: this.form.medication,
