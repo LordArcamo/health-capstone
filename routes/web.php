@@ -124,6 +124,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/prenatal/{prenatalId}/trimester/{trimester}', [PreNatalController::class, 'fetchTrimesterData']);
 });
 
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/postpartum', PostpartumController::class);
     Route::get('/checkup/postpartum', [PostpartumController::class, 'create'])->name('postpartum');
@@ -189,6 +190,7 @@ Route::get('/patients/{personalId}', [PatientController::class, 'show'])->name('
 Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
     ->middleware(RoleMiddleware::class . ':admin')
     ->name('admin.dashboard');
+    
 
 // Route to display the main doctor dashboard with static data
 Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
@@ -197,7 +199,7 @@ Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
 
     Route::get('/doctor-checkup/itr', [DoctorCheckupController::class, 'create'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
-    ->name('doctor.dashboard');
+    ->name('doctor.checkup.itr');
 
 
 Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
@@ -219,9 +221,9 @@ Route::get('/doctor-checkup', [DoctorCheckupController::class, 'index'])
 
 
 
-Route::get('/mortality', function () {
-    return Inertia::render('Mortality');
-})->middleware(['auth', 'verified'])->name('mortality');
+Route::get('/staff', function () {
+    return Inertia::render('Admin/Staff');
+})->middleware(['auth', 'verified'])->name('staff');
 
 Route::get('/itr-services', function () {
     return Inertia::render('About/ItrDescription');

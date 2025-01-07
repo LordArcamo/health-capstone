@@ -9,56 +9,12 @@ import Notifications from '@kyvg/vue3-notification';
 
 // Import Font Awesome library and icons
 import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import {
-    faHome,
-    faUser,
-    faCaretUp,
-    faCaretDown,
-    faClipboard,
-    faCalendarCheck,
-    faHistory,
-    faChevronDown,
-    faHeartbeat,
-    faChevronRight,
-    faCalendar,
-    faFileMedical,
-    faBars,
-    faTimes,
-    faEllipsisV,
-    faSignOutAlt,
-    faChartBar,
-    faPlusCircle,
-    faFileDownload,
-    faSearch,      // Added faSearch
-    faFilter,      // Added faFilter
-    faFileImport   // Added faFileImport
-} from '@fortawesome/free-solid-svg-icons';
 
 // Add icons to the Font Awesome library
 library.add(
-    faHome,
-    faUser,
-    faCaretUp,
-    faCaretDown,
-    faClipboard,
-    faCalendarCheck,
-    faHistory,
-    faHeartbeat,
-    faChevronDown,
-    faChevronRight,
-    faCalendar,
-    faFileMedical,
-    faBars,
-    faTimes,
-    faSignOutAlt,
-    faEllipsisV,
-    faChartBar,
-    faPlusCircle,
-    faFileDownload,
-    faSearch,      // Added faSearch
-    faFilter,      // Added faFilter
-    faFileImport   // Added faFileImport
+   fas
 );
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';

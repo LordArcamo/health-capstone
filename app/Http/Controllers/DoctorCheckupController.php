@@ -92,7 +92,7 @@ class DoctorCheckupController extends Controller
         $data = $generalConsultations->union($prenatalConsultations)->get();
 
         // Pass the data to Inertia
-        return Inertia::render('DoctorCheckup', [
+        return Inertia::render('Doctor/DoctorCheckup', [
             'ITRConsultation' => $data,
         ]);
     }
@@ -109,7 +109,7 @@ class DoctorCheckupController extends Controller
         $consultationDetailsID = $request->get('consultationDetailsID');
 
         if (!$consultationDetailsID) {
-            return Inertia::render('CheckUp/ItrDoctorCheckup', [
+            return Inertia::render('Doctor/ItrDoctorCheckup', [
                 'consultationDetails' => null,
             ]);
         }
@@ -122,22 +122,24 @@ class DoctorCheckupController extends Controller
                 'consultation_details.*',
                 'personal_information.firstName',
                 'personal_information.lastName',
+                'personal_information.suffix',
                 'personal_information.age',
                 'personal_information.sex',
                 'personal_information.contact',
                 'personal_information.purok',
-                'personal_information.barangay'
+                'personal_information.barangay',
+                'personal_information.birthdate'
             )
             ->first();
 
         if (!$consultationDetail) {
-            return Inertia::render('CheckUp/ItrDoctorCheckup', [
+            return Inertia::render('Doctor/ItrDoctorCheckup', [
                 'consultationDetails' => null,
             ]);
         }
 
         // Pass data to Inertia
-        return Inertia::render('CheckUp/ItrDoctorCheckup', [
+        return Inertia::render('Doctor/ItrDoctorCheckup', [
             'consultationDetails' => $consultationDetail,
         ]);
     }

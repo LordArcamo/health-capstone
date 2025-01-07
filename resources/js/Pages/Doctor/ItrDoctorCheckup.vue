@@ -3,18 +3,13 @@ import NewLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import ITRFormDoctor from '@/Components/ITRFormDoctor.vue';
 import { Inertia } from '@inertiajs/inertia';
-import { usePage } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
 
-
-const page = usePage();
-const consultationDetails = page.props.value?.consultationDetails || null;
-
-if (!consultationDetails) {
-  console.error('No valid consultationDetails provided:', consultationDetails);
-} else {
-  console.log('Received consultationDetails:', consultationDetails);
-}
+defineProps({
+  consultationDetails: {
+    type: Object,
+    default: null, 
+  },
+})
 
 function submitForm(payload) {
   console.log("Submitting from parent:", payload);
@@ -54,7 +49,7 @@ function submitForm(payload) {
   <Head title="Individual Treatment Record" />
   <NewLayout>
     <ITRFormDoctor
-        :consultation-details="consultationDetails"
+        :consultationDetails="consultationDetails"
         @submitForm="submitForm"
       />
   </NewLayout>

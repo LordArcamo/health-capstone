@@ -62,14 +62,12 @@ onBeforeUnmount(() => {
     <div class="mx-auto px-6 sm:px-6 lg:px-8">
       <div class="flex justify-between h-20 items-center">
         <!-- Logo Section -->
-        <a
-  :href="role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard'"
-  @click.prevent="$inertia.visit(role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard')"
-  class="flex items-center space-x-4 cursor-pointer"
->
-  <img :src="Logo" alt="RHU Logo" class="h-20 w-auto" />
-  <h1 class="text-lg font-black">Initao Regional Health Unit</h1>
-</a>
+        <a :href="role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard'"
+          @click.prevent="$inertia.visit(role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard')"
+          class="flex items-center space-x-4 cursor-pointer">
+          <img :src="Logo" alt="RHU Logo" class="h-20 w-auto" />
+          <h1 class="text-lg font-black">Initao Regional Health Unit</h1>
+        </a>
 
 
         <!-- Desktop Navigation -->
@@ -77,14 +75,13 @@ onBeforeUnmount(() => {
           <!-- Dashboard Link -->
           <NavLink
             :href="role === 'admin' ? '/admin-dashboard' : role === 'doctor' ? '/doctor-dashboard' : '/dashboard'"
-            :active="false"
-          >
+            :active="false">
             <font-awesome-icon :icon="['fas', 'home']" class="mr-2" />
             Dashboard
           </NavLink>
 
           <!-- Checkup Link (Visible for Doctors) -->
-          <NavLink  v-if="role === 'staff'" href="/checkup" :active="false">
+          <NavLink v-if="role === 'staff'" href="/checkup" :active="false">
             <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-2" />
             Checkup
           </NavLink>
@@ -96,29 +93,23 @@ onBeforeUnmount(() => {
 
           <!-- Services Dropdown -->
           <div class="relative">
-            <button
-              @click="toggleDropdown('patients')"
-              class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 dropdown-button"
-            >
+            <button @click="toggleDropdown('patients')"
+              class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 dropdown-button">
               <font-awesome-icon :icon="['fas', 'clipboard']" class="mr-2" />
               Services
-              <font-awesome-icon
-                :icon="['fas', 'chevron-down']"
-                :class="{ 'rotate-180': patientsDropdownOpen }"
-                class="ml-2 transition-transform duration-200"
-              />
+              <font-awesome-icon :icon="['fas', 'chevron-down']" :class="{ 'rotate-180': patientsDropdownOpen }"
+                class="ml-2 transition-transform duration-200" />
             </button>
 
             <!-- Dropdown Menu -->
-            <div
-              v-if="patientsDropdownOpen"
-              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-60 z-50 dropdown-menu"
-            >
+            <div v-if="patientsDropdownOpen"
+              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-60 z-50 dropdown-menu">
               <div class="grid grid-cols-1 gap-4 p-4">
                 <NavLink href="/itr-services" class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
                   Individual Treatment Record
                 </NavLink>
-                <NavLink href="/prenatal-postpartum-services" class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
+                <NavLink href="/prenatal-postpartum-services"
+                  class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
                   Prenatal Records
                 </NavLink>
                 <NavLink href="/epi-records-services" class="block text-gray-700 hover:bg-gray-100 px-2 py-1 rounded">
@@ -132,45 +123,41 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Analytics Link (Admin Only) -->
-          <NavLink  href="/system-analytics" :active="false">
-            <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
+          <NavLink href="/system-analytics" :active="false">
+            <font-awesome-icon :icon="['fas', 'chart-line']" class="mr-2" />
             System Analytics
           </NavLink>
-
-          <NavLink v-if="role === 'admin'" href="/system-analytics" :active="component === 'Analytics'">
-            <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
-            RHU Personnels
+          <NavLink v-if="role === 'admin'" href="/staff" :active="component === 'Analytics'">
+            <!-- Changed icon from 'chart-bar' to 'users' -->
+            <font-awesome-icon :icon="['fas', 'users']" class="mr-2" />
+            RHU Users
           </NavLink>
 
-          <NavLink v-if="role === 'admin'"  href="/register" :active="component === 'Register'">
-            <font-awesome-icon :icon="['fas', 'chart-bar']" class="mr-2" />
-            Register Staff
+          <NavLink v-if="role === 'admin'" href="/register" :active="component === 'Register'">
+            <!-- Changed icon from 'chart-bar' to 'user-plus' -->
+            <font-awesome-icon :icon="['fas', 'user-plus']" class="mr-2" />
+            Register User
           </NavLink>
+
           <!-- Profile Dropdown -->
           <div class="relative">
-            <button
-              @click="toggleDropdown('profile')"
-              class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 dropdown-button"
-            >
+            <button @click="toggleDropdown('profile')"
+              class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 dropdown-button">
               <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />
               Profile
-              <font-awesome-icon
-                :icon="['fas', 'chevron-down']"
-                :class="{ 'rotate-180': profileDropdownOpen }"
-                class="ml-2 transition-transform duration-200"
-              />
+              <font-awesome-icon :icon="['fas', 'chevron-down']" :class="{ 'rotate-180': profileDropdownOpen }"
+                class="ml-2 transition-transform duration-200" />
             </button>
 
             <!-- Dropdown Menu -->
-            <div
-              v-if="profileDropdownOpen"
-              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-full z-10"
-            >
+            <div v-if="profileDropdownOpen"
+              class="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-gray-200 w-full z-10">
               <NavLink href="/profile" class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-t">
                 <font-awesome-icon :icon="['fas', 'cog']" class="mr-2" />
                 Account Settings
               </NavLink>
-              <NavLink :href="route('logout')" method="post" class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-b">
+              <NavLink :href="route('logout')" method="post"
+                class="block text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-b">
                 <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="mr-2" />
                 Logout
               </NavLink>
@@ -180,10 +167,8 @@ onBeforeUnmount(() => {
 
         <!-- Mobile Menu Toggle -->
         <div class="sm:hidden flex items-center">
-          <button
-            @click="showingNavigationDropdown = !showingNavigationDropdown"
-            class="p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none"
-          >
+          <button @click="showingNavigationDropdown = !showingNavigationDropdown"
+            class="p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none">
             <font-awesome-icon :icon="showingNavigationDropdown ? 'times' : 'bars'" class="h-6 w-6" />
           </button>
         </div>

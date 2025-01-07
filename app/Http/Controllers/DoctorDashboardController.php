@@ -91,7 +91,7 @@ class DoctorDashboardController extends Controller
             // Combine both queries using union
             $data = $generalConsultations->union($prenatalConsultations)->get();
 
-        return Inertia::render('DoctorDashboard', [
+        return Inertia::render('Doctor/DoctorDashboard', [
             'totalPatients' => 1200,
             'ITRConsultation' => $data,
             'latestPatients' => [
@@ -114,7 +114,7 @@ class DoctorDashboardController extends Controller
      */
     public function doctor()
     {
-        return Inertia::render('DoctorDashboard', [
+        return Inertia::render('Doctor/DoctorDashboard', [
             'pageTitle' => 'Doctor Dashboard',
             'user' => auth()->user(),
         ]);
@@ -131,13 +131,13 @@ class DoctorDashboardController extends Controller
         $nextPatient = $patientsQueue[0] ?? null;
 
         if (!$nextPatient) {
-            return Inertia::render('DoctorCheckup', [
+            return Inertia::render('Doctor/DoctorCheckup', [
                 'patient' => null,
                 'message' => 'No patients are currently in the checkup queue.',
             ]);
         }
 
-        return Inertia::render('DoctorCheckup', [
+        return Inertia::render('Doctor/DoctorCheckup', [
             'patient' => $nextPatient,
         ]);
     }

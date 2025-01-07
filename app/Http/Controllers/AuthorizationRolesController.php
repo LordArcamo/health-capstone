@@ -15,7 +15,7 @@ class AuthorizationRolesController extends Controller
     public function admin()
     {
         // Pass data to the Inertia view
-        return Inertia::render('AdminDashboard', [
+        return Inertia::render('Admin/AdminDashboard', [
             'pageTitle' => 'Admin Dashboard',
             'user' => auth()->user(), // Optional: Pass authenticated user data
         ]);
