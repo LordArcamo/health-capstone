@@ -229,6 +229,11 @@
                 @input="validateWeight" required/>
                 <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
             </div>
+            <div>
+                <label class="block">Name of Attending Physician:</label>
+                <input type="text" v-model="form.providerName" @input="capitalizeName('providerName')" placeholder="Example: Dr. Jose Legazpi" class="input" />
+                <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
+            </div>
 
           </div>
           <div v-if="form.modeOfTransaction === 'Referral'" class="mt-4">
@@ -380,7 +385,7 @@ export default {
         referredTo: '',
         reasonsForReferral: '',
         referredBy: '',
-        // providerName: '',
+        providerName: '',
         natureOfVisit: '',
         visitType: '',
         // chiefComplaints: '',
@@ -756,7 +761,7 @@ export default {
         this.step++;
       } else if (this.step === 3 && this.validateStep3()) {
         this.step = 3;;
-      } 
+      }
     },
     prevStep() {
       this.step--;
@@ -831,6 +836,7 @@ export default {
     referredBy: this.form.referredBy || 'None',
     natureOfVisit: this.form.natureOfVisit,
     visitType: this.form.visitType,
+    providerName: this.form.providerName,
   };
 
   console.log('Submitting form with payload:', payload);
