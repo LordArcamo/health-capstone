@@ -40,8 +40,140 @@
 
       <form @submit.prevent="triggerSubmit">
 
-        <!-- Step 3: Visit Information -->
+        <!-- Step 1: Review Patient Information -->
         <div v-if="step === 1">
+          <h3 class="text-2xl font-semibold mb-6 text-gray-800">Patient Information Review</h3>
+
+          <!-- Basic Information Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Basic Information</h4>
+              <div>
+                <p class="font-medium text-gray-600">Full Name:</p>
+                <p class="text-gray-800">{{ form.firstName }} {{ form.middleName }} {{ form.lastName }} {{ form.suffix
+                  || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Age:</p>
+                <p class="text-gray-800">{{ form.age || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Birthdate:</p>
+                <p class="text-gray-800">{{ form.birthdate || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Contact:</p>
+                <p class="text-gray-800">{{ form.contact || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Sex:</p>
+                <p class="text-gray-800">{{ form.sex || 'Not Provided' }}</p>
+              </div>
+            </div>
+
+            <!-- Address Information Section -->
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Address Information</h4>
+              <div>
+                <p class="font-medium text-gray-600">Purok:</p>
+                <p class="text-gray-800">{{ form.purok || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Barangay:</p>
+                <p class="text-gray-800">{{ form.barangay || 'Not Provided' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consultation Details Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Consultation Details</h4>
+              <div>
+                <p class="font-medium text-gray-600">Consultation Date:</p>
+                <p class="text-gray-800">{{ form.consultationDate || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Consultation Time:</p>
+                <p class="text-gray-800">{{ form.consultationTime || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Mode of Transaction:</p>
+                <p class="text-gray-800">{{ form.modeOfTransaction || 'Not Provided' }}</p>
+              </div>
+            </div>
+
+            <!-- Medical Details Section -->
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Medical Details</h4>
+              <div>
+                <p class="font-medium text-gray-600">Blood Pressure:</p>
+                <p class="text-gray-800">{{ form.bloodPressure || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Temperature:</p>
+                <p class="text-gray-800">{{ form.temperature || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Height:</p>
+                <p class="text-gray-800">{{ form.height || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Weight:</p>
+                <p class="text-gray-800">{{ form.weight || 'Not Provided' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Referral Details Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Referral Details</h4>
+              <div>
+                <p class="font-medium text-gray-600">Referred From:</p>
+                <p class="text-gray-800">{{ form.referredFrom || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Referred To:</p>
+                <p class="text-gray-800">{{ form.referredTo || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Reasons for Referral:</p>
+                <p class="text-gray-800">{{ form.reasonsForReferral || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Referred By:</p>
+                <p class="text-gray-800">{{ form.referredBy || 'Not Provided' }}</p>
+              </div>
+            </div>
+
+            <!-- Additional Details Section -->
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Additional Details</h4>
+              <div>
+                <p class="font-medium text-gray-600">Provider Name:</p>
+                <p class="text-gray-800">{{ form.providerName || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Nature of Visit:</p>
+                <p class="text-gray-800">{{ form.natureOfVisit || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Visit Type:</p>
+                <p class="text-gray-800">{{ form.visitType || 'Not Provided' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="mt-6 flex justify-between">
+            <button @click="prevStep"
+              class="btn bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded-md">Back</button>
+            <button @click="nextStep"
+              class="btn bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md">Next</button>
+          </div>
+        </div>
+        <div v-if="step === 2">
           <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
           <div class="grid grid-cols-2 gap-4">
 
@@ -49,7 +181,7 @@
               <label class="block">Chief Complaints:</label>
               <textarea v-model="form.chiefComplaints" placeholder="Example: Low Bowel Movements etc."
                 class="input"></textarea>
-                <span v-if="errors.chiefComplaints" class="text-red-600 text-sm">{{ errors.chiefComplaints }}</span>
+              <span v-if="errors.chiefComplaints" class="text-red-600 text-sm">{{ errors.chiefComplaints }}</span>
             </div>
             <div>
               <label class="block">Diagnosis:</label>
@@ -69,7 +201,7 @@
         </div>
 
         <!-- Step 4: Review Submitted Data -->
-        <div v-if="step === 2">
+        <div v-if="step === 3">
           <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <!-- Loop through form fields to display data -->
@@ -129,8 +261,8 @@ export default {
     return {
       alertMessage: '',
       showModal: false, // Tracks modal visibility
-      stepTitles: ['Patient Information',
-        'Consultation Details',
+      stepTitles: [
+        'Medical Record',
         'Visit Information',
         'Review Information'
       ],
@@ -292,28 +424,28 @@ export default {
       }
     },
     validateConsultationDate() {
-    const today = new Date();
-    const inputDate = new Date(this.form.consultationDate);
+      const today = new Date();
+      const inputDate = new Date(this.form.consultationDate);
 
-    if (!this.form.consultationDate) {
-      this.errors.consultationDate = "Consultation date is required.";
-      return false;
-    }
+      if (!this.form.consultationDate) {
+        this.errors.consultationDate = "Consultation date is required.";
+        return false;
+      }
 
-    if (isNaN(inputDate.getTime())) {
-      this.errors.consultationDate = "Please enter a valid date.";
-      return false;
-    }
+      if (isNaN(inputDate.getTime())) {
+        this.errors.consultationDate = "Please enter a valid date.";
+        return false;
+      }
 
-    if (inputDate > today) {
-      this.errors.consultationDate = "Consultation date cannot be in the future.";
-      return false;
-    }
+      if (inputDate > today) {
+        this.errors.consultationDate = "Consultation date cannot be in the future.";
+        return false;
+      }
 
-    // Clear error if validation passes
-    this.errors.consultationDate = "";
-    return true;
-  },
+      // Clear error if validation passes
+      this.errors.consultationDate = "";
+      return true;
+    },
     formatBloodPressure(event) {
       let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
       if (value.length > 3) {
@@ -426,7 +558,7 @@ export default {
       this.form.weight = value;
     },
 
-    validateStep1() {
+    validateStep2() {
       this.errors = {};
       let valid = true;
 
@@ -445,10 +577,12 @@ export default {
       return valid;
     },
     nextStep() {
-      if (this.step === 1 && this.validateStep1()) {
+      if (this.step === 1) {
         this.step++;
-      } else if (this.step === 1 && this.validateStep1()) {
-        this.step = 1;
+      } else if (this.step === 2 && this.validateStep2()) {
+        this.step++;
+      } else if (this.step === 2 && this.validateStep2()) {
+        this.step = 2;
       }
     },
     prevStep() {
@@ -458,7 +592,7 @@ export default {
       if (targetStep > this.step) {
         // Validate the current step before proceeding
         const isCurrentStepValid =
-          (this.step === 1 && this.validateStep1())
+          (this.step === 1)
         if (!isCurrentStepValid) {
           this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
 
@@ -489,51 +623,51 @@ export default {
       }
     },
     triggerSubmit() {
-      if (this.validateStep1() && this.validateStep2() && this.validateStep3()) {
+      if (this.validateStep2()) {
         this.showModal = true; // Show confirmation modal
       } else {
         this.successMessage = 'Please complete all required fields before submitting.';
       }
     },
     confirmSubmit() {
-  const payload = {
-    personalId: this.selectedPatient?.personalId || null,
-    firstName: this.form.firstName,
-    lastName: this.form.lastName,
-    middleName: this.form.middleName,
-    suffix: this.form.suffix,
-    purok: this.form.purok,
-    barangay: this.form.barangay,
-    age: this.form.age,
-    birthdate: this.form.birthdate,
-    contact: this.form.contact,
-    sex: this.form.sex,
-    consultationDate: this.form.consultationDate,
-    consultationTime: this.form.consultationTime,
-    modeOfTransaction: this.form.modeOfTransaction,
-    bloodPressure: this.form.bloodPressure,
-    temperature: this.form.temperature,
-    height: parseFloat(this.form.height),
-    weight: parseFloat(this.form.weight),
-    referredFrom: this.form.referredFrom || 'None',
-    referredTo: this.form.referredTo || 'None',
-    reasonsForReferral: this.form.reasonsForReferral || 'None',
-    referredBy: this.form.referredBy || 'None',
-    providerName: this.form.providerName,
-    natureOfVisit: this.form.natureOfVisit,
-    visitType: this.form.visitType,
-    chiefComplaints: this.form.chiefComplaints,
-    diagnosis: this.form.diagnosis,
-    medication: this.form.medication,
-  };
+      const payload = {
+        personalId: this.selectedPatient?.personalId || null,
+        firstName: this.form.firstName,
+        lastName: this.form.lastName,
+        middleName: this.form.middleName,
+        suffix: this.form.suffix,
+        purok: this.form.purok,
+        barangay: this.form.barangay,
+        age: this.form.age,
+        birthdate: this.form.birthdate,
+        contact: this.form.contact,
+        sex: this.form.sex,
+        consultationDate: this.form.consultationDate,
+        consultationTime: this.form.consultationTime,
+        modeOfTransaction: this.form.modeOfTransaction,
+        bloodPressure: this.form.bloodPressure,
+        temperature: this.form.temperature,
+        height: parseFloat(this.form.height),
+        weight: parseFloat(this.form.weight),
+        referredFrom: this.form.referredFrom || 'None',
+        referredTo: this.form.referredTo || 'None',
+        reasonsForReferral: this.form.reasonsForReferral || 'None',
+        referredBy: this.form.referredBy || 'None',
+        providerName: this.form.providerName,
+        natureOfVisit: this.form.natureOfVisit,
+        visitType: this.form.visitType,
+        chiefComplaints: this.form.chiefComplaints,
+        diagnosis: this.form.diagnosis,
+        medication: this.form.medication,
+      };
 
-  console.log('Submitting form with payload:', payload);
+      console.log('Submitting form with payload:', payload);
 
-  // Emit the form data for processing
-  this.$emit('submitForm', payload);
+      // Emit the form data for processing
+      this.$emit('submitForm', payload);
 
-  this.showModal = false; // Hide confirmation modal
-},
+      this.showModal = false; // Hide confirmation modal
+    },
 
     cancelSubmit() {
       this.showModal = false; // Hide modal
@@ -595,6 +729,7 @@ export default {
 .time-input::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
+
 .input {
   width: 100%;
   padding: 8px;
