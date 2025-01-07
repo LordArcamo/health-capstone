@@ -40,205 +40,127 @@
       <form @submit.prevent="triggerSubmit">
         <!-- Step 1: Patient Information -->
         <div v-if="step === 1">
-          <h3 class="text-lg font-semibold mb-4">Patient Information</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" class="input"  @input="capitalizeName('firstName')" placeholder="Example: Juan" required />
-              <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName }}</span>
-            </div>
-            <div>
-              <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName" class="input"  @input="capitalizeName('lastName')" placeholder="Example: Dela Cruz" required />
-              <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName }}</span>
-            </div>
-            <div>
-              <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName" class="input"  @input="capitalizeName('middleName')" placeholder="Example: Penduko" required />
-              <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
-            </div>
+          <h3 class="text-2xl font-semibold mb-6 text-gray-800">Patient Information Review</h3>
 
+          <!-- Basic Information Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label for="barangay" class="block mb-1">Barangay:</label>
-              <select id="barangay" v-model="form.barangay" class="input" required>
-                <option disabled value="">Select a Barangay</option>
-                <option value="Apas">Apas</option>
-                <option value="Aluna">Aluna</option>
-                <option value="Andales">Andales</option>
-                <option value="Calacapan">Calacapan</option>
-                <option value="Gimangpang">Gimangpang</option>
-                <option value="Jampason">Jampason</option>
-                <option value="Kamelon">Kamelon</option>
-                <option value="Kanitoan">Kanitoan</option>
-                <option value="Oguis">Oguis</option>
-                <option value="Pagahan">Pagahan</option>
-                <option value="Poblacion">Poblacion</option>
-                <option value="Pontacon">Pontacon</option>
-                <option value="San Pedro">San Pedro</option>
-                <option value="Sinalac">Sinalac</option>
-                <option value="Tawantawan">Tawantawan</option>
-                <option value="Tubigan">Tubigan</option>
-              </select>
-              <span v-if="errors.barangay" class="text-red-600 text-sm">{{ errors.barangay }}</span>
-            </div>
-
-            <div>
-              <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
-              <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
-            </div>
-
-            <div>
-              <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input" required />
-              <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
-            </div>
-
-            <div>
-              <label class="block">Age:</label>
-              <input type="number" v-model="computedAge" class="input" readonly />
-            </div>
-            
-            <div>
-              <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
-              <div class="relative">
-                <input type="tel" v-model="form.contact" @input="formatContact"
-                  class="pl-14 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 w-full"
-                  placeholder="Enter 10 digits" required />
-                <span
-                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
-                  +63
-                </span>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Basic Information</h4>
+              <div>
+                <p class="font-medium text-gray-600">Full Name:</p>
+                <p class="text-gray-800">{{ form.firstName }} {{ form.middleName }} {{ form.lastName }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Age:</p>
+                <p class="text-gray-800">{{ form.age || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Birthdate:</p>
+                <p class="text-gray-800">{{ form.birthdate || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Contact:</p>
+                <p class="text-gray-800">{{ form.contact || 'Not Provided' }}</p>
               </div>
             </div>
 
-          </div>
-          <div class="mt-6 flex justify-center text-right">
-            <button @click="nextStep" class="btn">Next</button>
-          </div>
-        </div>
-
-        <!-- Step 2: Consultation Details -->
-        <div v-if="step === 2">
-          <h3 class="text-lg font-semibold mb-4">For CHU/RHU Personnel Only</h3>
-          <div class="grid grid-cols-2 gap-4">
+            <!-- Address Information Section -->
             <div>
-              <label class="block">Mode of Transaction:</label>
-              <select v-model="form.modeOfTransaction" class="input" required>
-                <!-- Placeholder option for selecting suffix -->
-                <option value="" disabled selected>Select a Mode of Transaction</option>
-                <option>Walk-in</option>
-                <option>Visited</option>
-                <option>Referral</option>
-              </select>
-              <span v-if="errors.modeOfTransaction" class="text-red-600 text-sm">{{ errors.modeOfTransaction }}</span>
-            </div>
-            <div>
-              <label class="block">Date of Consultation:</label>
-              <input type="date" v-model="form.consultationDate" class="input" required />
-              <span v-if="errors.consultationDate" class="text-red-600 text-sm">{{ errors.consultationDate }}</span>
-            </div>
-            <div>
-              <label class="block">Consultation Time:</label>
-              <input type="time" v-model="form.consultationTime" class="input" required />
-              <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
-            </div>
-            <!-- <div>
-              <label class="block">Referred From</label>
-              <input type="text" v-model="form.reasonForReferral" class="input"></input>
-            </div>-->
-            <div>
-              <label class="block">Blood Pressure:</label>
-              <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80"
-                class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatBloodPressure" />
-                <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
-            </div>
-            <div>
-              <label class="block">Temperature (°C):</label>
-              <input type="text" v-model="form.temperature" placeholder="Example: 37.5°C"
-                class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatTemperature" />
-                <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
-
-            </div>
-            <div>
-              <label class="block">Height (cm):</label>
-              <input type="text" v-model="form.height" placeholder="Example: 180" class="input"
-                @input="validateHeight" />
-                <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
-            </div>
-            <div>
-              <label class="block">Weight (kg):</label>
-              <input type="text" v-model="form.weight" placeholder="Example: 70" class="input"
-                @input="validateWeight" />
-                <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
-            </div>
-            <div>
-              <label class="block">Name of Attending Doctor/Provider:</label>
-              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Aileen Uy"
-                class="input"></input>
-                <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
-            </div>
-            <div>
-              <label class="block">Name of Spouse:</label>
-              <input type="text" v-model="form.nameOfSpouse" placeholder="Example: Pedro Penduko" class="input"></input>
-              <span v-if="errors.nameOfSpouse" class="text-red-600 text-sm">{{ errors.nameOfSpouse }}</span>
-            </div>
-            <!-- Emergency Contact Number -->
-            <div>
-              <label class="block mb-1 font-medium text-gray-700">Emergency Contact Number:</label>
-              <div class="relative">
-                <input type="tel" v-model="form.emergencyContact" @input="formatEmergencyContact"
-                  class="pl-14 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full"
-                  placeholder="Enter 10 digits" required />
-                <span
-                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none">
-                  +63
-                </span>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Address Information</h4>
+              <div>
+                <p class="font-medium text-gray-600">Purok:</p>
+                <p class="text-gray-800">{{ form.purok || 'Not Provided' }}</p>
               </div>
-              <span v-if="errors.emergencyContact" class="text-red-600 text-sm">{{ errors.emergencyContact }}</span>
+              <div>
+                <p class="font-medium text-gray-600">Barangay:</p>
+                <p class="text-gray-800">{{ form.barangay || 'Not Provided' }}</p>
+              </div>
             </div>
+          </div>
 
+          <!-- Consultation Details Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label class="block">4ps?:</label>
-              <select v-model="form.fourMember" class="input" required>
-                <option value="" disabled selected>Select Yes or No</option>
-                <option>Yes</option>
-                <option>No</option>
-              </select>
-              <span v-if="errors.fourMember" class="text-red-600 text-sm">{{ errors.fourMember }}</span>
-            </div>
-            <div class="form-group">
-              <label for="philhealthStatus" class="block font-medium text-gray-700">Philhealth Status:</label>
-              <select id="philhealthStatus" v-model="form.philhealthStatus"
-                class="input border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                required>
-                <option value="" disabled selected>Select Philhealth Status</option>
-                <option value="Member">Member</option>
-                <option value="Dependent">Dependent</option>
-              </select>
-              <span v-if="errors.philhealthStatus" class="text-red-600 text-sm">{{ errors.philhealthStatus }}</span>
-
-              <!-- Conditionally Render ID Input -->
-              <div v-if="form.philhealthStatus === 'Member'" class="mt-4">
-                <label for="philhealthNo" class="block font-medium text-gray-700">Philhealth ID Number:</label>
-                <input id="philhealthNo" v-model="form.philhealthNo" type="text"
-                  class="input border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="Enter ID number" />
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Consultation Details</h4>
+              <div>
+                <p class="font-medium text-gray-600">Consultation Date:</p>
+                <p class="text-gray-800">{{ form.consultationDate || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Consultation Time:</p>
+                <p class="text-gray-800">{{ form.consultationTime || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Mode of Transaction:</p>
+                <p class="text-gray-800">{{ form.modeOfTransaction || 'Not Provided' }}</p>
               </div>
             </div>
 
+            <!-- Medical Details Section -->
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Medical Details</h4>
+              <div>
+                <p class="font-medium text-gray-600">Blood Pressure:</p>
+                <p class="text-gray-800">{{ form.bloodPressure || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Temperature:</p>
+                <p class="text-gray-800">{{ form.temperature || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Height:</p>
+                <p class="text-gray-800">{{ form.height || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Weight:</p>
+                <p class="text-gray-800">{{ form.weight || 'Not Provided' }}</p>
+              </div>
+            </div>
           </div>
 
+          <!-- Additional Details Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Emergency Details</h4>
+              <div>
+                <p class="font-medium text-gray-600">Provider Name:</p>
+                <p class="text-gray-800">{{ form.providerName || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Name of Spouse:</p>
+                <p class="text-gray-800">{{ form.nameOfSpouse || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Emergency Contact:</p>
+                <p class="text-gray-800">{{ form.emergencyContact || 'Not Provided' }}</p>
+              </div>
+            </div>
+
+            <!-- Philhealth Details Section -->
+            <div>
+              <h4 class="font-semibold text-xl mb-4 text-gray-700">Philhealth Information</h4>
+              <div>
+                <p class="font-medium text-gray-600">Philhealth Status:</p>
+                <p class="text-gray-800">{{ form.philhealthStatus || 'Not Provided' }}</p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-600">Philhealth No.:</p>
+                <p class="text-gray-800">{{ form.philhealthNo || 'Not Provided' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
           <div class="mt-6 flex justify-between">
-            <button @click="prevStep" class="btn">Back</button>
-            <button @click="nextStep" class="btn">Next</button>
+            <button @click="prevStep"
+              class="btn bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded-md">Back</button>
+            <button @click="nextStep"
+              class="btn bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md">Next</button>
           </div>
         </div>
 
         <!-- Step 3: Visit Information -->
-        <div v-if="step === 3">
+        <div v-if="step === 2">
           <!-- Menstrual History Section -->
           <h2 class="font-bold">Menstrual History</h2>
           <div class="grid grid-cols-2 gap-4">
@@ -301,7 +223,7 @@
           </div>
         </div>
 
-        <div v-if="step === 4">
+        <div v-if="step === 3">
           <!-- Prenatal Section -->
           <h2 class="font-bold mt-4">Prenatal</h2>
           <div class="grid grid-cols-3 gap-4">
@@ -372,7 +294,7 @@
         </div>
 
 
-        <div v-if="step === 5">
+        <div v-if="step === 4">
           <!-- Labs Section -->
           <h2 class="font-bold mt-4">Labs Done On:</h2>
           <div class="grid grid-cols-2 gap-4">
@@ -416,7 +338,7 @@
 
 
         <!-- Step 6: Review Submitted Data -->
-        <div v-if="step === 6">
+        <div v-if="step === 5">
           <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <!-- Loop through form fields to display data -->
@@ -464,9 +386,9 @@
 export default {
   props: {
     selectedPatient: {
-    type: Object,
-    required: false,
-    default: () => ({}),
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     onSubmit: Function,
   },
@@ -476,8 +398,7 @@ export default {
       alertMessage: '',
       showModal: false,
       stepTitles: [
-        'Patient Information',
-        'For CHU/RHU Personnel Only',
+        'Medical Record',
         'Menstrual History',
         'Prenatal',
         'Labs Done On:',
@@ -578,15 +499,15 @@ export default {
     },
   },
   'form.philhealthStatus': function (newVal) {
-        if (newVal === 'Member') {
-            // Reset the fields to empty when Referral is selected
-            this.form.philhealthNo = '';
-        } else {
-            // Set the fields to "None" when not Referral
-            this.form.philhealthNo = 'None';
+    if (newVal === 'Member') {
+      // Reset the fields to empty when Referral is selected
+      this.form.philhealthNo = '';
+    } else {
+      // Set the fields to "None" when not Referral
+      this.form.philhealthNo = 'None';
 
-        }
-    },
+    }
+  },
   methods: {
     resetForm() {
       this.form = {
@@ -646,7 +567,7 @@ export default {
         age: '',
         birthdate: this.selectedPatient?.birthdate || '',
         contact: this.selectedPatient?.contact || '',
-        
+
       };
       this.form.age = this.computedAge;
 
@@ -749,93 +670,8 @@ export default {
       event.preventDefault();
       this.triggerSubmit();
     },
-    validateStep1() {
-      this.errors = {};
-      let valid = true;
 
-      // Validate each field
-      if (!this.form.firstName) {
-        this.errors.firstName = 'First name is required.';
-        valid = false;
-      }
-      if (!this.form.lastName) {
-        this.errors.lastName = 'Last name is required.';
-        valid = false;
-      }
-      if (!this.form.middleName) {
-        this.errors.middleName = 'Middle name is required.';
-        valid = false;
-      }
-      if (!this.form.purok) {
-        this.errors.purok = 'Purok is required.';
-        valid = false;
-      }
-      if (!this.form.barangay) {
-        this.errors.barangay = 'Barangay is required.';
-        valid = false;
-      }
-      if (!this.form.birthdate) {
-        this.errors.birthdate = 'Birthdate is required.';
-        valid = false;
-      }
-
-      return valid;
-    },
     validateStep2() {
-      this.errors = {};
-      let valid = true;
-
-      if (!this.form.modeOfTransaction) {
-        this.errors.modeOfTransaction = 'Mode of Transaction is required.';
-        valid = false;
-      }
-      if (!this.form.consultationDate) {
-        this.errors.consultationDate = 'Consultation date is required.';
-        valid = false;
-      }
-      if (!this.form.consultationTime) {
-        this.errors.consultationTime = 'Consultation time is required.';
-        valid = false;
-      }
-      if (!this.form.height || isNaN(this.form.height) || parseFloat(this.form.height) <= 0) {
-        this.errors.height = 'Valid height is required.';
-        valid = false;
-      }
-      if (!this.form.weight || isNaN(this.form.weight) || parseFloat(this.form.weight) <= 0) {
-        this.errors.weight = 'Valid weight is required.';
-        valid = false;
-      }
-      if (!this.form.temperature || isNaN(this.form.temperature) || parseFloat(this.form.temperature) <= 0) {
-        this.errors.temperature = 'Valid temperature is required.';
-        valid = false;
-      }
-      if (!this.form.bloodPressure) {
-        this.errors.bloodPressure = 'Consultation time is required.';
-        valid = false;
-      }
-      if (!this.form.providerName) {
-        this.errors.providerName = 'Provider Name is required.';
-        valid = false;
-      }
-      if (!this.form.emergencyContact) {
-        this.errors.emergencyContact = 'Emergency Contact is required.';
-        valid = false;
-      }
-      if (!this.form.nameOfSpouse) {
-        this.errors.nameOfSpouse = 'Name of Spouse is required.';
-        valid = false;
-      }
-      if (!this.form.fourMember) {
-        this.errors.fourMember = 'Name of Spouse is required.';
-        valid = false;
-      }
-      if (!this.form.philhealthStatus) {
-        this.errors.philhealthStatus = 'Philhealth Status is required.';
-        valid = false;
-      }
-      return valid;
-    },
-    validateStep3() {
       this.errors = {};
       let valid = true;
 
@@ -873,7 +709,7 @@ export default {
       }
       return valid;
     },
-    validateStep4() {
+    validateStep3() {
       this.errors = {};
       let valid = true;
 
@@ -907,7 +743,7 @@ export default {
       }
       return valid;
     },
-    validateStep5() {
+    validateStep4() {
       this.errors = {};
       let valid = true;
 
@@ -934,7 +770,7 @@ export default {
       return valid;
     },
     nextStep() {
-      if (this.step === 1 && this.validateStep1()) {
+      if (this.step === 1) {
         this.step++;
       } else if (this.step === 2 && this.validateStep2()) {
         this.step++;
@@ -942,8 +778,8 @@ export default {
         this.step++;
       } else if (this.step === 4 && this.validateStep4()) {
         this.step++;
-      } else if (this.step === 5 && this.validateStep5()) {
-        this.step++;
+      } else if (this.step === 4 && this.validateStep4()) {
+        this.step = 4;
       }
 
     },
@@ -954,12 +790,10 @@ export default {
       if (targetStep > this.step) {
         // Validate the current step before proceeding
         const isCurrentStepValid =
-          (this.step === 1 && this.validateStep1()) ||
+          (this.step === 1) ||
           (this.step === 2 && this.validateStep2()) ||
           (this.step === 3 && this.validateStep3()) ||
-          (this.step === 4 && this.validateStep4()) ||
-          (this.step === 5 && this.validateStep5());
-
+          (this.step === 4 && this.validateStep4())
         if (!isCurrentStepValid) {
           this.alertMessage = 'Please Fill In the Needed Details Before Proceeding to the Next Step.';
 
@@ -994,7 +828,7 @@ export default {
       }
     },
     triggerSubmit() {
-      if (this.validateStep1() && this.validateStep2()&& this.validateStep3() && this.validateStep4() && this.validateStep5()) {
+      if (this.validateStep2() && this.validateStep3() && this.validateStep4()) {
         this.showModal = true; // Show confirmation modal
       } else {
         this.successMessage = 'Please complete all required fields before submitting.';
