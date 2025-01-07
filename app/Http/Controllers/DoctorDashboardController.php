@@ -140,5 +140,5 @@ class DoctorDashboardController extends Controller
         ]);
     }
 
-    
+
 }
