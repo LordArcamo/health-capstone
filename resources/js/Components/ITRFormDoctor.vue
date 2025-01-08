@@ -50,24 +50,24 @@
               <h4 class="font-semibold text-xl mb-4 text-gray-700">Basic Information</h4>
               <div>
                 <p class="font-medium text-gray-600">Full Name:</p>
-                <p class="text-gray-800">{{ form.firstName }} {{ form.middleName }} {{ form.lastName }} {{ form.suffix
+                <p class="text-gray-800">{{ consultationDetails.firstName }} {{ consultationDetails.middleName }} {{ consultationDetails.lastName }} {{ consultationDetails.suffix
                   || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Age:</p>
-                <p class="text-gray-800">{{ form.age || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.age || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Birthdate:</p>
-                <p class="text-gray-800">{{ form.birthdate || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.birthdate || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Contact:</p>
-                <p class="text-gray-800">{{ form.contact || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.contact || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Sex:</p>
-                <p class="text-gray-800">{{ form.sex || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.sex || 'Not Provided' }}</p>
               </div>
             </div>
 
@@ -76,11 +76,11 @@
               <h4 class="font-semibold text-xl mb-4 text-gray-700">Address Information</h4>
               <div>
                 <p class="font-medium text-gray-600">Purok:</p>
-                <p class="text-gray-800">{{ form.purok || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.purok || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Barangay:</p>
-                <p class="text-gray-800">{{ form.barangay || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.barangay || 'Not Provided' }}</p>
               </div>
             </div>
           </div>
@@ -91,15 +91,15 @@
               <h4 class="font-semibold text-xl mb-4 text-gray-700">Consultation Details</h4>
               <div>
                 <p class="font-medium text-gray-600">Consultation Date:</p>
-                <p class="text-gray-800">{{ form.consultationDate || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.consultationDate || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Consultation Time:</p>
-                <p class="text-gray-800">{{ form.consultationTime || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.consultationTime || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Mode of Transaction:</p>
-                <p class="text-gray-800">{{ form.modeOfTransaction || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.modeOfTransaction || 'Not Provided' }}</p>
               </div>
             </div>
 
@@ -108,19 +108,19 @@
               <h4 class="font-semibold text-xl mb-4 text-gray-700">Medical Details</h4>
               <div>
                 <p class="font-medium text-gray-600">Blood Pressure:</p>
-                <p class="text-gray-800">{{ form.bloodPressure || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.bloodPressure || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Temperature:</p>
-                <p class="text-gray-800">{{ form.temperature || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.temperature || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Height:</p>
-                <p class="text-gray-800">{{ form.height || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.height || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Weight:</p>
-                <p class="text-gray-800">{{ form.weight || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.weight || 'Not Provided' }}</p>
               </div>
             </div>
           </div>
@@ -131,19 +131,19 @@
               <h4 class="font-semibold text-xl mb-4 text-gray-700">Referral Details</h4>
               <div>
                 <p class="font-medium text-gray-600">Referred From:</p>
-                <p class="text-gray-800">{{ form.referredFrom || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.referredFrom || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Referred To:</p>
-                <p class="text-gray-800">{{ form.referredTo || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.referredTo || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Reasons for Referral:</p>
-                <p class="text-gray-800">{{ form.reasonsForReferral || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.reasonsForReferral || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Referred By:</p>
-                <p class="text-gray-800">{{ form.referredBy || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.referredBy || 'Not Provided' }}</p>
               </div>
             </div>
 
@@ -152,15 +152,15 @@
               <h4 class="font-semibold text-xl mb-4 text-gray-700">Additional Details</h4>
               <div>
                 <p class="font-medium text-gray-600">Provider Name:</p>
-                <p class="text-gray-800">{{ form.providerName || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.providerName || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Nature of Visit:</p>
-                <p class="text-gray-800">{{ form.natureOfVisit || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.natureOfVisit || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Visit Type:</p>
-                <p class="text-gray-800">{{ form.visitType || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.visitType || 'Not Provided' }}</p>
               </div>
             </div>
           </div>
@@ -259,6 +259,7 @@ export default {
     },
     onSubmit: Function,
   },
+
   data() {
     return {
       alertMessage: '',

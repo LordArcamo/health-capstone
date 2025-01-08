@@ -160,7 +160,7 @@ class DoctorDashboardController extends Controller
         // Get critical cases count (you may need to adjust this based on your criteria)
         $criticalCases = 0;
 
-        return Inertia::render('DoctorDashboard', [
+        return Inertia::render('Doctor/DoctorDashboard', [
             'totalPatients' => $totalPatients,
             'ITRConsultation' => $ITRConsultation,
             'latestPatients' => $latestPatients,
@@ -177,7 +177,7 @@ class DoctorDashboardController extends Controller
      */
     public function doctor()
     {
-        return Inertia::render('DoctorDashboard', [
+        return Inertia::render('Doctor/DoctorDashboard', [
             'pageTitle' => 'Doctor Dashboard',
             'user' => auth()->user(),
         ]);
@@ -194,13 +194,13 @@ class DoctorDashboardController extends Controller
         $nextPatient = $patientsQueue[0] ?? null;
 
         if (!$nextPatient) {
-            return Inertia::render('DoctorCheckup', [
+            return Inertia::render('Doctor/DoctorCheckup', [
                 'patient' => null,
                 'message' => 'No patients are currently in the checkup queue.',
             ]);
         }
 
-        return Inertia::render('DoctorCheckup', [
+        return Inertia::render('Doctor/DoctorCheckup', [
             'patient' => $nextPatient,
         ]);
     }

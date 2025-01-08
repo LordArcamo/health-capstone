@@ -125,6 +125,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/prenatal/{prenatalId}/trimester/{trimester}', [PreNatalController::class, 'fetchTrimesterData']);
 });
 
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('/postpartum', PostpartumController::class);
     Route::get('/checkup/postpartum', [PostpartumController::class, 'create'])->name('postpartum');
@@ -191,6 +192,7 @@ Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
     ->middleware(RoleMiddleware::class . ':admin')
     ->name('admin.dashboard');
 
+
 // Route to display the main doctor dashboard with static data
 Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
@@ -230,9 +232,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/itr-table', [DoctorCheckupController::class, 'index'])->name('ITR.index');
 });
 
-Route::get('/mortality', function () {
-    return Inertia::render('Mortality');
-})->middleware(['auth', 'verified'])->name('mortality');
+Route::get('/staff', function () {
+    return Inertia::render('Admin/Staff');
+})->middleware(['auth', 'verified'])->name('staff');
 
 Route::get('/itr-services', function () {
     return Inertia::render('About/ItrDescription');
