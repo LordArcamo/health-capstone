@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Models\PersonalInformation;
-use App\Models\ConsultationDetail;
+use App\Models\ConsultationDetails;
+use App\Models\VisitInformation;
 
 class DoctorCheckupController extends Controller
 {
@@ -22,8 +23,13 @@ class DoctorCheckupController extends Controller
         $generalConsultations = DB::table('personal_information')
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->whereDate('consultation_details.consultationDate', $today) // Filter for today's date
+            ->where(function($query) {
+                $query->where('consultation_details.status', 'pending')
+                      ->orWhereNull('consultation_details.status');
+            })
             ->select(
                 'consultation_details.consultationDetailsID',
+                DB::raw('NULL as prenatalConsultationDetailsID'),
                 'personal_information.personalId',
                 'personal_information.firstName',
                 'personal_information.lastName',
@@ -57,7 +63,12 @@ class DoctorCheckupController extends Controller
         $prenatalConsultations = DB::table('personal_information')
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
             ->whereDate('prenatal_consultation_details.consultationDate', $today) // Filter for today's date
+            ->where(function($query) {
+                $query->where('prenatal_consultation_details.status', 'pending')
+                      ->orWhereNull('prenatal_consultation_details.status');
+            })
             ->select(
+                DB::raw('NULL as consultationDetailsID'),
                 'prenatal_consultation_details.prenatalConsultationDetailsID',
                 'personal_information.personalId',
                 'personal_information.firstName',
@@ -122,8 +133,10 @@ class DoctorCheckupController extends Controller
                 'consultation_details.*',
                 'personal_information.firstName',
                 'personal_information.lastName',
+                'personal_information.middleName',
                 'personal_information.suffix',
                 'personal_information.age',
+                'personal_information.birthdate',
                 'personal_information.sex',
                 'personal_information.contact',
                 'personal_information.purok',
@@ -142,6 +155,8 @@ class DoctorCheckupController extends Controller
         return Inertia::render('Doctor/ItrDoctorCheckup', [
             'consultationDetails' => $consultationDetail,
         ]);
+
+
     }
 
 
@@ -151,8 +166,44 @@ class DoctorCheckupController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            DB::beginTransaction();
+
+            $visitInfo = new VisitInformation();
+            $visitInfo->consultationDetailsID = $request->input('consultationDetailsID');
+            $visitInfo->chiefComplaints = $request->input('chiefComplaints');
+            $visitInfo->diagnosis = $request->input('diagnosis');
+            $visitInfo->medication = $request->input('medication');
+            $visitInfo->id = auth()->id(); // Add the authenticated user's ID
+            $visitInfo->save();
+
+            // Update consultation status to completed
+            if ($request->input('visitType') === 'Prenatal') {
+                DB::table('prenatal_consultation_details')
+                    ->where('prenatalConsultationDetailsID', $request->input('consultationDetailsID'))
+                    ->update([
+                        'status' => 'completed',
+                        'completed_at' => now(),
+                        'id' => auth()->id() // Add the authenticated user's ID
+                    ]);
+            } else {
+                DB::table('consultation_details')
+                    ->where('consultationDetailsID', $request->input('consultationDetailsID'))
+                    ->update([
+                        'status' => 'completed',
+                        'completed_at' => now(),
+                        'id' => auth()->id() // Add the authenticated user's ID
+                    ]);
+            }
+
+            DB::commit();
+            return redirect()->route('doctor.dashboard');
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
+
 
     /**
      * Display the specified resource.
@@ -184,5 +235,10 @@ class DoctorCheckupController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function table()
+    {
+
     }
 }

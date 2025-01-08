@@ -24,6 +24,7 @@ use App\Http\Controllers\VaccineAppointmentController;
 use App\Http\Controllers\AuthorizationRolesController;
 use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\DoctorCheckupController;
+use App\Http\Controllers\DoctorPreCheckupController;
 
 use App\Http\Middleware\RoleMiddleware;
 
@@ -190,24 +191,32 @@ Route::get('/patients/{personalId}', [PatientController::class, 'show'])->name('
 Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
     ->middleware(RoleMiddleware::class . ':admin')
     ->name('admin.dashboard');
-    
+
 
 // Route to display the main doctor dashboard with static data
 Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
     ->name('doctor.dashboard');
 
-    Route::get('/doctor-checkup/itr', [DoctorCheckupController::class, 'create'])
-    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
-    ->name('doctor.checkup.itr');
 
+Route::get('/doctor-checkup/itr', [DoctorCheckupController::class, 'create'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
+    ->name('doctor.itrdashboard');
+
+Route::get('/doctor-checkup/prenatal', [DoctorPreCheckupController::class, 'create'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
+    ->name('doctor.prenataldashboard');
+
+Route::POST('/store/itr', [DoctorCheckupController::class, 'store'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
+    ->name('store.itr');
+
+Route::POST('/store/prenatal', [DoctorPreCheckupController::class, 'store'])
+    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
+    ->name('store.prenatal');
 
 Route::get('/doctor-checkup/{id}', [DoctorDashboardController::class, 'checkup'])
     ->middleware(RoleMiddleware::class . ':doctor')
-    ->name('doctor.checkup');
-
-Route::get('/doctor-checkup', [DoctorDashboardController::class, 'checkup'])
-    ->middleware(RoleMiddleware::class . ':doctor') // Restrict access to doctors
     ->name('doctor.checkup');
 
 // Route to display a tailored doctor dashboard with user data
@@ -219,7 +228,9 @@ Route::get('/doctor-checkup', [DoctorCheckupController::class, 'index'])
     ->middleware(RoleMiddleware::class . ':doctor') // Restrict access to doctors
     ->name('ITRConsultation.checkup');
 
-
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/itr-table', [DoctorCheckupController::class, 'index'])->name('ITR.index');
+});
 
 Route::get('/staff', function () {
     return Inertia::render('Admin/Staff');

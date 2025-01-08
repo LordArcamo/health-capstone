@@ -53,4 +53,9 @@ class ConsultationDetails extends Model
     {
         return $this->belongsTo(User::class, 'id');
     }
+
+    public function visitInformation()
+    {
+        return $this->hasOne(VisitInformation::class, 'consultationDetailsID', 'consultationDetailsID');
+    }
 }

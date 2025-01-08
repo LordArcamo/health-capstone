@@ -479,6 +479,7 @@ export default {
         weight: '',
         natureOfVisit: '',
         visitType: '',
+        providerName: '',
         referredFrom: '',
         referredTo: '',
         reasonsForReferral: '',

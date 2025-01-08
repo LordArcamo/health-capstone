@@ -7,14 +7,14 @@ import { ref, watch } from 'vue';
 
 
 const props = defineProps({
-  personalInfo: {
+    prenatalConsultationDetails: {
       type: Object,
       required: false,
       default: () => ({}), // Default to an empty object
     },
 });
 
-watch(() => props.personalInfo, (newVal) => {
+watch(() => props.prenatalConsultationDetails, (newVal) => {
   if (!newVal || Object.keys(newVal).length === 0) {
     console.error('No valid personalInfo provided.');
   }
@@ -23,43 +23,25 @@ watch(() => props.personalInfo, (newVal) => {
 function submitForm(payload) {
   console.log("Submitting from parent:", payload);
 
-  if (payload.personalId) {
-    // Update existing patient
-    Inertia.post("/consultationDetails/store", payload, {
-      onSuccess: () => {
-        alert("Existing patient's record updated successfully!");
-      },
-      onError: (errors) => {
-        console.error("Error updating existing patient:", errors);
-        alert("Failed to update existing patient's record.");
-      },
-    });
-  } else {
-    // Create new patient
-    Inertia.post("/consultationDetails/store", payload, {
-      onSuccess: ({ props }) => {
-        if (props.personalId) {
-          payload.personalId = props.personalId; // Update payload with the new ID
-          console.log("New personalId received:", payload.personalId);
-        }
-        alert("New patient record added successfully!");
-      },
-      onError: (errors) => {
-        console.error("Error adding new patient:", errors);
-        alert("Failed to add new patient record.");
-      },
-    });
-  }
+  Inertia.post("/store/prenatal", payload, {
+    onSuccess: () => {
+      alert("Record saved successfully!");
+    },
+    onError: (errors) => {
+      console.error("Error saving record:", errors);
+      alert("Failed to save record.");
+    },
+  });
 }
 
 </script>
 
 <template>
-  <Head title="Individual Treatment Record" />
+  <Head title="Prenatal Record" />
   <NewLayout>
     <PrenatalFormDoctor
-        v-if="personalInfo !== undefined" 
-        :selectedPatient="personalInfo || {}"
+        v-if="prenatalConsultationDetails !== undefined"
+        :prenatalConsultationDetails="prenatalConsultationDetails || {}"
         @submitForm="submitForm"
       />
   </NewLayout>
