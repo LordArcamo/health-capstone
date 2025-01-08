@@ -13,7 +13,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-center mb-6">
 
       <div class="flex items-center gap-4">
-        <label for="filterDate" class="font-semibold text-gray-700">Filter Date:</label>
+        <label for="filterDate" class="font-semibold text-gray-700">Filter Dates:</label>
         <input type="date" id="filterDate" v-model="filterDate"
           class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
       </div>
