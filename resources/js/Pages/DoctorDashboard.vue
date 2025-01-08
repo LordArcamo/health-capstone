@@ -1,8 +1,9 @@
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
+import { format } from 'date-fns';
 
 // Props from backend
 const props = defineProps({
@@ -24,6 +25,12 @@ const notifications = ref(props.notifications || []);
 const searchQueue = ref('');
 const showNotifications = ref(false);
 
+// Function to format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return format(date, 'MMMM d, yyyy');
+};
+
 // Computed property for filtered patients in queue
 const filteredITRConsultation = computed(() => {
   if (!searchQueue.value) return ITRConsultation.value;
@@ -34,16 +41,57 @@ const filteredITRConsultation = computed(() => {
   );
 });
 
-// Navigate to the checkup page
+// Function to start checkup
 const startCheckup = (patient) => {
-  if (patient?.consultationDetailsID) {
-    router.visit(`/doctor-checkup/itr`, {
+  console.log('Patient Data:', patient); // Debugging: Inspect patient data
+
+  // Check if visitType is Prenatal and prenatalConsultationDetailsID exists
+  if (patient?.visitType === 'Prenatal' && patient?.prenatalConsultationDetailsID) {
+    console.log('Navigating to prenatal route with ID:', patient.prenatalConsultationDetailsID); // Debug
+    router.visit('/doctor-checkup/prenatal', {
       method: 'get',
-      data: { consultationDetailsID : patient.consultationDetailsID  },
+      data: { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID },
     });
-  } else {
-    console.warn('Invalid patient data: Missing patient ID.');
+    return; // Exit after handling Prenatal case
   }
+
+  // Check if consultationDetailsID exists (for general case)
+  if (patient?.consultationDetailsID) {
+    console.log('Navigating to ITR route with ID:', patient.consultationDetailsID); // Debug
+    router.visit('/doctor-checkup/itr', {
+      method: 'get',
+      data: { consultationDetailsID: patient.consultationDetailsID },
+    });
+    return; // Exit after handling ITR case
+  }
+
+  // If no valid data is found
+  console.warn('Invalid patient data:', patient);
+};
+
+// Function to view patient details
+const viewPatientDetails = (patient) => {
+  console.log('View Details - Patient Data:', patient); // Debugging
+
+  if (patient?.visitType === 'Prenatal' && patient?.prenatalConsultationDetailsID) {
+    console.log('Navigating to prenatal checkup with ID:', patient.prenatalConsultationDetailsID);
+    router.visit('/doctor-checkup/prenatal', {
+      method: 'get',
+      data: { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID },
+    });
+    return;
+  }
+
+  if (patient?.visitType === 'General' && patient?.consultationDetailsID) {
+    console.log('Navigating to ITR checkup with ID:', patient.consultationDetailsID);
+    router.visit('/doctor-checkup/itr', {
+      method: 'get',
+      data: { consultationDetailsID: patient.consultationDetailsID },
+    });
+    return;
+  }
+
+  console.warn('Invalid patient data for view details:', patient);
 };
 
 // Dynamic date
@@ -52,6 +100,7 @@ const updateDate = () => {
   const options = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Manila' };
   currentDate.value = new Date().toLocaleDateString('en-PH', options);
 };
+
 // Initialize Charts
 const initCharts = () => {
   // Patient Demographics (Bar Chart)
@@ -129,7 +178,6 @@ const initCharts = () => {
         },
       },
     },
-
   });
 
   // Critical Cases (Line Chart)
@@ -237,8 +285,16 @@ const initCharts = () => {
       },
     },
   });
-
 };
+
+// Watch for changes in props
+watch(() => props.latestPatients, (newVal) => {
+  latestPatients.value = newVal || [];
+}, { deep: true });
+
+watch(() => props.ITRConsultation, (newVal) => {
+  ITRConsultation.value = newVal || [];
+}, { deep: true });
 
 onMounted(() => {
   updateDate();
@@ -247,7 +303,6 @@ onMounted(() => {
 });
 </script>
 <template>
-
   <Head title="Initao RHU Dashboard" />
 
   <MainLayout>
@@ -326,15 +381,47 @@ onMounted(() => {
           </div>
 
           <!-- Latest Patients -->
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Latest Patients</h2>
-            <div class="space-y-4">
-              <div v-for="(patient, index) in latestPatients" :key="index"
-                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition">
-                <h3 class="text-lg font-semibold text-gray-700">{{ patient.name }}</h3>
-                <p class="text-sm text-gray-500">Checked In: {{ patient.checkInTime }}</p>
-                <p class="text-sm text-gray-500">Diagnosis: {{ patient.diagnosis }}</p>
-              </div>
+          <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Latest Consultations</h2>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visit Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="patient in latestPatients" :key="patient.visitType === 'Prenatal' ? patient.prenatalConsultationDetailsID : patient.consultationDetailsID">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      {{ patient.firstName }} {{ patient.lastName }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      {{ patient.visitType }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      {{ formatDate(patient.consultationDate) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      {{ patient.consultationTime }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <button @click="viewPatientDetails(patient)"
+                        class="text-indigo-600 hover:text-indigo-900">
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="latestPatients.length === 0">
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                      No completed consultations yet
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

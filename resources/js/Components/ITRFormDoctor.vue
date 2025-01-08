@@ -175,7 +175,7 @@
         </div>
         <div v-if="step === 2">
           <h3 class="text-lg font-semibold mb-4">Visit Informations
-          
+
           </h3>
           <div class="grid grid-cols-2 gap-4">
 
@@ -254,7 +254,8 @@ export default {
   props: {
     consultationDetails: {
         type: Object,
-        default: null,
+        required: false,
+        default: () => ({}),
     },
     onSubmit: Function,
   },
@@ -304,54 +305,27 @@ export default {
       successMessage: '',
     };
   },
-  computed: {
-    computedAge() {
-      if (!this.form.birthdate) return '';
-      const birthDate = new Date(this.form.birthdate);
-      const today = new Date();
-
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const hasBirthdayOccurred =
-        today.getMonth() > birthDate.getMonth() ||
-        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
-
-      if (!hasBirthdayOccurred) {
-        age--;
-      }
-
-      // Return 0 if the calculated age is less than 1
-      return age < 1 ? 0 : age;
-    },
-    isFormValid() {
-      return this.form.contact.length === 10;
-    },
-  },
   watch: {
     consultationDetails: {
-      handler(newDetails) {
-        if (newDetails) {
-          this.form = {
-            consultationDate: newDetails.consultationDate || '',
-            consultationTime: newDetails.consultationTime || '',
-            modeOfTransaction: newDetails.modeOfTransaction || '',
-            bloodPressure: newDetails.bloodPressure || '',
-            temperature: newDetails.temperature || '',
-            height: newDetails.height || '',
-            weight: newDetails.weight || '',
-            referredFrom: newDetails.referredFrom || '',
-            referredTo: newDetails.referredTo || '',
-            reasonsForReferral: newDetails.reasonsForReferral || '',
-            referredBy: newDetails.referredBy || '',
-            natureOfVisit: newDetails.natureOfVisit || '',
-            visitType: newDetails.visitType || '',
-            providerName: newDetails.providerName || '',
-          };
+        immediate: true,
+      handler(newPatient) {
+        if (newPatient && newPatient.consultationDetailsID === null) {
+          // Clear the form for a new patient
+          this.resetForm();
+        } else if (newPatient && Object.keys(newPatient).length > 0) {
+          // Populate the form with selected patient data
+          this.populateForm(newPatient);
         }
       },
-      immediate: true, // Trigger immediately on component load
     },
   },
   methods: {
+    formatLabel(key) {
+        return key
+            .replace(/([A-Z])/g, ' $1') // Add a space before capital letters
+            .replace(/_/g, ' ') // Replace underscores with spaces
+            .replace(/^\w/, (c) => c.toUpperCase()); // Capitalize the first letter
+        },
     resetForm() {
       this.form = {
         chiefComplaints: '',
@@ -363,164 +337,33 @@ export default {
     populateForm(patient) {
       console.log("Populating form with patient:", patient);
       this.form = {
-        firstName: this.selectedPatient?.firstName || '',
-        lastName: this.selectedPatient?.lastName || '',
-        middleName: this.selectedPatient?.middleName || '',
-        suffix: this.selectedPatient?.suffix || '',
-        purok: this.selectedPatient?.purok || '',
-        barangay: this.selectedPatient?.barangay || '',
-        age: '',
-        birthdate: this.selectedPatient?.birthdate || '',
-        contact: this.selectedPatient?.contact || '',
-        sex: this.selectedPatient?.sex || '',
+        firstName: this.consultationDetails?.firstName || '',
+        lastName: this.consultationDetails?.lastName || '',
+        middleName: this.consultationDetails?.middleName || '',
+        suffix: this.consultationDetails?.suffix || '',
+        purok: this.consultationDetails?.purok || '',
+        barangay: this.consultationDetails?.barangay || '',
+        age: this.consultationDetails?.age || '',
+        birthdate: this.consultationDetails?.birthdate || '',
+        contact: this.consultationDetails?.contact || '',
+        sex: this.consultationDetails?.sex || '',
+        consultationDate: this.consultationDetails?.consultationDate || '',
+        consultationTime: this.consultationDetails?.consultationTime || '',
+        modeOfTransaction: this.consultationDetails?.modeOfTransaction || '',
+        bloodPressure: this.consultationDetails?.bloodPressure || '',
+        temperature: this.consultationDetails?.temperature || '',
+        height: this.consultationDetails?.height || '',
+        weight: this.consultationDetails?.weight || '',
+        natureOfVisit: this.consultationDetails?.natureOfVisit || '',
+        visitType: this.consultationDetails?.visitType || '',
+        referredFrom: this.consultationDetails?.referredFrom || '',
+        referredTo: this.consultationDetails?.referredTo || '',
+        providerName: this.consultationDetails?.providerName || '',
+        reasonsForReferral: this.consultationDetails?.reasonsForReferral || '',
+        referredBy: this.consultationDetails?.referredBy || '',
 
       };
-      this.form.age = this.computedAge;
 
-    },
-    formatLabel(key) {
-      return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-    },
-    capitalizeName(field) {
-      if (this.form[field]) {
-        this.form[field] = this.form[field]
-          .toLowerCase() // Convert entire string to lowercase first
-          .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
-      }
-    },
-    validateConsultationDate() {
-      const today = new Date();
-      const inputDate = new Date(this.form.consultationDate);
-
-      if (!this.form.consultationDate) {
-        this.errors.consultationDate = "Consultation date is required.";
-        return false;
-      }
-
-      if (isNaN(inputDate.getTime())) {
-        this.errors.consultationDate = "Please enter a valid date.";
-        return false;
-      }
-
-      if (inputDate > today) {
-        this.errors.consultationDate = "Consultation date cannot be in the future.";
-        return false;
-      }
-
-      // Clear error if validation passes
-      this.errors.consultationDate = "";
-      return true;
-    },
-    formatBloodPressure(event) {
-      let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
-      if (value.length > 3) {
-        value = `${value.slice(0, 3)}/${value.slice(3, 5)}`; // Insert slash after the third character
-      }
-      this.form.bloodPressure = value;
-    },
-    formatTemperature(event) {
-      let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
-
-      if (value.length > 2) {
-        value = `${value.slice(0, 2)}.${value.slice(2, 3)}`; // Automatically add the decimal after the second digit
-      }
-
-      this.form.temperature = value; // Update the input value
-    },
-    handleTimeSelection(event) {
-      // Automatically retract the time picker
-      const input = this.$refs.timeInput;
-
-      // Force blur after a change (immediately hide dropdown)
-      if (input) {
-        setTimeout(() => {
-          input.blur();
-        }, 100); // Adding a slight delay for smoothness
-      }
-
-      // Optional Validation
-      if (!this.form.consultationTime) {
-        this.errors.consultationTime = "Consultation time is required.";
-      } else {
-        this.errors.consultationTime = "";
-      }
-    },
-    validateHeight(event) {
-      let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numbers and a single decimal point
-
-      // Handle multiple decimal points
-      const parts = value.split('.');
-      if (parts.length > 2) {
-        value = `${parts[0]}.${parts[1]}`; // Keep only the first decimal point
-      }
-
-      // Auto-format when the input reaches 4 digits without a decimal
-      if (value.length === 4 && !value.includes('.')) {
-        value = `${value.slice(0, 3)}.${value.slice(3)}`; // Add decimal before the last digit
-      }
-
-      // Limit to 3 digits before the decimal and 1 digit after
-      if (value.includes('.')) {
-        const [integer, decimal] = value.split('.');
-        value = `${integer.slice(0, 3)}.${decimal.slice(0, 1)}`;
-      }
-
-      this.form.height = value; // Update the form value
-    },
-    restrictBirthdateInput(event) {
-      const input = event.target.value;
-
-      // Restrict year part to a maximum of 4 digits
-      const parts = input.split('-');
-      if (parts[0] && parts[0].length > 4) {
-        parts[0] = parts[0].slice(0, 4); // Limit the year to 4 digits
-      }
-
-      // Reassemble the date and update the form value
-      this.form.birthdate = parts.join('-');
-    },
-    validateBirthdate() {
-      this.errors.birthdate = ''; // Reset error message
-
-      if (!this.form.birthdate) {
-        this.errors.birthdate = 'Birthdate is required.';
-        return;
-      }
-
-      const birthDate = new Date(this.form.birthdate);
-      const today = new Date();
-      const maxDate = new Date(today.getFullYear() - 200, today.getMonth(), today.getDate());
-
-      if (birthDate < maxDate) {
-        this.errors.birthdate = 'Please enter a birthdate that is valid.';
-      }
-    },
-    validateWeight(event) {
-      // Retrieve and sanitize the input value
-      let value = event.target.value.replace(/[^0-9.]/g, ''); // Allow only numeric characters and a single decimal point
-
-      // Ensure there is only one decimal point
-      const parts = value.split('.');
-      if (parts.length > 2) {
-        value = `${parts[0]}.${parts[1]}`; // Combine the first two parts, discarding extra decimals
-      }
-
-      // Auto-format when the input reaches 4 digits without a decimal
-      if (value.length === 4 && !value.includes('.')) {
-        value = `${value.slice(0, 3)}.${value.slice(3)}`; // Add a decimal before the last digit
-      }
-
-      // If a decimal exists, enforce limits on the integer and decimal parts
-      if (value.includes('.')) {
-        const [integer, decimal] = value.split('.');
-        value = `${integer.slice(0, 3)}.${decimal.slice(0, 1)}`; // Limit to 3 digits before and 1 digit after the decimal
-      } else {
-        // If no decimal, limit the integer part to 3 digits
-        value = value.slice(0, 3);
-      }
-
-      // Update the form weight with the validated value
-      this.form.weight = value;
     },
 
     validateStep2() {
@@ -576,17 +419,6 @@ export default {
     closeAlert() {
       this.alertMessage = ''; // Close the alert
     },
-    formatContact() {
-      // Remove all non-numeric characters first
-      this.form.contact = this.form.contact.replace(/[^0-9]/g, '');
-
-      // Ensure the number starts with "9" and limit to 11 digits
-      if (!this.form.contact.startsWith('9')) {
-        this.form.contact = '9' + this.form.contact.slice(0, 10); // Add "9" and limit to 10 more digits
-      } else {
-        this.form.contact = this.form.contact.slice(0, 10); // Limit to 11 digits if it already starts with "9"
-      }
-    },
     triggerSubmit() {
       if (this.validateStep2()) {
         this.showModal = true; // Show confirmation modal
@@ -596,18 +428,15 @@ export default {
     },
     confirmSubmit() {
       const payload = {
-        consultationDetailsID: this.selectedPatient?.consultationDetailsID || null,
-        id:this.id,
+        consultationDetailsID: this.consultationDetails?.consultationDetailsID || null,
+        id: this.id,
         chiefComplaints: this.form.chiefComplaints,
         diagnosis: this.form.diagnosis,
         medication: this.form.medication,
       };
 
       console.log('Submitting form with payload:', payload);
-
-      // Emit the form data for processing
       this.$emit('submitForm', payload);
-
       this.showModal = false; // Hide confirmation modal
     },
 
@@ -616,12 +445,12 @@ export default {
     },
   },
   mounted() {
-    console.log('Received personalInfo:', this.personalInfo);
-    if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
+    console.log('Received personalInfo:', this.consultationDetails);
+    if (!this.consultationDetails || Object.keys(this.consultationDetails).length === 0) {
       console.log('Rendering empty form for new patient');
     } else {
-      console.log('Rendering form for existing patient:', this.selectedPatient);
-      this.populateForm(this.selectedPatient);
+      console.log('Rendering form for existing patient:', this.consultationDetails);
+      this.populateForm(this.consultationDetails);
     }
   },
 

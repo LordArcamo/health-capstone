@@ -17,93 +17,156 @@ class DoctorDashboardController extends Controller
      */
     public function index()
     {
-        $today = now()->toDateString(); // e.g., "2025-01-06"
-                // Fetch general consultation details
-                $generalConsultations = DB::table('personal_information')
-                ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
-                ->whereDate('consultation_details.consultationDate', $today) // Filter for today's date
-                ->select(
-                    'consultation_details.consultationDetailsID',
-                    'personal_information.personalId',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    'consultation_details.consultationDate',
-                    'consultation_details.consultationTime',
-                    'consultation_details.modeOfTransaction',
-                    'consultation_details.bloodPressure',
-                    'consultation_details.temperature',
-                    'consultation_details.height',
-                    'consultation_details.weight',
-                    'consultation_details.visitType', // Include visitType directly here
-                    DB::raw('NULL as providerName'), // Placeholder for missing column
-                    DB::raw('NULL as nameOfSpouse'), // Placeholder for missing column
-                    DB::raw('NULL as emergencyContact'), // Placeholder for missing column
-                    DB::raw('NULL as fourMember'), // Placeholder for missing column
-                    DB::raw('NULL as philhealthStatus'), // Placeholder for missing column
-                    DB::raw('NULL as philhealthNo'), // Placeholder for missing column
-                    DB::raw("'General Checkup' as checkupType"), // Static checkup type
-                    DB::raw("'General' as consultationType") // Type identifier
-                );
+        $today = now()->toDateString();
 
-            // Fetch prenatal consultation details for today
-            $prenatalConsultations = DB::table('personal_information')
-                ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
-                ->whereDate('prenatal_consultation_details.consultationDate', $today) // Filter for today's date
-                ->select(
-                    'prenatal_consultation_details.prenatalConsultationDetailsID',
-                    'personal_information.personalId',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    'prenatal_consultation_details.consultationDate',
-                    'prenatal_consultation_details.consultationTime',
-                    'prenatal_consultation_details.modeOfTransaction',
-                    'prenatal_consultation_details.bloodPressure',
-                    'prenatal_consultation_details.temperature',
-                    'prenatal_consultation_details.height',
-                    'prenatal_consultation_details.weight',
-                    DB::raw("'Prenatal' as visitType"), // Set visitType to "Prenatal"
-                    'prenatal_consultation_details.providerName',
-                    'prenatal_consultation_details.nameOfSpouse',
-                    'prenatal_consultation_details.emergencyContact',
-                    'prenatal_consultation_details.fourMember',
-                    'prenatal_consultation_details.philhealthStatus',
-                    'prenatal_consultation_details.philhealthNo',
-                    DB::raw("'Prenatal Checkup' as checkupType"), // Static checkup type
-                    DB::raw("'Prenatal' as consultationType") // Type identifier
-                );
+        // Fetch patients in queue (not completed)
+        $generalConsultations = DB::table('personal_information')
+            ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+            ->whereDate('consultation_details.consultationDate', $today)
+            ->where(function($query) {
+                $query->where('consultation_details.status', 'pending')
+                      ->orWhereNull('consultation_details.status');
+            })
+            ->select(
+                'consultation_details.consultationDetailsID',
+                DB::raw('NULL as prenatalConsultationDetailsID'),
+                'personal_information.personalId',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                'consultation_details.consultationDate',
+                'consultation_details.consultationTime',
+                'consultation_details.modeOfTransaction',
+                'consultation_details.bloodPressure',
+                'consultation_details.temperature',
+                'consultation_details.height',
+                'consultation_details.weight',
+                'consultation_details.visitType',
+                DB::raw('NULL as providerName'),
+                DB::raw('NULL as nameOfSpouse'),
+                DB::raw('NULL as emergencyContact'),
+                DB::raw('NULL as fourMember'),
+                DB::raw('NULL as philhealthStatus'),
+                DB::raw('NULL as philhealthNo'),
+                DB::raw("'General Checkup' as checkupType"),
+                DB::raw("'General' as consultationType")
+            );
 
-            // Combine both queries using union
-            $data = $generalConsultations->union($prenatalConsultations)->get();
+        // Fetch prenatal consultations in queue
+        $prenatalConsultations = DB::table('personal_information')
+            ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+            ->whereDate('prenatal_consultation_details.consultationDate', $today)
+            ->where(function($query) {
+                $query->where('prenatal_consultation_details.status', 'pending')
+                      ->orWhereNull('prenatal_consultation_details.status');
+            })
+            ->select(
+                DB::raw('NULL as consultationDetailsID'),
+                'prenatal_consultation_details.prenatalConsultationDetailsID',
+                'personal_information.personalId',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                'prenatal_consultation_details.consultationDate',
+                'prenatal_consultation_details.consultationTime',
+                'prenatal_consultation_details.modeOfTransaction',
+                'prenatal_consultation_details.bloodPressure',
+                'prenatal_consultation_details.temperature',
+                'prenatal_consultation_details.height',
+                'prenatal_consultation_details.weight',
+                DB::raw("'Prenatal' as visitType"),
+                'prenatal_consultation_details.providerName',
+                'prenatal_consultation_details.nameOfSpouse',
+                'prenatal_consultation_details.emergencyContact',
+                'prenatal_consultation_details.fourMember',
+                'prenatal_consultation_details.philhealthStatus',
+                'prenatal_consultation_details.philhealthNo',
+                DB::raw("'Prenatal Checkup' as checkupType"),
+                DB::raw("'Prenatal' as consultationType")
+            );
+
+        // Get patients in queue
+        $ITRConsultation = $generalConsultations->union($prenatalConsultations)->get();
+
+        // Get latest completed general patients
+        $latestGeneralPatients = DB::table('personal_information')
+            ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+            ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+            ->where('consultation_details.status', 'completed')
+            ->select(
+                'consultation_details.consultationDetailsID',
+                DB::raw('NULL as prenatalConsultationDetailsID'),
+                'personal_information.firstName',
+                'personal_information.lastName',
+                DB::raw("'General' as visitType"),
+                'consultation_details.consultationDate',
+                'consultation_details.consultationTime',
+                'visit_information.diagnosis',
+                'visit_information.medication',
+                'consultation_details.completed_at',
+                'consultation_details.updated_at'
+            )
+            ->orderBy('consultation_details.completed_at', 'desc')
+            ->orderBy('consultation_details.updated_at', 'desc');
+
+        // Get latest completed prenatal patients
+        $latestPrenatalPatients = DB::table('personal_information')
+            ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+            ->leftJoin('visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'visit_information.consultationDetailsID')
+            ->where('prenatal_consultation_details.status', 'completed')
+            ->select(
+                DB::raw('NULL as consultationDetailsID'),
+                'prenatal_consultation_details.prenatalConsultationDetailsID',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                DB::raw("'Prenatal' as visitType"),
+                'prenatal_consultation_details.consultationDate',
+                'prenatal_consultation_details.consultationTime',
+                'visit_information.diagnosis',
+                'visit_information.medication',
+                'prenatal_consultation_details.completed_at',
+                'prenatal_consultation_details.updated_at'
+            )
+            ->orderBy('prenatal_consultation_details.completed_at', 'desc')
+            ->orderBy('prenatal_consultation_details.updated_at', 'desc');
+
+        // Combine and get latest 5 patients
+        $latestPatients = $latestGeneralPatients->union($latestPrenatalPatients)
+            ->orderBy('completed_at', 'desc')
+            ->orderBy('updated_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Get total patients count
+        $totalPatients = PersonalInformation::count();
+
+        // Get today's appointments count
+        $todayAppointments = ConsultationDetails::whereDate('consultationDate', $today)->count();
+
+        // Get critical cases count (you may need to adjust this based on your criteria)
+        $criticalCases = 0;
 
         return Inertia::render('DoctorDashboard', [
-            'totalPatients' => 1200,
-            'ITRConsultation' => $data,
-            'latestPatients' => [
-                ['name' => 'Alice Johnson', 'checkInTime' => '10:00 AM', 'diagnosis' => 'Common Cold'],
-                ['name' => 'Robert Brown', 'checkInTime' => '10:15 AM', 'diagnosis' => 'Allergy'],
-            ],
-            'todayAppointments' => 15,
-            'criticalCases' => 3,
-            'notifications' => [
-                ['message' => 'Emergency case in Room 4.'],
-                ['message' => 'Patient John Doe requires immediate attention.'],
-            ],
+            'totalPatients' => $totalPatients,
+            'ITRConsultation' => $ITRConsultation,
+            'latestPatients' => $latestPatients,
+            'todayAppointments' => $todayAppointments,
+            'criticalCases' => $criticalCases,
+            'notifications' => [], // Add notifications if needed
         ]);
     }
 
@@ -141,6 +204,4 @@ class DoctorDashboardController extends Controller
             'patient' => $nextPatient,
         ]);
     }
-
-
 }

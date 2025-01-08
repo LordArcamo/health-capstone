@@ -103,7 +103,9 @@
 </template>
 
 
-<script>
+<script>0
+import { router } from '@inertiajs/vue3';
+
 export default {
   props: {
     patientsInQueue: {
@@ -189,13 +191,53 @@ export default {
       this.selectedPatient = { ...patient }; // Copy patient details
     },
     startGeneralCheckup() {
-      console.log('Starting General Checkup for', this.selectedPatient.firstName);
-      // Call API or other logic here
+        if (this.selectedPatient && this.selectedPatient.consultationDetailsID) {
+            console.log(
+                'Starting General Checkup for',
+                this.selectedPatient.firstName,
+                'with ID:',
+                this.selectedPatient.consultationDetailsID
+            );
+
+            router.visit('/doctor-checkup/itr', {
+                method: 'get',
+                data: {
+                    consultationDetailsID: this.selectedPatient.consultationDetailsID,
+                },
+            });
+        } else {
+            console.error('Selected patient data is missing or invalid', this.selectedPatient);
+            alert('Please select a valid patient with a General Checkup ID before starting the checkup.');
+        }
     },
+
     startPrenatalCheckup() {
-      console.log('Starting Prenatal Checkup for', this.selectedPatient.firstName);
-      // Call API or other logic here
+        if (this.selectedPatient && this.selectedPatient.visitType === 'Prenatal') {
+            if (this.selectedPatient.prenatalConsultationDetailsID) {
+                console.log(
+                    'Starting Prenatal Checkup for',
+                    this.selectedPatient.firstName,
+                    'with ID:',
+                    this.selectedPatient.prenatalConsultationDetailsID
+                );
+
+                router.visit('/doctor-checkup/prenatal', {
+                    method: 'get',
+                    data: {
+                        prenatalConsultationDetailsID: this.selectedPatient.prenatalConsultationDetailsID,
+                    },
+                });
+            } else {
+                console.error('Prenatal Consultation ID is missing for:', this.selectedPatient);
+                alert('This patient does not have a valid Prenatal Checkup ID.');
+            }
+        } else {
+            console.error('Selected patient is not eligible for a Prenatal Checkup:', this.selectedPatient);
+            alert('Please select a patient with a Prenatal visit type before starting the checkup.');
+        }
     },
+
+
     previousPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
