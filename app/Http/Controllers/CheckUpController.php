@@ -117,7 +117,8 @@ class CheckUpController extends Controller
     public function index()
     {
         // Use Eloquent to join the PersonalInformation and itr tables
-        $data = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
+        $data = PersonalInformation::join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+        ->join('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
             ->select(
                 'personal_information.personalId',
                 'personal_information.firstName',
@@ -130,19 +131,19 @@ class CheckUpController extends Controller
                 'personal_information.birthdate',
                 'personal_information.contact',
                 'personal_information.sex',
-                'itr.consultationDate',
-                'itr.consultationTime',
-                'itr.modeOfTransaction',
-                'itr.bloodPressure',
-                'itr.temperature',
-                'itr.height',
-                'itr.weight',
-                'itr.providerName',
-                'itr.natureOfVisit',
-                'itr.visitType',
-                'itr.chiefComplaints',
-                'itr.diagnosis',
-                'itr.medication'
+                'consultation_details.consultationDate',
+                'consultation_details.consultationTime',
+                'consultation_details.modeOfTransaction',
+                'consultation_details.bloodPressure',
+                'consultation_details.temperature',
+                'consultation_details.height',
+                'consultation_details.weight',
+                'consultation_details.providerName',
+                'consultation_details.natureOfVisit',
+                'consultation_details.visitType',
+                'visit_information.chiefComplaints',
+                'visit_information.diagnosis',
+                'visit_information.medication'
             )
             ->distinct() // Ensure no duplicate entries
             ->get();

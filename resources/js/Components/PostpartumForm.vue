@@ -338,7 +338,7 @@ export default {
         { title: 'Postpartum Details' },
       ],
       form: {
-        prenatalId: this.patient?.prenatalId || null,
+        prenatalConsultationDetailsID: this.patient?.prenatalConsultationDetailsID || null,
         lastName: '',
         firstName: '',
         middleName: '',
@@ -451,7 +451,7 @@ export default {
       }
 
       const formData = {
-        prenatalId: this.form.prenatalId,
+        prenatalConsultationDetailsID: this.form.prenatalConsultationDetailsID,
         lastName: this.form.lastName,
         firstName: this.form.firstName,
         middleName: this.form.middleName,

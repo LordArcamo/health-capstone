@@ -133,8 +133,12 @@ onBeforeUnmount(() => {
             RHU Users
           </NavLink>
 
-          <NavLink v-if="role === 'admin'" href="/register" :active="component === 'Register'">
-            <!-- Changed icon from 'chart-bar' to 'user-plus' -->
+          <NavLink 
+            v-if="role === 'admin'" 
+            :href="route('admin.register')" 
+            :active="$page.url === '/admin/register'"
+            @click.prevent="$inertia.visit(route('admin.register'))"
+          >
             <font-awesome-icon :icon="['fas', 'user-plus']" class="mr-2" />
             Register User
           </NavLink>

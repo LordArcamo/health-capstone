@@ -10,25 +10,25 @@ use App\Models\CheckBox1;
 class Trimester1Controller extends Controller
 {
 
-    // public function fetchTrimesterData(Request $request, $prenatalId, $trimester)
+    // public function fetchTrimesterData(Request $request, $prenatalConsultationDetailsID, $trimester)
     // {
     //     // Fetch the trimester data
     //     $trimesterData = GeneralTrimester::with('checkbox1')
-    //         ->where('prenatalId', $prenatalId)
+    //         ->where('prenatalConsultationDetailsID', $prenatalConsultationDetailsID)
     //         ->where('trimester', $trimester)
     //         ->first();
-    
+
     //     // Render the TrimesterOneForm component with the fetched data
     //     return Inertia::render('Components/Trimester/TrimesterOneForm', [
     //         'prefilledData' => $trimesterData ?? [],
-    //         'prenatalId' => $prenatalId,
+    //         'prenatalConsultationDetailsID' => $prenatalConsultationDetailsID,
     //         'trimester' => $trimester,
     //     ]);
     // }
-    
-    
-    
-    
+
+
+
+
     /**
      * Display a listing of the resource.
      */
@@ -52,7 +52,7 @@ class Trimester1Controller extends Controller
     {
         // Validate request data
         $validatedData = $request->validate([
-            'prenatalId' => 'required|exists:prenatal,prenatalId',
+            'prenatalConsultationDetailsID' => 'required|exists:prenatal_consultation_details,prenatalConsultationDetailsID',
             'id' => 'nullable|exists:users,id',
             'date_of_visit' => 'required|date',
             'weight' => 'required|numeric',
@@ -61,7 +61,7 @@ class Trimester1Controller extends Controller
             'aog_months' => 'required|integer',
             'aog_days' => 'required|integer',
             'trimester' => 'required|string|max:50',
-            
+
             // CheckBox1 data validation
             'prenatal_checkup' => 'boolean',
             'pe_done' => 'boolean',
@@ -87,7 +87,7 @@ class Trimester1Controller extends Controller
 
         // Split validated data for GeneralTrimester
         $generalTrimesterData = [
-            'prenatalId' => $validatedData['prenatalId'],
+            'prenatalConsultationDetailsID' => $validatedData['prenatalConsultationDetailsID'],
             'id' => $userId,
             'date_of_visit' => $validatedData['date_of_visit'],
             'weight' => $validatedData['weight'],
@@ -119,7 +119,7 @@ class Trimester1Controller extends Controller
             'presentation' => $validatedData['presentation'],
             'fundal_height' => $validatedData['fundal_height'],
         ];
-        
+
 
         // Save CheckBox1 data to CheckBox1 table
         $checkBox1 = CheckBox1::create($checkBox1Data);

@@ -925,9 +925,6 @@ export default {
         this.showAlert = true;
         return;
       }
-      console.log("Vaccination data saved:", this.form); // Verify the form object
-      this.showConfirmationModal = false;
-      this.closeModal();
 
       // Prepare the vaccination data
       const vaccinationData = {
@@ -951,7 +948,7 @@ export default {
       if (this.selectedPatient?.personalId) {
         vaccinationData.patient = {
           personalId: this.selectedPatient.personalId,
-          isExisting: true // Add a flag to indicate this is an existing patient
+          isExisting: true
         };
       } else {
         // For new patients, include all details
@@ -970,25 +967,37 @@ export default {
         };
       }
 
-      // Log the consolidated data
+      this.showConfirmationModal = false;
+
+      // Submit using Inertia with proper options
       Inertia.post('/vaccination/store', vaccinationData, {
+        preserveState: true,
+        preserveScroll: true,
         onSuccess: () => {
-          console.log("Vaccination Data Successfully Submitted:", vaccinationData);
-          this.resetForm();
-          this.closeModal();
+          // Show success message
+          this.showAlert = true;
+          this.alertMessage = "Vaccination record saved successfully!";
+          
+          // Visit the current page again to refresh data
+          Inertia.visit(window.location.pathname, {
+            preserveState: false,
+            preserveScroll: true,
+            only: ['vaccinatedPatients']
+          });
+          
+          // Close modal after a short delay
+          setTimeout(() => {
+            this.resetForm();
+            this.closeModal();
+          }, 1000);
         },
         onError: (errors) => {
           console.error("Submission failed:", errors);
           this.errors = errors;
-          console.log("Vaccination Data Failed to Submit:", vaccinationData);
-        },
+          this.showAlert = true;
+          this.alertMessage = "Failed to save vaccination record. Please try again.";
+        }
       });
-
-      console.log("Vaccination data sent:", vaccinationData);
-
-      // Reset form and close modal
-      this.resetForm();
-      this.closeModal();
     },
     resetForm() {
       this.form = {

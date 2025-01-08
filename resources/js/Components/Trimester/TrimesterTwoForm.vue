@@ -203,7 +203,7 @@ import { Inertia } from '@inertiajs/inertia';
 
 export default {
   props: {
-    prenatalId: {
+    prenatalConsultationDetailsID: {
       type: Number,
       required: true,
     },
@@ -317,7 +317,7 @@ export default {
       if (this.isSubmitting) return; // Prevent duplicate submissions
       this.isSubmitting = true;
       if (this.validateForm()) {
-        const formData = { ...this.form, prenatalId: this.prenatalId, id: this.id };
+        const formData = { ...this.form, prenatalConsultationDetailsID: this.prenatalConsultationDetailsID, id: this.id };
 
         Inertia.post('/trimester2/store', formData, {
           onSuccess: () => {

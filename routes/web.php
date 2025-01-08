@@ -25,6 +25,7 @@ use App\Http\Controllers\AuthorizationRolesController;
 use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\DoctorCheckupController;
 use App\Http\Controllers\DoctorPreCheckupController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 use App\Http\Middleware\RoleMiddleware;
 
@@ -73,10 +74,14 @@ Route::get('/login', function () {
     ]);
 });
 
-Route::middleware(['auth', 'verified', 'role: admin'])->group(function () {
-    Route::get('/register', function () {
-        return Inertia::render('Register');
-    })->name('register');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/admin/register', [RegisteredUserController::class, 'create'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register');
+    
+    Route::post('/admin/register', [RegisteredUserController::class, 'store'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register.store');
 });
 
 // Route::get('/', function () {
@@ -122,7 +127,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/prenatalConstultationDetails/store', [PreNatalController::class, 'storeDetails'])->name('prenatalConstultationDetails.store');
     Route::get('/services/patients/prenatal-postpartum', [PreNatalController::class, 'index'])->name('prenatal-postpartum.index');
     Route::post('/services/patients/prenatal-postpartum', [PreNatalController::class, 'import'])->name('prenatal-postpartum.import');
-    Route::get('/prenatal/{prenatalId}/trimester/{trimester}', [PreNatalController::class, 'fetchTrimesterData']);
+    Route::get('/prenatal/{prenatalConsultationDetailsID}/trimester/{trimester}', [PreNatalController::class, 'fetchTrimesterData']);
 });
 
 
@@ -132,12 +137,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/postpartum/store', [PostpartumController::class, 'store'])->name('postpartum.store');
     Route::get('/postpartum/{id}', [PostpartumController::class, 'show'])->name('postpartum.show');
     Route::put('/postpartum/{id}', [PostpartumController::class, 'update'])->name('postpartum.update');
-    Route::get('/postpartum/data/{prenatalId}', [PostpartumController::class, 'getByPrenatalId'])->name('postpartum.getByPrenatalId');
+    Route::get('/postpartum/data/{prenatalConsultationDetailsID}', [PostpartumController::class, 'getByprenatalConsultationDetailsID'])->name('postpartum.getByprenatalConsultationDetailsID');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/trimester1/store', [Trimester1Controller::class, 'store'])->name('trimester1.store');
-    // Route::get('/trimester-data/{prenatalId}/{trimester}', [Trimester1Controller::class, 'fetchTrimesterData']);
+    // Route::get('/trimester-data/{prenatalConsultationDetailsID}/{trimester}', [Trimester1Controller::class, 'fetchTrimesterData']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -192,6 +197,15 @@ Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
     ->middleware(RoleMiddleware::class . ':admin')
     ->name('admin.dashboard');
 
+// Admin Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/register', [RegisteredUserController::class, 'create'])
+        ->name('register')
+        ->middleware([RoleMiddleware::class . ':admin']);
+    Route::post('/register', [RegisteredUserController::class, 'store'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('register.store');
+});
 
 // Route to display the main doctor dashboard with static data
 Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])

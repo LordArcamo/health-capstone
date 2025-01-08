@@ -49,7 +49,7 @@
         <div v-else-if="step === 2">
           <component
             :is="formComponent"
-            :prenatalId="prenatalId"
+            :prenatalConsultationDetailsID="prenatalConsultationDetailsID"
             :trimester="getTrimesterNumber(selectedTrimester)"
             :prefilledData="internalPrefilledData"
             @submit="handleFormSubmit"
@@ -81,7 +81,7 @@ import { ref, defineAsyncComponent, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
-  prenatalId: {
+  prenatalConsultationDetailsID: {
     type: Number,
     required: true
   },
@@ -157,9 +157,9 @@ const confirmSelection = async () => {
   if (selectedTrimester.value) {
     const trimesterNumber = getTrimesterNumber(selectedTrimester.value);
     try {
-      const response = await axios.get(`/prenatal/${props.prenatalId}/trimester/${trimesterNumber}`);
+      const response = await axios.get(`/prenatal/${props.prenatalConsultationDetailsID}/trimester/${trimesterNumber}`);
       console.log("API Response:", response.data);
-      
+
       if (response.data.success) {
         internalPrefilledData.value = response.data.data;
         step.value = 2;
@@ -190,6 +190,6 @@ watch(() => props.prefilledData, (newVal) => {
 }, { immediate: true });
 
 onMounted(() => {
-  console.log("Received prenatalId in TrimesterModal:", props.prenatalId);
+  console.log("Received prenatalConsultationDetailsID in TrimesterModal:", props.prenatalConsultationDetailsID);
 });
 </script>
