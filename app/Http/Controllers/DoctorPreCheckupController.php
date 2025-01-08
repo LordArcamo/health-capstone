@@ -33,7 +33,7 @@ class DoctorPreCheckupController extends Controller
         $prenatalConsultationDetailsID = $request->input('prenatalConsultationDetailsID');
 
         if (!$prenatalConsultationDetailsID) {
-            return Inertia::render('CheckUp/PrenatalDoctorCheckup', [
+            return Inertia::render('Doctor/PrenatalDoctorCheckup', [
                 'prenatalConsultationDetailsID' => null
             ]);
         }
@@ -55,12 +55,12 @@ class DoctorPreCheckupController extends Controller
             ->first();
 
             if (!$prenatalConsultationDetail) {
-                return Inertia::render('CheckUp/PrenatalDoctorCheckup', [
+                return Inertia::render('Doctor/PrenatalDoctorCheckup', [
                     'prenatalConsultationDetailsID' => null
                 ]);
             }
 
-            return Inertia::render('CheckUp/PrenatalDoctorCheckup', [
+            return Inertia::render('Doctor/PrenatalDoctorCheckup', [
                 'prenatalConsultationDetails' => $prenatalConsultationDetail
             ]);
     }

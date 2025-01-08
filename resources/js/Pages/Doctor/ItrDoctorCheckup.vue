@@ -3,54 +3,44 @@ import NewLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import ITRFormDoctor from '@/Components/ITRFormDoctor.vue';
 import { Inertia } from '@inertiajs/inertia';
+import { ref, watch } from 'vue';
 
-defineProps({
+const props = defineProps({
   consultationDetails: {
     type: Object,
-    default: null,
+    required: false,
+    default: () => ({}),
   },
-})
+});
+
+watch(() => props.consultationDetails, (newVal) => {
+  if (!newVal || Object.keys(newVal).length === 0) {
+    console.error('No valid personalInfo provided.');
+  }
+});
 
 function submitForm(payload) {
   console.log("Submitting from parent:", payload);
 
-  if (payload.personalId) {
-    // Update existing patient
-    Inertia.post("/consultationDetails/store", payload, {
-      onSuccess: () => {
-        alert("Existing patient's record updated successfully!");
-      },
-      onError: (errors) => {
-        console.error("Error updating existing patient:", errors);
-        alert("Failed to update existing patient's record.");
-      },
-    });
-  } else {
-    // Create new patient
-    Inertia.post("/consultationDetails/store", payload, {
-      onSuccess: ({ props }) => {
-        if (props.personalId) {
-          payload.personalId = props.personalId; // Update payload with the new ID
-          console.log("New personalId received:", payload.personalId);
-        }
-        alert("New patient record added successfully!");
-      },
-      onError: (errors) => {
-        console.error("Error adding new patient:", errors);
-        alert("Failed to add new patient record.");
-      },
-    });
-  }
+  Inertia.post("/store/itr", payload, {
+    onSuccess: () => {
+      alert("Record saved successfully!");
+    },
+    onError: (errors) => {
+      console.error("Error saving record:", errors);
+      alert("Failed to save record.");
+    },
+  });
 }
-
 </script>
 
 <template>
   <Head title="Individual Treatment Record" />
   <NewLayout>
     <ITRFormDoctor
-        :consultationDetails="consultationDetails"
-        @submitForm="submitForm"
-      />
+      v-if="consultationDetails !== undefined"
+      :consultationDetails="consultationDetails || {}"
+      @submitForm="submitForm"
+    />
   </NewLayout>
 </template>
