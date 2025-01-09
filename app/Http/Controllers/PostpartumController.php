@@ -23,11 +23,11 @@ class PostpartumController extends Controller
      */
     public function create()
     {
-        $prenatalId = request('prenatalId');
+        $prenatalConsultationDetailsID = request('prenatalConsultationDetailsID');
         $postpartum = null;
-        
-        if ($prenatalId) {
-            $postpartum = Postpartum::where('prenatalId', $prenatalId)->first();
+
+        if ($prenatalConsultationDetailsID) {
+            $postpartum = Postpartum::where('prenatalConsultationDetailsID', $prenatalConsultationDetailsID)->first();
         }
 
         return Inertia::render('CheckUp/PostPartumCheckup', [
@@ -44,9 +44,9 @@ class PostpartumController extends Controller
             // Add the authenticated user's ID to the request
             $requestData = $request->all();
             $requestData['id'] = auth()->id();
-            
+
             $validatedData = validator($requestData, [
-                'prenatalId' => 'nullable|exists:prenatal,prenatalId',
+                'prenatalConsultationDetailsID' => 'nullable|exists:prenatal_consultation_details,prenatalConsultationDetailsID',
                 'id' => 'required|exists:users,id',
                 'lastName' => 'required|string|max:100',
                 'firstName' => 'required|string|max:100',
@@ -72,7 +72,7 @@ class PostpartumController extends Controller
             ])->validate();
 
             DB::beginTransaction();
-            
+
             // Log incoming data for debugging
             Log::info('Creating postpartum record with data:', array_merge(
                 ['user_id' => auth()->id()],
@@ -120,13 +120,13 @@ class PostpartumController extends Controller
     }
 
     /**
-     * Get postpartum data by prenatalId.
+     * Get postpartum data by prenatalConsultationDetailsID.
      */
-    public function getByPrenatalId($prenatalId)
+    public function getByprenatalConsultationDetailsID($prenatalConsultationDetailsID)
     {
         try {
             // Fetch the latest data for this prenatalId
-            $postpartum = Postpartum::where('prenatalId', $prenatalId)
+            $postpartum = Postpartum::where('prenatalConsultationDetailsID', $prenatalConsultationDetailsID)
                 ->latest('created_at')  // Order by latest created_at
                 ->first();
 
@@ -166,7 +166,7 @@ class PostpartumController extends Controller
     public function update(Request $request, $id)
     {
         $postpartum = Postpartum::findOrFail($id);
-        
+
         $validatedData = $request->validate([
             'lastName' => 'sometimes|required|string|max:100',
             'firstName' => 'sometimes|required|string|max:100',

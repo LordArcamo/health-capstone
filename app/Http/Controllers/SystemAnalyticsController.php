@@ -7,18 +7,20 @@ use Inertia\Inertia;
 use App\Models\PersonalInformation;
 use App\Models\VaccinationRecord;
 use App\Models\CheckUp;
+use App\Models\ConsultationDetails;
+use App\Models\VisitInformation;
 use App\Models\RiskManagement;
 use Illuminate\Support\Facades\DB;
 
 class SystemAnalyticsController extends Controller
 {
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         $totalPatients = $this->totalPatients($request);
         $risk = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
         $cases = $this->cases($request);
-        
+
         $monthlyStats = $this->getPatientStatistics($request);
         $referredStats = $this->getReferredStats($request);
         $lineChart = $this->getVaccinationStatistics($request);
@@ -44,7 +46,7 @@ class SystemAnalyticsController extends Controller
     private function totalPatients($request)
     {
         $query = PersonalInformation::query();
-    
+
         if ($request->gender) {
             $query->where('sex', $request->gender);
         }
@@ -58,7 +60,7 @@ class SystemAnalyticsController extends Controller
                 $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
             }
         }
-    
+
         if ($request->date) {
             $today = now();
             switch ($request->date) {
@@ -73,20 +75,20 @@ class SystemAnalyticsController extends Controller
                     break;
             }
         }
-    
+
         return $query->count();
     }
 
-    private function risk($request) 
+    private function risk($request)
     {
         $query = RiskManagement::query();
-    
+
         if ($request->gender) {
             $query->whereHas('patient', function($q) use ($request) {
                 $q->where('sex', $request->gender);
             });
         }
-    
+
         if ($request->date) {
             $today = now();
             switch ($request->date) {
@@ -113,11 +115,11 @@ class SystemAnalyticsController extends Controller
                 }
             });
         }
-    
+
         return $query->count();
     }
 
-    private function vaccinations($request) 
+    private function vaccinations($request)
     {
         $query = VaccinationRecord::query();
 
@@ -126,7 +128,7 @@ class SystemAnalyticsController extends Controller
                 $q->where('sex', $request->gender);
             });
         }
-    
+
         if ($request->date) {
             $today = now();
             switch ($request->date) {
@@ -153,11 +155,11 @@ class SystemAnalyticsController extends Controller
                 }
             });
         }
-    
+
         return $query->count();
     }
 
-    private function cases($request) 
+    private function cases($request)
     {
         $query = CheckUp::where('visitType', 'Mental Health');
 
@@ -166,7 +168,7 @@ class SystemAnalyticsController extends Controller
                 $q->where('sex', $request->gender);
             });
         }
-    
+
         if ($request->date) {
             $today = now();
             switch ($request->date) {
@@ -208,7 +210,7 @@ class SystemAnalyticsController extends Controller
                     break;
             }
         }
-    
+
         return $query->count();
     }
 
@@ -258,14 +260,14 @@ class SystemAnalyticsController extends Controller
 
     private function getReferredStats($request)
     {
-        $query = CheckUp::query();
+        $query = ConsultationDetails::query();
 
         if ($request->gender) {
             $query->whereHas('personalInformation', function($q) use ($request) {
                 $q->where('sex', $request->gender);
             });
         }
-    
+
         if ($request->date) {
             $today = now();
             switch ($request->date) {
@@ -297,13 +299,13 @@ class SystemAnalyticsController extends Controller
 
         // Clone the query before adding the Referral condition
         $baseQuery = clone $query;
-        
+
         // Get referred count
         $referredCount = $query->where('modeOfTransaction', 'Referral')->count();
-        
+
         // Get total count from the base query
         $totalCount = $baseQuery->count();
-        
+
         return [
             'referred' => $referredCount,
             'notReferred' => $totalCount - $referredCount
@@ -314,7 +316,7 @@ class SystemAnalyticsController extends Controller
     {
         $monthlyVaccinations = [];
         $currentYear = date('Y');
-    
+
         for ($month = 1; $month <= 12; $month++) {
             $query = VaccinationRecord::whereYear('dateOfVisit', $currentYear)
                 ->whereMonth('dateOfVisit', $month);
@@ -355,24 +357,27 @@ class SystemAnalyticsController extends Controller
 
             $monthlyVaccinations[] = $query->count();
         }
-    
+
         return $monthlyVaccinations;
     }
-    
+
     private function getCasesStatistics()
     {
         $monthlyCases = [];
         $currentYear = date('Y');
-    
+
         for ($month = 1; $month <= 12; $month++) {
-            $count = CheckUp::whereYear('consultationDate', $currentYear)
-                ->whereMonth('consultationDate', $month)
+            $count = VisitInformation::join('consultation_details', 'visit_information.consultationDetailsID', '=', 'consultation_details.consultationDetailsID')
+                ->whereYear('consultation_details.consultationDate', $currentYear)
+                ->whereMonth('consultation_details.consultationDate', $month)
                 ->count();
+
             $monthlyCases[] = $count;
         }
 
         return $monthlyCases;
     }
+
 
     private function getMentalHealthStatistics()
     {

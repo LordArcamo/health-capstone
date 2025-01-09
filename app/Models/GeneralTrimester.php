@@ -22,7 +22,7 @@ class GeneralTrimester extends Model
 
     // Define the fillable fields for mass assignment
     protected $fillable = [
-        'prenatalId',
+        'prenatalConsultationDetailsID',
         'id', // Foreign key for users table
         'date_of_visit',
         'weight',
@@ -36,7 +36,7 @@ class GeneralTrimester extends Model
     // Define the relationship with the Prenatal model
     public function prenatal()
     {
-        return $this->belongsTo(Prenatal::class, 'prenatalId', 'prenatalId');
+        return $this->belongsTo(PrenatalConsultationDetails::class, 'prenatalConsultationDetailsID', 'prenatalConsultationDetailsID');
     }
     public function checkbox1()
     {

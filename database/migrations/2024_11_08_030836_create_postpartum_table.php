@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('postpartum', function (Blueprint $table) {
             $table->bigIncrements('postpartumId');  // Custom primary key
-            $table->unsignedBigInteger('prenatalId');
-            $table->unsignedBigInteger('id'); 
+            $table->unsignedBigInteger('prenatalConsultationDetailsID');
+            $table->unsignedBigInteger('id');
             $table->string('lastName', 100);
             $table->string('firstName', 100);
             $table->string('middleName', 100);
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->string('dangerSignsBaby', 100);
             $table->timestamps();
 
-            $table->foreign('prenatalId')->references('prenatalId')->on('prenatal')->onDelete('cascade');
+            $table->foreign('prenatalConsultationDetailsID')->references('prenatalConsultationDetailsID')->on('prenatal_consultation_details')->onDelete('cascade');
 
             $table->foreign('id')
             ->references('id')

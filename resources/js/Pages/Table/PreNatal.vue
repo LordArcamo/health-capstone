@@ -1,10 +1,10 @@
 <template>
   <Head title="Patient Records" />
   <NewLayout>
-    <PrenatalTable 
-    :patients="props.PRENATAL" 
-    :prefilledData="props.prefilledData" 
-    :prenatalId="props.prenatalId" 
+    <PrenatalTable
+    :patients="props.PRENATAL"
+    :prefilledData="props.prefilledData"
+    :prenatalConsultationDetailsID="props.prenatalConsultationDetailsID"
     :trimester="props.trimester"
     />
   </NewLayout>
@@ -18,7 +18,7 @@ import PrenatalTable from '@/Components/PrenatalTable.vue';
 const props = defineProps({
   PRENATAL: Array,
   prefilledData: Object,
-  prenatalId: Number,
+  prenatalConsultationDetailsID: Number,
   trimester: String,
 });
 </script>

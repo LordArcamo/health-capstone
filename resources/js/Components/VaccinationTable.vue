@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import VaccinationModal from "./VaccinationModals/VaccinationModal.vue";
 import ScheduleNextAppointmentModal from "./VaccinationModals/ScheduleNextAppointmentModal.vue";
 import ViewHistoryModal from "./VaccinationModals/ViewHistoryModal.vue";
@@ -17,7 +17,18 @@ export default {
       default: () => [],
     },
   },
-
+  watch: {
+    vaccinatedPatients: {
+      handler(newVal) {
+        this.updatePagination();
+      },
+      deep: true
+    },
+    filteredPatients() {
+      this.currentPage = 1; // Reset to the first page
+      this.updatePagination();
+    },
+  },
   components: {
     VaccinationModal,
     ScheduleNextAppointmentModal,
@@ -39,12 +50,6 @@ export default {
       itemsPerPage: 5, // Number of items per page
       dropdownOpen: null,
     };
-  },
-  watch: {
-    filteredPatients() {
-      this.currentPage = 1; // Reset to the first page
-      this.updatePagination();
-    },
   },
   computed: {
     barangayOptions() {

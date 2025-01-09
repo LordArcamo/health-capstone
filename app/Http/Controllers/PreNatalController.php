@@ -18,8 +18,9 @@ class PreNatalController extends Controller
      */
     public function index()
     {
-        $data = PersonalInformation::join('prenatal', 'personal_information.personalId', '=', 'prenatal.personalId')
-        ->select(
+        $data = PersonalInformation::join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+        ->join('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
+            ->select(
             'personal_information.personalId',
             'personal_information.firstName',
             'personal_information.lastName',
@@ -29,41 +30,41 @@ class PreNatalController extends Controller
             'personal_information.age',
             'personal_information.birthdate',
             'personal_information.contact',
-            'prenatal.prenatalId',
-            'prenatal.modeOfTransaction',
-            'prenatal.consultationDate',
-            'prenatal.consultationTime',
-            'prenatal.bloodPressure',
-            'prenatal.temperature',
-            'prenatal.height', 
-            'prenatal.weight', 
-            'prenatal.providerName', 
-            'prenatal.nameOfSpouse',
-            'prenatal.emergencyContact', 
-            'prenatal.fourMember', 
-            'prenatal.philhealthStatus', 
-            'prenatal.philhealthNo',
-            'prenatal.menarche', 
-            'prenatal.sexualOnset', 
-            'prenatal.periodDuration', 
-            'prenatal.birthControl', 
-            'prenatal.intervalCycle',
-            'prenatal.menopause', 
-            'prenatal.lmp', 
-            'prenatal.edc', 
-            'prenatal.gravidity', 
-            'prenatal.parity', 
-            'prenatal.term', 
-            'prenatal.preterm',
-            'prenatal.abortion', 
-            'prenatal.living', 
-            'prenatal.syphilisResult', 
-            'prenatal.penicillin', 
-            'prenatal.hemoglobin',
-            'prenatal.hematocrit', 
-            'prenatal.urinalysis', 
-            'prenatal.ttStatus', 
-            'prenatal.tdDate',
+            'prenatal_consultation_details.prenatalConsultationDetailsID',
+            'prenatal_consultation_details.modeOfTransaction',
+            'prenatal_consultation_details.consultationDate',
+            'prenatal_consultation_details.consultationTime',
+            'prenatal_consultation_details.bloodPressure',
+            'prenatal_consultation_details.temperature',
+            'prenatal_consultation_details.height',
+            'prenatal_consultation_details.weight',
+            'prenatal_consultation_details.providerName',
+            'prenatal_consultation_details.nameOfSpouse',
+            'prenatal_consultation_details.emergencyContact',
+            'prenatal_consultation_details.fourMember',
+            'prenatal_consultation_details.philhealthStatus',
+            'prenatal_consultation_details.philhealthNo',
+            'prenatal_visit_information.menarche',
+            'prenatal_visit_information.sexualOnset',
+            'prenatal_visit_information.periodDuration',
+            'prenatal_visit_information.birthControl',
+            'prenatal_visit_information.intervalCycle',
+            'prenatal_visit_information.menopause',
+            'prenatal_visit_information.lmp',
+            'prenatal_visit_information.edc',
+            'prenatal_visit_information.gravidity',
+            'prenatal_visit_information.parity',
+            'prenatal_visit_information.term',
+            'prenatal_visit_information.preterm',
+            'prenatal_visit_information.abortion',
+            'prenatal_visit_information.living',
+            'prenatal_visit_information.syphilisResult',
+            'prenatal_visit_information.penicillin',
+            'prenatal_visit_information.hemoglobin',
+            'prenatal_visit_information.hematocrit',
+            'prenatal_visit_information.urinalysis',
+            'prenatal_visit_information.ttStatus',
+            'prenatal_visit_information.tdDate',
         )
         ->distinct()
         ->get();
@@ -73,29 +74,29 @@ class PreNatalController extends Controller
         ]);
     }
 
-    public function fetchTrimesterData($prenatalId, $trimester)
+    public function fetchTrimesterData($prenatalConsultationDetailsID, $trimester)
     {
         try {
-            // Fetch the latest data for this prenatalId and trimester
-            $trimesterData = GeneralTrimester::where('prenatalId', $prenatalId)
+            // Fetch the latest data for this prenatalConsultationDetailsID and trimester
+            $trimesterData = GeneralTrimester::where('prenatalConsultationDetailsID', $prenatalConsultationDetailsID)
                 ->where('trimester', $trimester)
-                ->latest('created_at')  // Order by latest created_at
+                ->latest('created_at')
                 ->first();
 
             if ($trimesterData) {
-                // Get the associated checkbox data based on trimester
+                // Load the appropriate checkbox relationship based on trimester
                 $checkboxData = null;
                 switch($trimester) {
                     case '1':
-                        $checkboxData = $trimesterData->checkbox1;
+                        $checkboxData = $trimesterData->checkbox1()->first();
                         break;
                     case '2':
-                        $checkboxData = $trimesterData->checkbox2;
+                        $checkboxData = $trimesterData->checkbox2()->first();
                         break;
                     case '3':
                     case '4':
                     case '5':
-                        $checkboxData = $trimesterData->checkbox3;
+                        $checkboxData = $trimesterData->checkbox3()->first();
                         break;
                 }
 
@@ -116,13 +117,16 @@ class PreNatalController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Error in fetchTrimesterData: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching trimester data: ' . $e->getMessage()
             ], 500);
         }
     }
-    
+
 
     public function import(Request $request)
     {
@@ -130,15 +134,15 @@ class PreNatalController extends Controller
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
         ]);
-    
+
         $file = $request->file('file');
         $data = array_map('str_getcsv', file($file->getRealPath()));
         $header = array_shift($data); // Extract the header row
-    
+
         DB::transaction(function () use ($data, $header) {
             foreach ($data as $row) {
                 $prenatalData = array_combine($header, $row);
-    
+
                 // Insert data in PersonalInformation, excluding personalId
                 $personalInfo = PersonalInformation::create([
                     'firstName' => $prenatalData['firstName'],
@@ -151,7 +155,7 @@ class PreNatalController extends Controller
                     'contact' => $prenatalData['contact'],
                     'sex' => $prenatalData['sex'],
                 ]);
-    
+
                 // Insert data in Prenatal with the auto-incremented personalId
                 Prenatal::create([
                     'personalId' => $personalInfo->personalId,
@@ -190,13 +194,13 @@ class PreNatalController extends Controller
                     'ttStatus' => substr($prenatalData['ttStatus'], 0, 50), // Truncate to fit the column size
                     'tdDate' => $prenatalData['tdDate'],
                 ]);
-                
+
             }
         });
-    
+
         return redirect()->back()->with('success', 'Prenatal data imported successfully!');
     }
-    
+
 
     /**
      * Show the form for creating a new resource.

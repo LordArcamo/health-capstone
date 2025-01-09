@@ -22,7 +22,7 @@ class Postpartum extends Model
 
     // Add the fillable properties
     protected $fillable = [
-        'prenatalId',
+        'prenatalConsultationDetailsID',
         'id', // Foreign key for users table
         'lastName',
         'firstName',
@@ -68,7 +68,7 @@ class Postpartum extends Model
     // Define relationship with Prenatal model
     public function prenatal()
     {
-        return $this->belongsTo(PreNatal::class, 'prenatalId', 'prenatalId');
+        return $this->belongsTo(PrenatalConsultationDetails::class, 'prenatalConsultationDetailsID', 'prenatalConsultationDetailsID');
     }
 
     public function user()

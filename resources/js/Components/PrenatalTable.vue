@@ -242,9 +242,14 @@
 
 
 
-  <TrimesterModal v-if="currentModal === 'trimester'" :key="selectedPatient?.prenatalId"
-    :prenatalId="selectedPatient?.prenatalId" :prefilledData="localTrimesterData" @close="closeModal"
-    :onConfirm="handleTrimesterConfirm" />
+  <TrimesterModal
+      v-if="currentModal === 'trimester'"
+      :key="selectedPatient?.prenatalConsultationDetailsID"
+      :prenatalConsultationDetailsID="selectedPatient?.prenatalConsultationDetailsID"
+      :prefilledData="localTrimesterData"
+      @close="closeModal"
+      :onConfirm="handleTrimesterConfirm"
+    />
 
   <PostpartumModal v-if="currentModal === 'postpartum'" :patient="selectedPatient" :existingData="postpartumData"
     @close="closeModal" :onSubmit="handlePostpartumSubmit" />
@@ -270,7 +275,7 @@ export default {
       type: Object,
       default: null
     },
-    prenatalId: Number,
+    prenatalConsultationDetailsID: Number,
     trimester: String,
   },
   data() {
@@ -426,14 +431,14 @@ export default {
       this.selectedPatient = patient;
 
       if (type === 'trimester') {
-        await this.fetchTrimesterData(patient.prenatalId);
+        await this.fetchTrimesterData(patient.prenatalConsultationDetailsID);
       } else if (type === 'postpartum') {
-        await this.fetchPostpartumData(patient.prenatalId);
+        await this.fetchPostpartumData(patient.prenatalConsultationDetailsID);
       }
     },
-    async fetchPostpartumData(prenatalId) {
+    async fetchPostpartumData(prenatalConsultationDetailsID) {
       try {
-        const response = await axios.get(`/postpartum/data/${prenatalId}`);
+        const response = await axios.get(`/postpartum/data/${prenatalConsultationDetailsID}`);
         if (response.data.success) {
           this.postpartumData = response.data.data;
         } else {
@@ -459,9 +464,9 @@ export default {
       // Handle the form submission here
       this.closeModal();
     },
-    async fetchTrimesterData(prenatalId) {
+    async fetchTrimesterData(prenatalConsultationDetailsID) {
       try {
-        const response = await axios.get(`/prenatal/${prenatalId}/trimester/1`);
+        const response = await axios.get(`/prenatal/${prenatalConsultationDetailsID}/trimester/1`);
         if (response.data.success) {
           this.localTrimesterData = response.data.data;
         }

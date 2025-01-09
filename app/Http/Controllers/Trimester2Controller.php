@@ -32,7 +32,7 @@ class Trimester2Controller extends Controller
     {
     // Validate request data
         $validatedData = $request->validate([
-            'prenatalId' => 'required|exists:prenatal,prenatalId',
+            'prenatalConsultationDetailsID' => 'required|exists:prenatal_consultation_details,prenatalConsultationDetailsID',
             'id' => 'nullable|exists:users,id',
             'date_of_visit' => 'required|date',
             'weight' => 'required|numeric',
@@ -63,7 +63,7 @@ class Trimester2Controller extends Controller
 
         // Split general trimester data
         $generalTrimesterData = [
-            'prenatalId' => $validatedData['prenatalId'],
+            'prenatalConsultationDetailsID' => $validatedData['prenatalConsultationDetailsID'],
             'id' => $userId,
             'date_of_visit' => $validatedData['date_of_visit'],
             'weight' => $validatedData['weight'],
