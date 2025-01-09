@@ -9,6 +9,7 @@ import RiskManagement from '@/Components/Charts/RiskManagement.vue';
 import Cases from '@/Components/Charts/Cases.vue';
 import { ref, watch, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import Prenatal from '@/Components/Charts/Prenatal.vue';
 
 const props = defineProps({
   barChart: {
@@ -224,46 +225,34 @@ watch(() => props.lineChart, (newVal) => {
     </div>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Total Patients</h6>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 p-10 gap-10 mt-6">
+      <div class="hover:scale-105 transition-transform">
         <TotalPatients 
         :filters="filters"
         :monthly-data="monthlyData"
           />
       </div>
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Referred Patients</h6>
+      <div class=" hover:scale-105 transition-transform">
         <ReferedPatients 
           :filters="filters"
           :pie-chart="referredData"
         />
       </div>
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Vaccination Overview</h6>
+      <div class="hover:scale-105 transition-transform">
         <Vaccinations 
           :filters="filters"
           :vaccination-data="monthlyVaccination"
         />
       </div>
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Cases Overview</h6>
+      <div class="hover:scale-105 transition-transform">
         <Cases
          :filters="filters"
          :cases-data="monthlyCases"
           />
       </div>
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Mental Health</h6>
-        <MentalHealth 
-          :filters="filters"
-          :mental-health-stats="mentalHealthData"
-        />
+      <div class=" hover:scale-105 transition-transform">
+        <Prenatal/>
       </div>
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Risk Management</h6>
-        <RiskManagement :filters="filters" />
-      </div>
-    </div>
+        </div>
   </NewLayout>
 </template>

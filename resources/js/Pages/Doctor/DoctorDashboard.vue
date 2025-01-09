@@ -22,6 +22,8 @@ const latestPatients = ref(props.latestPatients || []);
 const todayAppointments = ref(props.todayAppointments || 0);
 const criticalCases = ref(props.criticalCases || 0);
 const notifications = ref(props.notifications || []);
+const currentPage = ref(1); // Initialize currentPage
+const itemsPerPage = ref(5); // Set the number of items per page
 const showNotifications = ref(false);
 const searchQueue = ref('');
 const unreadNotifications = computed(() =>
@@ -32,6 +34,30 @@ const unreadNotifications = computed(() =>
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return format(date, 'MMMM d, yyyy');
+};
+// Computed property for paginated patients
+const paginatedPatients = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredITRConsultation.value.slice(start, end);
+});
+
+// Total pages
+const totalPages = computed(() => {
+  return Math.ceil(filteredITRConsultation.value.length / itemsPerPage.value);
+});
+
+// Pagination methods
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
 };
 
 // Format date for notifications
@@ -50,62 +76,11 @@ const filteredITRConsultation = computed(() => {
   );
 });
 
-// Pagination setup
-const itemsPerPage = 5;
-const currentPage = ref(1);
-const currentLatestPage = ref(1);
-
-// Computed properties for patients in queue pagination
-const paginatedPatients = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredITRConsultation.value.slice(start, end);
-});
-
-const totalPages = computed(() => {
-  return Math.ceil(filteredITRConsultation.value.length / itemsPerPage);
-});
-
-// Computed properties for latest patients pagination
+// Computed property for paginated patients
 const paginatedLatestPatients = computed(() => {
-  const start = (currentLatestPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return latestPatients.value.slice(start, end);
-});
-
-const totalLatestPages = computed(() => {
-  return Math.ceil(latestPatients.value.length / itemsPerPage);
-});
-
-// Navigation functions for patients in queue
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-};
-
-// Navigation functions for latest patients
-const nextLatestPage = () => {
-  if (currentLatestPage.value < totalLatestPages.value) {
-    currentLatestPage.value++;
-  }
-};
-
-const prevLatestPage = () => {
-  if (currentLatestPage.value > 1) {
-    currentLatestPage.value--;
-  }
-};
-
-// Reset page when search changes
-watch(searchQueue, () => {
-  currentPage.value = 1;
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return props.latestPatients.slice(start, end);
 });
 
 // Function to start checkup
@@ -586,7 +561,7 @@ onMounted(() => {
           </div>
 
           <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Appointments Overview</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Consultation Overview</h2>
             <canvas id="appointmentsChart"></canvas>
           </div>
 

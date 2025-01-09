@@ -1,7 +1,16 @@
 <template>
   <div class="chart-container">
+    <!-- Header Section -->
+    <div class="chart-header">
+      <h2 class="chart-title">Monthly Total Patients</h2>
+      <p class="chart-subtitle">
+        Analyze total monthly patients with trends and insights.
+      </p>
+    </div>
+
+    <!-- Chart -->
     <apexchart 
-      type="bar" 
+      type="line" 
       :options="chartOptions" 
       :series="chartSeries" 
       class="patients-chart"
@@ -21,20 +30,21 @@ export default {
     monthlyData: {
       type: Array,
       required: true,
-      default: () => Array(12).fill(0)
+      default: () => Array(12).fill(0),
     },
   },
   data() {
     return {
       chartOptions: {
         chart: {
-          id: "patients-bar-chart",
+          id: "patients-line-chart",
           toolbar: {
-            show: true,
+            show: true, // Enable toolbar for download and zoom
           },
           zoom: {
-            enabled: true
-          }
+            enabled: true,
+          },
+          background: "#ffffff", // Card background
         },
         xaxis: {
           categories: [
@@ -51,62 +61,115 @@ export default {
             "November",
             "December",
           ],
+          labels: {
+            style: {
+              fontSize: "12px",
+              fontWeight: "bold",
+              colors: "#333", // Darker text for better contrast
+            },
+            rotate: -30,
+          },
         },
-        colors: ["#4BC0C0"],
-        plotOptions: {
-          bar: {
-            borderRadius: 4,
-            horizontal: false,
-            columnWidth: '70%',
-          }
+        yaxis: {
+          labels: {
+            style: {
+              fontSize: "12px",
+              fontWeight: "bold",
+              colors: "#333",
+            },
+          },
         },
-        dataLabels: {
-          enabled: false,
-        },
-        title: {
-          align: "center",
-          margin: 10,
-          style: {
-            fontSize: '18px',
-            fontWeight: 'bold',
-          }
+        colors: ["#6EC591"], // Green line color to match the theme
+        stroke: {
+          curve: "smooth", // Smooth lines for better aesthetics
+          width: 3,
         },
         grid: {
-          borderColor: "#e7e7e7",
+          borderColor: "#e5e5e5",
+          strokeDashArray: 4,
         },
         tooltip: {
           enabled: true,
-          theme: "dark",
+          theme: "light",
           y: {
-            formatter: function(val) {
-              return val + " patients"
-            }
-          }
+            formatter: function (val) {
+              return val + " patients";
+            },
+          },
         },
+        title: {
+          text: "",
+        },
+        responsive: [
+          {
+            breakpoint: 768,
+            options: {
+              chart: {
+                height: 300,
+              },
+              xaxis: {
+                labels: {
+                  style: {
+                    fontSize: "10px",
+                  },
+                },
+              },
+            },
+          },
+        ],
       },
     };
   },
   computed: {
     chartSeries() {
-      return [{
-        name: 'Total Patients',
-        data: this.monthlyData
-      }];
-    }
-  }
+      return [
+        {
+          name: "Total Patients",
+          data: this.monthlyData,
+        },
+      ];
+    },
+  },
 };
 </script>
 
 <style scoped>
 .chart-container {
   max-width: 100%;
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff; /* White background for clarity */
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
+.chart-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4CAF50; /* Green text for alignment with the theme */
+  margin: 0;
+}
+
+.chart-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0 0;
+}
+
 .patients-chart {
-  height: 300px;
+  height: 350px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .patients-chart {
+    height: 250px;
+  }
 }
 </style>

@@ -197,7 +197,7 @@ class DoctorCheckupController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('doctor.dashboard');
+            return Inertia::location('/checkup/thank-you/itr');
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;
