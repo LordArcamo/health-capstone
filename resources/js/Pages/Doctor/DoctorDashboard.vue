@@ -490,7 +490,7 @@ onMounted(() => {
             </div>
             <div class="flex items-center">
               <font-awesome-icon :icon="['fas', 'calendar-day']" class="mr-2 text-2xl text-blue-600" />
-              <p class="text-3xl font-bold">{{ todayAppointments }}</p>
+              <p class="text-3xl font-bold">{{ todaysConsultation }}</p>
             </div>
           </div>
         </div>
