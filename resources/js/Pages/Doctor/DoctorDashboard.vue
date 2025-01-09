@@ -195,7 +195,8 @@ const initCharts = () => {
   new Chart(appointmentsCtx, {
     type: 'line',
     data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Replace with actual months
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      , // Replace with actual months
       datasets: [
         {
           label: 'Appointments',
@@ -235,7 +236,8 @@ const initCharts = () => {
   new Chart(criticalCasesCtx, {
     type: 'line',
     data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Replace with actual months or dates
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      , // Replace with actual months or dates
       datasets: [
         {
           label: 'Heart Attack',
@@ -291,7 +293,8 @@ const initCharts = () => {
   new Chart(totalPatientsCtx, {
     type: 'bar',
     data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Replace with the months or dates you have
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      , // Replace with the months or dates you have
       datasets: [
         {
           label: 'Total Patients',
