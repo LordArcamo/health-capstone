@@ -565,7 +565,7 @@ onMounted(() => {
           </div>
 
           <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Appointments Overview</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Consultation Overview</h2>
             <canvas id="appointmentsChart"></canvas>
           </div>
 
