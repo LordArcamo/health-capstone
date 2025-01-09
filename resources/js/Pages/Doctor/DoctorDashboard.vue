@@ -4,6 +4,8 @@ import { Head, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
 import { format } from 'date-fns';
+import ViewPatientModalGeneral from '@/Components/Modals/ViewPatientModalGeneral.vue';
+import PrenatalModal from '@/Components/Modals/ViewPatientModalPrenatal.vue';
 
 // Props from backend
 const props = defineProps({
@@ -25,6 +27,10 @@ const currentPage = ref(1); // Initialize currentPage
 const currentLatestPage = ref(1); // Initialize currentLatestPage
 const itemsPerPage = ref(5); // Set the number of items per page
 const showNotifications = ref(false);
+const selectedPatient = ref(null); // Stores the selected patient data
+const currentModal = ref(null); // Stores the current modal type (e.g., 'prenatal', 'general')
+const showModal = ref(false); // Controls modal visibility
+
 const searchQueue = ref('');
 const unreadNotifications = computed(() =>
   notifications.value.filter(n => !n.isRead).length
@@ -130,28 +136,35 @@ const startCheckup = (patient) => {
 
 // Function to view patient details
 const viewPatientDetails = (patient) => {
-  console.log('View Details - Patient Data:', patient); // Debugging
+  console.log('View Details - Patient Data:', patient);
 
   if (patient?.visitType === 'Prenatal' && patient?.prenatalConsultationDetailsID) {
-    console.log('Navigating to prenatal checkup with ID:', patient.prenatalConsultationDetailsID);
-    router.visit('/services/patients/prenatal-postpartum', {
-      method: 'get',
-      data: { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID },
-    });
+    console.log('Opening Prenatal Checkup Modal for ID:', patient.prenatalConsultationDetailsID);
+    openModal('prenatal', patient);
     return;
   }
 
   if (patient?.visitType === 'General' && patient?.consultationDetailsID) {
-    console.log('Navigating to ITR checkup with ID:', patient.consultationDetailsID);
-    router.visit('/services/patients/itrtable', {
-      method: 'get',
-      data: { consultationDetailsID: patient.consultationDetailsID },
-    });
+    console.log('Opening General Patient Modal for ID:', patient.consultationDetailsID);
+    openModal('general', patient);
     return;
   }
 
   console.warn('Invalid patient data for view details:', patient);
 };
+
+const openModal = (modalType, patient) => {
+  selectedPatient.value = patient;
+  currentModal.value = modalType;
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  selectedPatient.value = null;
+  currentModal.value = null;
+  showModal.value = false;
+};
+
 
 // Handle marking notification as read
 const markAsRead = (notification) => {
@@ -379,9 +392,9 @@ watch(() => props.notifications, (newVal) => {
 
     // Show notification for each new patient
     newNotifications.forEach(notification => {
-    //   // Create notification sound
-    //   const audio = new Audio('/notification.mp3'); // Make sure to add this sound file
-    //   audio.play().catch(e => console.log('Audio play failed:', e));
+      //   // Create notification sound
+      //   const audio = new Audio('/notification.mp3'); // Make sure to add this sound file
+      //   audio.play().catch(e => console.log('Audio play failed:', e));
 
       // Show browser notification if permitted
       if (Notification.permission === "granted") {
@@ -588,7 +601,7 @@ onMounted(() => {
                       {{ patient.consultationTime }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <button @click="viewPatientDetails(patient)"
+                      <button  @click="viewPatientDetails(patient)"
                         class=" textcolor text-black-600 hover:text-indigo-900">
                         View Details
                       </button>
@@ -601,6 +614,13 @@ onMounted(() => {
                   </tr>
                 </tbody>
               </table>
+              <!-- Prenatal Modal -->
+              <PrenatalModal v-if="currentModal === 'prenatal'" :show-modal="showModal"
+                :selected-patient="selectedPatient" @close="closeModal" />
+
+              <!-- General Modal -->
+              <ViewPatientModalGeneral v-if="currentModal === 'general'" :show-modal="showModal"
+                :selected-patient="selectedPatient" @close="closeModal" />
             </div>
 
             <!-- Pagination Controls -->
