@@ -77,7 +77,7 @@ function initDonutChart() {
 
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-4">Distribution by Department (Example Data)</h2>
+    <h2 class="text-lg font-semibold mb-4">Distribution of Users by Department</h2>
     <div class="h-64">
       <canvas ref="donutCanvas"></canvas>
     </div>

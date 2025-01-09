@@ -118,7 +118,7 @@ const viewPatientDetails = (patient) => {
 
   if (patient?.visitType === 'Prenatal' && patient?.prenatalConsultationDetailsID) {
     console.log('Navigating to prenatal checkup with ID:', patient.prenatalConsultationDetailsID);
-    router.visit('/doctor-checkup/prenatal', {
+    router.visit('/services/patients/prenatal-postpartum', {
       method: 'get',
       data: { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID },
     });
@@ -127,7 +127,7 @@ const viewPatientDetails = (patient) => {
 
   if (patient?.visitType === 'General' && patient?.consultationDetailsID) {
     console.log('Navigating to ITR checkup with ID:', patient.consultationDetailsID);
-    router.visit('/doctor-checkup/itr', {
+    router.visit('/services/patients/itrtable', {
       method: 'get',
       data: { consultationDetailsID: patient.consultationDetailsID },
     });
@@ -423,28 +423,74 @@ onMounted(() => {
         <!-- Total Patients -->
         <div
           class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-lg p-6 rounded-xl shadow-md">
-          <h2 class="font-semibold text-lg">Total Patients Checked Up</h2>
-          <p class="text-3xl font-bold">{{ totalPatients }}</p>
+          <div class="flex flex-col items-start gap-4">
+            <div class="flex justify-between w-full">
+              <h2 class="font-semibold text-lg">Total Patients Checked Up</h2>
+              <Link href="/services/patients" class="bg-green-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
+                aria-label="View all checked-up patients">
+              View
+              </Link>
+            </div>
+            <div class="flex items-center">
+              <font-awesome-icon :icon="['fas', 'user-check']" class="mr-2 text-2xl text-green-600" />
+              <p class="text-3xl font-bold">{{ totalPatients }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Patients in Queue -->
         <div
           class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-lg p-6 rounded-xl shadow-md">
-          <h2 class="font-semibold text-lg">Patients in Queue</h2>
-          <p class="text-3xl font-bold">{{ ITRConsultation.length }}</p>
+          <div class="flex flex-col items-start gap-4">
+            <div class="flex justify-between w-full">
+              <h2 class="font-semibold text-lg">Patients in Queue</h2>
+              <Link href="/services/queue" class="bg-yellow-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
+                aria-label="View all patients in queue">
+              View
+              </Link>
+            </div>
+            <div class="flex items-center">
+              <font-awesome-icon :icon="['fas', 'users']" class="mr-2 text-2xl text-yellow-600" />
+              <p class="text-3xl font-bold">{{ ITRConsultation.length }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Today's Appointments -->
+
         <div class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-lg p-6 rounded-xl shadow-md">
-          <h2 class="font-semibold text-lg">Today's Consultation</h2>
-          <p class="text-3xl font-bold">{{ todayAppointments }}</p>
+          <div class="flex flex-col items-start gap-4">
+            <div class="flex justify-between w-full">
+              <h2 class="font-semibold text-lg">Today's Consultation</h2>
+              <Link href="/services/appointments"
+                class="bg-blue-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
+                aria-label="View today's consultations">
+              View
+              </Link>
+            </div>
+            <div class="flex items-center">
+              <font-awesome-icon :icon="['fas', 'calendar-day']" class="mr-2 text-2xl text-blue-600" />
+              <p class="text-3xl font-bold">{{ todayAppointments }}</p>
+            </div>
+          </div>
         </div>
+
 
         <!-- Critical Cases -->
         <div class="bg-gradient-to-br from-red-100 to-red-300 text-red-800 hover:shadow-lg p-6 rounded-xl shadow-md">
-          <h2 class="font-semibold text-lg">Critical Cases</h2>
-          <p class="text-3xl font-bold">{{ criticalCases }}</p>
+          <div class="flex flex-col items-start gap-4">
+            <div class="flex justify-between w-full">
+              <h2 class="font-semibold text-lg">Critical Cases</h2>
+              <Link href="/services/critical" class="bg-red-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
+                aria-label="View critical cases">
+              View
+              </Link>
+            </div>
+            <div class="flex items-center">
+              <font-awesome-icon :icon="['fas', 'heartbeat']" class="mr-2 text-2xl text-red-600" />
+              <p class="text-3xl font-bold">{{ criticalCases }}</p>
+            </div>
+          </div>
         </div>
+
       </div>
 
       <!-- Patients Section -->
@@ -523,7 +569,8 @@ onMounted(() => {
                       {{ patient.consultationTime }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <button @click="viewPatientDetails(patient)" class=" textcolor text-black-600 hover:text-indigo-900">
+                      <button @click="viewPatientDetails(patient)"
+                        class=" textcolor text-black-600 hover:text-indigo-900">
                         View Details
                       </button>
                     </td>
@@ -593,8 +640,7 @@ onMounted(() => {
             <template v-else>
               <div v-for="notification in notifications" :key="notification.id"
                 class="mb-4 p-4 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                :class="{ 'bg-blue-50': !notification.isRead }"
-                @click="markAsRead(notification)">
+                :class="{ 'bg-blue-50': !notification.isRead }" @click="markAsRead(notification)">
                 <div class="flex items-start">
                   <div class="flex-1">
                     <p class="font-medium text-gray-800">{{ notification.message }}</p>
@@ -627,7 +673,7 @@ button {
   color: white;
 }
 
-.textcolor{
+.textcolor {
   color: green;
 }
 
@@ -642,7 +688,9 @@ button {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 </style>
