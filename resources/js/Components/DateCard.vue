@@ -123,7 +123,7 @@ const getEndOfMonth = () => {
 
 // Debugging the functions
 console.log('Start of Month:', getStartOfMonth());
-console.log('End of Month:', getEndOfMonth());  
+console.log('End of Month:', getEndOfMonth());
 
 // Main Filter Logic
 const filteredPatients = computed(() => {

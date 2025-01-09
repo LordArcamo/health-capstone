@@ -5,6 +5,8 @@ use App\Models\PersonalInformation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\CheckUp;
+use App\Models\ConsultationDetails;
+use App\Models\VisitInformation;
 
 
 
@@ -29,7 +31,7 @@ class PatientController extends Controller
     public function disease(Request $request)
     {
         $diagnosis = $request->input('diagnosis', ''); // Retrieve the diagnosis filter from the request, default is empty
-    
+
         // Use LEFT JOIN to fetch cases filtered by diagnosis if provided
         $cases = PersonalInformation::leftJoin('itr', 'personal_information.personalId', '=', 'itr.personalId')
             ->select(
@@ -60,16 +62,16 @@ class PatientController extends Controller
             })
             ->distinct() // Ensure no duplicate rows
             ->get();
-    
+
         // Return the filtered cases to the frontend
         return Inertia::render('Table/DiseaseCases', [
             'cases' => $cases, // Pass the filtered cases
             'diagnosisFilter' => $diagnosis, // Current diagnosis filter for UI
         ]);
     }
-    
-    
-    
+
+
+
 
     public function show()
     {
@@ -90,16 +92,16 @@ class PatientController extends Controller
             )
             ->distinct() // Ensure no duplicate rows
             ->get();
-    
+
         return Inertia::render('Table/Patient', [
             'totalPatients' => $patients, // Pass the unique patients to the frontend
         ]);
     }
-    
+
 
     public function showReferred(){
-        $referredPatients = PersonalInformation::join('itr', 'personal_information.personalId', '=', 'itr.personalId')
-        ->where('itr.modeOfTransaction', 'Referral')
+        $referredPatients = PersonalInformation::join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+        ->where('consultation_details.modeOfTransaction', 'Referral')
         ->select(
             'personal_information.personalId',
             'personal_information.firstName',
@@ -112,20 +114,20 @@ class PatientController extends Controller
             'personal_information.birthdate',
             'personal_information.contact',
             'personal_information.sex',
-            'itr.modeOfTransaction',
-            'itr.referredFrom',
-            'itr.referredTo',
-            'itr.reasonsForReferral',
-            'itr.referredBy',
+            'consultation_details.modeOfTransaction',
+            'consultation_details.referredFrom',
+            'consultation_details.referredTo',
+            'consultation_details.reasonsForReferral',
+            'consultation_details.referredBy',
         )
         ->get();
 
         return Inertia::render('Table/ReferredPatient', [
             'referredPatients' => $referredPatients,
         ]);
-        
+
     }
-    
+
 
 
 }

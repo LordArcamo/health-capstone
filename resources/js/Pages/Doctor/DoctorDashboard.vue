@@ -15,7 +15,6 @@ const props = defineProps({
   notifications: Array,
 });
 
-
 // Reactive states
 const totalPatients = ref(props.totalPatients || 0);
 const ITRConsultation = ref(props.ITRConsultation || []);
@@ -49,6 +48,64 @@ const filteredITRConsultation = computed(() => {
     patient.lastName.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
     patient.visitType.toLowerCase().includes(searchQueue.value.toLowerCase())
   );
+});
+
+// Pagination setup
+const itemsPerPage = 5;
+const currentPage = ref(1);
+const currentLatestPage = ref(1);
+
+// Computed properties for patients in queue pagination
+const paginatedPatients = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredITRConsultation.value.slice(start, end);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredITRConsultation.value.length / itemsPerPage);
+});
+
+// Computed properties for latest patients pagination
+const paginatedLatestPatients = computed(() => {
+  const start = (currentLatestPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return latestPatients.value.slice(start, end);
+});
+
+const totalLatestPages = computed(() => {
+  return Math.ceil(latestPatients.value.length / itemsPerPage);
+});
+
+// Navigation functions for patients in queue
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+// Navigation functions for latest patients
+const nextLatestPage = () => {
+  if (currentLatestPage.value < totalLatestPages.value) {
+    currentLatestPage.value++;
+  }
+};
+
+const prevLatestPage = () => {
+  if (currentLatestPage.value > 1) {
+    currentLatestPage.value--;
+  }
+};
+
+// Reset page when search changes
+watch(searchQueue, () => {
+  currentPage.value = 1;
 });
 
 // Function to start checkup
@@ -327,9 +384,9 @@ watch(() => props.notifications, (newVal) => {
 
     // Show notification for each new patient
     newNotifications.forEach(notification => {
-      // Create notification sound
-      const audio = new Audio('/notification.mp3'); // Make sure to add this sound file
-      audio.play().catch(e => console.log('Audio play failed:', e));
+    //   // Create notification sound
+    //   const audio = new Audio('/notification.mp3'); // Make sure to add this sound file
+    //   audio.play().catch(e => console.log('Audio play failed:', e));
 
       // Show browser notification if permitted
       if (Notification.permission === "granted") {
@@ -369,7 +426,7 @@ onMounted(() => {
   <Head title="Initao RHU Dashboard" />
 
   <MainLayout>
-    <div class="relative overflow-y-auto w-full min-h-screen">
+    <div class="w-full min-h-screen">
       <!-- Branding Section -->
       <div
         class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-8 py-6 text-white shadow-md ">
@@ -420,7 +477,7 @@ onMounted(() => {
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Patients in Queue</h2>
             <input type="text" v-model="searchQueue" placeholder="Search for a patient..."
               class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4" />
-            <div v-if="paginatedPatients.length" class="space-y-4">
+            <div v-if="paginatedPatients.length" class="space-y-4 overflow-hidden">
               <div v-for="(patient, index) in paginatedPatients" :key="index"
                 class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition">
                 <h3 class="text-lg font-semibold text-gray-700">
@@ -457,18 +514,15 @@ onMounted(() => {
 
           <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Latest Consultations</h2>
-            <div class="overflow-x-auto">
+            <div class="overflow-hidden">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient
-                      Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visit
-                      Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
-                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -487,7 +541,7 @@ onMounted(() => {
                       {{ patient.consultationTime }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <button @click="viewPatientDetails(patient)" class=" textcolor text-black-600 hover:text-indigo-900">
+                      <button @click="viewPatientDetails(patient)" class="textcolor text-black-600 hover:text-indigo-900">
                         View Details
                       </button>
                     </td>
@@ -503,12 +557,12 @@ onMounted(() => {
 
             <!-- Pagination Controls -->
             <div v-if="paginatedLatestPatients.length" class="flex justify-center items-center mt-4 space-x-2">
-              <button @click="prevPage" :disabled="currentPage === 1"
+              <button @click="prevLatestPage" :disabled="currentLatestPage === 1"
                 class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
                 Previous
               </button>
-              <span class="text-black-700">Page {{ currentPage }} of {{ totalPages }}</span>
-              <button @click="nextPage" :disabled="currentPage === totalPages"
+              <span class="text-black-700">Page {{ currentLatestPage }} of {{ totalLatestPages }}</span>
+              <button @click="nextLatestPage" :disabled="currentLatestPage === totalLatestPages"
                 class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
                 Next
               </button>
