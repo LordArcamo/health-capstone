@@ -49,7 +49,7 @@ function initStaffChart() {
       labels: chartData.map((item) => item.month),
       datasets: [
         {
-          label: 'Staff On Leave',
+          label: 'Users',
           data: chartData.map((item) => item.count),
           backgroundColor: 'rgba(75, 192, 192, 0.4)',
           borderColor: 'rgba(75, 192, 192, 1)',
@@ -76,7 +76,7 @@ function initStaffChart() {
 
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-4">Staff Over Time (Example Data)</h2>
+    <h2 class="text-lg font-semibold mb-4">Total Users</h2>
     <!-- Set a fixed height or use a CSS class so you can see the chart properly -->
     <div class="h-64">
       <canvas ref="chartCanvas"></canvas>
