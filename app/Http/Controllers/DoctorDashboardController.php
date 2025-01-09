@@ -102,11 +102,34 @@ class DoctorDashboardController extends Controller
         // Get patients in queue
         $ITRConsultation = $generalConsultations->union($prenatalConsultations)->get();
 
+        // Generate notifications for new patients in queue
+        $notifications = [];
+        foreach ($ITRConsultation as $patient) {
+            $notifications[] = [
+                'id' => uniqid(),
+                'type' => 'new_patient',
+                'message' => "New {$patient->visitType} consultation: {$patient->firstName} {$patient->lastName}",
+                'time' => $patient->consultationTime,
+                'isRead' => false,
+                'data' => [
+                    'patientId' => $patient->personalId,
+                    'consultationType' => $patient->visitType,
+                    'consultationId' => $patient->consultationDetailsID ?? $patient->prenatalConsultationDetailsID
+                ]
+            ];
+        }
+
+        // Sort notifications by time
+        usort($notifications, function($a, $b) {
+            return strtotime($b['time']) - strtotime($a['time']);
+        });
+
         // Get latest completed general patients
         $latestGeneralPatients = DB::table('personal_information')
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
             ->where('consultation_details.status', 'completed')
+            ->whereDate('consultation_details.consultationDate', $today)
             ->select(
                 'consultation_details.consultationDetailsID',
                 DB::raw('NULL as prenatalConsultationDetailsID'),
@@ -128,6 +151,7 @@ class DoctorDashboardController extends Controller
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
             ->leftJoin('visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'visit_information.consultationDetailsID')
             ->where('prenatal_consultation_details.status', 'completed')
+            ->whereDate('prenatal_consultation_details.consultationDate', $today)
             ->select(
                 DB::raw('NULL as consultationDetailsID'),
                 'prenatal_consultation_details.prenatalConsultationDetailsID',
@@ -166,7 +190,7 @@ class DoctorDashboardController extends Controller
             'latestPatients' => $latestPatients,
             'todayAppointments' => $todayAppointments,
             'criticalCases' => $criticalCases,
-            'notifications' => [], // Add notifications if needed
+            'notifications' => $notifications,
         ]);
     }
 

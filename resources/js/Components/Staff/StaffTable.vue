@@ -2,7 +2,7 @@
   <div class="mx-auto py-8 px-10 bg-gradient-to-br from-green-100 to-blue-100 min-h-screen">
     <!-- Header Section -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-green-600 text-center">ITR Users List</h1>
+      <h1 class="text-3xl font-bold text-green-600 text-center">Users List</h1>
       <p class="text-gray-700 text-center">Search, filter, and manage staff records efficiently.</p>
     </div>
 
@@ -33,31 +33,17 @@
         v-if="isFilterPanelOpen"
         class="border border-gray-300 rounded-lg p-6 shadow-md bg-white mb-8"
       >
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Department Filter (example) -->
+        <div class="grid grid-cols-1 gap-6">
+          <!-- Role/Position Filter -->
           <div>
-            <label class="block font-semibold mb-2">Department</label>
-            <select
-              v-model="filterDepartment"
-              class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400"
-            >
-              <option value="">All Departments</option>
-              <option v-for="dept in departmentOptions" :key="dept" :value="dept">
-                {{ dept }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Position Filter (example) -->
-          <div>
-            <label class="block font-semibold mb-2">Position</label>
+            <label class="block font-semibold mb-2">Role</label>
             <select
               v-model="filterPosition"
               class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400"
             >
-              <option value="">All Positions</option>
-              <option v-for="pos in positionOptions" :key="pos" :value="pos">
-                {{ pos }}
+              <option value="">All Roles</option>
+              <option v-for="role in positionOptions" :key="role" :value="role">
+                {{ capitalize(role) }}
               </option>
             </select>
           </div>
@@ -70,25 +56,36 @@
       <table class="min-w-full bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
-            <th class="py-4 px-6 text-left">User ID</th>
             <th class="py-4 px-6 text-left">Full Name</th>
             <th class="py-4 px-6 text-left">Position</th>
-            <th class="py-4 px-6 text-left">Department</th>
-            <th class="py-4 px-6 text-left">Contact</th>
+            <th class="py-4 px-6 text-left">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 text-gray-700">
           <tr
             v-for="staff in paginatedStaff"
-            :key="staff.staffId"
+            :key="staff.id"
             class="hover:bg-gray-50 cursor-pointer"
             @click="openModal(staff)"
           >
-            <td class="py-3 px-6">{{ staff.staffId }}</td>
-            <td class="py-3 px-6">{{ staff.fullName }}</td>
-            <td class="py-3 px-6">{{ staff.position }}</td>
-            <td class="py-3 px-6">{{ staff.department }}</td>
-            <td class="py-3 px-6">{{ staff.contact }}</td>
+            <td class="py-3 px-6">{{ staff.name }}</td>
+            <td class="py-3 px-6">{{ capitalize(staff.role) }}</td>
+            <td class="py-3 px-6">
+              <!-- Edit Button -->
+              <button
+                @click.stop="editStaff(staff)"
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
+              >
+                Edit
+              </button>
+              <!-- Delete Button -->
+              <button
+                @click.stop="deleteStaff(staff)"
+                class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition ml-2"
+              >
+                Delete
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -113,11 +110,8 @@
       </button>
     </div>
 
-    <!-- Modal (Staff Details) -->
-    <div
-      v-if="showModal && selectedStaff"
-      class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4"
-    >
+    <!-- Staff Details Modal -->
+    <div v-if="showModal && selectedStaff" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative">
         <!-- Close Button -->
         <button
@@ -133,15 +127,15 @@
             <!-- Icon or Avatar here -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" 
-                    stroke-linejoin="round" 
-                    stroke-width="2" 
+              <path stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
                     d="M5 13l4 4L19 7" />
             </svg>
           </div>
           <div>
-            <h2 class="text-2xl font-bold text-gray-800">Staff Details</h2>
-            <p class="text-gray-600">{{ selectedStaff.fullName }}</p>
+            <h2 class="text-2xl font-bold text-gray-800">User Details</h2>
+            <p class="text-gray-600">{{ selectedStaff.name }}</p>
           </div>
         </div>
 
@@ -150,22 +144,22 @@
           <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
             <ul class="space-y-2">
-              <li><strong>User ID:</strong> {{ selectedStaff.staffId }}</li>
-              <li><strong>Full Name:</strong> {{ selectedStaff.fullName }}</li>
-              <li><strong>Position:</strong> {{ selectedStaff.position }}</li>
-              <li><strong>Department:</strong> {{ selectedStaff.department }}</li>
-              <li><strong>Contact:</strong> {{ selectedStaff.contact }}</li>
+              <li><strong>User ID:</strong> {{ selectedStaff.id }}</li>
+              <li><strong>Full Name:</strong> {{ selectedStaff.name }}</li>
+              <li><strong>Position:</strong>{{ capitalize(selectedStaff.role) }}</li>
+              <li><strong>Email:</strong> {{ selectedStaff.email }}</li>
+              <li><strong>Account Created at:</strong> {{ formatDateTime(selectedStaff.created_at) }}</li>
             </ul>
           </div>
 
-          <div>
+          <!-- <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Information</h3>
             <ul class="space-y-2">
               <li><strong>Email:</strong> {{ selectedStaff.email }}</li>
               <li><strong>Date Instated:</strong> {{ selectedStaff.dateHired }}</li>
               <li><strong>Status:</strong> {{ selectedStaff.status }}</li>
             </ul>
-          </div>
+          </div> -->
         </div>
 
         <!-- Footer Actions -->
@@ -179,54 +173,64 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Staff Modal -->
+    <EditStaffModal
+      v-if="showEditModal"
+      :show="showEditModal"
+      :staff="editingStaff"
+      @close="closeEditModal"
+      @updated="refreshData"
+    />
   </div>
 </template>
 
 <script>
+import { router } from '@inertiajs/vue3';
+import EditStaffModal from './EditStaffModal.vue';
+
 export default {
   name: 'ITRStaffTable',
+  components: {
+    EditStaffModal
+  },
   props: {
-    // Suppose your Inertia controller passes an array of staff
     staffList: {
       type: Array,
-      default: () => [],
-    },
+      required: true
+    }
   },
   data() {
     return {
       searchQuery: '',
-      filterDepartment: '',
-      filterPosition: '',
       isFilterPanelOpen: false,
+      filterPosition: '',
       currentPage: 1,
       itemsPerPage: 10,
       showModal: false,
       selectedStaff: null,
-    };
+      showEditModal: false,
+      editingStaff: null
+    }
   },
   computed: {
-    // Create computed array of staff to display (filter + search + pagination)
     filteredStaff() {
-      const query = this.searchQuery.toLowerCase();
+      if (!this.staffList) return [];
+      
+      const query = this.searchQuery ? this.searchQuery.toLowerCase() : '';
 
-      return this.staffList
-        .map((staff) => ({
-          ...staff,
-          fullName: `${staff.firstName} ${staff.lastName}`, // combine names if needed
-        }))
-        .filter((staff) => {
-          const matchesQuery =
-            staff.fullName.toLowerCase().includes(query) ||
-            staff.position.toLowerCase().includes(query) ||
-            staff.department.toLowerCase().includes(query);
+      return this.staffList.filter((staff) => {
+        if (!staff) return false;
 
-          const matchesDept =
-            !this.filterDepartment || staff.department === this.filterDepartment;
-          const matchesPosition =
-            !this.filterPosition || staff.position === this.filterPosition;
+        const matchesQuery = !query || 
+          staff.name?.toLowerCase().includes(query) ||
+          staff.role?.toLowerCase().includes(query) ||
+          staff.email?.toLowerCase().includes(query);
 
-          return matchesQuery && matchesDept && matchesPosition;
-        });
+        const matchesPosition = !this.filterPosition || staff.role === this.filterPosition;
+
+        return matchesQuery && matchesPosition;
+      });
     },
 
     paginatedStaff() {
@@ -238,15 +242,10 @@ export default {
       return Math.ceil(this.filteredStaff.length / this.itemsPerPage);
     },
 
-    // Generate unique department options from staff data
-    departmentOptions() {
-      return Array.from(new Set(this.staffList.map((s) => s.department))).sort();
-    },
-
-    // Generate unique position options from staff data
     positionOptions() {
-      return Array.from(new Set(this.staffList.map((s) => s.position))).sort();
-    },
+      if (!this.staffList) return [];
+      return Array.from(new Set(this.staffList.map(s => s.role))).sort();
+    }
   },
   methods: {
     toggleFilterPanel() {
@@ -260,6 +259,24 @@ export default {
       this.showModal = false;
       this.selectedStaff = null;
     },
+    editStaff(staff) {
+      event.stopPropagation();
+      this.editingStaff = { ...staff };
+      this.showEditModal = true;
+    },
+    closeEditModal() {
+      this.showEditModal = false;
+      this.editingStaff = null;
+    },
+    refreshData() {
+      router.reload({ only: ['staffList'] });
+    },
+    deleteStaff(staff) {
+      event.stopPropagation();
+      if (confirm('Are you sure you want to delete this staff member?')) {
+        router.delete(`/admin/staff/${staff.id}`);
+      }
+    },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
@@ -270,6 +287,20 @@ export default {
         this.currentPage--;
       }
     },
-  },
+    formatDateTime(dateTime) {
+      const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(dateTime).toLocaleDateString('en-US', options);
+    },
+    capitalize(text) {
+      if (!text) return '';
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+  }
 };
 </script>

@@ -18,6 +18,28 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
+    public function getStaff()
+    {
+        // Fetch all users excluding the admin role
+        $data = User::where('role', '!=', 'admin')->get();
+
+        // Pass the filtered users to the Inertia view
+        return Inertia::render('Admin/Staff', [
+            'USERS' => $data,
+        ]);
+    }
+
+    // public function index()
+    // {
+    //     // Count all users excluding the admin role
+    //     $totalUsers = User::where('role', '!=', 'admin')->count();
+
+    //     // Pass the user count to the Inertia view
+    //     return Inertia::render('Admin/AdminDashboard', [
+    //         'totalUsers' => $totalUsers,
+    //     ]);
+    // }
+
     public function create(): Response
     {
         return Inertia::render('Auth/Register');
@@ -35,7 +57,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|string|in:staff,doctor', // Validate the role
+            'role' => 'required|string|in:staff,doctor',
         ]);
 
         // Ensure unauthorized role manipulation is avoided
@@ -48,16 +70,58 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role, // Save the selected role (Staff or Doctor)
+            'role' => $request->role,
         ]);
 
         // Trigger the registered event
         event(new Registered($user));
 
-        // Log the user in
-        Auth::login($user);
+        // Redirect to staff page with success message
+        return redirect()->route('admin.register.staff')
+            ->with('message', 'Successfully registered!');
+    }
 
-        // Redirect to the intended dashboard
-        return redirect()->route('dashboard');
+    /**
+     * Update the specified user.
+     */
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'required|string|in:staff,doctor',
+        ]);
+
+        // Prevent updating to admin role
+        if ($request->role === 'admin') {
+            return response()->json(['message' => 'Unauthorized role assignment.'], 403);
+        }
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+        ]);
+
+        return redirect()->back();
+    }
+
+    /**
+     * Delete the specified user.
+     */
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Prevent deleting admin users
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Cannot delete admin users.'], 403);
+        }
+
+        $user->delete();
+
+        return redirect()->back();
     }
 }

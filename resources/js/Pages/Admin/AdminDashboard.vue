@@ -15,15 +15,16 @@ import StaffDonutChart from '@/Components/Staff/StaffDonutChart.vue';
 
 // Props from backend
 const props = defineProps({
-  totalStaff: Number,
-  totalPatients: Number,      // if you still want to show total patients
-  staffList: Array,           // Detailed staff data
-  staffDistributionData: { type: Array, default: () => [] },
-  onLeaveStaffData: { type: Array, default: () => [] }, // Example for staff on leave
+    totalUsers: Number,
+    totalPatients: Number,      // if you still want to show total patients
+    staffList: Array,           // Detailed staff data
+    staffDistributionData: { type: Array, default: () => [] },
+    onLeaveStaffData: { type: Array, default: () => [] }, // Example for staff on leave
 });
 
 // Reactive states
-const totalStaff = ref(props.totalStaff || 0);
+const totalUsers = ref(props.totalUsers || 0);
+console.log('Total Users:', totalUsers.value);
 const totalPatients = ref(props.totalPatients || 0);
 const staffOnLeave = ref(0);
 const staffList = ref(props.staffList || []);
@@ -42,7 +43,7 @@ const normalizedDistributionData = computed(() => {
 
 // Update stats from DateCard
 const updateStats = (stats) => {
-  totalStaff.value = stats.totalStaff || 0;
+    // totalUsers.value = stats.totalUsers || 0;
   staffOnLeave.value = stats.staffOnLeave || 0;
   distributionData.value = stats.distributionData || [];
 };
@@ -89,25 +90,25 @@ watch(
       <section class="gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
 
         <!-- Total Staff -->
-        <ShortBox class="bg-gradient-to-br from-green-100 to-green-300 text-green-800">
-          <div class="flex flex-col items-start gap-2">
+        <ShortBox class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-md transition-shadow">
+            <div class="flex flex-col items-start gap-2">
             <div class="flex justify-between w-full">
-              <h2 class="font-bold text-lg">Total Users</h2>
-              <Link href="/staff/all" class="bg-green-500 text-white rounded px-3 py-1 shadow hover:opacity-90">
+                <h2 class="font-bold text-lg">Total Users</h2>
+                <Link href="/services/patients" class="bg-green-500 text-white rounded px-3 py-1 shadow hover:opacity-90">
                 View
-              </Link>
+                </Link>
             </div>
             <div class="flex items-center">
-              <i class="fas fa-users text-green-600 mr-2 text-lg"></i>
-              <p class="text-2xl font-semibold">{{ totalStaff }}</p>
+                <font-awesome-icon :icon="['fas', 'user']" class="mr-2 text-lg text-green-600" />
+                <p class="text-2xl font-semibold">{{ totalUsers }}</p>
             </div>
-          </div>
+            </div>
         </ShortBox>
 
         <!-- Date/Filter Card -->
         <DateCard
           class="z-30"
-          :staffList="staffList"
+          :totalPatients="totalPatients"
           @updateStats="updateStats"
         />
 

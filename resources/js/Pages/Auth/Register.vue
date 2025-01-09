@@ -52,8 +52,12 @@ const submit = () => {
     }
 
     form.post(route('admin.register.store'), {
+        preserveScroll: true,
         onSuccess: () => {
-            form.reset('password', 'password_confirmation');
+            // Show success alert
+            alert('Successfully registered!');
+            form.reset();
+            router.visit(route('admin.register.staff'));
         },
         onError: () => {
             // Handle errors if needed
