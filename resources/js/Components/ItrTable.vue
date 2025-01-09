@@ -1,17 +1,16 @@
 <template>
   <div class="mx-auto py-8 px-10  bg-gradient-to-br from-green-100 to-blue-100 min-h-screen">
     <!-- Header Section -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-green-600 text-center">Individual Treatment Records</h1>
+    <div class="mb-6 flex flex-col text-center">
+      <h1 class="text-4xl font-bold text-green-600 text-center">Individual Treatment Records</h1>
       <p class="text-gray-700 text-center">Search, filter, and manage patient records efficiently.</p>
     </div>
-    <div class="text-center mb-6">
+    <!-- In your template (e.g. at the top, above the search bar) -->
+    <div class="flex flex-col md:flex-row md:items-center gap-10 justify-center mb-6">
+      <div class="flex items-center gap-4">
       <span class="font-semibold text-gray-700">Current Date:</span>
       <span class="text-gray-900">{{ currentDateText }}</span>
     </div>
-    <!-- In your template (e.g. at the top, above the search bar) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-center mb-6">
-
       <div class="flex items-center gap-4">
         <label for="filterDate" class="font-semibold text-gray-700">Filter Date:</label>
         <input type="date" id="filterDate" v-model="filterDate"
@@ -20,168 +19,130 @@
     </div>
 
 
-<!-- Search and Filter Section -->
-<div class="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-  <!-- Search Bar -->
-  <div class="w-full md:w-2/3 flex items-center border border-gray-300 rounded-lg shadow-sm bg-white">
-    <input
-      v-model="searchQuery"
-      type="text"
-      placeholder="Search by name, diagnosis, or visit type"
-      class="w-full p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-    />
-  </div>
+    <!-- Search and Filter Section -->
+    <div class="flex flex-col md:flex-row md:items-center gap-6 mb-8">
+      <!-- Search Bar -->
+      <div class="w-full md:w-2/3 flex items-center border border-gray-300 rounded-lg shadow-sm bg-white">
+        <input v-model="searchQuery" type="text" placeholder="Search by name, diagnosis, or visit type"
+          class="w-full p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
+      </div>
 
-  <!-- Relative container for the Filters button + panel -->
-  <div class="relative">
-    <!-- Filters Button -->
-    <button
-      @click="toggleFilterPanel"
-      class="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition"
-    >
-      Filters
-      <span v-if="isFilterPanelOpen">▲</span>
-      <span v-else>▼</span>
-    </button>
+      <!-- Relative container for the Filters button + panel -->
+      <div class="relative flex gap-1">
+        <!-- Filters Button -->
+        <button @click="toggleFilterPanel"
+          class="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition">
+          Filters
+          <span v-if="isFilterPanelOpen">▲</span>
+          <span v-else>▼</span>
+        </button>
+        <button @click="generateReport"
+          class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 transition">
+          <!-- <font-awesome-icon icon="file-import" /> -->
+          Generate Report
+        </button>
+        <button @click="triggerImport"
+          class="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
+          <!-- <font-awesome-icon icon="file-import" /> -->
+          Import CSV
+        </button>
 
-    <!-- Absolute-positioned Filter Panel -->
-    <transition name="slide-vertical">
-      <div
-        v-if="isFilterPanelOpen"
-        class="absolute left-0 top-full mt-2 w-96 bg-white border border-gray-300 rounded-lg shadow-md z-50 p-6"
-      >
-        <div class="grid grid-cols-2 gap-6">
-          <!-- Gender Filter -->
-          <div>
-            <label class="block font-semibold mb-2">Gender</label>
-            <div class="flex items-center gap-4">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <font-awesome-icon icon="mars" class="text-blue-500" />
-                <input
-                  type="checkbox"
-                  value="Male"
-                  v-model="filterGender"
-                  class="form-checkbox text-blue-500 focus:ring-blue-500"
-                />
-                <span class="text-gray-700">Male</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <font-awesome-icon icon="venus" class="text-pink-500" />
-                <input
-                  type="checkbox"
-                  value="Female"
-                  v-model="filterGender"
-                  class="form-checkbox text-pink-500 focus:ring-pink-500"
-                />
-                <span class="text-gray-700">Female</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Age Range Filter -->
-          <div>
-            <label class="block font-semibold mb-2">Age Range</label>
-            <div class="flex flex-col items-start">
-              <input
-                type="range"
-                v-model="filterAgeRange"
-                min="0"
-                max="100"
-                step="5"
-                class="w-full accent-green-500"
-              />
-              <p class="text-sm text-gray-500 mt-1">Selected: {{ filterAgeRange }}+</p>
-            </div>
-          </div>
-
-          <!-- Purok Filter -->
-          <div>
-            <label class="block font-semibold mb-2">Purok</label>
-            <select
-              v-model="filterPrk"
-              class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400"
-            >
-              <option value="">All Purok</option>
-              <option v-for="purok in purokOptions" :key="purok" :value="purok">
-                {{ purok }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Barangay Filter -->
-          <div>
-            <label class="block font-semibold mb-2">Barangay</label>
-            <select
-              v-model="filterBarangay"
-              class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400"
-            >
-              <option value="">All Barangay</option>
-              <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
-                {{ barangay }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Diagnosis Filters -->
-          <div class="col-span-2">
-            <button
-              @click="toggleDiagnosisPanel"
-              class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 transition font-medium"
-            >
-              Diagnosis Filters
-              <span v-if="isDiagnosisPanelOpen">▲</span>
-              <span v-else>▼</span>
-            </button>
-
-            <transition name="fade">
-              <div v-if="isDiagnosisPanelOpen" class="flex flex-col gap-2 mt-3">
-                <div v-for="diagnosis in visibleDiagnosisOptions" :key="diagnosis">
+        <!-- Absolute-positioned Filter Panel -->
+        <transition name="slide-vertical">
+          <div v-if="isFilterPanelOpen"
+            class="absolute left-0 top-full mt-2 w-96 bg-white border border-gray-300 rounded-lg shadow-md z-50 p-6">
+            <div class="grid grid-cols-2 gap-6">
+              <!-- Gender Filter -->
+              <div>
+                <label class="block font-semibold mb-2">Gender</label>
+                <div class="flex items-center gap-4">
                   <label class="flex items-center gap-2 cursor-pointer">
-                    <div class="w-5 h-5 border-2 border-green-500 rounded flex items-center justify-center">
-                      <input
-                        type="checkbox"
-                        :value="diagnosis"
-                        v-model="filterDiagnosis"
-                        class="appearance-none w-4 h-4"
-                      />
-                      <div
-                        v-if="filterDiagnosis.includes(diagnosis)"
-                        class="w-3 h-3 bg-green-500 rounded"
-                      ></div>
-                    </div>
-                    <span class="text-gray-700">{{ diagnosis }}</span>
+                    <font-awesome-icon icon="mars" class="text-blue-500" />
+                    <input type="checkbox" value="Male" v-model="filterGender"
+                      class="form-checkbox text-blue-500 focus:ring-blue-500" />
+                    <span class="text-gray-700">Male</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <font-awesome-icon icon="venus" class="text-pink-500" />
+                    <input type="checkbox" value="Female" v-model="filterGender"
+                      class="form-checkbox text-pink-500 focus:ring-pink-500" />
+                    <span class="text-gray-700">Female</span>
                   </label>
                 </div>
-                <button
-                  v-if="uniqueDiagnosisOptions.length > maxVisibleDiagnoses"
-                  @click="toggleShowAllDiagnosis"
-                  class="text-blue-500 underline font-medium hover:text-blue-700 mt-2"
-                >
-                  {{ showAllDiagnosis ? "See Less" : "See More" }}
-                </button>
               </div>
-            </transition>
+
+              <!-- Age Range Filter -->
+              <div>
+                <label class="block font-semibold mb-2">Age Range</label>
+                <div class="flex flex-col items-start">
+                  <input type="range" v-model="filterAgeRange" min="0" max="100" step="5"
+                    class="w-full accent-green-500" />
+                  <p class="text-sm text-gray-500 mt-1">Selected: {{ filterAgeRange }}+</p>
+                </div>
+              </div>
+
+              <!-- Purok Filter -->
+              <div>
+                <label class="block font-semibold mb-2">Purok</label>
+                <select v-model="filterPrk"
+                  class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400">
+                  <option value="">All Purok</option>
+                  <option v-for="purok in purokOptions" :key="purok" :value="purok">
+                    {{ purok }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Barangay Filter -->
+              <div>
+                <label class="block font-semibold mb-2">Barangay</label>
+                <select v-model="filterBarangay"
+                  class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400">
+                  <option value="">All Barangay</option>
+                  <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
+                    {{ barangay }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Diagnosis Filters -->
+              <div class="col-span-2">
+                <button @click="toggleDiagnosisPanel"
+                  class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 transition font-medium">
+                  Diagnosis Filters
+                  <span v-if="isDiagnosisPanelOpen">▲</span>
+                  <span v-else>▼</span>
+                </button>
+
+                <transition name="fade">
+                  <div v-if="isDiagnosisPanelOpen" class="flex flex-col gap-2 mt-3">
+                    <div v-for="diagnosis in visibleDiagnosisOptions" :key="diagnosis">
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <div class="w-5 h-5 border-2 border-green-500 rounded flex items-center justify-center">
+                          <input type="checkbox" :value="diagnosis" v-model="filterDiagnosis"
+                            class="appearance-none w-4 h-4" />
+                          <div v-if="filterDiagnosis.includes(diagnosis)" class="w-3 h-3 bg-green-500 rounded"></div>
+                        </div>
+                        <span class="text-gray-700">{{ diagnosis }}</span>
+                      </label>
+                    </div>
+                    <button v-if="uniqueDiagnosisOptions.length > maxVisibleDiagnoses" @click="toggleShowAllDiagnosis"
+                      class="text-blue-500 underline font-medium hover:text-blue-700 mt-2">
+                      {{ showAllDiagnosis ? "See Less" : "See More" }}
+                    </button>
+                  </div>
+                </transition>
+              </div>
+            </div>
           </div>
-        </div>
+        </transition>
+
       </div>
-    </transition>
-  </div>
-</div>
+    </div>
 
     <!-- Buttons -->
-    <div class="flex gap-4 mb-6">
-      <button @click="generateReport"
-        class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 transition">
-        <!-- <font-awesome-icon icon="file-import" /> -->
-        Generate Report
-      </button>
-      <button @click="triggerImport"
-        class="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
-        <!-- <font-awesome-icon icon="file-import" /> -->
-        Import CSV
-      </button>
-      <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
-    </div>
+
+    <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
 
     <!-- Table -->
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
@@ -492,8 +453,8 @@ export default {
 
   methods: {
     toggleFilterPanel() {
-    this.isFilterPanelOpen = !this.isFilterPanelOpen;
-  },
+      this.isFilterPanelOpen = !this.isFilterPanelOpen;
+    },
     toggleDiagnosisPanel() {
       this.isDiagnosisPanelOpen = !this.isDiagnosisPanelOpen;
     },
@@ -643,7 +604,8 @@ export default {
 .slide-vertical-enter-active,
 .slide-vertical-leave-active {
   transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
-  overflow: hidden; /* Hide content beyond the max-height */
+  overflow: hidden;
+  /* Hide content beyond the max-height */
 }
 
 .slide-vertical-enter-from,
@@ -656,8 +618,8 @@ export default {
 
 .slide-vertical-enter-to,
 .slide-vertical-leave-from {
-  max-height: 2000px; /* A large enough max-height to accommodate content */
+  max-height: 2000px;
+  /* A large enough max-height to accommodate content */
   opacity: 1;
 }
-
 </style>

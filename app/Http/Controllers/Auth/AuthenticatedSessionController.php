@@ -18,12 +18,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function index()
     {
-        // Passing the authentication status to the Home component
+        // Get the authenticated user
+        $user = auth()->user();
+        
         return Inertia::render('Home', [
-            'isAuthenticated' => auth()->check() // Check if the user is logged in
+            'isAuthenticated' => $user !== null, // Check if the user is logged in
+            'userRole' => $user ? $user->role : null, // Pass the user's role if authenticated, otherwise null
         ]);
     }
-
+    
+    
     /**
      * Display the login page.
      */
