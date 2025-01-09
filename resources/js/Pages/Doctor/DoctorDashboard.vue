@@ -12,8 +12,7 @@ const props = defineProps({
   totalPatients: Number,
   ITRConsultation: Array,
   latestPatients: Array,
-  todayAppointments: Number,
-  criticalCases: Number,
+  todaysConsultation: Number,
   notifications: Array,
 });
 
@@ -21,10 +20,11 @@ const props = defineProps({
 const totalPatients = ref(props.totalPatients || 0);
 const ITRConsultation = ref(props.ITRConsultation || []);
 const latestPatients = ref(props.latestPatients || []);
-const todayAppointments = ref(props.todayAppointments || 0);
+const todaysConsultation = ref(props.todaysConsultation || 0);
 const criticalCases = ref(props.criticalCases || 0);
 const notifications = ref(props.notifications || []);
 const currentPage = ref(1); // Initialize currentPage
+const currentLatestPage = ref(1); // Initialize currentLatestPage
 const itemsPerPage = ref(5); // Set the number of items per page
 const showNotifications = ref(false);
 const selectedPatient = ref(null); // Stores the selected patient data
@@ -53,6 +53,11 @@ const totalPages = computed(() => {
   return Math.ceil(filteredITRConsultation.value.length / itemsPerPage.value);
 });
 
+// Total pages for latest patients
+const totalLatestPages = computed(() => {
+  return Math.ceil(props.latestPatients.length / itemsPerPage.value);
+});
+
 // Pagination methods
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
@@ -63,6 +68,18 @@ const nextPage = () => {
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
+  }
+};
+
+const nextLatestPage = () => {
+  if (currentLatestPage.value < totalLatestPages.value) {
+    currentLatestPage.value++;
+  }
+};
+
+const prevLatestPage = () => {
+  if (currentLatestPage.value > 1) {
+    currentLatestPage.value--;
   }
 };
 
@@ -84,7 +101,7 @@ const filteredITRConsultation = computed(() => {
 
 // Computed property for paginated patients
 const paginatedLatestPatients = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const start = (currentLatestPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
   return props.latestPatients.slice(start, end);
 });
@@ -394,6 +411,12 @@ watch(() => props.notifications, (newVal) => {
 const refreshData = () => {
   router.reload({ only: ['latestPatients', 'ITRConsultation', 'notifications'] });
 };
+
+// Reset pages when search changes
+watch(searchQueue, () => {
+  currentPage.value = 1;
+  currentLatestPage.value = 1;
+});
 
 onMounted(() => {
   updateDate();

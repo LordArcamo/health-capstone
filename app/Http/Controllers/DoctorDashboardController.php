@@ -179,7 +179,7 @@ class DoctorDashboardController extends Controller
         $totalPatients = PersonalInformation::count();
 
         // Get today's appointments count
-        $todayAppointments = ConsultationDetails::whereDate('consultationDate', $today)->count();
+        $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)->count();
 
         // Get critical cases count (you may need to adjust this based on your criteria)
         $criticalCases = 0;
@@ -188,7 +188,7 @@ class DoctorDashboardController extends Controller
             'totalPatients' => $totalPatients,
             'ITRConsultation' => $ITRConsultation,
             'latestPatients' => $latestPatients,
-            'todayAppointments' => $todayAppointments,
+            'todaysConsultation' => $todaysConsultation,
             'criticalCases' => $criticalCases,
             'notifications' => $notifications,
         ]);
