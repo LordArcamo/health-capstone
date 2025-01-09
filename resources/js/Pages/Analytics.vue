@@ -65,7 +65,6 @@ const updateStats = (stats) => {
 const monthlyData = ref(props.barChart || []);
 const monthlyVaccination = ref(props.lineChart && props.lineChart.data ? props.lineChart.data : Array(12).fill(0));
 const monthlyCases = ref(props.casesData || Array(12).fill(0));
-const mentalHealthData = ref(props.mentalHealthStats);
 const referredData = ref(props.pieChart);
 
 const filters = ref({
@@ -227,19 +226,19 @@ watch(() => props.lineChart, (newVal) => {
     <!-- Charts Section -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 p-10 gap-10 mt-6">
       <div class="hover:scale-105 transition-transform">
-        <TotalPatients 
+        <TotalPatients
         :filters="filters"
         :monthly-data="monthlyData"
           />
       </div>
       <div class=" hover:scale-105 transition-transform">
-        <ReferedPatients 
+        <ReferedPatients
           :filters="filters"
           :pie-chart="referredData"
         />
       </div>
       <div class="hover:scale-105 transition-transform">
-        <Vaccinations 
+        <Vaccinations
           :filters="filters"
           :vaccination-data="monthlyVaccination"
         />

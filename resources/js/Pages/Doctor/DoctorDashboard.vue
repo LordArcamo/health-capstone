@@ -10,8 +10,7 @@ const props = defineProps({
   totalPatients: Number,
   ITRConsultation: Array,
   latestPatients: Array,
-  todayAppointments: Number,
-  criticalCases: Number,
+  todaysConsultation: Number,
   notifications: Array,
 });
 
@@ -19,10 +18,11 @@ const props = defineProps({
 const totalPatients = ref(props.totalPatients || 0);
 const ITRConsultation = ref(props.ITRConsultation || []);
 const latestPatients = ref(props.latestPatients || []);
-const todayAppointments = ref(props.todayAppointments || 0);
+const todaysConsultation = ref(props.todaysConsultation || 0);
 const criticalCases = ref(props.criticalCases || 0);
 const notifications = ref(props.notifications || []);
 const currentPage = ref(1); // Initialize currentPage
+const currentLatestPage = ref(1); // Initialize currentLatestPage
 const itemsPerPage = ref(5); // Set the number of items per page
 const showNotifications = ref(false);
 const searchQueue = ref('');
@@ -47,6 +47,11 @@ const totalPages = computed(() => {
   return Math.ceil(filteredITRConsultation.value.length / itemsPerPage.value);
 });
 
+// Total pages for latest patients
+const totalLatestPages = computed(() => {
+  return Math.ceil(props.latestPatients.length / itemsPerPage.value);
+});
+
 // Pagination methods
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
@@ -57,6 +62,18 @@ const nextPage = () => {
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
+  }
+};
+
+const nextLatestPage = () => {
+  if (currentLatestPage.value < totalLatestPages.value) {
+    currentLatestPage.value++;
+  }
+};
+
+const prevLatestPage = () => {
+  if (currentLatestPage.value > 1) {
+    currentLatestPage.value--;
   }
 };
 
@@ -78,7 +95,7 @@ const filteredITRConsultation = computed(() => {
 
 // Computed property for paginated patients
 const paginatedLatestPatients = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const start = (currentLatestPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
   return props.latestPatients.slice(start, end);
 });
@@ -382,6 +399,12 @@ const refreshData = () => {
   router.reload({ only: ['latestPatients', 'ITRConsultation', 'notifications'] });
 };
 
+// Reset pages when search changes
+watch(searchQueue, () => {
+  currentPage.value = 1;
+  currentLatestPage.value = 1;
+});
+
 onMounted(() => {
   updateDate();
   setInterval(updateDate, 1000);
@@ -436,7 +459,7 @@ onMounted(() => {
         <!-- Today's Appointments -->
         <div class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <h2 class="font-semibold text-lg">Today's Consultation</h2>
-          <p class="text-3xl font-bold">{{ todayAppointments }}</p>
+          <p class="text-3xl font-bold">{{ todaysConsultation }}</p>
         </div>
 
         <!-- Critical Cases -->
