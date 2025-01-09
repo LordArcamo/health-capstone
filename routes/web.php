@@ -78,11 +78,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/register', [RegisteredUserController::class, 'create'])
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register');
-    
+
     Route::post('/admin/register', [RegisteredUserController::class, 'store'])
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.store');
+
+        Route::get('/staff', [RegisteredUserController::class, 'getStaff'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register.staff');
+
+        Route::put('/admin/staff/{id}', [RegisteredUserController::class, 'update'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register.update');
+
+        Route::delete('/admin/staff/{id}', [RegisteredUserController::class, 'destroy'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register.destroy');
+
+        // Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'index'])
+        // ->middleware([RoleMiddleware::class . ':admin'])
+        // ->name('admin.index');
 });
+
 
 // Route::get('/', function () {
 //     return Inertia::render('Home');
@@ -194,8 +211,10 @@ Route::get('/checkup', function () {
 Route::get('/patients/{personalId}', [PatientController::class, 'show'])->name('patients.show');
 
 Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
-    ->middleware(RoleMiddleware::class . ':admin')
+    ->middleware(['auth', 'verified', RoleMiddleware::class . ':admin'])
     ->name('admin.dashboard');
+
+
 
 // Admin Routes
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -246,9 +265,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/itr-table', [DoctorCheckupController::class, 'index'])->name('ITR.index');
 });
 
-Route::get('/staff', function () {
-    return Inertia::render('Admin/Staff');
-})->middleware(['auth', 'verified'])->name('staff');
 
 Route::get('/itr-services', function () {
     return Inertia::render('About/ItrDescription');
@@ -283,9 +299,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics-radarChart', [SystemAnalyticsController::class, 'getMentalHealthStatistics'])->name('analytics.radarChart');
 
 });
-// Route::get('/system-analytics', [SystemAnalyticsController::class, 'index'])
-//     ->middleware(['auth', 'verified'])
-//     ->name('system-analytics');
 
     Route::get('/mental-health', function () {
         return Inertia::render('About/MentalDescription');

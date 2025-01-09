@@ -25,45 +25,21 @@ const criticalCases = ref(props.criticalCases || 0);
 const notifications = ref(props.notifications || []);
 const showNotifications = ref(false);
 const searchQueue = ref('');
-const currentPage = ref(1); // Initialize currentPage
-const itemsPerPage = ref(5); // Set the number of items per page
+const unreadNotifications = computed(() =>
+  notifications.value.filter(n => !n.isRead).length
+);
 
-// Computed property for paginated patients
-const paginatedPatients = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return filteredITRConsultation.value.slice(start, end);
-});
-
-// Total pages
-const totalPages = computed(() => {
-  return Math.ceil(filteredITRConsultation.value.length / itemsPerPage.value);
-});
-
-// Pagination methods
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-};
 // Function to format date
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return format(date, 'MMMM d, yyyy');
 };
 
-// Computed property for paginated patients
-const paginatedLatestPatients = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return props.latestPatients.slice(start, end);
-});
+// Format date for notifications
+const formatNotificationDate = (time) => {
+  const date = new Date(time);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
 
 // Computed property for filtered patients in queue
 const filteredITRConsultation = computed(() => {
@@ -126,6 +102,13 @@ const viewPatientDetails = (patient) => {
   }
 
   console.warn('Invalid patient data for view details:', patient);
+};
+
+// Handle marking notification as read
+const markAsRead = (notification) => {
+  if (!notification.isRead) {
+    notification.isRead = true;
+  }
 };
 
 // Dynamic date
@@ -330,10 +313,55 @@ watch(() => props.ITRConsultation, (newVal) => {
   ITRConsultation.value = newVal || [];
 }, { deep: true });
 
+// Watch for changes in notifications
+watch(() => props.notifications, (newVal) => {
+  const oldNotifications = notifications.value;
+  notifications.value = newVal || [];
+
+  // Check for new notifications
+  if (oldNotifications && newVal) {
+    const newNotifications = newVal.filter(notification =>
+      !notification.isRead &&
+      !oldNotifications.some(old => old.id === notification.id)
+    );
+
+    // Show notification for each new patient
+    newNotifications.forEach(notification => {
+      // Create notification sound
+      const audio = new Audio('/notification.mp3'); // Make sure to add this sound file
+      audio.play().catch(e => console.log('Audio play failed:', e));
+
+      // Show browser notification if permitted
+      if (Notification.permission === "granted") {
+        new Notification("New Patient in Queue", {
+          body: notification.message,
+          icon: "/icon.png" // Add your icon
+        });
+      }
+    });
+  }
+}, { deep: true });
+
+// Function to refresh data
+const refreshData = () => {
+  router.reload({ only: ['latestPatients', 'ITRConsultation', 'notifications'] });
+};
+
 onMounted(() => {
   updateDate();
   setInterval(updateDate, 1000);
   initCharts();
+
+  // Request notification permission
+  if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+    Notification.requestPermission();
+  }
+
+  // Set up periodic refresh
+  setInterval(refreshData, 30000); // Check every 30 seconds
+
+  // Initial refresh
+  refreshData();
 });
 </script>
 <template>
@@ -516,21 +544,45 @@ onMounted(() => {
       </div>
 
       <!-- Notifications Section -->
-      <button
-        class="fixed bottom-4 right-4 bg-yellow-500 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-yellow-600"
-        @click="showNotifications = !showNotifications">
-        Notifications ({{ notifications.length }})
-      </button>
-      <div v-if="showNotifications"
-        class="fixed top-16 right-4 bg-white shadow-xl rounded-lg w-80 overflow-y-auto max-h-96">
-        <h2 class="font-bold text-lg bg-yellow-500 text-white p-4">Notifications</h2>
-        <ul>
-          <li v-for="(notification, index) in notifications" :key="index"
-            class="p-4 border-b hover:bg-gray-100 transition">
-            {{ notification.message }}
-          </li>
-        </ul>
+      <div v-if="showNotifications" class="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
+        <div class="w-96 bg-white h-screen overflow-hidden">
+          <div class="p-4 bg-blue-500 text-white flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Notifications</h3>
+            <button @click="showNotifications = false" class="text-2xl">&times;</button>
+          </div>
+          <div class="p-4 h-[calc(100vh-4rem)] overflow-y-auto no-scrollbar">
+            <div v-if="notifications.length === 0" class="text-gray-500 text-center py-4">
+              No new notifications
+            </div>
+            <template v-else>
+              <div v-for="notification in notifications" :key="notification.id"
+                class="mb-4 p-4 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                :class="{ 'bg-blue-50': !notification.isRead }"
+                @click="markAsRead(notification)">
+                <div class="flex items-start">
+                  <div class="flex-1">
+                    <p class="font-medium text-gray-800">{{ notification.message }}</p>
+                    <p class="text-sm text-gray-500">{{ formatNotificationDate(notification.time) }}</p>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
+
+      <button @click="showNotifications = !showNotifications"
+        class="fixed bottom-4 right-4 bg-yellow-500 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-yellow-600">
+        Notifications ({{ unreadNotifications }})
+      </button>
+      <button @click="showNotifications = !showNotifications"
+        class="relative p-2 text-white hover:bg-blue-600 rounded-full transition-colors fixed top-4 right-4">
+        <font-awesome-icon :icon="['fas', 'bell']" class="text-xl" />
+        <span v-if="unreadNotifications > 0"
+          class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+          {{ unreadNotifications }}
+        </span>
+      </button>
     </div>
   </MainLayout>
 </template>
@@ -545,5 +597,16 @@ button {
 
 .bg-gradient-to-r {
   background: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 </style>

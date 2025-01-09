@@ -1,24 +1,17 @@
 <template>
     <Head title="Mental Health Records" />
-  
+
     <NewLayout>
-      <div >
-        <StaffTable :patients="patients" />
-      </div>
+        <StaffTable :staffList="props.USERS" />
     </NewLayout>
-  </template>
-  
-  <script setup>
-  import NewLayout from '@/Layouts/MainLayout.vue';
-  import { Head } from '@inertiajs/vue3';
+</template>
+
+<script setup>
+import NewLayout from '@/Layouts/MainLayout.vue';
+import { Head } from '@inertiajs/vue3';
  import StaffTable from '@/Components/Staff/StaffTable.vue';
-  import MentalHealthSessions from '@/Components/MentalHealthSessions.vue';
-  
-  defineProps({
-    patients: {
-      type: Array,
-      required: true
-    },
-  });
+
+const props = defineProps({
+  USERS: Array, // Declare the checkUps prop coming from the server
+});
   </script>
-  
