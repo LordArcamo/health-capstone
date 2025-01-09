@@ -15,6 +15,7 @@ const props = defineProps({
   notifications: Array,
 });
 
+
 // Reactive states
 const totalPatients = ref(props.totalPatients || 0);
 const ITRConsultation = ref(props.ITRConsultation || []);
@@ -364,13 +365,14 @@ onMounted(() => {
 });
 </script>
 <template>
+
   <Head title="Initao RHU Dashboard" />
 
   <MainLayout>
-    <div class="min-h-screen bg-gray-50 no-scrollbar">
+    <div class="relative overflow-y-auto w-full min-h-screen">
       <!-- Branding Section -->
       <div
-        class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-8 py-6 text-white shadow-md rounded-b-xl">
+        class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-green-400 px-8 py-6 text-white shadow-md ">
         <div>
           <h1 class="text-3xl font-semibold">Initao RHU Dashboard</h1>
           <p class="text-lg">Empowering community health with data-driven insights.</p>
@@ -398,7 +400,7 @@ onMounted(() => {
 
         <!-- Today's Appointments -->
         <div class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-lg p-6 rounded-xl shadow-md">
-          <h2 class="font-semibold text-lg">Today's Appointments</h2>
+          <h2 class="font-semibold text-lg">Today's Consultation</h2>
           <p class="text-3xl font-bold">{{ todayAppointments }}</p>
         </div>
 
@@ -412,51 +414,66 @@ onMounted(() => {
       <!-- Patients Section -->
       <div class="px-8 mb-10">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Patients in Queue -->
+
+
           <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Patients in Queue</h2>
-            <input
-              type="text"
-              v-model="searchQueue"
-              placeholder="Search for a patient..."
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4"
-            />
-            <div v-if="filteredITRConsultation.length" class="space-y-4">
-              <div
-                v-for="(patient, index) in filteredITRConsultation"
-                :key="index"
-                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition"
-              >
-                <h3 class="text-lg font-semibold text-gray-700">{{ patient.firstName }} {{ patient.lastName }}</h3>
+            <input type="text" v-model="searchQueue" placeholder="Search for a patient..."
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4" />
+            <div v-if="paginatedPatients.length" class="space-y-4">
+              <div v-for="(patient, index) in paginatedPatients" :key="index"
+                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition">
+                <h3 class="text-lg font-semibold text-gray-700">
+                  {{ patient.firstName }} {{ patient.lastName }}
+                </h3>
                 <p class="text-sm text-gray-500">Age: {{ patient.age }}</p>
                 <p class="text-sm text-gray-500">Reason: {{ patient.visitType }}</p>
-                <button
-                  @click="startCheckup(patient)"
-                  class="mt-3 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600"
-                >
-                  Start Checkup
+                <button @click="startCheckup(patient)" :class="[
+                  'mt-3 text-white font-semibold py-2 px-4 rounded-lg transition',
+                  patient.visitType === 'Prenatal' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-green-500 hover:bg-green-600'
+                ]">
+                  {{ patient.visitType === 'Prenatal' ? 'Start Prenatal Checkup' : 'Start General Checkup' }}
                 </button>
+
               </div>
             </div>
             <p v-else class="text-center text-gray-500">No patients in queue.</p>
+
+            <!-- Pagination Controls -->
+            <div v-if="paginatedPatients.length" class="flex justify-center items-center mt-4 space-x-2">
+              <button @click="prevPage" :disabled="currentPage === 1"
+                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
+                Previous
+              </button>
+              <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+              <button @click="nextPage" :disabled="currentPage === totalPages"
+                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
+                Next
+              </button>
+            </div>
           </div>
 
-          <!-- Latest Patients -->
+
+
           <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Latest Consultations</h2>
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visit Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient
+                      Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visit
+                      Type</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="patient in latestPatients" :key="patient.visitType === 'Prenatal' ? patient.prenatalConsultationDetailsID : patient.consultationDetailsID">
+                  <tr v-for="patient in paginatedLatestPatients"
+                    :key="patient.visitType === 'Prenatal' ? patient.prenatalConsultationDetailsID : patient.consultationDetailsID">
                     <td class="px-6 py-4 whitespace-nowrap">
                       {{ patient.firstName }} {{ patient.lastName }}
                     </td>
@@ -470,8 +487,7 @@ onMounted(() => {
                       {{ patient.consultationTime }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <button @click="viewPatientDetails(patient)"
-                        class="text-indigo-600 hover:text-indigo-900">
+                      <button @click="viewPatientDetails(patient)" class=" textcolor text-black-600 hover:text-indigo-900">
                         View Details
                       </button>
                     </td>
@@ -484,7 +500,21 @@ onMounted(() => {
                 </tbody>
               </table>
             </div>
+
+            <!-- Pagination Controls -->
+            <div v-if="paginatedLatestPatients.length" class="flex justify-center items-center mt-4 space-x-2">
+              <button @click="prevPage" :disabled="currentPage === 1"
+                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
+                Previous
+              </button>
+              <span class="text-black-700">Page {{ currentPage }} of {{ totalPages }}</span>
+              <button @click="nextPage" :disabled="currentPage === totalPages"
+                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
+                Next
+              </button>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -557,6 +587,14 @@ onMounted(() => {
   </MainLayout>
 </template>
 <style scoped>
+button {
+  color: white;
+}
+
+.textcolor{
+  color: green;
+}
+
 .bg-gradient-to-r {
   background: linear-gradient(to right, var(--tw-gradient-stops));
 }

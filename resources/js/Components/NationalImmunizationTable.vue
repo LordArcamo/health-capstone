@@ -2,10 +2,21 @@
   <div class="mx-auto py-8 px-10 bg-gradient-to-br from-blue-100 to-teal-100 min-h-screen">
     <!-- Header Section -->
     <div class="mb-6 text-center">
-      <h1 class="text-3xl font-bold text-teal-600">National Immunization Records</h1>
+      <h1 class="text-4xl font-bold text-teal-600">National Immunization Records</h1>
       <p class="text-gray-700">Search, filter, and manage patient immunization records effectively.</p>
     </div>
-
+    <!-- In your template (e.g. at the top, above the search bar) -->
+    <div class="flex flex-col md:flex-row md:items-center gap-10 justify-center mb-6">
+      <div class="flex items-center gap-4">
+        <span class="font-semibold text-gray-700">Current Date:</span>
+        <span class="text-gray-900">{{ currentDateText }}</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <label for="filterDate" class="font-semibold text-gray-700">Filter Date:</label>
+        <input type="date" id="filterDate" v-model="filterDate"
+          class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
+      </div>
+    </div>
     <!-- Search and Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <!-- Search Bar -->
@@ -16,13 +27,23 @@
 
       <!-- Filter Panel Toggle -->
       <button @click="toggleFilterPanel"
-        class="flex items-center px-4 py-3 bg-teal-500 text-white font-medium rounded-lg shadow hover:bg-teal-600 focus:outline-none w-full md:w-1/3">
+        class="flex items-center px-4 py-3 bg-teal-500 text-white font-medium rounded-lg shadow hover:bg-teal-600 focus:outline-none">
         <span>Filters</span>
         <svg class="w-4 h-4 ml-2 transform" :class="{ 'rotate-180': isFilterPanelOpen }"
           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
+      <!-- Buttons -->
+      <button @click="generateReport"
+        class="px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow hover:bg-teal-600 focus:outline-none transition">
+        Generate Report
+      </button>
+      <button @click="triggerImport"
+        class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition flex items-center gap-2">
+        Import CSV
+      </button>
+      <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
     </div>
 
     <!-- Collapsible Filter Panel -->
@@ -55,8 +76,8 @@
             <label class="block text-base font-semibold mb-2">Age Range</label>
             <div class="flex items-center gap-4">
               <span class="text-sm text-gray-500">0</span>
-              <input type="range" v-model="filterAgeRange" min="0" max="100" step="5" class="w-full accent-teal-500" />
-              <span class="text-sm text-gray-500">100+</span>
+              <input type="range" v-model="filterAgeRange" min="0" max="10" step="5" class="w-full accent-teal-500" />
+              <span class="text-sm text-gray-500">10+</span>
             </div>
             <div class="text-sm text-gray-700 mt-1">Selected: {{ filterAgeRange }}+</div>
           </div>
@@ -85,19 +106,6 @@
         </div>
       </div>
     </transition>
-
-    <!-- Buttons -->
-    <div class="mb-6 flex gap-4">
-      <button @click="generateReport"
-        class="px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow hover:bg-teal-600 focus:outline-none transition">
-        Generate Report
-      </button>
-      <button @click="triggerImport"
-        class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition flex items-center gap-2">
-        Import CSV
-      </button>
-      <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
-    </div>
 
     <!-- Table -->
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
@@ -137,99 +145,93 @@
   </div>
 
   <!-- Modal -->
-  <div
-  v-if="showModal && selectedPatient"
-  class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4"
->
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative">
-    <!-- Close Button -->
-    <button
-      @click="closeModal"
-      class="absolute top-4 right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-700 transition"
-    >
-      &times;
-    </button>
+  <div v-if="showModal && selectedPatient"
+    class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative">
+      <!-- Close Button -->
+      <button @click="closeModal"
+        class="absolute top-4 right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-700 transition">
+        &times;
+      </button>
 
-    <!-- Header Section -->
-    <div class="border-b pb-4 mb-6 flex items-center gap-4">
-      <div class="bg-green-100 text-green-700 rounded-full p-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <div>
-        <h2 class="text-2xl font-bold text-gray-800">Patient Details</h2>
-        <p class="text-gray-600">Comprehensive information about {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}</p>
-      </div>
-    </div>
-
-    <!-- Patient Details Section -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <!-- Column 1 -->
-      <div>
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
-        <ul class="space-y-2">
-          <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{ selectedPatient.lastName }}</li>
-          <li><strong>Suffix:</strong> {{ selectedPatient.suffix || 'N/A' }}</li>
-          <li><strong>Address:</strong> {{ selectedPatient.address }}</li>
-          <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
-          <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
-          <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
-          <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
-          <li><strong>Birth Place:</strong> {{ selectedPatient.birthplace }}</li>
-          <li><strong>Blood Type:</strong> {{ selectedPatient.bloodtype }}</li>
-        </ul>
+      <!-- Header Section -->
+      <div class="border-b pb-4 mb-6 flex items-center gap-4">
+        <div class="bg-green-100 text-green-700 rounded-full p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">Patient Details</h2>
+          <p class="text-gray-600">Comprehensive information about {{ selectedPatient.firstName }} {{
+            selectedPatient.middleName }} {{ selectedPatient.lastName }}</p>
+        </div>
       </div>
 
-      <!-- Column 2 -->
-      <div>
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Family & Health Information</h3>
-        <ul class="space-y-2">
-          <li><strong>Mother's Name:</strong> {{ selectedPatient.mothername }}</li>
-          <li><strong>DSWD NHTS:</strong> {{ selectedPatient.dswdNhts || 'N/A' }}</li>
-          <li><strong>Facility Household No.:</strong> {{ selectedPatient.facilityHouseholdno }}</li>
-          <li><strong>Household No.:</strong> {{ selectedPatient.houseHoldno }}</li>
-          <li><strong>4Ps Member?:</strong> {{ selectedPatient.fourpsmember ? 'Yes' : 'No' }}</li>
-          <li><strong>Primary Care Benefit Member?:</strong> {{ selectedPatient.PCBMember ? 'Yes' : 'No' }}</li>
-          <li><strong>Philhealth Status:</strong> {{ selectedPatient.philhealthStatus }}</li>
-          <li><strong>Philhealth No.:</strong> {{ selectedPatient.philhealthNo }}</li>
-          <li><strong>TT Status of Mother:</strong> {{ selectedPatient.ttStatus }}</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Additional Information Section -->
-    <div class="mt-8">
-      <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
+      <!-- Patient Details Section -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <ul class="space-y-2">
-          <li><strong>Date Assessed:</strong> {{ selectedPatient.dateAssesed || 'N/A' }}</li>
-          <li><strong>Date:</strong> {{ selectedPatient.date }}</li>
-          <li><strong>Place:</strong> {{ selectedPatient.place }}</li>
-          <li><strong>Guardian:</strong> {{ selectedPatient.guardian }}</li>
-        </ul>
+        <!-- Column 1 -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
+          <ul class="space-y-2">
+            <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName }} {{
+              selectedPatient.lastName }}</li>
+            <li><strong>Suffix:</strong> {{ selectedPatient.suffix || 'N/A' }}</li>
+            <li><strong>Address:</strong> {{ selectedPatient.address }}</li>
+            <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
+            <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
+            <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
+            <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
+            <li><strong>Birth Place:</strong> {{ selectedPatient.birthplace }}</li>
+            <li><strong>Blood Type:</strong> {{ selectedPatient.bloodtype }}</li>
+          </ul>
+        </div>
+
+        <!-- Column 2 -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Family & Health Information</h3>
+          <ul class="space-y-2">
+            <li><strong>Mother's Name:</strong> {{ selectedPatient.mothername }}</li>
+            <li><strong>DSWD NHTS:</strong> {{ selectedPatient.dswdNhts || 'N/A' }}</li>
+            <li><strong>Facility Household No.:</strong> {{ selectedPatient.facilityHouseholdno }}</li>
+            <li><strong>Household No.:</strong> {{ selectedPatient.houseHoldno }}</li>
+            <li><strong>4Ps Member?:</strong> {{ selectedPatient.fourpsmember ? 'Yes' : 'No' }}</li>
+            <li><strong>Primary Care Benefit Member?:</strong> {{ selectedPatient.PCBMember ? 'Yes' : 'No' }}</li>
+            <li><strong>Philhealth Status:</strong> {{ selectedPatient.philhealthStatus }}</li>
+            <li><strong>Philhealth No.:</strong> {{ selectedPatient.philhealthNo }}</li>
+            <li><strong>TT Status of Mother:</strong> {{ selectedPatient.ttStatus }}</li>
+          </ul>
+        </div>
       </div>
 
+      <!-- Additional Information Section -->
+      <div class="mt-8">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <ul class="space-y-2">
+            <li><strong>Date Assessed:</strong> {{ selectedPatient.dateAssesed || 'N/A' }}</li>
+            <li><strong>Date:</strong> {{ selectedPatient.date }}</li>
+            <li><strong>Place:</strong> {{ selectedPatient.place }}</li>
+            <li><strong>Guardian:</strong> {{ selectedPatient.guardian }}</li>
+          </ul>
+        </div>
 
-    <!-- Footer Actions -->
-    <div class="mt-6 flex justify-end gap-4">
-      <button
-        @click="closeModal"
-        class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
-      >
-        Close
-      </button>
-      <button
-        @click="printRecord(selectedPatient)"
-        class="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition"
-      >
-        Print Record
-      </button>
-    </div>
 
+        <!-- Footer Actions -->
+        <div class="mt-6 flex justify-end gap-4">
+          <button @click="closeModal"
+            class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+            Close
+          </button>
+          <button @click="printRecord(selectedPatient)"
+            class="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition">
+            Print Record
+          </button>
+        </div>
+
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -255,6 +257,8 @@ export default {
       showModal: false,
       selectedPatient: null,
       isFilterPanelOpen: false, // Toggle filter panel visibility
+      filterDate: '',
+      currentDateText: '',
     };
   },
   computed: {
@@ -278,23 +282,41 @@ export default {
           if (this.filterAgeRange) {
             const [minAge, maxAge] = this.filterAgeRange.split('-').map(Number);
             const patientAge = patient.age;
+
+            // Ensure the maximum age is capped at 10
+            const effectiveMaxAge = Math.min(maxAge || Infinity, 10); // Default to 10 if maxAge is NaN or greater than 10
+
             matchesAgeRange =
-              (isNaN(minAge) || patientAge >= minAge) &&
-              (isNaN(maxAge) || patientAge <= maxAge);
+              (isNaN(minAge) || patientAge >= minAge) && // Allow the minAge to be flexible
+              (isNaN(effectiveMaxAge) || patientAge <= effectiveMaxAge);
           }
+
+
 
           const matchesGender =
             this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+
+          let matchesDate = true;
+          if (this.filterDate) {
+            // Compare day-only to avoid format/timezone issues
+            matchesDate = this.sameDay(patient.consultationDate, this.filterDate);
+          }
 
           return (
             matchesQuery &&
             matchesPrk &&
             matchesBarangay &&
             matchesAgeRange &&
-            matchesGender
+            matchesGender &&
+            matchesDate
           );
         })
-        .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+        .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage)
+        .sort((a, b) => {
+          const dateA = new Date(a.consultationDate);
+          const dateB = new Date(b.consultationDate);
+          return dateB - dateA; // descending -> most recent first
+        });
     },
     totalPages() {
       return Math.ceil(this.patients.length / this.itemsPerPage);
@@ -308,9 +330,43 @@ export default {
       return Array.from(barangays);
     },
   },
+  mounted() {
+    // 1) For the <input type="date">, we either start blank or set it to today's YYYY-MM-DD.
+    //    If you want the user to see it empty by default, keep it as ''.
+    //    If you want it to default to today's date in the picker, do:
+    // this.filterDate = new Date().toISOString().split('T')[0];
+
+    // 2) For displaying the "Current Date" in a more human-readable format:
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    this.currentDateText = today.toLocaleDateString(undefined, options);
+  },
   methods: {
+    formatDate(dateStr) {
+      if (!dateStr) return '';
+      // Convert to Date object
+      const dateObj = new Date(dateStr);
+      // Check if valid
+      if (isNaN(dateObj)) return dateStr; // Fallback: return original if invalid
+
+      // Format: e.g. "December 01, 2024"
+      const options = { year: 'numeric', month: 'long', day: '2-digit' };
+      return dateObj.toLocaleDateString('en-US', options);
+    },
+    sameDay(dateA, dateB) {
+      // Convert both to Date objects
+      const dA = new Date(dateA); // e.g. "2025-01-07", "01/07/2025", or "2025-01-07T00:00:00"
+      const dB = new Date(dateB); // e.g. "2025-01-07"
+      // If either is invalid, return false
+      if (isNaN(dA) || isNaN(dB)) return false;
+      return (
+        dA.getFullYear() === dB.getFullYear() &&
+        dA.getMonth() === dB.getMonth() &&
+        dA.getDate() === dB.getDate()
+      );
+    },
     printRecord(patient) {
-    const printContent = `
+      const printContent = `
       <div style="font-family: Arial, sans-serif; line-height: 1.5; padding: 20px;">
         <h2 style="text-align: center; color: #38a169;">Individual Treatment Record</h2>
         <p><strong>Full Name:</strong> ${patient.firstName} ${patient.middleName || ''} ${patient.lastName}</p>
@@ -325,8 +381,8 @@ export default {
       </div>
     `;
 
-    const newWindow = window.open('', '_blank', 'width=800,height=600');
-    newWindow.document.write(`
+      const newWindow = window.open('', '_blank', 'width=800,height=600');
+      newWindow.document.write(`
       <html>
         <head>
           <title>Print Record</title>
@@ -336,9 +392,9 @@ export default {
         </body>
       </html>
     `);
-    newWindow.document.close();
-    newWindow.print();
-  },
+      newWindow.document.close();
+      newWindow.print();
+    },
     triggerImport() {
       this.$refs.fileInput.click(); // Trigger file input click
     },
