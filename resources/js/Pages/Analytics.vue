@@ -232,15 +232,13 @@ watch(() => props.lineChart, (newVal) => {
         :monthly-data="monthlyData"
           />
       </div>
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Referred Patients</h6>
+      <div class=" hover:scale-105 transition-transform">
         <ReferedPatients 
           :filters="filters"
           :pie-chart="referredData"
         />
       </div>
-      <div class="bg-white shadow-lg rounded-lg p-6 hover:scale-105 transition-transform">
-        <h6 class="text-lg font-bold text-gray-800 mb-4">Vaccination Overview</h6>
+      <div class="hover:scale-105 transition-transform">
         <Vaccinations 
           :filters="filters"
           :vaccination-data="monthlyVaccination"

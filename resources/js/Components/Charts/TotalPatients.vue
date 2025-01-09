@@ -1,8 +1,16 @@
 <template>
   <div class="chart-container">
-    <h2 class="chart-title text-gradient">Monthly Total Patients</h2>
+    <!-- Header Section -->
+    <div class="chart-header">
+      <h2 class="chart-title">Monthly Total Patients</h2>
+      <p class="chart-subtitle">
+        Analyze total monthly patients with trends and insights.
+      </p>
+    </div>
+
+    <!-- Chart -->
     <apexchart 
-      type="bar" 
+      type="line" 
       :options="chartOptions" 
       :series="chartSeries" 
       class="patients-chart"
@@ -29,24 +37,14 @@ export default {
     return {
       chartOptions: {
         chart: {
-          id: "patients-bar-chart",
+          id: "patients-line-chart",
           toolbar: {
-            show: true, // Enable toolbar
-            tools: {
-              download: true, // Download button
-              zoom: true, // Zoom button
-              zoomin: true, // Zoom in
-              zoomout: true, // Zoom out
-              pan: true, // Pan mode
-              reset: true, // Reset zoom
-            },
-            offsetX: 0,
-            offsetY: -10, // Adjust toolbar to the top
+            show: true, // Enable toolbar for download and zoom
           },
           zoom: {
             enabled: true,
           },
-          background: "#ffffff",
+          background: "#ffffff", // Card background
         },
         xaxis: {
           categories: [
@@ -66,8 +64,8 @@ export default {
           labels: {
             style: {
               fontSize: "12px",
-              fontWeight: "normal",
-              colors: "#333",
+              fontWeight: "bold",
+              colors: "#333", // Darker text for better contrast
             },
             rotate: -30,
           },
@@ -76,21 +74,15 @@ export default {
           labels: {
             style: {
               fontSize: "12px",
-              fontWeight: "normal",
+              fontWeight: "bold",
               colors: "#333",
             },
           },
         },
-        colors: ["#6EC591"],
-        plotOptions: {
-          bar: {
-            borderRadius: 4,
-            horizontal: false,
-            columnWidth: "50%",
-          },
-        },
-        dataLabels: {
-          enabled: false,
+        colors: ["#6EC591"], // Green line color to match the theme
+        stroke: {
+          curve: "smooth", // Smooth lines for better aesthetics
+          width: 3,
         },
         grid: {
           borderColor: "#e5e5e5",
@@ -142,25 +134,32 @@ export default {
 </script>
 
 <style scoped>
-
 .chart-container {
   max-width: 100%;
   margin: 20px auto;
   padding: 20px;
-  background: #ffffff;
-  border-radius: 10px;
+  background: #ffffff; /* White background for clarity */
+  border-radius: 12px;
   border: 1px solid #e5e5e5;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
-.chart-title {
+
+.chart-header {
   text-align: center;
-  font-size: 24px; /* Larger font size for emphasis */
-  font-weight: bold;
   margin-bottom: 20px;
-  background: linear-gradient(to right, #6fd190, #48a868); /* Green gradient */
-  -webkit-background-clip: text; /* Clip gradient to text */
-  -webkit-text-fill-color: transparent; /* Make background clip visible */
+}
+
+.chart-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4CAF50; /* Green text for alignment with the theme */
+  margin: 0;
+}
+
+.chart-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0 0;
 }
 
 .patients-chart {

@@ -23,6 +23,8 @@ const latestPatients = ref(props.latestPatients || []);
 const todayAppointments = ref(props.todayAppointments || 0);
 const criticalCases = ref(props.criticalCases || 0);
 const notifications = ref(props.notifications || []);
+const currentPage = ref(1); // Initialize currentPage
+const itemsPerPage = ref(5); // Set the number of items per page
 const showNotifications = ref(false);
 const searchQueue = ref('');
 const unreadNotifications = computed(() =>
@@ -33,6 +35,30 @@ const unreadNotifications = computed(() =>
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return format(date, 'MMMM d, yyyy');
+};
+// Computed property for paginated patients
+const paginatedPatients = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredITRConsultation.value.slice(start, end);
+});
+
+// Total pages
+const totalPages = computed(() => {
+  return Math.ceil(filteredITRConsultation.value.length / itemsPerPage.value);
+});
+
+// Pagination methods
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
 };
 
 // Format date for notifications
@@ -49,6 +75,13 @@ const filteredITRConsultation = computed(() => {
     patient.lastName.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
     patient.visitType.toLowerCase().includes(searchQueue.value.toLowerCase())
   );
+});
+
+// Computed property for paginated patients
+const paginatedLatestPatients = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return props.latestPatients.slice(start, end);
 });
 
 // Function to start checkup
