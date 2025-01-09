@@ -108,7 +108,7 @@ class DoctorPreCheckupController extends Controller
                     ]);
 
             DB::commit();
-            return redirect()->route('doctor.dashboard');
+            return Inertia::location('/checkup/thank-you/prenatal');
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;

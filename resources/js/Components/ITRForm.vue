@@ -160,7 +160,7 @@
             </div>
             <div>
               <label class="block">Consultation Time:</label>
-              <input type="time" v-model="form.consultationTime" class="input" required    @input="handleTimeSelection" />
+              <input type="time" v-model="form.consultationTime" class="input" required @input="handleTimeSelection" />
               <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
             </div>
             <div>
@@ -207,32 +207,33 @@
               <label class="block">Blood Pressure:</label>
               <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatBloodPressure" required/>
-                <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
+                @input="formatBloodPressure" required />
+              <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
             </div>
             <div>
               <label class="block">Temperature (°C):</label>
               <input type="text" v-model="form.temperature" placeholder="Example: 37.5°C"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                @input="formatTemperature" required/>
-                <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
+                @input="formatTemperature" required />
+              <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
             </div>
             <div>
               <label class="block">Height (cm):</label>
-              <input type="text" v-model="form.height" placeholder="Example: 180" class="input"
-                @input="validateHeight" required/>
-                <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
+              <input type="text" v-model="form.height" placeholder="Example: 180" class="input" @input="validateHeight"
+                required />
+              <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
             </div>
             <div>
               <label class="block">Weight (kg):</label>
-              <input type="text" v-model="form.weight" placeholder="Example: 70" class="input"
-                @input="validateWeight" required/>
-                <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
+              <input type="text" v-model="form.weight" placeholder="Example: 70" class="input" @input="validateWeight"
+                required />
+              <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
             </div>
             <div>
-                <label class="block">Name of Attending Physician:</label>
-                <input type="text" v-model="form.providerName" @input="capitalizeName('providerName')" placeholder="Example: Dr. Jose Legazpi" class="input" />
-                <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
+              <label class="block">Name of Attending Physician:</label>
+              <input type="text" v-model="form.providerName" @input="capitalizeName('providerName')"
+                placeholder="Example: Dr. Jose Legazpi" class="input" />
+              <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
 
           </div>
@@ -516,28 +517,28 @@ export default {
       }
     },
     validateConsultationDate() {
-    const today = new Date();
-    const inputDate = new Date(this.form.consultationDate);
+      const today = new Date();
+      const inputDate = new Date(this.form.consultationDate);
 
-    if (!this.form.consultationDate) {
-      this.errors.consultationDate = "Consultation date is required.";
-      return false;
-    }
+      if (!this.form.consultationDate) {
+        this.errors.consultationDate = "Consultation date is required.";
+        return false;
+      }
 
-    if (isNaN(inputDate.getTime())) {
-      this.errors.consultationDate = "Please enter a valid date.";
-      return false;
-    }
+      if (isNaN(inputDate.getTime())) {
+        this.errors.consultationDate = "Please enter a valid date.";
+        return false;
+      }
 
-    if (inputDate > today) {
-      this.errors.consultationDate = "Consultation date cannot be in the future.";
-      return false;
-    }
+      if (inputDate > today) {
+        this.errors.consultationDate = "Consultation date cannot be in the future.";
+        return false;
+      }
 
-    // Clear error if validation passes
-    this.errors.consultationDate = "";
-    return true;
-  },
+      // Clear error if validation passes
+      this.errors.consultationDate = "";
+      return true;
+    },
     formatBloodPressure(event) {
       let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
       if (value.length > 3) {
@@ -680,50 +681,50 @@ export default {
       return valid;
     },
     validateStep2() {
-  this.errors = {};
-  let valid = true;
+      this.errors = {};
+      let valid = true;
 
-  const today = new Date();
-  const consultationDate = new Date(this.form.consultationDate);
+      const today = new Date();
+      const consultationDate = new Date(this.form.consultationDate);
 
-  if (!this.form.consultationDate) {
-    this.errors.consultationDate = "Consultation date is required.";
-    valid = false;
-  } else if (isNaN(consultationDate.getTime())) {
-    this.errors.consultationDate = "Please enter a valid date.";
-    valid = false;
-  } else if (consultationDate > today) {
-    this.errors.consultationDate = "Consultation date cannot be in the future.";
-    valid = false;
-  }
+      if (!this.form.consultationDate) {
+        this.errors.consultationDate = "Consultation date is required.";
+        valid = false;
+      } else if (isNaN(consultationDate.getTime())) {
+        this.errors.consultationDate = "Please enter a valid date.";
+        valid = false;
+      } else if (consultationDate > today) {
+        this.errors.consultationDate = "Consultation date cannot be in the future.";
+        valid = false;
+      }
 
-  if (!this.form.consultationTime) {
-    this.errors.consultationTime = "Consultation time is required.";
-    valid = false;
-  }
-  if (!this.form.modeOfTransaction) {
-    this.errors.modeOfTransaction = "Mode of Transaction is required.";
-    valid = false;
-  }
-  if (!this.form.bloodPressure) {
-    this.errors.bloodPressure = "Blood Pressure is required.";
-    valid = false;
-  }
-  if (!this.form.temperature) {
-    this.errors.temperature = "Temperature is required.";
-    valid = false;
-  }
-  if (!this.form.height) {
-    this.errors.height = "Height is required.";
-    valid = false;
-  }
-  if (!this.form.weight) {
-    this.errors.weight = "Weight is required.";
-    valid = false;
-  }
+      if (!this.form.consultationTime) {
+        this.errors.consultationTime = "Consultation time is required.";
+        valid = false;
+      }
+      if (!this.form.modeOfTransaction) {
+        this.errors.modeOfTransaction = "Mode of Transaction is required.";
+        valid = false;
+      }
+      if (!this.form.bloodPressure) {
+        this.errors.bloodPressure = "Blood Pressure is required.";
+        valid = false;
+      }
+      if (!this.form.temperature) {
+        this.errors.temperature = "Temperature is required.";
+        valid = false;
+      }
+      if (!this.form.height) {
+        this.errors.height = "Height is required.";
+        valid = false;
+      }
+      if (!this.form.weight) {
+        this.errors.weight = "Weight is required.";
+        valid = false;
+      }
 
-  return valid;
-},
+      return valid;
+    },
 
     // validateStep3() {
     //   this.errors = {};
@@ -811,42 +812,42 @@ export default {
       }
     },
     confirmSubmit() {
-  const payload = {
-    personalId: this.selectedPatient?.personalId || null,
-    id: this.id,
-    firstName: this.form.firstName,
-    lastName: this.form.lastName,
-    middleName: this.form.middleName,
-    suffix: this.form.suffix,
-    purok: this.form.purok,
-    barangay: this.form.barangay,
-    age: this.form.age,
-    birthdate: this.form.birthdate,
-    contact: this.form.contact,
-    sex: this.form.sex,
-    consultationDate: this.form.consultationDate,
-    consultationTime: this.form.consultationTime,
-    modeOfTransaction: this.form.modeOfTransaction,
-    bloodPressure: this.form.bloodPressure,
-    temperature: this.form.temperature,
-    height: parseFloat(this.form.height),
-    weight: parseFloat(this.form.weight),
-    referredFrom: this.form.referredFrom || 'None',
-    referredTo: this.form.referredTo || 'None',
-    reasonsForReferral: this.form.reasonsForReferral || 'None',
-    referredBy: this.form.referredBy || 'None',
-    natureOfVisit: this.form.natureOfVisit,
-    visitType: this.form.visitType,
-    providerName: this.form.providerName,
-  };
+      const payload = {
+        personalId: this.selectedPatient?.personalId || null,
+        id: this.id,
+        firstName: this.form.firstName,
+        lastName: this.form.lastName,
+        middleName: this.form.middleName,
+        suffix: this.form.suffix,
+        purok: this.form.purok,
+        barangay: this.form.barangay,
+        age: this.form.age,
+        birthdate: this.form.birthdate,
+        contact: this.form.contact,
+        sex: this.form.sex,
+        consultationDate: this.form.consultationDate,
+        consultationTime: this.form.consultationTime,
+        modeOfTransaction: this.form.modeOfTransaction,
+        bloodPressure: this.form.bloodPressure,
+        temperature: this.form.temperature,
+        height: parseFloat(this.form.height),
+        weight: parseFloat(this.form.weight),
+        referredFrom: this.form.referredFrom || 'None',
+        referredTo: this.form.referredTo || 'None',
+        reasonsForReferral: this.form.reasonsForReferral || 'None',
+        referredBy: this.form.referredBy || 'None',
+        natureOfVisit: this.form.natureOfVisit,
+        visitType: this.form.visitType,
+        providerName: this.form.providerName,
+      };
 
-  console.log('Submitting form with payload:', payload);
+      console.log('Submitting form with payload:', payload);
 
-  // Emit the form data for processing
-  this.$emit('submitForm', payload);
+      // Emit the form data for processing
+      this.$emit('submitForm', payload);
 
-  this.showModal = false; // Hide confirmation modal
-},
+      this.showModal = false; // Hide confirmation modal
+    },
 
     cancelSubmit() {
       this.showModal = false; // Hide modal
@@ -908,6 +909,7 @@ export default {
 .time-input::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
+
 .input {
   width: 100%;
   padding: 8px;

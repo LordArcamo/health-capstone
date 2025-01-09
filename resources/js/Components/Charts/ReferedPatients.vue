@@ -1,93 +1,99 @@
 <template>
   <div class="chart-container">
-    <canvas ref="chartRef"></canvas>
+    <apexchart 
+      type="bar" 
+      :options="chartOptions" 
+      :series="chartSeries" 
+      class="patients-chart"
+    ></apexchart>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, watch, computed } from "vue";
-import { Chart, PieController, ArcElement, Tooltip, Legend } from "chart.js";
-
-// Register components for Pie Chart
-Chart.register(PieController, ArcElement, Tooltip, Legend);
+import VueApexCharts from "vue3-apexcharts";
 
 export default {
   name: "ReferredPatientsChart",
+  components: {
+    apexchart: VueApexCharts,
+  },
   props: {
     pieChart: {
       type: Object,
       required: true,
     },
   },
-  setup(props) {
-    const chartRef = ref(null);
-    let chart = null;
-
-    const createChart = () => {
-      if (chart) {
-        chart.destroy();
-      }
-
-      const ctx = chartRef.value.getContext("2d");
-      chart = new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels: ["Referred", "Not Referred"],
-          datasets: [
-            {
-              data: [
-                props.pieChart.referred || 0,
-                props.pieChart.notReferred || 0,
-              ],
-              backgroundColor: ["#FF6384", "#36A2EB"],
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const label = context.label || "";
-                  const value = context.raw || 0;
-                  return `${label}: ${value}`;
-                },
-              },
-            },
-            legend: {
-              position: 'bottom'
-            }
-          },
-        },
-      });
-    };
-
-    onMounted(() => {
-      createChart();
-    });
-
-    watch(() => props.pieChart, (newVal) => {
-      if (chart) {
-        chart.data.datasets[0].data = [
-          newVal.referred || 0,
-          newVal.notReferred || 0,
-        ];
-        chart.update();
-      }
-    }, { deep: true });
-
+  data() {
     return {
-      chartRef
+      chartOptions: {
+        chart: {
+          id: "referred-patients-bar-chart",
+          toolbar: {
+            show: true,
+          },
+          zoom: {
+            enabled: true
+          }
+        },
+        xaxis: {
+          categories: ["Referred", "Not Referred"],
+        },
+        colors: ["#FF6384", "#36A2EB"],
+        plotOptions: {
+          bar: {
+            borderRadius: 4,
+            horizontal: false,
+            columnWidth: '70%',
+          }
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        title: {
+          text: "Referred Patients Overview",
+          align: "center",
+          margin: 10,
+          style: {
+            fontSize: '18px',
+            fontWeight: 'bold',
+          }
+        },
+        grid: {
+          borderColor: "#e7e7e7",
+        },
+        tooltip: {
+          enabled: true,
+          theme: "dark",
+          y: {
+            formatter: function(val) {
+              return val + " patients";
+            }
+          }
+        },
+      },
     };
   },
+  computed: {
+    chartSeries() {
+      return [{
+        name: 'Patients',
+        data: [this.pieChart.referred || 0, this.pieChart.notReferred || 0]
+      }];
+    }
+  }
 };
 </script>
 
 <style scoped>
 .chart-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.patients-chart {
   height: 300px;
-  position: relative;
 }
 </style>
