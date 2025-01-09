@@ -17,6 +17,7 @@ const props = defineProps({
   auth: Object,
   flash: Object,
   totalPatients: Number,
+  referredPatients: Number,
   patients: Array,
   casesData: [Array, Object],
   nonReferredData: { type: Array, default: () => [] },
@@ -24,7 +25,7 @@ const props = defineProps({
 
 // Reactive states
 const totalPatients = ref(props.totalPatients || 0);
-const referredPatients = ref(0);
+const referredPatients = ref(props.referredPatients || 0);
 const patients = ref(props.patients || []);
 const casesData = ref([]);
 
@@ -38,7 +39,7 @@ const normalizedCasesData = computed(() => {
 // Update stats from DateCard
 const updateStats = (stats) => {
   totalPatients.value = stats.totalPatients || 0;
-  referredPatients.value = stats.referredPatients || 0;
+  referredPatients.value = stats.referredPatients || 0 ;
   casesData.value = stats.diseaseCounts || [];
 };
 
@@ -82,7 +83,7 @@ watch(() => props.casesData, (newCasesData) => {
       <!-- Stats Section -->
    <!-- Stats Section -->
 <div class="w-full gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
-  
+
   <!-- Total Patients -->
   <ShortBox class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-md transition-shadow">
     <div class="flex flex-col items-start gap-2">
