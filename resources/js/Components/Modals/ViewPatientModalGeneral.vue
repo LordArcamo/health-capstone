@@ -15,7 +15,7 @@
           </svg>
         </div>
         <div>
-          <h2 class="text-2xl font-bold text-gray-800">Individual Treatment Record</h2>
+          <h2 class="text-2xl font-bold text-gray-800">Individual Treatment Records</h2>
           <p class="text-gray-600">Details for {{ selectedPatient.fullName }}</p>
         </div>
       </div>
