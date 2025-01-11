@@ -8,6 +8,7 @@ use App\Models\PersonalInformation;
 use App\Models\VaccinationRecord;
 use App\Models\CheckUp;
 use App\Models\ConsultationDetails;
+use App\Models\PreNatal;
 use App\Models\VisitInformation;
 use App\Models\RiskManagement;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,59 @@ class SystemAnalyticsController extends Controller
 {
     public function index(Request $request)
     {
+        $prenatal = PersonalInformation::join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+        ->join('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
+        ->leftJoin('general_trimester', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'general_trimester.prenatalConsultationDetailsID')
+        ->select(
+            'personal_information.personalId',
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.contact',
+            'prenatal_consultation_details.prenatalConsultationDetailsID',
+            'prenatal_consultation_details.modeOfTransaction',
+            'prenatal_consultation_details.consultationDate',
+            'prenatal_consultation_details.consultationTime',
+            'prenatal_consultation_details.bloodPressure',
+            'prenatal_consultation_details.temperature',
+            'prenatal_consultation_details.height',
+            'prenatal_consultation_details.weight',
+            'prenatal_consultation_details.providerName',
+            'prenatal_consultation_details.nameOfSpouse',
+            'prenatal_consultation_details.emergencyContact',
+            'prenatal_consultation_details.fourMember',
+            'prenatal_consultation_details.philhealthStatus',
+            'prenatal_consultation_details.philhealthNo',
+            'prenatal_visit_information.menarche',
+            'prenatal_visit_information.sexualOnset',
+            'prenatal_visit_information.periodDuration',
+            'prenatal_visit_information.birthControl',
+            'prenatal_visit_information.intervalCycle',
+            'prenatal_visit_information.menopause',
+            'prenatal_visit_information.lmp',
+            'prenatal_visit_information.edc',
+            'prenatal_visit_information.gravidity',
+            'prenatal_visit_information.parity',
+            'prenatal_visit_information.term',
+            'prenatal_visit_information.preterm',
+            'prenatal_visit_information.abortion',
+            'prenatal_visit_information.living',
+            'prenatal_visit_information.syphilisResult',
+            'prenatal_visit_information.penicillin',
+            'prenatal_visit_information.hemoglobin',
+            'prenatal_visit_information.hematocrit',
+            'prenatal_visit_information.urinalysis',
+            'prenatal_visit_information.ttStatus',
+            'prenatal_visit_information.tdDate',
+            'general_trimester.trimester',
+        )
+        ->distinct()
+        ->get();
+    
         $totalPatients = $this->totalPatients($request);
         $risk = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
@@ -40,6 +94,7 @@ class SystemAnalyticsController extends Controller
             ],
             'casesData' => $casesStats,
             'mentalHealthStats' => $mentalHealthStats,
+            'prenatal' => $prenatal
         ]);
     }
 

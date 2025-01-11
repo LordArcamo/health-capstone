@@ -24,6 +24,7 @@ const props = defineProps({
       notReferred: 0
     })
   },
+  
   totalPatients: Number,
   vaccinations: Number,
   cases: Number,
@@ -31,6 +32,7 @@ const props = defineProps({
   lineChart: Object,
   lineChart2: Object,
   casesData: Array,
+  prenatal: Array,
   mentalHealthStats: {
     type: Object,
     required: true,
@@ -40,7 +42,7 @@ const props = defineProps({
     })
   }
 });
-
+console.log('Prenatal Data', props.prenatal);
 const showFilters = ref(false);
 
 const summaryStats = ref({
@@ -261,7 +263,7 @@ onBeforeUnmount(() => {
           />
       </div>
       <div class=" hover:scale-105 transition-transform">
-        <Prenatal/>
+        <Prenatal :prenatal="prenatal"/>
       </div>
         </div>
   </NewLayout>

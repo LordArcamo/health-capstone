@@ -92,12 +92,31 @@
             What type of Check-Up are we conducting today?
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- New Consultation Case Checkup -->
+            <!-- New Consultation Case Checkup -->
             <Link
-              v-if="!selectedPatient.personalId || selectedPatient.sex === 'Male' || selectedPatient.sex === 'Female'"
-              :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new' })"
+              :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new', natureOfVisit: 'New Consultation/Case' })"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105">
-            General Checkup
+            New Consultation/Case Checkup
             </Link>
+
+            <!-- New Admission Checkup -->
+            <Link
+              :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new', natureOfVisit: 'New Admission' })"
+              method="post" as="button"
+              class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-blue-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105">
+            New Admission Checkup
+            </Link>
+
+            <!-- Follow-Up Visit Checkup -->
+            <Link
+              :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new', natureOfVisit: 'Follow-Up Visit' })"
+              method="post" as="button"
+              class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105">
+            Follow-Up Visit Checkup
+            </Link>
+
+
             <Link v-if="!selectedPatient.personalId || (selectedPatient.sex === 'Female' && selectedPatient.age >= 8)"
               :href="route('prenatal', { patient_personalId: selectedPatient.personalId || 'new' })"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105">

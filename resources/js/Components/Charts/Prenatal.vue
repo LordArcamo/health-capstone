@@ -6,44 +6,41 @@
       <p class="text-sm text-pink-600">{{ selectedFilters }}</p>
     </div>
 
-    <div class="filters-container flex justify-between items-center gap-6 py-4">
-  <!-- Period Filter -->
-  <div class="filter flex flex-col items-start">
-    <label for="period-filter" class="filter-label">Period:</label>
-    <select id="period-filter" v-model="selectedPeriod" class="filter-select">
-      <option value="all">All Periods</option>
-      <option value="trimester1">Trimester 1</option>
-      <option value="trimester2">Trimester 2</option>
-      <option value="trimester3">Trimester 3</option>
-      <option value="trimester4">Trimester 4</option>
-      <option value="trimester5">Trimester 5</option>
-      <option value="postpartum">Postpartum</option>
-    </select>
-  </div>
+    <div class="filters-container flex items-center gap-6 py-4">
+      <!-- Period Filter -->
+      <div class="filter flex flex-col items-start">
+        <label for="period-filter" class="filter-label">Period:</label>
+        <select id="period-filter" v-model="selectedPeriod" class="filter-select">
+          <option value="all">All Periods</option>
+          <option value="trimester1">Trimester 1</option>
+          <option value="trimester2">Trimester 2</option>
+          <option value="trimester3">Trimester 3</option>
+          <option value="trimester4">Trimester 4</option>
+          <option value="trimester5">Trimester 5</option>
+          <option value="postpartum">Postpartum</option>
+        </select>
+      </div>
+      <!-- Year Filter -->
+      <div class="filter flex flex-col items-start">
+        <label for="year-filter" class="filter-label">Year:</label>
+        <select id="year-filter" v-model="selectedYear" class="filter-select">
+          <option value="all">All Years</option>
+          <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+        </select>
+      </div>
+      <!-- Age Group Filter -->
+      <div class="filter flex flex-col items-start">
+      <label for="age-group" class="filter-label">Age Group:</label>
+      <select id="age-group" v-model="selectedAgeGroup" class="filter-select">
+        <option value="all">All Ages</option>
+        <option value="0-18">0-18</option>
+        <option value="19-35">19-35</option>
+        <option value="36-50">36-50</option>
+        <option value="50+">50+</option>
+      </select>
+    </div>
 
-  <!-- Age Group Filter -->
-  <div class="filter flex flex-col items-start">
-    <label for="age-group" class="filter-label">Age Group:</label>
-    <select id="age-group" v-model="selectedAgeGroup" class="filter-select">
-      <option value="all">All Ages</option>
-      <option value="0-18">0-18</option>
-      <option value="19-35">19-35</option>
-      <option value="36-50">36-50</option>
-      <option value="50+">50+</option>
-    </select>
   </div>
-
-  <!-- Gender Filter -->
-  <div class="filter flex flex-col items-start">
-    <label for="gender" class="filter-label">Gender:</label>
-    <select id="gender" v-model="selectedGender" class="filter-select">
-      <option value="all">All Genders</option>
-      <option value="female">Female</option>
-      <option value="male">Male</option>
-    </select>
-  </div>
-</div>
-
 
     <!-- Chart Section -->
     <apexchart
@@ -53,120 +50,226 @@
       class="prenatal-chart mt-6"
     ></apexchart>
   </div>
+  <div>
+    <!--recorfd-->
+    <div></div>
+  </div>
 </template>
 
----
-
-### JavaScript
-
-```javascript
-<script>
-import VueApexCharts from "vue3-apexcharts";
+<script setup>
+import apexchart from "vue3-apexcharts";
 import { ref, computed } from "vue";
 
-export default {
-  name: "PrenatalChart",
-  components: {
-    apexchart: VueApexCharts,
+// Define props
+const props = defineProps({
+  prenatal: {
+    type: Array,
   },
-  setup() {
-    // Filters
-    const selectedPeriod = ref("all");
-    const selectedAgeGroup = ref("all");
-    const selectedGender = ref("all");
+});
 
-    // Test Data
-    const allData = {
-      all: [300, 400, 350, 500, 450, 600, 700, 800, 750, 650, 500, 400],
-      trimester1: [100, 120, 110, 130, 140, 150, 160, 170, 180, 190, 200, 210],
-      trimester2: [80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190],
-      trimester3: [70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180],
-      trimester4: [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160],
-      trimester5: [40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150],
-      postpartum: [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140],
-    };
+// Helper functions
+const uniquePrenatal = props.prenatal.reduce((acc, current) => {
+  const exists = acc.find(
+    (person) =>
+      person.firstName === current.firstName &&
+      person.lastName === current.lastName &&
+      person.middleName === current.middleName
+  );
 
-    const chartOptions = ref({
-      chart: {
-        id: "prenatal-chart",
-        toolbar: { show: true },
-        zoom: { enabled: true },
-      },
-      xaxis: {
-        categories: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ],
-        labels: {
-          style: {
-            fontSize: "12px",
-            fontWeight: "bold",
-            colors: "#333",
-          },
-        },
-      },
-      stroke: {
-        curve: "smooth",
-        width: 3,
-      },
-      colors: ["#FF69B4"],
-      dataLabels: { enabled: false },
-      tooltip: {
-        enabled: true,
-        theme: "light",
-        y: {
-          formatter: (val) => `${val} patients`,
-        },
-      },
-    });
+  if (!exists) {
+    acc.push(current);
+  }
+  return acc;
+}, []);
 
-    const chartSeries = computed(() => {
-      const baseData = allData[selectedPeriod.value] || allData.all;
-
-      return [
-        {
-          name: "Patients",
-          data: baseData.map((value) => {
-            if (selectedAgeGroup.value !== "all") value *= 0.9;
-            if (selectedGender.value !== "all") value *= 0.8;
-            return Math.round(value);
-          }),
-        },
-      ];
-    });
-
-    const selectedFilters = computed(() => {
-      const filters = [];
-      if (selectedPeriod.value !== "all")
-        filters.push(`Period: ${selectedPeriod.value}`);
-      if (selectedAgeGroup.value !== "all")
-        filters.push(`Age: ${selectedAgeGroup.value}`);
-      if (selectedGender.value !== "all")
-        filters.push(`Gender: ${selectedGender.value}`);
-      return filters.length ? filters.join(" | ") : "No filters applied";
-    });
-
-    return {
-      selectedPeriod,
-      selectedAgeGroup,
-      selectedGender,
-      chartOptions,
-      chartSeries,
-      selectedFilters,
-    };
-  },
+const formatDate = (dateString) => {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = months[date.getMonth()];
+  const day = date.getDate();
+  return `${month} ${day}, ${year}`;
 };
+
+// Filters
+const selectedPeriod = ref("all");
+const selectedAgeGroup = ref("all");
+const selectedYear = ref("all");
+
+// Age group ranges
+const ageRanges = {
+  "0-18": [0, 18],
+  "19-35": [19, 35],
+  "36-50": [36, 50],
+  "50+": [51, Infinity],
+};
+
+// Get all available years from data
+const availableYears = computed(() => {
+  const years = props.prenatal.map((record) =>
+    new Date(record.consultationDate).getFullYear()
+  );
+  return [...new Set(years)].sort((a, b) => a - b);
+});
+
+// Compute filtered prenatal data
+const filteredPrenatal = computed(() => {
+  let data = uniquePrenatal;
+
+  // Apply age group filter
+  if (selectedAgeGroup.value !== "all") {
+    const [minAge, maxAge] = ageRanges[selectedAgeGroup.value];
+    data = data.filter(
+      (person) => person.age >= minAge && person.age <= maxAge
+    );
+  }
+
+  // Apply year filter
+  if (selectedYear.value !== "all") {
+    data = data.filter((record) => {
+      const recordYear = new Date(record.consultationDate).getFullYear();
+      return recordYear === selectedYear.value;
+    });
+  }
+
+  return data;
+});
+
+// Monthly counts based on filtered data
+const monthlyCounts = computed(() => {
+  const counts = {
+    January: 0,
+    February: 0,
+    March: 0,
+    April: 0,
+    May: 0,
+    June: 0,
+    July: 0,
+    August: 0,
+    September: 0,
+    October: 0,
+    November: 0,
+    December: 0,
+  };
+
+  // Iterate through the filtered prenatal data and count occurrences per month
+  filteredPrenatal.value.forEach((record) => {
+    const date = new Date(record.consultationDate);
+    const month = date.toLocaleString("default", { month: "long" }); // Get month name
+    if (counts[month] !== undefined) {
+      counts[month]++;
+    }
+  });
+
+  return counts;
+});
+
+// Create chart data based on monthly counts
+const allData = computed(() => {
+  // Extract monthly counts in order
+  const countsArray = [
+    monthlyCounts.value.January,
+    monthlyCounts.value.February,
+    monthlyCounts.value.March,
+    monthlyCounts.value.April,
+    monthlyCounts.value.May,
+    monthlyCounts.value.June,
+    monthlyCounts.value.July,
+    monthlyCounts.value.August,
+    monthlyCounts.value.September,
+    monthlyCounts.value.October,
+    monthlyCounts.value.November,
+    monthlyCounts.value.December,
+  ];
+
+  return {
+    all: countsArray, // Dynamically populate the chart data
+  };
+});
+
+// Chart Options
+const chartOptions = ref({
+  chart: {
+    id: "prenatal-chart",
+    toolbar: { show: true },
+    zoom: { enabled: true },
+  },
+  xaxis: {
+    categories: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
+    labels: {
+      style: {
+        fontSize: "12px",
+        fontWeight: "bold",
+        colors: "#333",
+      },
+    },
+  },
+  stroke: {
+    curve: "smooth",
+    width: 3,
+  },
+  colors: ["#FF69B4"],
+  dataLabels: { enabled: false },
+  tooltip: {
+    enabled: true,
+    theme: "light",
+    y: {
+      formatter: (val) => `${val} patients`,
+    },
+  },
+});
+
+// Chart Series
+const chartSeries = computed(() => {
+  // Get base data or fallback to empty array
+  const baseData = allData.value[selectedPeriod.value] || allData.value.all || [];
+
+  return [
+    {
+      name: "Patients",
+      data: baseData,
+    },
+  ];
+});
+
+const selectedFilters = computed(() => {
+  const filters = [];
+  if (selectedPeriod.value !== "all")
+    filters.push(`Period: ${selectedPeriod.value}`);
+  if (selectedAgeGroup.value !== "all")
+    filters.push(`Age: ${selectedAgeGroup.value}`);
+  if (selectedYear.value !== "all") filters.push(`Year: ${selectedYear.value}`);
+  return filters.length ? filters.join(" | ") : "No filters applied";
+});
 </script>
+
+
 <style scoped>
 .chart-container {
   max-width: 100%;
@@ -190,7 +293,6 @@ export default {
 
 .filters-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 16px;
   padding: 16px 0;
