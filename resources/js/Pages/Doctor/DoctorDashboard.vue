@@ -1,6 +1,6 @@
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, Link } from '@inertiajs/vue3';
 import { ref, computed, onMounted, watch } from 'vue';
 import Chart from 'chart.js/auto';
 import { format } from 'date-fns';

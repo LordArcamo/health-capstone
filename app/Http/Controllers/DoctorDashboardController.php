@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
+use Carbon\Carbon;
 
 class DoctorDashboardController extends Controller
 {
@@ -269,20 +270,50 @@ class DoctorDashboardController extends Controller
             ->take(5)
             ->get();
 
-
-
-
         // Get total patients count
         $totalPatients = PersonalInformation::count();
 
-        // Get today's appointments count
-        $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)->count();
+        // Get today's consultations count
+        $todaysConsultation = ConsultationDetails::whereDate('created_at', Carbon::today())
+            ->where('status', '!=', 'Pending')
+            ->count();
 
-        // Get critical cases count (you may need to adjust this based on your criteria)
+        // Get monthly patient counts for all years
+        $monthlyPatients = PersonalInformation::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->whereNotNull('created_at')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        // Organize data by year and month
+        $monthlyData = [];
+        $years = [];
+
+        foreach ($monthlyPatients as $record) {
+            $year = $record->year;
+            if (!in_array($year, $years)) {
+                $years[] = $year;
+                $monthlyData[$year] = array_fill(0, 12, 0);
+            }
+            $monthlyData[$year][$record->month - 1] = (int)$record->count;
+        }
+
+        // If no data exists, add current year
+        if (empty($years)) {
+            $currentYear = now()->year;
+            $years[] = $currentYear;
+            $monthlyData[$currentYear] = array_fill(0, 12, 0);
+        }
+
+        // Sort years in descending order
+
         $criticalCases = 0;
 
         return Inertia::render('Doctor/DoctorDashboard', [
             'totalPatients' => $totalPatients,
+            'monthlyData' => $monthlyData,
+            'availableYears' => $years,
             'ITRConsultation' => $ITRConsultation,
             'latestPatients' => $latestPatients,
             'todaysConsultation' => $todaysConsultation,
