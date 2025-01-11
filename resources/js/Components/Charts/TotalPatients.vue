@@ -9,10 +9,11 @@
     </div>
 
     <!-- Chart -->
-    <apexchart 
-      type="line" 
-      :options="chartOptions" 
-      :series="chartSeries" 
+    <apexchart
+      v-if="chartSeries[0].data.length"
+      type="line"
+      :options="chartOptions"
+      :series="chartSeries"
       class="patients-chart"
     ></apexchart>
   </div>
@@ -29,43 +30,28 @@ export default {
   props: {
     monthlyData: {
       type: Array,
-      required: true,
-      default: () => Array(12).fill(0),
+      required: true,  // ✅ Required since Inertia will pass this
     },
   },
   data() {
     return {
-      chartOptions: {
+      chartOptions: Object.freeze({
         chart: {
           id: "patients-line-chart",
-          toolbar: {
-            show: true, // Enable toolbar for download and zoom
-          },
-          zoom: {
-            enabled: true,
-          },
-          background: "#ffffff", // Card background
+          toolbar: { show: true },
+          zoom: { enabled: true },
+          background: "#ffffff",
         },
         xaxis: {
           categories: [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December",
           ],
           labels: {
             style: {
               fontSize: "12px",
               fontWeight: "bold",
-              colors: "#333", // Darker text for better contrast
+              colors: "#333",
             },
             rotate: -30,
           },
@@ -79,45 +65,24 @@ export default {
             },
           },
         },
-        colors: ["#6EC591"], // Green line color to match the theme
-        stroke: {
-          curve: "smooth", // Smooth lines for better aesthetics
-          width: 3,
-        },
-        grid: {
-          borderColor: "#e5e5e5",
-          strokeDashArray: 4,
-        },
+        colors: ["#6EC591"],
+        stroke: { curve: "smooth", width: 3 },
+        grid: { borderColor: "#e5e5e5", strokeDashArray: 4 },
         tooltip: {
           enabled: true,
           theme: "light",
-          y: {
-            formatter: function (val) {
-              return val + " patients";
-            },
-          },
-        },
-        title: {
-          text: "",
+          y: { formatter: (val) => `${val} patients` },
         },
         responsive: [
           {
             breakpoint: 768,
             options: {
-              chart: {
-                height: 300,
-              },
-              xaxis: {
-                labels: {
-                  style: {
-                    fontSize: "10px",
-                  },
-                },
-              },
+              chart: { height: 300 },
+              xaxis: { labels: { style: { fontSize: "10px" } } },
             },
           },
         ],
-      },
+      }),
     };
   },
   computed: {
@@ -125,7 +90,7 @@ export default {
       return [
         {
           name: "Total Patients",
-          data: this.monthlyData,
+          data: [...this.monthlyData],  // ✅ Clone to prevent reactivity loops
         },
       ];
     },
@@ -138,7 +103,7 @@ export default {
   max-width: 100%;
   margin: 20px auto;
   padding: 20px;
-  background: #ffffff; /* White background for clarity */
+  background: #ffffff;
   border-radius: 12px;
   border: 1px solid #e5e5e5;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -152,7 +117,7 @@ export default {
 .chart-title {
   font-size: 24px;
   font-weight: bold;
-  color: #4CAF50; /* Green text for alignment with the theme */
+  color: #4CAF50;
   margin: 0;
 }
 
