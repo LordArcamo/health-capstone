@@ -95,10 +95,9 @@
             <!-- New Consultation Case Checkup -->
             <!-- New Consultation Case Checkup -->
             <Link
-              :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new', natureOfVisit: 'New Consultation Case' })"
-              method="post" as="button"
+              :href="route('itr', { patient_personalId: selectedPatient.personalId || 'new', natureOfVisit: 'New Consultation/Case' })"
               class="bg-gradient-to-r from-green-500 to-yellow-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:from-green-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105">
-            New Consultation Case Checkup
+            New Consultation/Case Checkup
             </Link>
 
             <!-- New Admission Checkup -->

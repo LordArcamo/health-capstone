@@ -20,12 +20,38 @@
     <!-- Search and Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
       <!-- Search Bar -->
-      <div class="w-full md:w-2/3">
-        <input v-model="searchQuery" type="text" placeholder="Search by name, diagnosis, or visit type"
-          class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400" />
+      <div class="w-full md:w-2/3 flex flex-col gap-4">
+        <!-- Enhanced Input Field with Clean Design -->
+        <div class="relative">
+          <input v-model="searchQuery" @keyup.enter="addFilter" type="text"
+            placeholder="🔍 Search by name, and address..."
+            class="w-full px-5 py-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 transition duration-200 placeholder-gray-400" />
+          <button @click="addFilter"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-pink-500 text-white text-sm font-semibold rounded-md hover:bg-pink-600 focus:outline-none transition duration-200">
+            Add
+          </button>
+        </div>
+
+        <!-- Dynamic Filter Tags with Soft Gradient -->
+        <div v-if="filters.length" class="flex flex-wrap gap-2">
+          <div v-for="(filter, index) in filters" :key="index"
+            class="flex items-center gap-2 bg-gradient-to-r from-pink-300 to-pink-400 text-white px-4 py-1 rounded-md shadow hover:shadow-md transition duration-300">
+            <span class="text-sm font-medium">{{ filter }}</span>
+            <button @click="removeFilter(index)"
+              class="flex items-center justify-center w-5 h-5 bg-white text-pink-500 rounded-md hover:bg-red-500 hover:text-white hover:scale-110 transition">
+              &times;
+            </button>
+          </div>
+        </div>
+
+        <!-- Helper Text -->
+        <p v-if="!filters.length" class="text-gray-500 text-sm italic">
+          Type your search and press <strong>Enter</strong> or click <strong>Add</strong> to apply filters.
+        </p>
       </div>
 
-      <div class="flex items-center gap-4 justify-center">
+
+      <div class="flex items-center gap-4 justify-center mb-10">
 
         <!-- Buttons -->
         <!-- Filter Panel Toggle -->
@@ -97,9 +123,9 @@
             <th class="py-4 px-6 text-left">Full Name</th>
             <th class="py-4 px-6 text-left">Address</th>
             <th class="py-4 px-6 text-left">Age</th>
-            <th class="py-4 px-6 text-left">Contact Number</th>
-            <th class="py-4 px-6 text-left">TT Status</th>
+            <th class="py-4 px-6 text-left">Emergency Contact Number</th>
             <th class="py-4 px-6 text-left">Consultation Date</th>
+            <th class="py-4 px-6 text-left">Status</th>
             <th class="py-4 px-6 text-left">Actions</th>
           </tr>
         </thead>
@@ -109,9 +135,19 @@
             <td class="py-3 px-6">{{ patient.fullName }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.contact }}</td>
-            <td class="py-3 px-6">{{ patient.ttStatus }}</td>
+            <td class="py-3 px-6">{{ patient.emergencyContact }}</td>
             <td class="py-3 px-6">{{ patient.consultationDate }}</td>
+            <td class="text-base py-3 px-6">
+              <span :class="{
+                'bg-green-100 text-green-800': patient.status === 'Completed',
+                'bg-yellow-100 text-yellow-800': patient.status === 'In Queued',
+                'bg-red-100 text-red-800': patient.status === 'Cancelled',
+                'bg-orange-100 text-orange-800': patient.status === 'Follow-up Required',
+                'bg-gray-100 text-gray-800': !patient.status || !['Completed', 'In Queued', 'Cancelled', 'Follow-up Required'].includes(patient.status)
+              }" class="px-3 py-1 rounded-full text-sm font-semibold shadow-sm capitalize">
+                {{ patient.status || 'Pending' }}
+              </span>
+            </td>
             <td class="py-3 px-6">
               <div class="flex gap-2">
                 <button @click.stop="openModal('trimester', patient)"
@@ -144,7 +180,7 @@
   </div>
 
   <!-- Modal -->
-  <div v-if="currentModal === 'inline'"
+  <div v-if="currentModal && selectedPatient"
     class="fixed inset-0 bg-pink-100 bg-opacity-80 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl h-[90vh] p-8 relative overflow-hidden">
       <!-- Close Button -->
@@ -167,6 +203,15 @@
             <h2 class="text-2xl font-bold text-pink-600">Prenatal Checkup Details</h2>
             <p class="text-gray-600">Details for {{ selectedPatient.fullName }}</p>
           </div>
+        </div>
+
+          <!-- Patient Status Section -->
+          <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-700">Patient Status:</h3>
+          <span :class="statusBadgeClass(selectedPatient.status)"
+            class="inline-block px-3 py-1 text-sm font-medium rounded-full">
+            {{ selectedPatient.status || 'Pending' }}
+          </span>
         </div>
 
         <!-- Patient Details Section -->
@@ -231,6 +276,11 @@
             class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
             Close
           </button>
+            <!-- Edit Button -->
+            <button @click="editPatient(selectedPatient)"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition">
+            Edit Record
+          </button>
           <button @click="printRecord(selectedPatient)"
             class="px-6 py-2 bg-pink-600 text-white rounded-lg shadow-md hover:bg-pink-700 transition">
             Print Record
@@ -242,14 +292,9 @@
 
 
 
-  <TrimesterModal
-      v-if="currentModal === 'trimester'"
-      :key="selectedPatient?.prenatalConsultationDetailsID"
-      :prenatalConsultationDetailsID="selectedPatient?.prenatalConsultationDetailsID"
-      :prefilledData="localTrimesterData"
-      @close="closeModal"
-      :onConfirm="handleTrimesterConfirm"
-    />
+  <TrimesterModal v-if="currentModal === 'trimester'" :key="selectedPatient?.prenatalConsultationDetailsID"
+    :prenatalConsultationDetailsID="selectedPatient?.prenatalConsultationDetailsID" :prefilledData="localTrimesterData"
+    @close="closeModal" :onConfirm="handleTrimesterConfirm" />
 
   <PostpartumModal v-if="currentModal === 'postpartum'" :patient="selectedPatient" :existingData="postpartumData"
     @close="closeModal" :onSubmit="handlePostpartumSubmit" />
@@ -278,15 +323,18 @@ export default {
     prenatalConsultationDetailsID: Number,
     trimester: String,
   },
+
   data() {
     return {
       isModalOpen: false,
       searchQuery: '',
+      filters: [],
       filterPrk: '',
       filterBarangay: '',
       filterGender: [],
       filterAgeRange: '',
       filterDiagnosis: [],
+      filterDate: '',
       currentPage: 1,
       itemsPerPage: 5,
       currentModal: null,
@@ -294,13 +342,14 @@ export default {
       isFilterPanelOpen: false,
       localTrimesterData: null,
       postpartumData: null,
-      filterDate: '',
       currentDateText: '',
     };
   },
+
   computed: {
     filteredPatients() {
-      const query = this.searchQuery.toLowerCase();
+      const queryFilters = this.filters.map(f => f.toLowerCase());
+
       return this.patients
         .map((patient) => ({
           ...patient,
@@ -308,32 +357,37 @@ export default {
           address: `${patient.purok}, ${patient.barangay}`,
         }))
         .filter((patient) => {
-          const matchesQuery =
-            patient.fullName.toLowerCase().includes(query) ||
-            (patient.natureOfVisit && patient.natureOfVisit.toLowerCase().includes(query)) ||
-            (patient.visitType && patient.visitType.toLowerCase().includes(query)) ||
-            patient.address.toLowerCase().includes(query);
+          const matchesFilters = queryFilters.every(filter =>
+            patient.fullName.toLowerCase().includes(filter) ||
+            (patient.natureOfVisit && patient.natureOfVisit.toLowerCase().includes(filter)) ||
+            (patient.visitType && patient.visitType.toLowerCase().includes(filter)) ||
+            patient.address.toLowerCase().includes(filter) ||
+            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(filter))
+          );
 
           const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
           const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
-          const matchesAgeRange = this.filterAgeRange
-            ? parseInt(patient.age) >= parseInt(this.filterAgeRange)
-            : true;
-          const matchesGender =
-            this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+          const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+          const matchesDiagnosis = this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
+
+          let matchesAgeRange = true;
+          if (this.filterAgeRange) {
+            const patientAge = parseInt(patient.age, 10);
+            matchesAgeRange = patientAge >= parseInt(this.filterAgeRange, 10);
+          }
 
           let matchesDate = true;
           if (this.filterDate) {
-            // Compare day-only to avoid format/timezone issues
             matchesDate = this.sameDay(patient.consultationDate, this.filterDate);
           }
 
           return (
-            matchesQuery &&
+            matchesFilters &&
             matchesPrk &&
             matchesBarangay &&
-            matchesAgeRange &&
             matchesGender &&
+            matchesDiagnosis &&
+            matchesAgeRange &&
             matchesDate
           );
         })
@@ -341,92 +395,89 @@ export default {
           (this.currentPage - 1) * this.itemsPerPage,
           this.currentPage * this.itemsPerPage
         )
-        .sort((a, b) => {
-          const dateA = new Date(a.consultationDate);
-          const dateB = new Date(b.consultationDate);
-          return dateB - dateA; // descending -> most recent first
-        });
+        .sort((a, b) => new Date(b.consultationDate) - new Date(a.consultationDate));
     },
 
     totalPages() {
-      return Math.ceil(this.patients.length / this.itemsPerPage);
+      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
     },
+
     purokOptions() {
       return [...new Set(this.patients.map((patient) => patient.purok))];
     },
+
     barangayOptions() {
       return [...new Set(this.patients.map((patient) => patient.barangay))];
     },
   },
-  watch: {
-    prefilledData: {
-      immediate: true,
-      handler(newVal) {
-        this.localTrimesterData = newVal;
-      }
-    }
-  },
-  mounted() {
-    // 1) For the <input type="date">, we either start blank or set it to today's YYYY-MM-DD.
-    //    If you want the user to see it empty by default, keep it as ''.
-    //    If you want it to default to today's date in the picker, do:
-    // this.filterDate = new Date().toISOString().split('T')[0];
 
-    // 2) For displaying the "Current Date" in a more human-readable format:
+  mounted() {
     const today = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     this.currentDateText = today.toLocaleDateString(undefined, options);
-  },
-  methods: {
-    formatDate(dateStr) {
-      if (!dateStr) return '';
-      // Convert to Date object
-      const dateObj = new Date(dateStr);
-      // Check if valid
-      if (isNaN(dateObj)) return dateStr; // Fallback: return original if invalid
 
-      // Format: e.g. "December 01, 2024"
-      const options = { year: 'numeric', month: 'long', day: '2-digit' };
-      return dateObj.toLocaleDateString('en-US', options);
+    // 🚀 Add ESC key listener for modal close
+    window.addEventListener('keydown', this.handleEscKey);
+    // 🚀 Add click listener for clicking outside modal to close
+    window.addEventListener('click', this.handleClickOutside);
+  },
+
+  beforeDestroy() {
+    window.removeEventListener('keydown', this.handleEscKey);
+    window.removeEventListener('click', this.handleClickOutside);
+  },
+
+  methods: {
+     // Open Edit Page
+     editPatient(patient) {
+      Inertia.get(`/patients/edit/${patient.personalId}`);
     },
-    sameDay(dateA, dateB) {
-      // Convert both to Date objects
-      const dA = new Date(dateA); // e.g. "2025-01-07", "01/07/2025", or "2025-01-07T00:00:00"
-      const dB = new Date(dateB); // e.g. "2025-01-07"
-      // If either is invalid, return false
-      if (isNaN(dA) || isNaN(dB)) return false;
-      return (
-        dA.getFullYear() === dB.getFullYear() &&
-        dA.getMonth() === dB.getMonth() &&
-        dA.getDate() === dB.getDate()
-      );
-    },
-    triggerImport() {
-      this.$refs.fileInput.click();
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        this.uploadCSV(formData);
+       // Status Badge Styling
+       statusBadgeClass(status) {
+      switch (status) {
+        case 'Completed':
+          return 'bg-green-100 text-green-800';
+        case 'In Progress':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'Pending':
+          return 'bg-gray-100 text-gray-800';
+        case 'Cancelled':
+          return 'bg-red-100 text-red-800';
+        case 'Follow-up Required':
+          return 'bg-orange-100 text-orange-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
       }
     },
-    uploadCSV(formData) {
-      Inertia.post('/services/patients/prenatal-postpartum', formData, {
-        onSuccess: () => {
-          alert('Patients imported successfully!');
-        },
-        onError: (errors) => {
-          console.error('Errors during upload:', errors);
-          alert('Failed to import CSV. Please check the file and try again.');
-        },
+    // ✅ Add Filter Tags
+    addFilter() {
+      const words = this.searchQuery.trim().split(/\s+/);
+      words.forEach((word) => {
+        const cleanWord = word.toLowerCase();
+        if (cleanWord && !this.filters.includes(cleanWord)) {
+          this.filters.push(cleanWord);
+        }
       });
+      this.searchQuery = '';
     },
-    toggleFilterPanel() {
-      this.isFilterPanelOpen = !this.isFilterPanelOpen;
+
+    // ✅ Remove Filter Tags
+    removeFilter(index) {
+      this.filters.splice(index, 1);
     },
+
+    // ✅ Date Comparison
+    sameDay(dateA, dateB) {
+      const dA = new Date(dateA);
+      const dB = new Date(dateB);
+      return dA.getFullYear() === dB.getFullYear() &&
+        dA.getMonth() === dB.getMonth() &&
+        dA.getDate() === dB.getDate();
+    },
+
+    // ✅ Open Modal
     async openModal(type, patient) {
+      this.isModalOpen = true;
       this.currentModal = type;
       this.selectedPatient = patient;
 
@@ -436,6 +487,31 @@ export default {
         await this.fetchPostpartumData(patient.prenatalConsultationDetailsID);
       }
     },
+
+    // ✅ Close Modal
+    closeModal() {
+      this.isModalOpen = false;
+      this.currentModal = null;
+      this.selectedPatient = null;
+      this.localTrimesterData = null;
+      this.postpartumData = null;
+    },
+
+    // ✅ ESC Key to Close Modal
+    handleEscKey(event) {
+      if (event.key === 'Escape' && this.isModalOpen) {
+        this.closeModal();
+      }
+    },
+
+    // ✅ Click Outside to Close Modal
+    handleClickOutside(event) {
+      const modal = this.$el.querySelector(".modal-content");
+      if (this.isModalOpen && modal && !modal.contains(event.target)) {
+        this.closeModal();
+      }
+    },
+
     async fetchPostpartumData(prenatalConsultationDetailsID) {
       try {
         const response = await axios.get(`/postpartum/data/${prenatalConsultationDetailsID}`);
@@ -449,41 +525,19 @@ export default {
         this.postpartumData = null;
       }
     },
-    closeModal() {
-      this.currentModal = null;
-      this.selectedPatient = null;
-      this.localTrimesterData = null;
-      this.postpartumData = null;
-    },
-    handlePostpartumSubmit(formData) {
-      console.log("Submitted Postpartum Data:", formData);
-      this.closeModal();
-    },
-    handleTrimesterConfirm(formData) {
-      console.log('Trimester form submitted:', formData);
-      // Handle the form submission here
-      this.closeModal();
-    },
-    async fetchTrimesterData(prenatalConsultationDetailsID) {
-      try {
-        const response = await axios.get(`/prenatal/${prenatalConsultationDetailsID}/trimester/1`);
-        if (response.data.success) {
-          this.localTrimesterData = response.data.data;
-        }
-      } catch (error) {
-        console.error('Error fetching trimester data:', error);
-      }
-    },
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
+
     generateReport() {
       const data = this.filteredPatients.map((patient) => ({
         fullName: patient.fullName,
@@ -513,6 +567,8 @@ export default {
   },
 };
 </script>
+
+
 
 
 

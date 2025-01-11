@@ -177,11 +177,11 @@
             <th class="py-4 px-6 text-left">Full Name</th>
             <th class="py-4 px-6 text-left">Address</th>
             <th class="py-4 px-6 text-left">Age</th>
-            <th class="py-4 px-6 text-left">Nature of Visit</th>
             <th class="py-4 px-6 text-left">Visit Type</th>
             <th class="py-4 px-6 text-left">Consultation Date</th>
             <th class="py-4 px-6 text-left">Diagnosis</th>
             <th class="py-4 px-6 text-left">Gender</th>
+            <th class="py-4 px-6 text-left">Status</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 text-gray-700">
@@ -190,7 +190,6 @@
             <td class="py-3 px-6">{{ patient.fullName }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
             <td class="py-3 px-6">{{ patient.visitType }}</td>
             <td class="py-3 px-6">
               {{ formatDate(patient.consultationDate) }}
@@ -199,6 +198,18 @@
             <td class="py-3 px-6">
               {{ patient.sex }}
             </td>
+            <td class="text-base py-3 px-6">
+              <span :class="{
+                'bg-green-100 text-green-800': patient.status === 'Completed',
+                'bg-yellow-100 text-yellow-800': patient.status === 'In Queued',
+                'bg-red-100 text-red-800': patient.status === 'Cancelled',
+                'bg-orange-100 text-orange-800': patient.status === 'Follow-up Required',
+                'bg-gray-100 text-gray-800': !patient.status || !['Completed', 'In Queued', 'Cancelled', 'Follow-up Required'].includes(patient.status)
+              }" class="px-3 py-1 rounded-full text-sm font-semibold shadow-sm capitalize">
+                {{ patient.status || 'Pending' }}
+              </span>
+            </td>
+
           </tr>
         </tbody>
       </table>
@@ -216,10 +227,12 @@
         Next
       </button>
     </div>
+    
     <!-- Modal -->
     <div v-if="showModal && selectedPatient"
-      class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative">
+      class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative max-h-screen overflow-y-auto">
+
         <!-- Close Button -->
         <button @click="closeModal"
           class="absolute top-4 right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-700 transition">
@@ -240,9 +253,19 @@
           </div>
         </div>
 
+        <!-- Patient Status Section -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-700">Patient Status:</h3>
+          <span :class="statusBadgeClass(selectedPatient.status)"
+            class="inline-block px-3 py-1 text-sm font-medium rounded-full">
+            {{ selectedPatient.status || 'Pending' }}
+          </span>
+        </div>
+
         <!-- Patient Details Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Column 1 -->
+
+          <!-- Column 1: Basic Information -->
           <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
             <ul class="space-y-2">
@@ -257,7 +280,7 @@
             </ul>
           </div>
 
-          <!-- Column 2 -->
+          <!-- Column 2: Consultation Details -->
           <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Consultation Details</h3>
             <ul class="space-y-2">
@@ -291,6 +314,13 @@
             class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
             Close
           </button>
+
+          <!-- Edit Button -->
+          <button @click="editPatient(selectedPatient)"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition">
+            Edit Record
+          </button>
+
           <button @click="printRecord(selectedPatient)"
             class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
             Print Record
@@ -298,6 +328,8 @@
         </div>
       </div>
     </div>
+
+
 
   </div>
 </template>
@@ -437,6 +469,28 @@ export default {
   },
 
   methods: {
+    // Open Edit Page
+    editPatient(patient) {
+      Inertia.get(`/patients/edit/${patient.personalId}`);
+    },
+
+    // Status Badge Styling
+    statusBadgeClass(status) {
+      switch (status) {
+        case 'Completed':
+          return 'bg-green-100 text-green-800';
+        case 'In Progress':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'Pending':
+          return 'bg-gray-100 text-gray-800';
+        case 'Cancelled':
+          return 'bg-red-100 text-red-800';
+        case 'Follow-up Required':
+          return 'bg-orange-100 text-orange-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    },
     addFilter() {
       const words = this.searchQuery.trim().split(/\s+/);
       words.forEach((word) => {
