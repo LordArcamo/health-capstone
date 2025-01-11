@@ -10,6 +10,7 @@ import PrenatalModal from '@/Components/Modals/ViewPatientModalPrenatal.vue';
 // Props from backend
 const props = defineProps({
   totalPatients: Number,
+  totalPatient: Array,
   ITRConsultation: Array,
   latestPatients: Array,
   todaysConsultation: Number,
@@ -30,6 +31,16 @@ const showNotifications = ref(false);
 const selectedPatient = ref(null); // Stores the selected patient data
 const currentModal = ref(null); // Stores the current modal type (e.g., 'prenatal', 'general')
 const showModal = ref(false); // Controls modal visibility
+
+const totalPatientsData = ref([]); // Initialize as empty array
+
+// Ensure totalPatient is converted into an array if it's a Number
+if (Array.isArray(props.totalPatient)) {
+  totalPatientsData.value = props.totalPatient;
+} else {
+  // If it's a single number, duplicate it for all months
+  totalPatientsData.value = Array(12).fill(props.totalPatient);
+}
 
 const searchQueue = ref('');
 const unreadNotifications = computed(() =>
@@ -327,7 +338,7 @@ const initCharts = () => {
       datasets: [
         {
           label: 'Total Patients',
-          data: [200, 250, 300, 275, 350], // Replace with the actual total patients data for each month
+          data: totalPatientsData.value, // Replace with the actual total patients data for each month
           backgroundColor: '#66BB6A', // Green color for the bar
           borderColor: '#388E3C', // Dark green for border color
           borderWidth: 1,
@@ -353,15 +364,10 @@ const initCharts = () => {
           },
         },
         y: {
-          grid: {
-            display: true, // Keeps the grid lines for y-axis
-          },
+          beginAtZero: true,
+          suggestedMax: Math.max(...totalPatientsData.value) + 10,
           ticks: {
-            beginAtZero: true, // Ensures the y-axis starts at 0
-            stepSize: 50, // Adjust the step size for better readability
-            font: {
-              size: 12,
-            },
+            stepSize: 10,
           },
         },
       },

@@ -47,4 +47,13 @@ class PersonalInformation extends Model
     {
         return $this->hasMany(ConsultationDetails::class, 'personalId', 'personalId');
     }
+    public function prenatalConsultationDetails()
+    {
+        return $this->hasMany(PrenatalConsultationDetails::class, 'personalId', 'personalId');
+    }
+
+    public function nationalImmunizationPrograms()
+    {
+        return $this->hasMany(NationalImmunizationProgram::class, 'personalId', 'personalId');
+    }
 }

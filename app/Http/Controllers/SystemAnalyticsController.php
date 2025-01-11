@@ -9,6 +9,8 @@ use App\Models\VaccinationRecord;
 use App\Models\CheckUp;
 use App\Models\ConsultationDetails;
 use App\Models\PreNatal;
+use App\Models\NationalImmunizationProgram;
+use App\Models\PrenatalConsultationDetails;
 use App\Models\VisitInformation;
 use App\Models\RiskManagement;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +71,7 @@ class SystemAnalyticsController extends Controller
         )
         ->distinct()
         ->get();
-    
+
         $totalPatients = $this->totalPatients($request);
         $risk = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
@@ -100,39 +102,49 @@ class SystemAnalyticsController extends Controller
 
     private function totalPatients($request)
     {
-        $query = PersonalInformation::query();
-
-        if ($request->gender) {
-            $query->where('sex', $request->gender);
-        }
-
-        if ($request->ageRange) {
-            $ages = explode('-', $request->ageRange);
-            if (count($ages) === 2) {
-                $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
-                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
-            } else {
-                $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+        // Gender, Age, and Date Filters
+        $applyFilters = function ($query) use ($request) {
+            // Filter by gender
+            if ($request->gender) {
+                $query->where('personal_information.sex', $request->gender);
             }
-        }
 
-        if ($request->date) {
-            $today = now();
-            switch ($request->date) {
-                case '7days':
-                    $query->where('created_at', '>=', $today->subDays(7));
-                    break;
-                case '30days':
-                    $query->where('created_at', '>=', $today->subDays(30));
-                    break;
-                case 'year':
-                    $query->whereYear('created_at', $today->year);
-                    break;
+            // Filter by age range
+            if ($request->ageRange) {
+                $ages = explode('-', $request->ageRange);
+                if (count($ages) === 2) {
+                    $query->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthDate, CURDATE()) >= ?', [$ages[0]])
+                          ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthDate, CURDATE()) <= ?', [$ages[1]]);
+                } else {
+                    // Default to 60+ if age range is incorrect
+                    $query->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthDate, CURDATE()) >= ?', [60]);
+                }
             }
-        }
+        };
 
-        return $query->count();
+        // Apply filters and join with PersonalInformation
+        $consultationCount = ConsultationDetails::join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
+            ->when($request, $applyFilters)
+            ->count();
+
+        $prenatalCount = PrenatalConsultationDetails::join('personal_information', 'prenatal_consultation_details.personalId', '=', 'personal_information.personalId')
+            ->when($request, $applyFilters)
+            ->count();
+
+        $nipCount = NationalImmunizationProgram::join('personal_information', 'national_immunization_programs.personalId', '=', 'personal_information.personalId')
+            ->when($request, $applyFilters)
+            ->count();
+
+        $vaccinationCount = VaccinationRecord::join('personal_information', 'vaccination_records.personalId', '=', 'personal_information.personalId')
+            ->when($request, $applyFilters)
+            ->count();
+
+        // Sum up all the counts
+        $totalPatients = $consultationCount + $prenatalCount + $nipCount + $vaccinationCount;
+
+        return $totalPatients;
     }
+
 
     private function risk($request)
     {
