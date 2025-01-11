@@ -145,6 +145,7 @@ onBeforeUnmount(() => {
 
           <!-- Profile Dropdown -->
           <div class="relative">
+            
             <button @click="toggleDropdown('profile')"
               class="flex items-center text-sm font-medium text-gray-700 hover:bg-gray-100 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500 dropdown-button">
               <font-awesome-icon :icon="['fas', 'user']" class="mr-2" />

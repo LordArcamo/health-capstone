@@ -88,15 +88,24 @@ const formatNotificationDate = (time) => {
   const date = new Date(time);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
-
 // Computed property for filtered patients in queue
 const filteredITRConsultation = computed(() => {
-  if (!searchQueue.value) return ITRConsultation.value;
-  return ITRConsultation.value.filter((patient) =>
-    patient.firstName.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
-    patient.lastName.toLowerCase().includes(searchQueue.value.toLowerCase()) ||
-    patient.visitType.toLowerCase().includes(searchQueue.value.toLowerCase())
-  );
+  if (!searchQueue.value.trim()) return ITRConsultation.value;
+
+  // Normalize the search input: trim spaces and collapse multiple spaces
+  const normalizedSearch = searchQueue.value.trim().replace(/\s+/g, ' ').toLowerCase();
+
+  return ITRConsultation.value.filter((patient) => {
+    const firstName = patient.firstName.toLowerCase();
+    const lastName = patient.lastName.toLowerCase();
+    const visitType = patient.visitType.toLowerCase();
+
+    return (
+      firstName.includes(normalizedSearch) ||
+      lastName.includes(normalizedSearch) ||
+      visitType.includes(normalizedSearch)
+    );
+  });
 });
 
 // Computed property for paginated patients
@@ -460,7 +469,7 @@ onMounted(() => {
           class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <div class="flex flex-col items-start gap-4">
             <div class="flex justify-between w-full">
-              <h2 class="font-semibold text-lg">Total Patients Checked Up</h2>
+              <h2 class="font-semibold text-lg">Total Patients</h2>
               <Link href="/services/patients" class="bg-green-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
                 aria-label="View all checked-up patients">
               View
@@ -533,38 +542,88 @@ onMounted(() => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
 
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Patients in Queue</h2>
-            <input type="text" v-model="searchQueue" placeholder="Search for a patient..."
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4" />
-            <div v-if="paginatedPatients.length" class="space-y-4 overflow-hidden">
-              <div v-for="(patient, index) in paginatedPatients" :key="index"
-                class="p-4 bg-gray-50 rounded-lg shadow-md hover:bg-gray-100 transition">
-                <h3 class="text-lg font-semibold text-gray-700">
-                  {{ patient.firstName }} {{ patient.lastName }}
-                </h3>
-                <p class="text-sm text-gray-500">Age: {{ patient.age }}</p>
-                <p class="text-sm text-gray-500">Reason: {{ patient.visitType }}</p>
-                <button @click="startCheckup(patient)" :class="[
-                  'mt-3 text-white font-semibold py-2 px-4 rounded-lg transition',
-                  patient.visitType === 'Prenatal' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-green-500 hover:bg-green-600'
-                ]">
-                  {{ patient.visitType === 'Prenatal' ? 'Start Prenatal Checkup' : 'Start General Checkup' }}
-                </button>
+          <div class="bg-white rounded-2xl shadow-xl p-8">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-3xl font-bold text-gray-800">🩺 Patients in Queue</h2>
+              <span class="text-sm text-gray-500 italic">{{ paginatedPatients.length }} patient(s) in queue</span>
+            </div>
 
+            <!-- Search Input -->
+            <div class="relative mb-6">
+              <input type="text" v-model="searchQueue" placeholder="🔍 Search for a patient..."
+                class="w-full px-5 py-3 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200 placeholder-gray-400" />
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
+              </svg>
+            </div>
+
+            <!-- Patient Queue List -->
+            <div v-if="paginatedPatients.length" class="space-y-4">
+              <div v-for="(patient, index) in paginatedPatients" :key="index" :class="[
+                'flex items-center justify-between border rounded-xl p-4 shadow-sm transition',
+                patient.status === 'Cancelled' ? 'bg-red-100 border-red-300' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+              ]">
+
+                <!-- Left: Queue Number and Patient Info -->
+                <div class="flex items-center gap-4">
+                  <!-- Queue Number -->
+                  <div
+                    class="flex items-center justify-center w-12 h-12 bg-green-100 text-green-800 font-bold text-lg rounded-full">
+                    {{ ((currentPage - 1) * itemsPerPage) + index + 1 }}
+                  </div>
+
+                  <!-- Patient Info -->
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-700">
+                      {{ patient.firstName }} {{ patient.lastName }}
+                    </h3>
+                    <p class="text-sm text-gray-500">Age: {{ patient.age }} | Reason: {{ patient.visitType }}</p>
+                    <p class="text-xs text-gray-400">🕒 Queued In: {{ patient.consultationTime }}</p>
+
+                    <!-- Patient Status -->
+                    <p v-if="patient.status === 'Cancelled'" class="text-xs text-red-600 font-semibold mt-1">❌ Cancelled
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Right: Action Buttons -->
+                <div class="flex gap-2">
+                  <!-- Start Checkup Button -->
+                  <button @click="startCheckup(patient)" :disabled="patient.status === 'Cancelled'" :class="[
+                    'px-5 py-2 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition',
+                    patient.status === 'Cancelled' ? 'bg-gray-400 cursor-not-allowed' :
+                      patient.visitType === 'Prenatal' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-green-500 hover:bg-green-600'
+                  ]">
+                    {{ patient.visitType === 'Prenatal' ? 'Start Prenatal' : 'Start Checkup' }}
+                  </button>
+
+                  <!-- Mark as Cancelled Button -->
+                  <button @click="markAsCancelled(patient)" :disabled="patient.status === 'Cancelled'"
+                    class="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-red-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
-            <p v-else class="text-center text-gray-500">No patients in queue.</p>
+
+            <!-- No Patients Message -->
+            <p v-else class="text-center text-gray-500 mt-4">No patients in queue.</p>
 
             <!-- Pagination Controls -->
-            <div v-if="paginatedPatients.length" class="flex justify-center items-center mt-4 space-x-2">
+            <div v-if="paginatedPatients.length" class="flex justify-center items-center mt-6 space-x-3">
               <button @click="prevPage" :disabled="currentPage === 1"
-                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
+                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed">
                 Previous
               </button>
-              <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+
+              <span class="text-gray-600">Page {{ currentPage }} of {{ totalPages }}</span>
+
               <button @click="nextPage" :disabled="currentPage === totalPages"
-                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
+                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed">
                 Next
               </button>
             </div>
@@ -572,70 +631,92 @@ onMounted(() => {
 
 
 
-          <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Latest Consultations</h2>
-            <div class="overflow-hidden">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Visit Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="patient in paginatedLatestPatients"
-                    :key="patient.visitType === 'Prenatal' ? patient.prenatalConsultationDetailsID : patient.consultationDetailsID">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      {{ patient.firstName }} {{ patient.lastName }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      {{ patient.visitType }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      {{ formatDate(patient.consultationDate) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      {{ patient.consultationTime }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <button  @click="viewPatientDetails(patient)"
-                        class=" textcolor text-black-600 hover:text-indigo-900">
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                  <tr v-if="latestPatients.length === 0">
-                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                      No completed consultations yet
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <!-- Prenatal Modal -->
-              <PrenatalModal v-if="currentModal === 'prenatal'" :show-modal="showModal"
-                :selected-patient="selectedPatient" @close="closeModal" />
+          <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-3xl font-bold text-gray-800">🩺 Latest Consultations</h2>
+              <span class="text-sm text-gray-500 italic">{{ paginatedLatestPatients.length }} consultation(s)</span>
+            </div>
 
-              <!-- General Modal -->
-              <ViewPatientModalGeneral v-if="currentModal === 'general'" :show-modal="showModal"
-                :selected-patient="selectedPatient" @close="closeModal" />
+            <!-- Consultation Table -->
+            <div class="grid grid-cols-1 gap-4">
+              <div v-for="patient in paginatedLatestPatients"
+                :key="patient.visitType === 'Prenatal' ? patient.prenatalConsultationDetailsID : patient.consultationDetailsID"
+                class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl shadow-md hover:shadow-lg transition duration-300">
+
+                <!-- Patient Info -->
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-800">
+                      {{ patient.firstName }} {{ patient.lastName }}
+                    </h3>
+                    <p class="text-sm text-gray-600">
+                      📅 {{ formatDate(patient.consultationDate) }} | 🕒 {{ patient.consultationTime }}
+                    </p>
+                    <p class="mt-1">
+                      <span :class="[
+                        'inline-block px-3 py-1 rounded-full text-xs font-medium',
+                        patient.visitType === 'Prenatal' ? 'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'
+                      ]">
+                        {{ patient.visitType }}
+                      </span>
+                    </p>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="flex space-x-3">
+                    <button @click="viewPatientDetails(patient)"
+                      class="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg shadow hover:bg-indigo-600 transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12H9m0 0H5m4 0h4m0 0h4m0 0a9 9 0 11-9 9 9 9 0 019-9z" />
+                      </svg>
+                      View Details
+                    </button>
+
+                    <button @click="printPatientDetails(patient)"
+                      class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 9V2h12v7m-6 5v6m0 0h4m-4 0H8" />
+                      </svg>
+                      Print Record
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-if="latestPatients.length === 0"
+                class="text-center text-gray-500 py-8 bg-gray-50 rounded-lg shadow">
+                No completed consultations yet.
+              </div>
             </div>
 
             <!-- Pagination Controls -->
-            <div v-if="paginatedLatestPatients.length" class="flex justify-center items-center mt-4 space-x-2">
+            <div v-if="paginatedLatestPatients.length" class="flex justify-center items-center mt-6 space-x-3">
               <button @click="prevLatestPage" :disabled="currentLatestPage === 1"
-                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
+                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed">
                 Previous
               </button>
-              <span class="text-black-700">Page {{ currentLatestPage }} of {{ totalLatestPages }}</span>
+
+              <span class="text-gray-600 font-semibold">Page {{ currentLatestPage }} of {{ totalLatestPages }}</span>
+
               <button @click="nextLatestPage" :disabled="currentLatestPage === totalLatestPages"
-                class="px-4 py-2 bg-green-600 text-white-800 rounded-lg hover:bg-green-400 disabled:bg-green-200 disabled:text-black-400">
-                Next
+                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed">
+                Next 
               </button>
             </div>
+
+            <!-- Modals -->
+            <PrenatalModal v-if="currentModal === 'prenatal'" :show-modal="showModal"
+              :selected-patient="selectedPatient" @close="closeModal" />
+            <ViewPatientModalGeneral v-if="currentModal === 'general'" :show-modal="showModal"
+              :selected-patient="selectedPatient" @close="closeModal" />
           </div>
+
 
         </div>
       </div>
@@ -695,14 +776,6 @@ onMounted(() => {
       <button @click="showNotifications = !showNotifications"
         class="fixed bottom-4 right-4 bg-yellow-500 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-yellow-600">
         Notifications ({{ unreadNotifications }})
-      </button>
-      <button @click="showNotifications = !showNotifications"
-        class="relative p-2 text-white hover:bg-blue-600 rounded-full transition-colors fixed top-4 right-4">
-        <font-awesome-icon :icon="['fas', 'bell']" class="text-xl" />
-        <span v-if="unreadNotifications > 0"
-          class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-          {{ unreadNotifications }}
-        </span>
       </button>
     </div>
   </MainLayout>
