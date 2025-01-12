@@ -299,7 +299,7 @@ class DoctorDashboardController extends Controller
                         'type' => 'Consultation Details',
                     ];
                 });
-        
+
                 // Retrieve and map dates from PrenatalConsultationDetails
                 $prenatalConsultationDates = PrenatalConsultationDetails::select('consultationDate')
                     ->get()
@@ -309,7 +309,7 @@ class DoctorDashboardController extends Controller
                             'type' => 'Prenatal Consultation',
                         ];
                     });
-        
+
                 // Retrieve and map dates from NationalImmunizationProgram
                 $immunizationDates = NationalImmunizationProgram::select('created_at')
                     ->get()
@@ -319,7 +319,7 @@ class DoctorDashboardController extends Controller
                             'type' => 'Immunization Program',
                         ];
                     });
-        
+
                 // Retrieve and map dates from VaccinationRecord
                 $vaccinationDates = VaccinationRecord::select('dateOfVisit')
                     ->get()
@@ -329,13 +329,13 @@ class DoctorDashboardController extends Controller
                             'type' => 'Vaccination Record',
                         ];
                     });
-        
+
                 // Merge all dates into a single collection
                 $allDates = $consultationDates
                     ->merge($prenatalConsultationDates)
                     ->merge($immunizationDates)
                     ->merge($vaccinationDates);
-        
+
 
         return Inertia::render('Doctor/DoctorDashboard', [
             'allDates' => $allDates,
