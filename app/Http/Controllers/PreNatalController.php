@@ -44,6 +44,7 @@ class PreNatalController extends Controller
             'prenatal_consultation_details.fourMember',
             'prenatal_consultation_details.philhealthStatus',
             'prenatal_consultation_details.philhealthNo',
+            'prenatal_consultation_details.status',
             'prenatal_visit_information.menarche',
             'prenatal_visit_information.sexualOnset',
             'prenatal_visit_information.periodDuration',

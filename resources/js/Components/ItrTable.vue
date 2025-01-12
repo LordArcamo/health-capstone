@@ -8,9 +8,9 @@
     <!-- In your template (e.g. at the top, above the search bar) -->
     <div class="flex flex-col md:flex-row md:items-center gap-10 justify-center mb-6">
       <div class="flex items-center gap-4">
-      <span class="font-semibold text-gray-700">Current Date:</span>
-      <span class="text-gray-900">{{ currentDateText }}</span>
-    </div>
+        <span class="font-semibold text-gray-700">Current Date:</span>
+        <span class="text-gray-900">{{ currentDateText }}</span>
+      </div>
       <div class="flex items-center gap-4">
         <label for="filterDate" class="font-semibold text-gray-700">Filter Date:</label>
         <input type="date" id="filterDate" v-model="filterDate"
@@ -25,10 +25,36 @@
       <div class="w-full md:w-2/3 flex items-center border border-gray-300 rounded-lg shadow-sm bg-white">
         <input v-model="searchQuery" type="text" placeholder="Search by name, diagnosis, or visit type"
           class="w-full p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
+          <div class="w-full md:w-2/3 flex flex-col gap-4">
+        <!-- Enhanced Input Field -->
+        <div class="relative">
+          <input v-model="searchQuery" @keyup.enter="addFilter" type="text"
+            placeholder="🔍 Search by name, diagnosis, or visit type..."
+            class="w-full px-5 py-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200" />
+          <button @click="addFilter"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-md hover:bg-green-600 focus:outline-none transition duration-200">
+            Add
+          </button>
+        </div>
+        <!-- Dynamic Filter Tags with Modern Style -->
+        <div v-if="filters.length" class="flex flex-wrap gap-3">
+          <div v-for="(filter, index) in filters" :key="index"
+            class="flex items-center gap-2 bg-gradient-to-r from-green-200 to-green-300 text-green-900 px-4 py-1 rounded-md shadow hover:shadow-md transition duration-300">
+            <span class="text-sm font-medium">{{ filter }}</span>
+            <button @click="removeFilter(index)"
+              class="flex items-center justify-center w-5 h-5 bg-green-400 text-white rounded-full hover:bg-red-500 hover:scale-110 transition">
+              &times;
+            </button>
+          </div>
+        </div>
+        <!-- Helper Text -->
+        <p v-if="!filters.length" class="text-gray-500 text-sm italic">
+          Type your search and press <strong>Enter</strong> or click <strong>Add</strong> to apply filters.
+        </p>
       </div>
 
       <!-- Relative container for the Filters button + panel -->
-      <div class="relative flex gap-1">
+      <div class="relative flex gap-1 mb-10">
         <!-- Filters Button -->
         <button @click="toggleFilterPanel"
           class="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition">
@@ -358,7 +384,7 @@ export default {
       return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
     },
 
-    /* 
+    /*
       2) The subset of diagnoses you actually display (either first 5 or all).
          We'll rename "filteredDiagnosisOptions" => "visibleDiagnosisOptions"
          for clarity that these are the ones you physically render in checkboxes.

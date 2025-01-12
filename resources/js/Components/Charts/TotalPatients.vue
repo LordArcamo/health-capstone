@@ -9,10 +9,11 @@
     </div>
 
     <!-- Chart -->
-    <apexchart 
-      type="line" 
-      :options="chartOptions" 
-      :series="chartSeries" 
+    <apexchart
+      v-if="chartSeries[0].data.length"
+      type="line"
+      :options="chartOptions"
+      :series="chartSeries"
       class="patients-chart"
     ></apexchart>
   </div>
@@ -35,16 +36,12 @@ export default {
   },
   data() {
     return {
-      chartOptions: {
+        chartOptions: Object.freeze({
         chart: {
           id: "patients-line-chart",
-          toolbar: {
-            show: true, // Enable toolbar for download and zoom
-          },
-          zoom: {
-            enabled: true,
-          },
-          background: "#ffffff", // Card background
+          toolbar: { show: true },
+          zoom: { enabled: true },
+          background: "#ffffff",
         },
         xaxis: {
           categories: [
@@ -79,45 +76,24 @@ export default {
             },
           },
         },
-        colors: ["#6EC591"], // Green line color to match the theme
-        stroke: {
-          curve: "smooth", // Smooth lines for better aesthetics
-          width: 3,
-        },
-        grid: {
-          borderColor: "#e5e5e5",
-          strokeDashArray: 4,
-        },
+        colors: ["#6EC591"],
+        stroke: { curve: "smooth", width: 3 },
+        grid: { borderColor: "#e5e5e5", strokeDashArray: 4 },
         tooltip: {
           enabled: true,
           theme: "light",
-          y: {
-            formatter: function (val) {
-              return val + " patients";
-            },
-          },
-        },
-        title: {
-          text: "",
+          y: { formatter: (val) => `${val} patients` },
         },
         responsive: [
           {
             breakpoint: 768,
             options: {
-              chart: {
-                height: 300,
-              },
-              xaxis: {
-                labels: {
-                  style: {
-                    fontSize: "10px",
-                  },
-                },
-              },
+                chart: { height: 300 },
+                xaxis: { labels: { style: { fontSize: "10px" } } },
             },
           },
         ],
-      },
+      }),
     };
   },
   computed: {

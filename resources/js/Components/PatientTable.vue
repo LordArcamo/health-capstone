@@ -144,7 +144,7 @@
 
       <h1 class="text-2xl font-bold text-start mt-6 mb-4">Total Patients</h1>
     </div>
-    
+
 <!-- Responsive Table -->
 <div class="overflow-x-auto bg-gray-100 rounded-lg">
   <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
@@ -211,12 +211,12 @@
             <li><strong>Birthday:</strong> {{ selectedPatient.birthdate }}</li>
             <li><strong>Contact:</strong> {{ selectedPatient.contact }}</li>
             <li><strong>Gender:</strong> {{ selectedPatient.sex }}</li>
-            <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
+            <li><strong>Visit Type:</strong> {{ selectedPatient.visitType }}</li>
           </div>
         </ul>
 
       </div>
-    </div> 
+    </div>
   </div>
 </template>
 
