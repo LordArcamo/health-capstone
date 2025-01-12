@@ -54,132 +54,161 @@
   </div>
 </template>
 
-<script>
-import VueApexCharts from "vue3-apexcharts";
+<script setup>
+import apexchart from "vue3-apexcharts";
 import { ref, computed } from "vue";
 
-export default {
-  name: "CasesChart",
-  components: {
-    apexchart: VueApexCharts,
+// Define props
+const props = defineProps({
+  monthly: {
+    type: Array,
+    required: true,
   },
-  setup() {
-    // Test data for cases
-    const casesData = {
-      All: [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650],
-      "COVID-19": [50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325],
-      "Flu": [30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195],
-      "Dengue": [20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
-    };
+});
 
-    // Filters
-    const selectedCaseType = ref(""); // Default: All Cases
-    const selectedAgeGroup = ref(""); // Default: All Ages
-    const selectedGender = ref(""); // Default: All Genders
+console.log("Monthly Cases received", props.monthly);
 
-    const caseTypes = ["COVID-19", "Flu", "Dengue"]; // Available case types
-    const ageGroups = ["0-18", "19-35", "36-60", "60+"]; // Age groups
-    const genders = ["Male", "Female"]; // Gender options
+// Filters
+const selectedCaseType = ref(""); // Default: All Cases
+const selectedAgeGroup = ref(""); // Default: All Ages
+const selectedGender = ref(""); // Default: All Genders
 
-    // Chart options
-    const chartOptions = ref({
-      chart: {
-        id: "cases-chart",
-        toolbar: {
-          show: true,
-        },
-        animations: {
-          enabled: true,
-          easing: "easeinout",
-          speed: 800,
-        },
-        background: "#ffffff",
-      },
-      xaxis: {
-        categories: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ],
-        labels: {
-          style: {
-            fontSize: "12px",
-            fontWeight: "bold",
-            colors: "#333",
-          },
-        },
-      },
-      stroke: {
-        curve: "smooth",
-        width: 3,
-      },
-      colors: ["#FF9F40"], // Orange color for the line chart
-      markers: {
-        size: 5,
-        colors: "#ffffff",
-        strokeColors: "#FF9F40",
-        strokeWidth: 2,
-      },
-      grid: {
-        borderColor: "#e7e7e7",
-        strokeDashArray: 4,
-      },
-      tooltip: {
-        enabled: true,
-        theme: "light",
-        y: {
-          formatter: (val) => `${val} cases`,
-        },
-      },
-    });
+// Extract unique case types (diagnosis)
+const caseTypes = Array.from(
+  new Set(
+    props.monthly.map((item) => item.visit_information?.diagnosis || "Unknown")
+  )
+);
 
-    // Compute the chart data based on filters
-    const chartSeries = computed(() => [
-      {
-        name: "Monthly Cases",
-        data: selectedCaseType.value
-          ? casesData[selectedCaseType.value] || Array(12).fill(0)
-          : casesData["All"],
-      },
-    ]);
+// Predefined age groups and gender options
+const ageGroups = ["0-18", "19-35", "36-60", "60+"];
+const genders = ["Male", "Female"];
 
-    // Display selected filters as text
-    const selectedFilters = computed(() => {
-      const filters = [];
-      if (selectedCaseType.value) filters.push(`Case Type: ${selectedCaseType.value}`);
-      if (selectedAgeGroup.value) filters.push(`Age Group: ${selectedAgeGroup.value}`);
-      if (selectedGender.value) filters.push(`Gender: ${selectedGender.value}`);
-      return filters.length ? filters.join(" | ") : "No filters applied";
-    });
+// Helper function to calculate age from birthdate
+const getAge = (birthdate) => {
+  if (!birthdate) return null;
+  const birth = new Date(birthdate);
+  const today = new Date();
+  return today.getFullYear() - birth.getFullYear() - 
+    (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
+};
 
-    // Update the chart when filters change
-    const updateChart = () => {
-      // Reactivity ensures the chart updates automatically
-    };
+// Filtered Data
+const filteredData = computed(() => {
+  return props.monthly.filter((item) => {
+    // Case type filter
+    const caseTypeMatch =
+      !selectedCaseType.value || item.visit_information?.diagnosis === selectedCaseType.value;
 
-    return {
-      casesData,
-      selectedCaseType,
-      selectedAgeGroup,
-      selectedGender,
-      caseTypes,
-      ageGroups,
-      genders,
-      chartOptions,
-      chartSeries,
-      selectedFilters,
-      updateChart,
-    };
+    // Age group filter
+    const age = getAge(item.personal_information?.birthdate);
+    const ageGroupMatch =
+      !selectedAgeGroup.value ||
+      (selectedAgeGroup.value === "0-18" && age <= 18) ||
+      (selectedAgeGroup.value === "19-35" && age >= 19 && age <= 35) ||
+      (selectedAgeGroup.value === "36-60" && age >= 36 && age <= 60) ||
+      (selectedAgeGroup.value === "60+" && age > 60);
+
+    // Gender filter
+    const genderMatch =
+      !selectedGender.value || item.personal_information?.sex === selectedGender.value;
+
+    return caseTypeMatch && ageGroupMatch && genderMatch;
+  });
+});
+
+// Chart Data
+const casesData = computed(() => {
+  const data = Array(12).fill(0); // Initialize an array for 12 months
+  filteredData.value.forEach((item) => {
+    const month = new Date(item.consultationDate).getMonth();
+    data[month] += 1; // Increment case count for the month
+  });
+  return data;
+});
+
+// Chart options
+const chartOptions = ref({
+  chart: {
+    id: "cases-chart",
+    toolbar: {
+      show: true,
+    },
+    animations: {
+      enabled: true,
+      easing: "easeinout",
+      speed: 800,
+    },
+    background: "#ffffff",
   },
+  xaxis: {
+    categories: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
+    labels: {
+      style: {
+        fontSize: "12px",
+        fontWeight: "bold",
+        colors: "#333",
+      },
+    },
+  },
+  stroke: {
+    curve: "smooth",
+    width: 3,
+  },
+  colors: ["#FF9F40"],
+  markers: {
+    size: 5,
+    colors: "#ffffff",
+    strokeColors: "#FF9F40",
+    strokeWidth: 2,
+  },
+  grid: {
+    borderColor: "#e7e7e7",
+    strokeDashArray: 4,
+  },
+  tooltip: {
+    enabled: true,
+    theme: "light",
+    y: {
+      formatter: (val) => `${val} cases`,
+    },
+  },
+});
+
+// Chart series
+const chartSeries = computed(() => [
+  {
+    name: "Monthly Cases",
+    data: casesData.value, // Use the filtered data
+  },
+]);
+
+// Display selected filters as text
+const selectedFilters = computed(() => {
+  const filters = [];
+  if (selectedCaseType.value) filters.push(`Case Type: ${selectedCaseType.value}`);
+  if (selectedAgeGroup.value) filters.push(`Age Group: ${selectedAgeGroup.value}`);
+  if (selectedGender.value) filters.push(`Gender: ${selectedGender.value}`);
+  return filters.length ? filters.join(" | ") : "No filters applied";
+});
+
+// Update the chart when filters change
+const updateChart = () => {
+  // Reactivity ensures the chart updates automatically
+  console.log("Filters updated");
 };
 </script>
 

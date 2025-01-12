@@ -110,6 +110,9 @@ class SystemAnalyticsController extends Controller
             ];
         });
 
+
+        $monthly = ConsultationDetails::with(['personalInformation', 'visitInformation'])->get();
+
         $totalPatients = $this->totalPatients($request);
         $risk = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
@@ -135,7 +138,8 @@ class SystemAnalyticsController extends Controller
             ],
             'casesData' => $casesStats,
             'mentalHealthStats' => $mentalHealthStats,
-            'prenatal' => $prenatal
+            'prenatal' => $prenatal,
+            'monthly' => $monthly
         ]);
     }
 

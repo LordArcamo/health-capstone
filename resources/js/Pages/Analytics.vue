@@ -25,12 +25,14 @@ const props = defineProps({
     })
   },
   vaccinenatedPatients: Array,
+  allDates: Array,
   totalPatients: Number,
   vaccinations: Number,
   cases: Number,
   risk: Number,
   lineChart: Object,
   lineChart2: Object,
+  monthly: Array,
   casesData: {
     type: Object,
     required: true,
@@ -48,6 +50,7 @@ const props = defineProps({
     })
   }
 });
+console.log('Dates', props.allDates);
 console.log('Vaccine Data', props.vaccinenatedPatients);
 console.log('Prenatal Data', props.prenatal);
 const showFilters = ref(false);
@@ -267,7 +270,7 @@ onBeforeUnmount(() => {
       <div class="hover:scale-105 transition-transform">
         <Cases
          :filters="filters"
-         :cases-data="monthlyCases"
+         :monthly="monthly"
           />
       </div>
       <div class=" hover:scale-105 transition-transform">

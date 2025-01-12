@@ -41,7 +41,7 @@ class PersonalInformation extends Model
     }
     public function consultations()
     {
-        return $this->hasMany(ConsultationDetail::class, 'personalId', 'personalId');
+        return $this->hasMany(ConsultationDetails::class, 'personalId', 'personalId');
     }
     public function consultationDetails()
     {
