@@ -119,7 +119,7 @@ class DashboardController extends Controller
         // Return data to the frontend
         return Inertia::render('Dashboard', [
             'casesData' => $casesData, // Diagnosis and counts
-            'totalPatient' => $totalPatient, // Total patients count
+            'totalPatients' => $totalPatients, // Total patients count
             'nonReferredData' => $nonReferredData ?? [],
             'referredPatients' => $referredPatientsCount, // Referred patients count
             'patients' => $patientsWithCheckUp, // All patients with check-up data

@@ -506,10 +506,10 @@ export default {
 
     // ✅ Click Outside to Close Modal
     handleClickOutside(event) {
-      const modal = this.$el.querySelector(".modal-content");
-      if (this.isModalOpen && modal && !modal.contains(event.target)) {
-        this.closeModal();
-      }
+        const modal = document.querySelector(".modal-content"); // Changed this.$el to document
+        if (this.isModalOpen && modal && !modal.contains(event.target)) {
+            this.closeModal();
+        }
     },
 
     async fetchPostpartumData(prenatalConsultationDetailsID) {
@@ -565,6 +565,14 @@ export default {
       document.body.removeChild(link);
     },
   },
+  mounted() {
+    window.addEventListener('keydown', this.handleEscKey);
+    window.addEventListener('click', this.handleClickOutside.bind(this)); // Bind this context
+    },
+    beforeDestroy() {
+        window.removeEventListener('keydown', this.handleEscKey);
+        window.removeEventListener('click', this.handleClickOutside.bind(this)); // Unbind properly
+    },
 };
 </script>
 

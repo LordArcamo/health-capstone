@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\CheckUp;
 use App\Models\ConsultationDetails;
 use App\Models\VisitInformation;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -75,26 +76,90 @@ class PatientController extends Controller
 
     public function show()
     {
-        // Fetch unique personal information
-        $patients = PersonalInformation::select(
-                'personalId',
-                'created_at',
-                'firstName',
-                'lastName',
-                'middleName',
-                'suffix',
-                'purok',
-                'barangay',
-                'age',
-                'birthdate',
-                'contact',
-                'sex'
+        // Combine patients from all four tables with their personal information
+            $patients = PersonalInformation::select(
+                'personal_information.personalId',
+                'personal_information.created_at',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                'consultation_details.visitType',
+                DB::raw("'consultation_details' as source")  // Tag the source table
             )
-            ->distinct() // Ensure no duplicate rows
+            ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+
+            ->unionAll(
+                PersonalInformation::select(
+                    'personal_information.personalId',
+                    'personal_information.created_at',
+                    'personal_information.firstName',
+                    'personal_information.lastName',
+                    'personal_information.middleName',
+                    'personal_information.suffix',
+                    'personal_information.purok',
+                    'personal_information.barangay',
+                    'personal_information.age',
+                    'personal_information.birthdate',
+                    'personal_information.contact',
+                    'personal_information.sex',
+                    DB::raw("'Prenatal' as visitType"),
+                    DB::raw("'prenatal_consultation_details' as source")
+                )
+                ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+            )
+
+            ->unionAll(
+                PersonalInformation::select(
+                    'personal_information.personalId',
+                    'personal_information.created_at',
+                    'personal_information.firstName',
+                    'personal_information.lastName',
+                    'personal_information.middleName',
+                    'personal_information.suffix',
+                    'personal_information.purok',
+                    'personal_information.barangay',
+                    'personal_information.age',
+                    'personal_information.birthdate',
+                    'personal_information.contact',
+                    'personal_information.sex',
+                    DB::raw("'Immunization' as visitType"),
+                    DB::raw("'national_immunization_programs' as source")
+                )
+                ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+            )
+
+            ->unionAll(
+                PersonalInformation::select(
+                    'personal_information.personalId',
+                    'personal_information.created_at',
+                    'personal_information.firstName',
+                    'personal_information.lastName',
+                    'personal_information.middleName',
+                    'personal_information.suffix',
+                    'personal_information.purok',
+                    'personal_information.barangay',
+                    'personal_information.age',
+                    'personal_information.birthdate',
+                    'personal_information.contact',
+                    'personal_information.sex',
+                    DB::raw("'Vaccination' as visitType"),
+                    DB::raw("'vaccination_records' as source")
+                )
+                ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
+            )
+            ->distinct()  // Remove duplicate entries
             ->get();
 
+        // Pass data to the frontend
         return Inertia::render('Table/Patient', [
-            'totalPatients' => $patients, // Pass the unique patients to the frontend
+            'totalPatients' => $patients,
         ]);
     }
 
