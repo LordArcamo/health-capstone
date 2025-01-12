@@ -213,33 +213,34 @@
               <span v-if="errors.selectedLabTests" class="text-red-600 text-sm">{{ errors.selectedLabTests }}</span>
             </div>
 
+
+            <!-- Auto-set Status to 'Follow-up Required' -->
+            <input type="hidden" v-model="form.status" />
+
             <!-- Diagnosis Input with Tagging -->
             <div v-if="form.requireLabTest === 'no'">
-  <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis:</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis:</label>
 
-  <div class="flex flex-wrap items-center border border-gray-300 rounded-md p-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-green-500">
-    <!-- Display added diagnosis tags -->
-    <div v-for="(diagnosis, index) in form.diagnosisTags" :key="index"
-      class="flex items-center bg-green-100 text-green-800 px-3 py-1 mr-2 mb-2 rounded-full text-sm font-medium shadow-sm">
-      {{ diagnosis }}
-      <button type="button" @click="removeDiagnosisTag(index)"
-        class="ml-2 text-green-600 hover:text-red-500 focus:outline-none">
-        &times;
-      </button>
-    </div>
+              <div
+                class="flex flex-wrap items-center border border-gray-300 rounded-md p-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-green-500">
+                <!-- Display added diagnosis tags -->
+                <div v-for="(diagnosis, index) in form.diagnosisTags" :key="index"
+                  class="flex items-center bg-green-100 text-green-800 px-3 py-1 mr-2 mb-2 rounded-full text-sm font-medium shadow-sm">
+                  {{ diagnosis }}
+                  <button type="button" @click="removeDiagnosisTag(index)"
+                    class="ml-2 text-green-600 hover:text-red-500 focus:outline-none">
+                    &times;
+                  </button>
+                </div>
 
-    <!-- Input for new diagnosis tags -->
-    <input
-      v-model="newDiagnosis"
-      @keydown.enter.prevent="addDiagnosisTag"
-      @keydown.space.prevent="addDiagnosisTag"
-      placeholder="Type diagnosis and press Enter or Space"
-      class="flex-grow py-1 px-3 text-sm text-gray-700 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none"
-    />
-  </div>
+                <!-- Input for new diagnosis tags -->
+                <input v-model="newDiagnosis" @keydown.enter.prevent="addDiagnosisTag"
+                  @keydown.space.prevent="addDiagnosisTag" placeholder="Type diagnosis and press Enter or Space"
+                  class="flex-grow py-1 px-3 text-sm text-gray-700 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none" />
+              </div>
 
-  <span v-if="errors.diagnosis" class="text-red-600 text-xs mt-1">{{ errors.diagnosis }}</span>
-</div>
+              <span v-if="errors.diagnosis" class="text-red-600 text-xs mt-1">{{ errors.diagnosis }}</span>
+            </div>
 
 
 
@@ -250,6 +251,11 @@
               <textarea v-model="form.medication" placeholder="Example: Loperamide" class="input"></textarea>
               <span v-if="errors.medication" class="text-red-600 text-sm">{{ errors.medication }}</span>
             </div>
+
+            <p class="text-orange-700 text-lg">
+              <strong>Status:</strong> {{ form.status }}
+            </p>
+
           </div>
 
           <!-- Navigation Buttons -->
@@ -372,6 +378,15 @@ export default {
   },
 
   watch: {
+    'form.requireLabTest'(newValue) {
+    if (newValue === 'yes') {
+      this.form.status = 'Follow-up Required';
+    } else if (newValue === 'no') {
+      this.form.status = 'Completed';
+    } else {
+      this.form.status = '';
+    }
+  },
     consultationDetails: {
       immediate: true,
       handler(newPatient) {
