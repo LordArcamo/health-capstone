@@ -116,45 +116,53 @@ class CheckUpController extends Controller
      */
     public function index()
     {
-        // Use Eloquent to join the PersonalInformation and itr tables
         $data = PersonalInformation::join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
-        ->join('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
-            ->select(
-                'personal_information.personalId',
-                'personal_information.firstName',
-                'personal_information.lastName',
-                'personal_information.middleName',
-                'personal_information.suffix',
-                'personal_information.purok',
-                'personal_information.barangay',
-                'personal_information.age',
-                'personal_information.birthdate',
-                'personal_information.contact',
-                'personal_information.sex',
-                'consultation_details.consultationDate',
-                'consultation_details.consultationTime',
-                'consultation_details.modeOfTransaction',
-                'consultation_details.bloodPressure',
-                'consultation_details.temperature',
-                'consultation_details.height',
-                'consultation_details.weight',
-                'consultation_details.providerName',
-                'consultation_details.natureOfVisit',
-                'consultation_details.visitType',
-                'visit_information.chiefComplaints',
-                'visit_information.diagnosis',
-                'visit_information.medication'
-            )
-            ->distinct() // Ensure no duplicate entries
-            ->get();
+        ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+        ->select(
+            'personal_information.personalId',
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.suffix',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.contact',
+            'personal_information.sex',
+            'consultation_details.consultationDate',
+            'consultation_details.consultationTime',
+            'consultation_details.modeOfTransaction',
+            'consultation_details.bloodPressure',
+            'consultation_details.temperature',
+            'consultation_details.height',
+            'consultation_details.weight',
+            'consultation_details.providerName',
+            'consultation_details.natureOfVisit',
+            'consultation_details.visitType',
 
-        // Pass the joined data to the view
-        return Inertia::render('Table/IndividualTreatmentRecord', [
-            'ITR' => $data,
-        ]);
+            // Updated Status Logic: Pending, Completed, or Cancelled
+            DB::raw("
+                CASE
+                    WHEN consultation_details.status = 'cancelled' THEN 'Cancelled'
+                    WHEN visit_information.consultationDetailsID IS NULL THEN 'Pending'
+                    ELSE 'Completed'
+                END AS status
+            "),
+
+            'visit_information.chiefComplaints',
+            'visit_information.diagnosis',
+            'visit_information.medication'
+        )
+        ->distinct()
+        ->get();
+
+    return Inertia::render('Table/IndividualTreatmentRecord', [
+        'ITR' => $data,
+    ]);
 
     // Query the CheckUp model to get the data needed for the chart
-    $checkups = CheckUp::selectRaw('
+    $checkups = ConsultationDetails::selectRaw('
             MONTH(consultationDate) as month,
             YEAR(consultationDate) as year,
             sex,

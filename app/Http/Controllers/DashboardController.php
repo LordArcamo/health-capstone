@@ -42,16 +42,30 @@ class DashboardController extends Controller
             })
             ->toArray();
 
-        // Fetch patients with check-up data in real-time
-        $patientsWithCheckUp = PersonalInformation::leftJoin('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
-        ->select(
-            'personal_information.personalId',
-            'personal_information.created_at',
-            'consultation_details.modeOfTransaction'
-        )
-        ->distinct()
-        ->get()
-        ->toArray();
+            $patientsWithCheckUp = DB::table('personal_information')
+            ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+            ->select('personal_information.personalId', 'personal_information.created_at', 'consultation_details.modeOfTransaction')
+
+            ->unionAll(
+                DB::table('personal_information')
+                    ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+                    ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Prenatal' as modeOfTransaction"))
+            )
+
+            ->unionAll(
+                DB::table('personal_information')
+                    ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+                    ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Immunization' as modeOfTransaction"))
+            )
+
+            ->unionAll(
+                DB::table('personal_information')
+                    ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
+                    ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Vaccination' as modeOfTransaction"))
+            )
+
+            ->get()
+            ->toArray();
 
               // Prepare data for chart of non-referred cases by diagnosis
    // Prepare data for chart of non-referred cases by diagnosis, age, gender, and month

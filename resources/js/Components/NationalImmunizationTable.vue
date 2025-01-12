@@ -19,31 +19,60 @@
     </div>
     <!-- Search and Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-      <!-- Search Bar -->
-      <div class="w-full md:w-2/3">
-        <input v-model="searchQuery" type="text" placeholder="Search by name, diagnosis, or address"
-          class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400" />
+          <!-- Search Bar-->
+      <div class="w-full md:w-2/3 flex flex-col gap-4">
+
+        <!-- Search Input with Add Button -->
+        <div class="relative">
+          <input v-model="searchQuery" @keyup.enter="addFilter" type="text"
+            placeholder="🔍 Search by name, diagnosis, or address..."
+            class="w-full px-5 py-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-400 transition duration-200 placeholder-gray-400" />
+
+          <button @click="addFilter"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-teal-400 text-white text-sm font-semibold rounded-md hover:bg-teal-500 focus:outline-none transition duration-200">
+            Add
+          </button>
+        </div>
+
+        <!-- Dynamic Filter Tags with Soft Gradient -->
+        <div v-if="filters.length" class="flex flex-wrap gap-2">
+          <div v-for="(filter, index) in filters" :key="index"
+            class="flex items-center gap-2 bg-gradient-to-r from-teal-300 to-teal-400 text-white px-4 py-1 rounded-md shadow hover:shadow-md transition duration-300">
+            <span class="text-sm font-medium">{{ filter }}</span>
+            <button @click="removeFilter(index)"
+              class="flex items-center justify-center w-5 h-5 bg-white text-teal-500 rounded-md hover:bg-red-500 hover:text-white hover:scale-110 transition">
+              &times;
+            </button>
+          </div>
+        </div>
+
+        <!-- Helper Text -->
+        <p v-if="!filters.length" class="text-gray-500 text-sm italic">
+          Type your search and press <strong>Enter</strong> or click <strong>Add</strong> to apply filters.
+        </p>
       </div>
 
-      <!-- Filter Panel Toggle -->
-      <button @click="toggleFilterPanel"
-        class="flex items-center px-4 py-3 bg-teal-500 text-white font-medium rounded-lg shadow hover:bg-teal-600 focus:outline-none">
-        <span>Filters</span>
-        <svg class="w-4 h-4 ml-2 transform" :class="{ 'rotate-180': isFilterPanelOpen }"
-          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      <!-- Buttons -->
-      <button @click="generateReport"
-        class="px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow hover:bg-teal-600 focus:outline-none transition">
-        Generate Report
-      </button>
-      <button @click="triggerImport"
-        class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition flex items-center gap-2">
-        Import CSV
-      </button>
-      <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
+      <div class="flex items-center gap-3 mb-10">
+        <!-- Filter Panel Toggle -->
+        <button @click="toggleFilterPanel"
+          class="flex items-center px-4 py-3 bg-teal-500 text-white font-medium rounded-lg shadow hover:bg-teal-600 focus:outline-none">
+          <span>Filters</span>
+          <svg class="w-4 h-4 ml-2 transform" :class="{ 'rotate-180': isFilterPanelOpen }"
+            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <!-- Buttons -->
+        <button @click="generateReport"
+          class="px-6 py-3 bg-teal-500 text-white font-semibold rounded-lg shadow hover:bg-teal-600 focus:outline-none transition">
+          Generate Report
+        </button>
+        <button @click="triggerImport"
+          class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 focus:outline-none transition flex items-center gap-2">
+          Import CSV
+        </button>
+        <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
+      </div>
     </div>
 
     <!-- Collapsible Filter Panel -->
@@ -247,23 +276,24 @@ export default {
   data() {
     return {
       searchQuery: '',
+      filters: [],  // Dynamic filter tags
       filterPrk: '',
       filterBarangay: '',
-      filterGender: [], // Array for selected genders
-      filterAgeRange: '', // Filter by age range
-      filterDiagnosis: [], // Array for selected diagnoses
+      filterGender: [],
+      filterAgeRange: '',
+      filterDiagnosis: [],
       currentPage: 1,
       itemsPerPage: 10,
       showModal: false,
       selectedPatient: null,
-      isFilterPanelOpen: false, // Toggle filter panel visibility
+      isFilterPanelOpen: false,
       filterDate: '',
       currentDateText: '',
     };
   },
   computed: {
     filteredPatients() {
-      const query = this.searchQuery.toLowerCase();
+      const queryFilters = this.filters.map(f => f.toLowerCase());
       return this.patients
         .map((patient) => ({
           ...patient,
@@ -271,9 +301,11 @@ export default {
           address: `${patient.purok}, ${patient.barangay}`,
         }))
         .filter((patient) => {
-          const matchesQuery =
-            patient.fullName.toLowerCase().includes(query) ||
-            patient.address.toLowerCase().includes(query);
+          const matchesFilters = queryFilters.every(filter =>
+            patient.fullName.toLowerCase().includes(filter) ||
+            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(filter)) ||
+            patient.address.toLowerCase().includes(filter)
+          );
 
           const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
           const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
@@ -282,28 +314,20 @@ export default {
           if (this.filterAgeRange) {
             const [minAge, maxAge] = this.filterAgeRange.split('-').map(Number);
             const patientAge = patient.age;
-
-            // Ensure the maximum age is capped at 10
-            const effectiveMaxAge = Math.min(maxAge || Infinity, 10); // Default to 10 if maxAge is NaN or greater than 10
-
-            matchesAgeRange =
-              (isNaN(minAge) || patientAge >= minAge) && // Allow the minAge to be flexible
+            const effectiveMaxAge = Math.min(maxAge || Infinity, 10);
+            matchesAgeRange = (isNaN(minAge) || patientAge >= minAge) &&
               (isNaN(effectiveMaxAge) || patientAge <= effectiveMaxAge);
           }
 
-
-
-          const matchesGender =
-            this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+          const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
 
           let matchesDate = true;
           if (this.filterDate) {
-            // Compare day-only to avoid format/timezone issues
             matchesDate = this.sameDay(patient.consultationDate, this.filterDate);
           }
 
           return (
-            matchesQuery &&
+            matchesFilters &&
             matchesPrk &&
             matchesBarangay &&
             matchesAgeRange &&
@@ -312,92 +336,70 @@ export default {
           );
         })
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage)
-        .sort((a, b) => {
-          const dateA = new Date(a.consultationDate);
-          const dateB = new Date(b.consultationDate);
-          return dateB - dateA; // descending -> most recent first
-        });
+        .sort((a, b) => new Date(b.consultationDate) - new Date(a.consultationDate));
     },
+
     totalPages() {
-      return Math.ceil(this.patients.length / this.itemsPerPage);
+      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
     },
+
     purokOptions() {
-      const puroks = new Set(this.patients.map((patient) => patient.purok));
-      return Array.from(puroks);
+      return Array.from(new Set(this.patients.map((patient) => patient.purok)));
     },
+
     barangayOptions() {
-      const barangays = new Set(this.patients.map((patient) => patient.barangay));
-      return Array.from(barangays);
+      return Array.from(new Set(this.patients.map((patient) => patient.barangay)));
     },
   },
-  mounted() {
-    // 1) For the <input type="date">, we either start blank or set it to today's YYYY-MM-DD.
-    //    If you want the user to see it empty by default, keep it as ''.
-    //    If you want it to default to today's date in the picker, do:
-    // this.filterDate = new Date().toISOString().split('T')[0];
 
-    // 2) For displaying the "Current Date" in a more human-readable format:
+  mounted() {
     const today = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     this.currentDateText = today.toLocaleDateString(undefined, options);
+
+    window.addEventListener('keydown', this.handleEscKey);
   },
+
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleEscKey);
+  },
+
   methods: {
+    addFilter() {
+      const words = this.searchQuery.trim().split(/\s+/);
+      words.forEach((word) => {
+        const cleanWord = word.toLowerCase();
+        if (cleanWord && !this.filters.includes(cleanWord)) {
+          this.filters.push(cleanWord);
+        }
+      });
+      this.searchQuery = '';
+    },
+
+    removeFilter(index) {
+      this.filters.splice(index, 1);
+    },
+
     formatDate(dateStr) {
       if (!dateStr) return '';
-      // Convert to Date object
       const dateObj = new Date(dateStr);
-      // Check if valid
-      if (isNaN(dateObj)) return dateStr; // Fallback: return original if invalid
-
-      // Format: e.g. "December 01, 2024"
+      if (isNaN(dateObj)) return dateStr;
       const options = { year: 'numeric', month: 'long', day: '2-digit' };
       return dateObj.toLocaleDateString('en-US', options);
     },
-    sameDay(dateA, dateB) {
-      // Convert both to Date objects
-      const dA = new Date(dateA); // e.g. "2025-01-07", "01/07/2025", or "2025-01-07T00:00:00"
-      const dB = new Date(dateB); // e.g. "2025-01-07"
-      // If either is invalid, return false
-      if (isNaN(dA) || isNaN(dB)) return false;
-      return (
-        dA.getFullYear() === dB.getFullYear() &&
-        dA.getMonth() === dB.getMonth() &&
-        dA.getDate() === dB.getDate()
-      );
-    },
-    printRecord(patient) {
-      const printContent = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.5; padding: 20px;">
-        <h2 style="text-align: center; color: #38a169;">Individual Treatment Record</h2>
-        <p><strong>Full Name:</strong> ${patient.firstName} ${patient.middleName || ''} ${patient.lastName}</p>
-        <p><strong>Age:</strong> ${patient.age}</p>
-        <p><strong>Gender:</strong> ${patient.sex}</p>
-        <p><strong>Address:</strong> ${patient.purok}, ${patient.barangay}</p>
-        <p><strong>Nature of Visit:</strong> ${patient.natureOfVisit}</p>
-        <p><strong>Visit Type:</strong> ${patient.visitType}</p>
-        <p><strong>Date of Consultation:</strong> ${patient.consultationDate}</p>
-        <p><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
-        <p><strong>Medication/Treatment:</strong> ${patient.medication}</p>
-      </div>
-    `;
 
-      const newWindow = window.open('', '_blank', 'width=800,height=600');
-      newWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Record</title>
-        </head>
-        <body>
-          ${printContent}
-        </body>
-      </html>
-    `);
-      newWindow.document.close();
-      newWindow.print();
+    sameDay(dateA, dateB) {
+      const dA = new Date(dateA);
+      const dB = new Date(dateB);
+      return dA.getFullYear() === dB.getFullYear() &&
+        dA.getMonth() === dB.getMonth() &&
+        dA.getDate() === dB.getDate();
     },
+
     triggerImport() {
-      this.$refs.fileInput.click(); // Trigger file input click
+      this.$refs.fileInput.click();
     },
+
     handleFileUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -406,6 +408,7 @@ export default {
         this.uploadCSV(formData);
       }
     },
+
     uploadCSV(formData) {
       Inertia.post('/services/patients/epi-records', formData, {
         onSuccess: () => {
@@ -417,27 +420,48 @@ export default {
         },
       });
     },
+
     toggleFilterPanel() {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
+
     openModal(patient) {
       this.selectedPatient = patient;
       this.showModal = true;
+      document.addEventListener('click', this.handleClickOutside);
     },
+
     closeModal() {
       this.showModal = false;
       this.selectedPatient = null;
+      document.removeEventListener('click', this.handleClickOutside);
     },
+
+    handleClickOutside(event) {
+      const modal = this.$refs.modal;
+      if (modal && !modal.contains(event.target)) {
+        this.closeModal();
+      }
+    },
+
+    handleEscKey(event) {
+      if (event.key === "Escape") {
+        this.closeModal();
+      }
+    },
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
+
     generateReport() {
       const data = this.filteredPatients.map((patient) => ({
         fullName: patient.fullName,

@@ -19,8 +19,8 @@ class PreNatalController extends Controller
     public function index()
     {
         $data = PersonalInformation::join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
-        ->join('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
-            ->select(
+        ->leftJoin('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
+        ->select(
             'personal_information.personalId',
             'personal_information.firstName',
             'personal_information.lastName',
@@ -44,6 +44,16 @@ class PreNatalController extends Controller
             'prenatal_consultation_details.fourMember',
             'prenatal_consultation_details.philhealthStatus',
             'prenatal_consultation_details.philhealthNo',
+
+            // Updated Status Logic: Pending, Completed, or Cancelled
+            DB::raw("
+            CASE
+                WHEN prenatal_consultation_details.status = 'cancelled' THEN 'Cancelled'
+                WHEN prenatal_visit_information.prenatalConsultationDetailsID IS NULL THEN 'Pending'
+                ELSE 'Completed'
+            END AS status
+        "),
+
             'prenatal_visit_information.menarche',
             'prenatal_visit_information.sexualOnset',
             'prenatal_visit_information.periodDuration',
@@ -64,14 +74,15 @@ class PreNatalController extends Controller
             'prenatal_visit_information.hematocrit',
             'prenatal_visit_information.urinalysis',
             'prenatal_visit_information.ttStatus',
-            'prenatal_visit_information.tdDate',
+            'prenatal_visit_information.tdDate'
         )
         ->distinct()
         ->get();
 
-        return Inertia::render('Table/PreNatal', [
-            'PRENATAL' => $data,
-        ]);
+    return Inertia::render('Table/PreNatal', [
+        'PRENATAL' => $data,
+    ]);
+
     }
 
     public function fetchTrimesterData($prenatalConsultationDetailsID, $trimester)

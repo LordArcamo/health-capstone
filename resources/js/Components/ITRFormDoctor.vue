@@ -50,8 +50,9 @@
               <h4 class="font-semibold text-xl mb-4 text-gray-700">Basic Information</h4>
               <div>
                 <p class="font-medium text-gray-600">Full Name:</p>
-                <p class="text-gray-800">{{ consultationDetails.firstName }} {{ consultationDetails.middleName }} {{ consultationDetails.lastName }} {{ consultationDetails.suffix
-                  || 'Not Provided' }}</p>
+                <p class="text-gray-800">{{ consultationDetails.firstName }} {{ consultationDetails.middleName }} {{
+                  consultationDetails.lastName }} {{ consultationDetails.suffix
+                    || 'Not Provided' }}</p>
               </div>
               <div>
                 <p class="font-medium text-gray-600">Age:</p>
@@ -173,34 +174,93 @@
               class="btn bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md">Next</button>
           </div>
         </div>
-        <div v-if="step === 2">
-          <h3 class="text-lg font-semibold mb-4">Visit Informations
 
-          </h3>
+        <div v-if="step === 2">
+          <h3 class="text-lg font-semibold mb-4">Visit Information</h3>
+
           <div class="grid grid-cols-2 gap-4">
 
+            <!-- Chief Complaints -->
             <div>
               <label class="block">Chief Complaints:</label>
               <textarea v-model="form.chiefComplaints" placeholder="Example: Low Bowel Movements etc."
                 class="input"></textarea>
               <span v-if="errors.chiefComplaints" class="text-red-600 text-sm">{{ errors.chiefComplaints }}</span>
             </div>
+
+            <!-- Require Laboratory Test (Dropdown Select) -->
             <div>
-              <label class="block">Diagnosis:</label>
-              <textarea v-model="form.diagnosis" placeholder="Example: Diarrhea" class="input"></textarea>
-              <span v-if="errors.diagnosis" class="text-red-600 text-sm">{{ errors.diagnosis }}</span>
+              <label class="block">Require Laboratory Test?</label>
+              <select v-model="form.requireLabTest" class="input">
+                <option disabled value="">-- Select Option --</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+              <span v-if="errors.requireLabTest" class="text-red-600 text-sm">{{ errors.requireLabTest }}</span>
             </div>
-            <div>
+
+            <!-- Laboratory Tests Checklist (Shows if "Yes" is Selected) -->
+            <div v-if="form.requireLabTest === 'yes'" class="col-span-2">
+              <label class="block font-semibold">Select Laboratory Tests:</label>
+              <div class="grid grid-cols-2 gap-4">
+                <div v-for="(test, index) in labTests" :key="`labTest-${index}`" class="flex items-center">
+                  <input type="checkbox" :id="`labTest-${index}`" :value="test" v-model="form.selectedLabTests"
+                    class="mr-2 h-4 w-4 text-green-600 focus:ring-green-500" />
+                  <label :for="`labTest-${index}`" class="cursor-pointer">{{ test }}</label>
+                </div>
+
+              </div>
+              <span v-if="errors.selectedLabTests" class="text-red-600 text-sm">{{ errors.selectedLabTests }}</span>
+            </div>
+
+
+            <!-- Auto-set Status to 'Follow-up Required' -->
+            <input type="hidden" v-model="form.status" />
+
+            <!-- Diagnosis Input with Tagging -->
+            <div v-if="form.requireLabTest === 'no'">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis:</label>
+
+              <div
+                class="flex flex-wrap items-center border border-gray-300 rounded-md p-2 bg-white shadow-sm focus-within:ring-2 focus-within:ring-green-500">
+                <!-- Display added diagnosis tags -->
+                <div v-for="(diagnosis, index) in form.diagnosisTags" :key="index"
+                  class="flex items-center bg-green-100 text-green-800 px-3 py-1 mr-2 mb-2 rounded-full text-sm font-medium shadow-sm">
+                  {{ diagnosis }}
+                  <button type="button" @click="removeDiagnosisTag(index)"
+                    class="ml-2 text-green-600 hover:text-red-500 focus:outline-none">
+                    &times;
+                  </button>
+                </div>
+
+                <!-- Input for new diagnosis tags -->
+                <input v-model="newDiagnosis" @keydown.enter.prevent="addDiagnosisTag"
+                  @keydown.space.prevent="addDiagnosisTag" placeholder="Type diagnosis and press Enter or Space"
+                  class="flex-grow py-1 px-3 text-sm text-gray-700 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none" />
+              </div>
+
+              <span v-if="errors.diagnosis" class="text-red-600 text-xs mt-1">{{ errors.diagnosis }}</span>
+            </div>
+
+
+
+
+            <!-- Medication/Treatment (Hidden if "Yes" is Selected) -->
+            <div v-if="form.requireLabTest === 'no'">
               <label class="block">Medication/Treatment:</label>
               <textarea v-model="form.medication" placeholder="Example: Loperamide" class="input"></textarea>
               <span v-if="errors.medication" class="text-red-600 text-sm">{{ errors.medication }}</span>
             </div>
+
           </div>
+
+          <!-- Navigation Buttons -->
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
             <button @click="nextStep" class="btn">Next</button>
           </div>
         </div>
+
 
         <!-- Step 4: Review Submitted Data -->
         <div v-if="step === 3">
@@ -218,9 +278,6 @@
           </div>
         </div>
       </form>
-      <!-- <div v-if="successMessage" class="mt-4 text-green-600 text-center">
-        {{ successMessage }}
-      </div> -->
     </div>
 
     <!-- Confirmation Modal -->
@@ -253,17 +310,18 @@
 export default {
   props: {
     consultationDetails: {
-        type: Object,
-        required: false,
-        default: () => ({}),
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     onSubmit: Function,
   },
 
   data() {
     return {
+      newDiagnosis: '',  // ✅ Initialize input for new diagnosis
       alertMessage: '',
-      showModal: false, // Tracks modal visibility
+      showModal: false,  // Tracks modal visibility
       stepTitles: [
         'Medical Record',
         'Visit Information',
@@ -298,105 +356,46 @@ export default {
         chiefComplaints: '',
         diagnosis: '',
         medication: '',
+        requireLabTest: '',
+        selectedLabTests: [],
+        diagnosisTags: [],  // ✅ Properly initialized diagnosisTags
       },
-      errors: {
-        contact: '',
-        birthdate: '',
-      },
+      labTests: [
+        'Complete Blood Count (CBC)',
+        'Urinalysis',
+        'X-ray',
+        'Blood Sugar Test',
+        'Electrolyte Panel',
+        'Stool Examination',
+      ],
+      errors: {},
       successMessage: '',
     };
   },
+
   watch: {
+    'form.requireLabTest'(newValue) {
+      if (newValue === 'yes') {
+        this.form.status = 'Follow-up Required';
+      } else if (newValue === 'no') {
+        this.form.status = 'Completed';
+      } else {
+        this.form.status = '';
+      }
+    },
     consultationDetails: {
-        immediate: true,
+      immediate: true,
       handler(newPatient) {
         if (newPatient && newPatient.consultationDetailsID === null) {
-          // Clear the form for a new patient
-          this.resetForm();
+          this.resetForm();  // Clear the form for a new patient
         } else if (newPatient && Object.keys(newPatient).length > 0) {
-          // Populate the form with selected patient data
-          this.populateForm(newPatient);
+          this.populateForm(newPatient);  // Populate with patient data
         }
       },
     },
   },
+
   methods: {
-    formatLabel(key) {
-        return key
-            .replace(/([A-Z])/g, ' $1') // Add a space before capital letters
-            .replace(/_/g, ' ') // Replace underscores with spaces
-            .replace(/^\w/, (c) => c.toUpperCase()); // Capitalize the first letter
-        },
-    resetForm() {
-      this.form = {
-        chiefComplaints: '',
-        diagnosis: '',
-        medication: '',
-      };
-      this.errors = {};
-    },
-    populateForm(patient) {
-      console.log("Populating form with patient:", patient);
-      this.form = {
-        firstName: this.consultationDetails?.firstName || '',
-        lastName: this.consultationDetails?.lastName || '',
-        middleName: this.consultationDetails?.middleName || '',
-        suffix: this.consultationDetails?.suffix || '',
-        purok: this.consultationDetails?.purok || '',
-        barangay: this.consultationDetails?.barangay || '',
-        age: this.consultationDetails?.age || '',
-        birthdate: this.consultationDetails?.birthdate || '',
-        contact: this.consultationDetails?.contact || '',
-        sex: this.consultationDetails?.sex || '',
-        consultationDate: this.consultationDetails?.consultationDate || '',
-        consultationTime: this.consultationDetails?.consultationTime || '',
-        modeOfTransaction: this.consultationDetails?.modeOfTransaction || '',
-        bloodPressure: this.consultationDetails?.bloodPressure || '',
-        temperature: this.consultationDetails?.temperature || '',
-        height: this.consultationDetails?.height || '',
-        weight: this.consultationDetails?.weight || '',
-        natureOfVisit: this.consultationDetails?.natureOfVisit || '',
-        visitType: this.consultationDetails?.visitType || '',
-        referredFrom: this.consultationDetails?.referredFrom || '',
-        referredTo: this.consultationDetails?.referredTo || '',
-        providerName: this.consultationDetails?.providerName || '',
-        reasonsForReferral: this.consultationDetails?.reasonsForReferral || '',
-        referredBy: this.consultationDetails?.referredBy || '',
-
-      };
-
-    },
-
-    validateStep2() {
-      this.errors = {};
-      let valid = true;
-
-      if (!this.form.chiefComplaints) {
-        this.errors.chiefComplaints = 'Chief Complaints is required.';
-        valid = false;
-      }
-      if (!this.form.diagnosis) {
-        this.errors.diagnosis = 'Diagnosis is required.';
-        valid = false;
-      }
-      if (!this.form.medication) {
-        this.errors.medication = 'Medication is required.';
-        valid = false;
-      }
-      return valid;
-    },
-    nextStep() {
-      if (this.step === 1) {
-        this.step++;
-      } else if (this.step === 2 && this.validateStep2()) {
-        this.step++;
-      } else if (this.step === 2 && this.validateStep2()) {
-        this.step = 2;
-      }
-    },
-    prevStep() {
-      this.step--;
-    },
     navigateToStep(targetStep) {
       if (targetStep > this.step) {
         // Validate the current step before proceeding
@@ -416,47 +415,169 @@ export default {
       // If validation passes or moving backward, update the step
       this.step = targetStep;
     },
+    // ✅ Add Diagnosis Tag without submitting form
+    addDiagnosisTag(event) {
+      event.preventDefault();  // 🔥 Prevent form submission
+      const trimmedDiagnosis = this.newDiagnosis.trim();
+
+      if (trimmedDiagnosis && !this.form.diagnosisTags.includes(trimmedDiagnosis)) {
+        this.form.diagnosisTags.push(trimmedDiagnosis);
+      }
+      this.newDiagnosis = '';  // Clear input after adding
+    },
+
+    // ✅ Remove Diagnosis Tag
+    removeDiagnosisTag(index) {
+      this.form.diagnosisTags.splice(index, 1);
+    },
+
+    toggleLabTest(test) {
+      const index = this.form.selectedLabTests.indexOf(test);
+      if (index > -1) {
+        this.form.selectedLabTests.splice(index, 1);  // Uncheck
+      } else {
+        this.form.selectedLabTests.push(test);  // Check
+      }
+    },
+
+    formatLabel(key) {
+      return key
+        .replace(/([A-Z])/g, ' $1')  // Add space before capital letters
+        .replace(/_/g, ' ')  // Replace underscores with spaces
+        .replace(/^\w/, (c) => c.toUpperCase());  // Capitalize the first letter
+    },
+
+    resetForm() {
+      this.form = {
+        chiefComplaints: '',
+        diagnosis: '',
+        medication: '',
+        requireLabTest: '',
+        selectedLabTests: [],
+        diagnosisTags: [],  // ✅ Reset diagnosisTags
+      };
+      this.errors = {};
+      this.newDiagnosis = '';
+    },
+
+    populateForm(patient) {
+      this.form = {
+        ...this.form,
+        firstName: patient.firstName || '',
+        lastName: patient.lastName || '',
+        middleName: patient.middleName || '',
+        suffix: patient.suffix || '',
+        purok: patient.purok || '',
+        barangay: patient.barangay || '',
+        age: patient.age || '',
+        birthdate: patient.birthdate || '',
+        contact: patient.contact || '',
+        sex: patient.sex || '',
+        consultationDate: patient.consultationDate || '',
+        consultationTime: patient.consultationTime || '',
+        modeOfTransaction: patient.modeOfTransaction || '',
+        bloodPressure: patient.bloodPressure || '',
+        temperature: patient.temperature || '',
+        height: patient.height || '',
+        weight: patient.weight || '',
+        natureOfVisit: patient.natureOfVisit || '',
+        visitType: patient.visitType || '',
+        referredFrom: patient.referredFrom || '',
+        referredTo: patient.referredTo || '',
+        providerName: patient.providerName || '',
+        reasonsForReferral: patient.reasonsForReferral || '',
+        referredBy: patient.referredBy || '',
+      };
+    },
+
+    validateStep2() {
+      this.errors = {};
+      let valid = true;
+
+      if (!this.form.chiefComplaints) {
+        this.errors.chiefComplaints = 'Chief Complaints is required.';
+        valid = false;
+      }
+
+      if (!this.form.requireLabTest) {
+        this.errors.requireLabTest = 'Please specify if a lab test is required.';
+        valid = false;
+      }
+
+      if (this.form.requireLabTest === 'yes' && this.form.selectedLabTests.length === 0) {
+        this.errors.selectedLabTests = 'Select at least one laboratory test.';
+        valid = false;
+      }
+
+      if (this.form.requireLabTest === 'no') {
+        if (this.form.diagnosisTags.length === 0) {
+          this.errors.diagnosis = 'At least one diagnosis is required.';
+          valid = false;
+        }
+        if (!this.form.medication) {
+          this.errors.medication = 'Medication is required.';
+          valid = false;
+        }
+      }
+
+      return valid;
+    },
+
+    nextStep() {
+      if (this.step === 1 || (this.step === 2 && this.validateStep2())) {
+        this.step++;
+      } else {
+        this.alertMessage = 'Please fill in the required fields before proceeding.';
+        setTimeout(() => (this.alertMessage = ''), 2000);
+      }
+    },
+
+    prevStep() {
+      this.step--;
+    },
 
     closeAlert() {
-      this.alertMessage = ''; // Close the alert
+      this.alertMessage = '';
     },
+
     triggerSubmit() {
       if (this.validateStep2()) {
-        this.showModal = true; // Show confirmation modal
+        this.showModal = true;
       } else {
         this.successMessage = 'Please complete all required fields before submitting.';
       }
     },
+
     confirmSubmit() {
       const payload = {
         consultationDetailsID: this.consultationDetails?.consultationDetailsID || null,
         id: this.id,
         chiefComplaints: this.form.chiefComplaints,
-        diagnosis: this.form.diagnosis,
-        medication: this.form.medication,
+        requireLabTest: this.form.requireLabTest,
+        selectedLabTests: this.form.selectedLabTests,
+        diagnosis: this.form.diagnosisTags.join(', '),  // ✅ Submit as comma-separated string
+        medication: this.form.requireLabTest === 'no' ? this.form.medication : '',
+        status: this.form.requireLabTest === 'yes' ? 'Follow-up Required' : 'Completed',
       };
 
       console.log('Submitting form with payload:', payload);
       this.$emit('submitForm', payload);
-      this.showModal = false; // Hide confirmation modal
+      this.showModal = false;
     },
 
     cancelSubmit() {
-      this.showModal = false; // Hide modal
+      this.showModal = false;
     },
   },
+
   mounted() {
-    console.log('Received personalInfo:', this.consultationDetails);
-    if (!this.consultationDetails || Object.keys(this.consultationDetails).length === 0) {
-      console.log('Rendering empty form for new patient');
-    } else {
-      console.log('Rendering form for existing patient:', this.consultationDetails);
+    if (Object.keys(this.consultationDetails).length > 0) {
       this.populateForm(this.consultationDetails);
     }
   },
-
 };
 </script>
+
 
 
 

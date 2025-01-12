@@ -30,7 +30,6 @@ return new class extends Migration
             $table->string('visitType', 50);
             $table->string('providerName', 100);
 
-
             $table->timestamps();
 
             // Add foreign key constraint for personalId
