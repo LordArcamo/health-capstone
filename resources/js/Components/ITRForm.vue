@@ -158,11 +158,13 @@
               <input type="date" v-model="form.consultationDate" class="input" required />
               <span v-if="errors.consultationDate" class="text-red-600 text-sm">{{ errors.consultationDate }}</span>
             </div>
+
             <div>
               <label class="block">Consultation Time:</label>
               <input type="time" v-model="form.consultationTime" class="input" required @input="handleTimeSelection" />
               <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
             </div>
+
             <div>
               <label class="block">Mode of Transaction:</label>
               <select v-model="form.modeOfTransaction" class="input" required>
@@ -539,6 +541,20 @@ export default {
       this.errors.consultationDate = "";
       return true;
     },
+    setAutoDateTime() {
+      const now = new Date();
+
+      // Format the date to YYYY-MM-DD for the date input
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is zero-based
+      const day = String(now.getDate()).padStart(2, '0');
+      this.form.consultationDate = `${year}-${month}-${day}`;
+
+      // Format the time to HH:MM for the time input
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      this.form.consultationTime = `${hours}:${minutes}`;
+    },
     formatBloodPressure(event) {
       let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
       if (value.length > 3) {
@@ -854,6 +870,8 @@ export default {
     },
   },
   mounted() {
+    this.setAutoDateTime();
+    setInterval(this.setAutoDateTime, 0); // Updates every 60 seconds
     console.log('Received personalInfo:', this.personalInfo);
     if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
       console.log('Rendering empty form for new patient');

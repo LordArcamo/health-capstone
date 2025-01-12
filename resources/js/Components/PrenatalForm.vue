@@ -44,17 +44,20 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block">First Name:</label>
-              <input type="text" v-model="form.firstName" class="input"  @input="capitalizeName('firstName')" placeholder="Example: Juan" required />
+              <input type="text" v-model="form.firstName" class="input" @input="capitalizeName('firstName')"
+                placeholder="Example: Juan" required />
               <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName }}</span>
             </div>
             <div>
               <label class="block">Last Name:</label>
-              <input type="text" v-model="form.lastName" class="input"  @input="capitalizeName('lastName')" placeholder="Example: Dela Cruz" required />
+              <input type="text" v-model="form.lastName" class="input" @input="capitalizeName('lastName')"
+                placeholder="Example: Dela Cruz" required />
               <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName }}</span>
             </div>
             <div>
               <label class="block">Middle Name:</label>
-              <input type="text" v-model="form.middleName" class="input"  @input="capitalizeName('middleName')" placeholder="Example: Penduko" required />
+              <input type="text" v-model="form.middleName" class="input" @input="capitalizeName('middleName')"
+                placeholder="Example: Penduko" required />
               <span v-if="errors.middleName" class="text-red-600 text-sm">{{ errors.middleName }}</span>
             </div>
 
@@ -98,7 +101,7 @@
               <label class="block">Age:</label>
               <input type="number" v-model="computedAge" class="input" readonly />
             </div>
-            
+
             <div>
               <label class="block mb-1 font-medium text-gray-700">Contact Number:</label>
               <div class="relative">
@@ -123,6 +126,16 @@
           <h3 class="text-lg font-semibold mb-4">For CHU/RHU Personnel Only</h3>
           <div class="grid grid-cols-2 gap-4">
             <div>
+              <label class="block">Date of Consultation:</label>
+              <input type="date" v-model="form.consultationDate" class="input" required />
+              <span v-if="errors.consultationDate" class="text-red-600 text-sm">{{ errors.consultationDate }}</span>
+            </div>
+            <div>
+              <label class="block">Consultation Time:</label>
+              <input type="time" v-model="form.consultationTime" class="input" required />
+              <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
+            </div>
+            <div>
               <label class="block">Mode of Transaction:</label>
               <select v-model="form.modeOfTransaction" class="input" required>
                 <!-- Placeholder option for selecting suffix -->
@@ -133,16 +146,6 @@
               </select>
               <span v-if="errors.modeOfTransaction" class="text-red-600 text-sm">{{ errors.modeOfTransaction }}</span>
             </div>
-            <div>
-              <label class="block">Date of Consultation:</label>
-              <input type="date" v-model="form.consultationDate" class="input" required />
-              <span v-if="errors.consultationDate" class="text-red-600 text-sm">{{ errors.consultationDate }}</span>
-            </div>
-            <div>
-              <label class="block">Consultation Time:</label>
-              <input type="time" v-model="form.consultationTime" class="input" required />
-              <span v-if="errors.consultationTime" class="text-red-600 text-sm">{{ errors.consultationTime }}</span>
-            </div>
             <!-- <div>
               <label class="block">Referred From</label>
               <input type="text" v-model="form.reasonForReferral" class="input"></input>
@@ -152,33 +155,32 @@
               <input type="text" v-model="form.bloodPressure" placeholder="Example: 120/80"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 @input="formatBloodPressure" />
-                <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
+              <span v-if="errors.bloodPressure" class="text-red-600 text-sm">{{ errors.bloodPressure }}</span>
             </div>
             <div>
               <label class="block">Temperature (°C):</label>
               <input type="text" v-model="form.temperature" placeholder="Example: 37.5°C"
                 class="input border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 @input="formatTemperature" />
-                <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
+              <span v-if="errors.temperature" class="text-red-600 text-sm">{{ errors.temperature }}</span>
 
             </div>
             <div>
               <label class="block">Height (cm):</label>
               <input type="text" v-model="form.height" placeholder="Example: 180" class="input"
                 @input="validateHeight" />
-                <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
+              <span v-if="errors.height" class="text-red-600 text-sm">{{ errors.height }}</span>
             </div>
             <div>
               <label class="block">Weight (kg):</label>
               <input type="text" v-model="form.weight" placeholder="Example: 70" class="input"
                 @input="validateWeight" />
-                <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
+              <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
             </div>
             <div>
               <label class="block">Name of Attending Doctor/Provider:</label>
-              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Aileen Uy"
-                class="input"></input>
-                <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
+              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Aileen Uy" class="input"></input>
+              <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
             <div>
               <label class="block">Name of Spouse:</label>
@@ -286,9 +288,9 @@
 export default {
   props: {
     selectedPatient: {
-    type: Object,
-    required: false,
-    default: () => ({}),
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
     onSubmit: Function,
   },
@@ -376,15 +378,15 @@ export default {
     },
   },
   'form.philhealthStatus': function (newVal) {
-        if (newVal === 'Member') {
-            // Reset the fields to empty when Referral is selected
-            this.form.philhealthNo = '';
-        } else {
-            // Set the fields to "None" when not Referral
-            this.form.philhealthNo = 'None';
+    if (newVal === 'Member') {
+      // Reset the fields to empty when Referral is selected
+      this.form.philhealthNo = '';
+    } else {
+      // Set the fields to "None" when not Referral
+      this.form.philhealthNo = 'None';
 
-        }
-    },
+    }
+  },
   methods: {
     resetForm() {
       this.form = {
@@ -423,10 +425,24 @@ export default {
         age: '',
         birthdate: this.selectedPatient?.birthdate || '',
         contact: this.selectedPatient?.contact || '',
-        
+
       };
       this.form.age = this.computedAge;
 
+    },
+    setAutoDateTime() {
+      const now = new Date();
+
+      // Format the date to YYYY-MM-DD for the date input
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is zero-based
+      const day = String(now.getDate()).padStart(2, '0');
+      this.form.consultationDate = `${year}-${month}-${day}`;
+
+      // Format the time to HH:MM for the time input
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      this.form.consultationTime = `${hours}:${minutes}`;
     },
     formatLabel(key) {
       // Convert camelCase keys to readable labels
@@ -617,9 +633,9 @@ export default {
         this.step++;
       } else if (this.step === 2 && this.validateStep2()) {
         this.step++;
-      }  else if (this.step === 3 && this.validateStep3()) {
+      } else if (this.step === 3 && this.validateStep3()) {
         this.step = 3;;
-      } 
+      }
 
     },
     prevStep() {
@@ -737,6 +753,8 @@ export default {
     },
   },
   mounted() {
+    this.setAutoDateTime();
+    setInterval(this.setAutoDateTime, 0); 
     console.log('Received personalInfo:', this.personalInfo);
     if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
       console.log('Rendering empty form for new patient');
