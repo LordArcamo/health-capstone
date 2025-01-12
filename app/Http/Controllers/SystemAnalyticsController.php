@@ -480,22 +480,43 @@ class SystemAnalyticsController extends Controller
         return $monthlyVaccinations;
     }
 
-    private function getCasesStatistics()
+    private function getCasesStatistics($request)
     {
-        $monthlyCases = [];
+        $monthlyStats = [];
         $currentYear = date('Y');
 
         for ($month = 1; $month <= 12; $month++) {
-            $count = VisitInformation::join('consultation_details', 'visit_information.consultationDetailsID', '=', 'consultation_details.consultationDetailsID')
-                ->whereYear('consultation_details.consultationDate', $currentYear)
-                ->whereMonth('consultation_details.consultationDate', $month)
-                ->count();
+            $query = VisitInformation::with(['consultationDetails.personalInformation'])
+                ->whereHas('consultationDetails', function($q) use ($currentYear, $month) {
+                    $q->whereYear('consultationDate', $currentYear)
+                      ->whereMonth('consultationDate', $month);
+                })
+                ->whereNotNull('diagnosis');
 
-            $monthlyCases[] = $count;
+            // Get all cases for this month with their related data
+            $cases = $query->get();
+
+            // Map the data to include only what we need
+            $monthlyStats[] = $cases->map(function($visit) {
+                if (!$visit->consultationDetails || !$visit->consultationDetails->personalInformation) {
+                    return null;
+                }
+
+                return [
+                    'diagnosis' => $visit->diagnosis,
+                    'personalInformation' => [
+                        'sex' => $visit->consultationDetails->personalInformation->sex,
+                        'birthdate' => $visit->consultationDetails->personalInformation->birthdate,
+                    ]
+                ];
+            })->filter()->values()->all();
         }
 
-        return $monthlyCases;
+        return [
+            'cases' => $monthlyStats
+        ];
     }
+
 
 
     private function getMentalHealthStatistics()
