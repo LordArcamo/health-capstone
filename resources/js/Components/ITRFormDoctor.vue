@@ -375,14 +375,14 @@ export default {
 
   watch: {
     'form.requireLabTest'(newValue) {
-    if (newValue === 'yes') {
-      this.form.status = 'Follow-up Required';
-    } else if (newValue === 'no') {
-      this.form.status = 'Completed';
-    } else {
-      this.form.status = '';
-    }
-  },
+      if (newValue === 'yes') {
+        this.form.status = 'Follow-up Required';
+      } else if (newValue === 'no') {
+        this.form.status = 'Completed';
+      } else {
+        this.form.status = '';
+      }
+    },
     consultationDetails: {
       immediate: true,
       handler(newPatient) {
