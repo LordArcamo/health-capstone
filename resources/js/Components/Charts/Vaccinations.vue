@@ -20,126 +20,143 @@
     </div>
 
     <!-- Chart -->
-    <apexchart 
-      type="line" 
-      :options="chartOptions" 
-      :series="chartSeries" 
+    <apexchart
+      type="line"
+      :options="chartOptions"
+      :series="chartSeries"
       class="vaccinations-chart"
     ></apexchart>
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed } from "vue";
-import VueApexCharts from "vue3-apexcharts";
+import apexchart from "vue3-apexcharts";
 
-export default {
-  name: "VaccinationsChart",
-  components: {
-    apexchart: VueApexCharts,
+const props = defineProps({
+  vaccinenatedPatients: Array,
+});
+
+console.log("Vaccine Data", props.vaccinenatedPatients);
+
+// Helper function to count patients per month for each vaccine type
+const countPatientsByVaccine = () => {
+  const vaccineCounts = {};
+
+  props.vaccinenatedPatients.forEach((patient) => {
+    if (patient.history && patient.history.length > 0) {
+      patient.history.forEach((entry) => {
+        const date = new Date(entry.dateOfVisit);
+        const month = date.getMonth(); // Month is 0-indexed (0 = January, 11 = December)
+        const vaccineType = entry.vaccineType;
+
+        if (!vaccineCounts[vaccineType]) {
+          vaccineCounts[vaccineType] = Array(12).fill(0); // Initialize months for this vaccine type
+        }
+        vaccineCounts[vaccineType][month]++;
+      });
+    }
+  });
+
+  // Add aggregated data for "All" vaccines
+  vaccineCounts["All"] = Array(12).fill(0);
+  Object.keys(vaccineCounts).forEach((type) => {
+    if (type !== "All") {
+      vaccineCounts["All"] = vaccineCounts["All"].map(
+        (total, month) => total + vaccineCounts[type][month]
+      );
+    }
+  });
+
+  return vaccineCounts;
+};
+
+// Reactive data for vaccine counts
+const vaccinationData = ref(countPatientsByVaccine());
+
+// Reactive data for the selected vaccine
+const selectedVaccine = ref("");
+
+// Available vaccine types
+const vaccineTypes = computed(() =>
+  Object.keys(vaccinationData.value).filter((type) => type !== "All")
+);
+
+// Chart options
+const chartOptions = ref({
+  chart: {
+    id: "vaccinations-line-chart",
+    toolbar: {
+      show: true,
+    },
+    animations: {
+      enabled: true,
+      easing: "easeinout",
+      speed: 800,
+    },
+    background: "#ffffff",
   },
-  setup() {
-    // Test data for vaccinations
-    const vaccinationData = {
-      vaccineTypes: {
-        All: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200],
-        Pfizer: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600],
-        Moderna: [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360],
-        "Johnson & Johnson": [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240],
+  xaxis: {
+    categories: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
+    labels: {
+      style: {
+        fontSize: "12px",
+        fontWeight: "bold",
+        colors: "#333",
       },
-    };
-
-    // Reactive data for selected vaccine
-    const selectedVaccine = ref(""); // Default is "All Vaccines"
-
-    // Available vaccine types
-    const vaccineTypes = computed(() => Object.keys(vaccinationData.vaccineTypes));
-
-    // Chart options
-    const chartOptions = ref({
-      chart: {
-        id: "vaccinations-line-chart",
-        toolbar: {
-          show: true,
-        },
-        animations: {
-          enabled: true,
-          easing: "easeinout",
-          speed: 800,
-        },
-        background: "#ffffff",
-      },
-      xaxis: {
-        categories: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ],
-        labels: {
-          style: {
-            fontSize: "12px",
-            fontWeight: "bold",
-            colors: "#333",
-          },
-        },
-      },
-      stroke: {
-        curve: "smooth",
-        width: 3,
-      },
-      colors: ["#6EC591"], // Green theme for the chart line
-      markers: {
-        size: 5,
-        colors: "#ffffff",
-        strokeColors: "#6EC591",
-        strokeWidth: 2,
-      },
-      grid: {
-        borderColor: "#e7e7e7",
-        strokeDashArray: 4,
-      },
-      tooltip: {
-        enabled: true,
-        theme: "light",
-        y: {
-          formatter: (val) => `${val} vaccinations`,
-        },
-      },
-    });
-
-    // Dynamically update the chart data
-    const chartSeries = computed(() => [
-      {
-        name: "Monthly Vaccinations",
-        data: selectedVaccine.value
-          ? vaccinationData.vaccineTypes[selectedVaccine.value] || Array(12).fill(0)
-          : vaccinationData.vaccineTypes["All"],
-      },
-    ]);
-
-    // Handle chart updates when the vaccine type changes
-    const updateChart = () => {
-      // Reactivity ensures chart updates automatically
-    };
-
-    return {
-      vaccinationData,
-      selectedVaccine,
-      vaccineTypes,
-      chartOptions,
-      chartSeries,
-      updateChart,
-    };
+    },
   },
+  stroke: {
+    curve: "smooth",
+    width: 3,
+  },
+  colors: ["#6EC591"], // Green theme for the chart line
+  markers: {
+    size: 5,
+    colors: "#ffffff",
+    strokeColors: "#6EC591",
+    strokeWidth: 2,
+  },
+  grid: {
+    borderColor: "#e7e7e7",
+    strokeDashArray: 4,
+  },
+  tooltip: {
+    enabled: true,
+    theme: "light",
+    y: {
+      formatter: (val) => `${val} vaccinations`,
+    },
+  },
+});
+
+// Chart series dynamically updates based on the selected vaccine
+const chartSeries = computed(() => [
+  {
+    name: "Monthly Vaccinations",
+    data:
+      selectedVaccine.value && selectedVaccine.value !== ""
+        ? vaccinationData.value[selectedVaccine.value] || Array(12).fill(0)
+        : vaccinationData.value["All"],
+  },
+]);
+
+// Handle chart updates (reactivity ensures the chart updates automatically)
+const updateChart = () => {
+  console.log(`Filter updated to: ${selectedVaccine.value}`);
 };
 </script>
 
@@ -169,13 +186,6 @@ export default {
   font-size: 14px;
   color: #666; /* Subtle gray for context */
   margin-top: 5px;
-}
-
-.filter-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
 }
 
 .filter-label {

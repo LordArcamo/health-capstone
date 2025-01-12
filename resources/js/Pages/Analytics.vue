@@ -24,7 +24,7 @@ const props = defineProps({
       notReferred: 0
     })
   },
-  
+  vaccinenatedPatients: Array,
   totalPatients: Number,
   vaccinations: Number,
   cases: Number,
@@ -42,6 +42,7 @@ const props = defineProps({
     })
   }
 });
+console.log('Vaccine Data', props.vaccinenatedPatients);
 console.log('Prenatal Data', props.prenatal);
 const showFilters = ref(false);
 
@@ -243,6 +244,7 @@ watch(() => props.lineChart, (newVal) => {
         <Vaccinations
           :filters="filters"
           :vaccination-data="monthlyVaccination"
+          :vaccinenatedPatients="vaccinenatedPatients"
         />
       </div>
       <div class="hover:scale-105 transition-transform">
