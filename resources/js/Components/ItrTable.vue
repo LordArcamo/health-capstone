@@ -200,11 +200,11 @@
             </td>
             <td class="text-base py-3 px-6">
               <span :class="{
-                'bg-green-100 text-green-800': patient.status === 'completed',
-                'bg-yellow-100 text-yellow-800': patient.status === 'pending',
-                'bg-red-100 text-red-800': patient.status === 'cancelled',
-                'bg-orange-100 text-orange-800': patient.status === 'follow-up required',
-                'bg-gray-100 text-gray-800': !patient.status || !['completed', 'in queued', 'cancelled', 'follow-up required'].includes(patient.status)
+                'bg-green-100 text-green-800': patient.status === 'Completed',
+                'bg-yellow-100 text-yellow-800': patient.status === 'Pending',
+                'bg-red-100 text-red-800': patient.status === 'Cancelled',
+                'bg-orange-100 text-orange-800': patient.status === 'Follow-up Required',
+                'bg-gray-100 text-gray-800': !patient.status || !['Completed', 'in queued', 'Cancelled', 'Follow-up Required'].includes(patient.status)
               }" class="px-3 py-1 rounded-full text-sm font-semibold shadow-sm capitalize">
                 {{ patient.status || 'Pending' }}
               </span>

@@ -140,7 +140,7 @@
             <td class="text-base py-3 px-6">
               <span :class="{
                 'bg-green-100 text-green-800': patient.status === 'Completed',
-                'bg-yellow-100 text-yellow-800': patient.status === 'In Queued',
+                'bg-yellow-100 text-yellow-800': patient.status === 'Pending',
                 'bg-red-100 text-red-800': patient.status === 'Cancelled',
                 'bg-orange-100 text-orange-800': patient.status === 'Follow-up Required',
                 'bg-gray-100 text-gray-800': !patient.status || !['Completed', 'In Queued', 'Cancelled', 'Follow-up Required'].includes(patient.status)
