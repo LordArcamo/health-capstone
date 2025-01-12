@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
+use App\Models\NationalImmunizationProgram;
 use App\Models\PrenatalConsultationDetails;
+use App\Models\VaccinationRecord;
 
 class DoctorDashboardController extends Controller
 {
@@ -288,7 +290,55 @@ class DoctorDashboardController extends Controller
         // Get critical cases count (you may need to adjust this based on your criteria)
         $criticalCases = 0;
 
+                // Retrieve and map dates from ConsultationDetails
+                $consultationDates = ConsultationDetails::select('consultationDate')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'date' => $item->consultationDate,
+                        'type' => 'Consultation Details',
+                    ];
+                });
+        
+                // Retrieve and map dates from PrenatalConsultationDetails
+                $prenatalConsultationDates = PrenatalConsultationDetails::select('consultationDate')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'date' => $item->consultationDate,
+                            'type' => 'Prenatal Consultation',
+                        ];
+                    });
+        
+                // Retrieve and map dates from NationalImmunizationProgram
+                $immunizationDates = NationalImmunizationProgram::select('created_at')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'date' => $item->created_at,
+                            'type' => 'Immunization Program',
+                        ];
+                    });
+        
+                // Retrieve and map dates from VaccinationRecord
+                $vaccinationDates = VaccinationRecord::select('dateOfVisit')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'date' => $item->dateOfVisit,
+                            'type' => 'Vaccination Record',
+                        ];
+                    });
+        
+                // Merge all dates into a single collection
+                $allDates = $consultationDates
+                    ->merge($prenatalConsultationDates)
+                    ->merge($immunizationDates)
+                    ->merge($vaccinationDates);
+        
+
         return Inertia::render('Doctor/DoctorDashboard', [
+            'allDates' => $allDates,
             'totalPatients' => $totalPatients,
             'ITRConsultation' => $ITRConsultation,
             'latestPatients' => $latestPatients,

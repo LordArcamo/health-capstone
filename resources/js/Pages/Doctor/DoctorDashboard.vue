@@ -15,6 +15,7 @@ const props = defineProps({
   latestPatients: Array,
   todaysConsultation: Number,
   notifications: Array,
+  allDates: Array,
 });
 
 // Reactive states
@@ -46,6 +47,17 @@ const searchQueue = ref('');
 const unreadNotifications = computed(() =>
   notifications.value.filter(n => !n.isRead).length
 );
+
+const formattedDates = props.allDates.map(item => {
+  const date = new Date(item.date);
+  const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(date);
+  return {
+    formattedDate: month // This will return the month name, like "January"
+  };
+});
+
+console.log(formattedDates);
+
 
 // Function to format date
 const formatDate = (dateString) => {
@@ -350,16 +362,22 @@ const initCharts = () => {
     },
   });
 
+  //New Patients (Bar Chart)
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthCounts = months.map(month => {
+    return formattedDates.filter(item => item.formattedDate === month).length;
+  });
+
   const totalPatientsCtx = document.getElementById('totalPatientsChart').getContext('2d');
+
   new Chart(totalPatientsCtx, {
     type: 'bar',
     data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      , // Replace with the months or dates you have
+      labels: months, // Month names as labels
       datasets: [
         {
           label: 'Total Patients',
-          data: totalPatientsData.value, // Replace with the actual total patients data for each month
+          data: monthCounts, // The count of patients per month
           backgroundColor: '#66BB6A', // Green color for the bar
           borderColor: '#388E3C', // Dark green for border color
           borderWidth: 1,
