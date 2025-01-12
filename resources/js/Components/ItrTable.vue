@@ -21,11 +21,7 @@
 
     <!-- Search and Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-      <!-- Search Bar -->
-      <div class="w-full md:w-2/3 flex items-center border border-gray-300 rounded-lg shadow-sm bg-white">
-        <input v-model="searchQuery" type="text" placeholder="Search by name, diagnosis, or visit type"
-          class="w-full p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
-          <div class="w-full md:w-2/3 flex flex-col gap-4">
+      <div class="w-full md:w-2/3 flex flex-col gap-4">
         <!-- Enhanced Input Field -->
         <div class="relative">
           <input v-model="searchQuery" @keyup.enter="addFilter" type="text"
@@ -36,6 +32,7 @@
             Add
           </button>
         </div>
+
         <!-- Dynamic Filter Tags with Modern Style -->
         <div v-if="filters.length" class="flex flex-wrap gap-3">
           <div v-for="(filter, index) in filters" :key="index"
@@ -47,11 +44,13 @@
             </button>
           </div>
         </div>
+
         <!-- Helper Text -->
         <p v-if="!filters.length" class="text-gray-500 text-sm italic">
           Type your search and press <strong>Enter</strong> or click <strong>Add</strong> to apply filters.
         </p>
       </div>
+
 
       <!-- Relative container for the Filters button + panel -->
       <div class="relative flex gap-1 mb-10">
@@ -76,8 +75,8 @@
         <!-- Absolute-positioned Filter Panel -->
         <transition name="slide-vertical">
           <div v-if="isFilterPanelOpen"
-            class="absolute left-0 top-full mt-2 w-96 bg-white border border-gray-300 rounded-lg shadow-md z-50 p-6">
-            <div class="grid grid-cols-2 gap-6">
+            class="absolute left-0 top-full mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 p-6">
+            <div class="grid grid-cols-2 gap-6 ">
               <!-- Gender Filter -->
               <div>
                 <label class="block font-semibold mb-2">Gender</label>
@@ -98,7 +97,7 @@
               </div>
 
               <!-- Age Range Filter -->
-              <div>
+              <div class="test">
                 <label class="block font-semibold mb-2">Age Range</label>
                 <div class="flex flex-col items-start">
                   <input type="range" v-model="filterAgeRange" min="0" max="100" step="5"
@@ -178,11 +177,11 @@
             <th class="py-4 px-6 text-left">Full Name</th>
             <th class="py-4 px-6 text-left">Address</th>
             <th class="py-4 px-6 text-left">Age</th>
-            <th class="py-4 px-6 text-left">Nature of Visit</th>
             <th class="py-4 px-6 text-left">Visit Type</th>
             <th class="py-4 px-6 text-left">Consultation Date</th>
             <th class="py-4 px-6 text-left">Diagnosis</th>
             <th class="py-4 px-6 text-left">Gender</th>
+            <th class="py-4 px-6 text-left">Status</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 text-gray-700">
@@ -191,7 +190,6 @@
             <td class="py-3 px-6">{{ patient.fullName }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
             <td class="py-3 px-6">{{ patient.age }}</td>
-            <td class="py-3 px-6">{{ patient.natureOfVisit }}</td>
             <td class="py-3 px-6">{{ patient.visitType }}</td>
             <td class="py-3 px-6">
               {{ formatDate(patient.consultationDate) }}
@@ -200,6 +198,18 @@
             <td class="py-3 px-6">
               {{ patient.sex }}
             </td>
+            <td class="text-base py-3 px-6">
+              <span :class="{
+                'bg-green-100 text-green-800': patient.status === 'Completed',
+                'bg-yellow-100 text-yellow-800': patient.status === 'In Queued',
+                'bg-red-100 text-red-800': patient.status === 'Cancelled',
+                'bg-orange-100 text-orange-800': patient.status === 'Follow-up Required',
+                'bg-gray-100 text-gray-800': !patient.status || !['Completed', 'In Queued', 'Cancelled', 'Follow-up Required'].includes(patient.status)
+              }" class="px-3 py-1 rounded-full text-sm font-semibold shadow-sm capitalize">
+                {{ patient.status || 'Pending' }}
+              </span>
+            </td>
+
           </tr>
         </tbody>
       </table>
@@ -208,7 +218,7 @@
     <!-- Pagination -->
     <div class="mt-6 flex justify-center gap-4">
       <button @click="prevPage" :disabled="currentPage === 1"
-        class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow hover:bg-red-600 transition">
+        class="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow hover:bg-gray-600 transition">
         Previous
       </button>
       <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
@@ -217,10 +227,12 @@
         Next
       </button>
     </div>
+
     <!-- Modal -->
     <div v-if="showModal && selectedPatient"
-      class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative">
+      class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative max-h-screen overflow-y-auto">
+
         <!-- Close Button -->
         <button @click="closeModal"
           class="absolute top-4 right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-700 transition">
@@ -241,9 +253,19 @@
           </div>
         </div>
 
+        <!-- Patient Status Section -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-700">Patient Status:</h3>
+          <span :class="statusBadgeClass(selectedPatient.status)"
+            class="inline-block px-3 py-1 text-sm font-medium rounded-full">
+            {{ selectedPatient.status || 'Pending' }}
+          </span>
+        </div>
+
         <!-- Patient Details Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Column 1 -->
+
+          <!-- Column 1: Basic Information -->
           <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
             <ul class="space-y-2">
@@ -258,7 +280,7 @@
             </ul>
           </div>
 
-          <!-- Column 2 -->
+          <!-- Column 2: Consultation Details -->
           <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Consultation Details</h3>
             <ul class="space-y-2">
@@ -292,6 +314,13 @@
             class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
             Close
           </button>
+
+          <!-- Edit Button -->
+          <button @click="editPatient(selectedPatient)"
+            class="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition">
+            Edit Record
+          </button>
+
           <button @click="printRecord(selectedPatient)"
             class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
             Print Record
@@ -300,9 +329,10 @@
       </div>
     </div>
 
+
+
   </div>
 </template>
-
 
 
 <script>
@@ -316,39 +346,30 @@ export default {
     },
   },
   mounted() {
-    // 1) For the <input type="date">, we either start blank or set it to today's YYYY-MM-DD.
-    //    If you want the user to see it empty by default, keep it as ''.
-    //    If you want it to default to today's date in the picker, do:
-    // this.filterDate = new Date().toISOString().split('T')[0];
-
-    // 2) For displaying the "Current Date" in a more human-readable format:
     const today = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     this.currentDateText = today.toLocaleDateString(undefined, options);
   },
   data() {
     return {
-      searchQuery: '', // Search query for filtering
-      filterPrk: '', // Filter by purok
-      filterBarangay: '', // Filter by barangay
-      filterGender: [], // Array for selected genders
-      filterAgeRange: '', // Filter by age range
-      filterDiagnosis: [], // Array for selected diagnoses
-      currentPage: 1, // Current page for pagination
-      itemsPerPage: 15, // Number of items per page
-      showModal: false, // Modal visibility flag
-      selectedPatient: null, // Selected patient for modal display
-      isFilterPanelOpen: false, // Toggle filter panel visibility
+      searchQuery: '',            // User input for search
+      filters: [],                // Dynamic search filters
+      filterPrk: '',
+      filterBarangay: '',
+      filterGender: [],
+      filterAgeRange: '',
+      filterDiagnosis: [],
+      currentPage: 1,
+      itemsPerPage: 15,
+      showModal: false,
+      selectedPatient: null,
+      isFilterPanelOpen: false,
       filterDate: '',
       currentDateText: '',
-      diagnosisOptions: [],  // e.g. ["Malaria","Dengue","Flu","Cold","COVID-19",...]
-      showAllDiagnosis: false,  // Toggles whether all or some diagnosis checkboxes are shown
+      diagnosisOptions: [],
+      showAllDiagnosis: false,
       maxVisibleDiagnoses: 5,
-      // For collapsible Diagnosis panel
       isDiagnosisPanelOpen: false,
-      isFilterPanelOpen: false,
-      isDiagnosisPanelOpen: false,
-
     };
   },
   watch: {
@@ -379,8 +400,6 @@ export default {
     },
 
     uniqueDiagnosisOptions() {
-      // If your `patients` array definitely has a 'diagnosis' field
-      // that can be used for unique sets:
       return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
     },
 
@@ -391,13 +410,11 @@ export default {
     */
     visibleDiagnosisOptions() {
       const all = this.uniqueDiagnosisOptions;
-      return this.showAllDiagnosis
-        ? all
-        : all.slice(0, this.maxVisibleDiagnoses);
+      return this.showAllDiagnosis ? all : all.slice(0, this.maxVisibleDiagnoses);
     },
 
     filteredPatients() {
-      const query = this.searchQuery.toLowerCase();
+      const queries = this.filters.map(f => f.toLowerCase());
 
       return this.patients
         .map((patient) => ({
@@ -406,41 +423,32 @@ export default {
           address: `${patient.purok}, ${patient.barangay}`,
         }))
         .filter((patient) => {
-          // SEARCH MATCH
-          const matchesQuery =
-            patient.fullName.toLowerCase().includes(query) ||
-            patient.natureOfVisit.toLowerCase().includes(query) ||
-            patient.visitType.toLowerCase().includes(query) ||
-            patient.address.toLowerCase().includes(query) ||
-            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(query));
+          const matchesFilters = queries.every((filter) =>
+            (patient.fullName && patient.fullName.toLowerCase().includes(filter)) ||
+            (patient.natureOfVisit && patient.natureOfVisit.toLowerCase().includes(filter)) ||
+            (patient.visitType && patient.visitType.toLowerCase().includes(filter)) ||
+            (patient.address && patient.address.toLowerCase().includes(filter)) ||
+            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(filter))
+          );
 
-          // PUROK, BARANGAY, GENDER, DIAGNOSIS
           const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
-          const matchesBarangay =
-            !this.filterBarangay || patient.barangay === this.filterBarangay;
-          const matchesGender =
-            this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
-          const matchesDiagnosis =
-            this.filterDiagnosis.length === 0 ||
-            this.filterDiagnosis.includes(patient.diagnosis);
+          const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
+          const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+          const matchesDiagnosis = this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
 
-          // AGE RANGE
           let matchesAgeRange = true;
           if (this.filterAgeRange) {
             const patientAge = parseInt(patient.age, 10);
             matchesAgeRange = patientAge >= parseInt(this.filterAgeRange, 10);
           }
 
-          // DATE FILTER
-          // Only apply if the user actually picked a date in the datepicker.
           let matchesDate = true;
           if (this.filterDate) {
-            // Compare day-only to avoid format/timezone issues
             matchesDate = this.sameDay(patient.consultationDate, this.filterDate);
           }
 
           return (
-            matchesQuery &&
+            matchesFilters &&
             matchesPrk &&
             matchesBarangay &&
             matchesGender &&
@@ -449,102 +457,105 @@ export default {
             matchesDate
           );
         })
-        .sort((a, b) => {
-          const dateA = new Date(a.consultationDate);
-          const dateB = new Date(b.consultationDate);
-          return dateB - dateA; // descending -> most recent first
-        });
+        .sort((a, b) => new Date(b.consultationDate) - new Date(a.consultationDate));
     },
 
     totalPages() {
       return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
     },
 
-    // Unique Purok
     purokOptions() {
       return Array.from(new Set(this.patients.map((p) => p.purok)));
     },
 
-    // Unique Barangay
     barangayOptions() {
       return Array.from(new Set(this.patients.map((p) => p.barangay)));
     },
-
-    // Unique Diagnosis
-    diagnosisOptions() {
-      return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
-    },
   },
 
-
   methods: {
+    // Open Edit Page
+    editPatient(patient) {
+      Inertia.get(`/patients/edit/${patient.personalId}`);
+    },
+
+    // Status Badge Styling
+    statusBadgeClass(status) {
+      switch (status) {
+        case 'Completed':
+          return 'bg-green-100 text-green-800';
+        case 'In Progress':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'Pending':
+          return 'bg-gray-100 text-gray-800';
+        case 'Cancelled':
+          return 'bg-red-100 text-red-800';
+        case 'Follow-up Required':
+          return 'bg-orange-100 text-orange-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    },
+    addFilter() {
+      const words = this.searchQuery.trim().split(/\s+/);
+      words.forEach((word) => {
+        const cleanWord = word.trim().toLowerCase();
+        if (cleanWord && !this.filters.includes(cleanWord)) {
+          this.filters.push(cleanWord);
+        }
+      });
+      this.searchQuery = '';
+    },
+
+    removeFilter(index) {
+      this.filters.splice(index, 1);
+    },
+
     toggleFilterPanel() {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
+
     toggleDiagnosisPanel() {
       this.isDiagnosisPanelOpen = !this.isDiagnosisPanelOpen;
     },
+
     formatDate(dateStr) {
       if (!dateStr) return '';
-      // Convert to Date object
       const dateObj = new Date(dateStr);
-      // Check if valid
-      if (isNaN(dateObj)) return dateStr; // Fallback: return original if invalid
-
-      // Format: e.g. "December 01, 2024"
+      if (isNaN(dateObj)) return dateStr;
       const options = { year: 'numeric', month: 'long', day: '2-digit' };
       return dateObj.toLocaleDateString('en-US', options);
     },
+
     toggleShowAllDiagnosis() {
       this.showAllDiagnosis = !this.showAllDiagnosis;
     },
-    // Compare two dates by year, month, day
-    sameDay(dateA, dateB) {
-      // Convert both to Date objects
-      const dA = new Date(dateA); // e.g. "2025-01-07", "01/07/2025", or "2025-01-07T00:00:00"
-      const dB = new Date(dateB); // e.g. "2025-01-07"
-      // If either is invalid, return false
-      if (isNaN(dA) || isNaN(dB)) return false;
-      return (
-        dA.getFullYear() === dB.getFullYear() &&
-        dA.getMonth() === dB.getMonth() &&
-        dA.getDate() === dB.getDate()
-      );
-    },
-    printRecord(patient) {
-      const printContent = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.5; padding: 20px;">
-        <h2 style="text-align: center; color: #38a169;">Individual Treatment Record</h2>
-        <p><strong>Full Name:</strong> ${patient.firstName} ${patient.middleName || ''} ${patient.lastName}</p>
-        <p><strong>Age:</strong> ${patient.age}</p>
-        <p><strong>Gender:</strong> ${patient.sex}</p>
-        <p><strong>Address:</strong> ${patient.purok}, ${patient.barangay}</p>
-        <p><strong>Nature of Visit:</strong> ${patient.natureOfVisit}</p>
-        <p><strong>Visit Type:</strong> ${patient.visitType}</p>
-        <p><strong>Date of Consultation:</strong> ${patient.consultationDate}</p>
-        <p><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
-        <p><strong>Medication/Treatment:</strong> ${patient.medication}</p>
-      </div>
-    `;
 
-      const newWindow = window.open('', '_blank', 'width=800,height=600');
-      newWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Record</title>
-        </head>
-        <body>
-          ${printContent}
-        </body>
-      </html>
-    `);
-      newWindow.document.close();
-      newWindow.print();
+    sameDay(dateA, dateB) {
+      const dA = new Date(dateA);
+      const dB = new Date(dateB);
+      if (isNaN(dA) || isNaN(dB)) return false;
+      return dA.getFullYear() === dB.getFullYear() &&
+        dA.getMonth() === dB.getMonth() &&
+        dA.getDate() === dB.getDate();
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
     },
 
     triggerImport() {
-      this.$refs.fileInput.click(); // Trigger file input click
+      this.$refs.fileInput.click();
     },
+
     handleFileUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -553,76 +564,41 @@ export default {
         this.uploadCSV(formData);
       }
     },
+
     uploadCSV(formData) {
       Inertia.post('/services/patients/itrtable', formData, {
-        onSuccess: () => {
-          alert('Patients imported successfully!');
-        },
+        onSuccess: () => alert('Patients imported successfully!'),
         onError: (errors) => {
           console.error('Errors during upload:', errors);
           alert('Failed to import CSV. Please check the file and try again.');
         },
       });
     },
-    // Toggle filter panel visibility
-    toggleFilterPanel() {
-      this.isFilterPanelOpen = !this.isFilterPanelOpen;
-    },
-    // Open the modal with selected patient details
+
     openModal(patient) {
       this.selectedPatient = patient;
       this.showModal = true;
     },
-    // Close the modal
+
     closeModal() {
       this.showModal = false;
       this.selectedPatient = null;
     },
-    // Go to the next page
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    // Go to the previous page
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
-    // Generate a CSV report of filtered patients
-    generateReport() {
-      const data = this.filteredPatients.map((patient) => ({
-        fullName: patient.fullName,
-        address: patient.address,
-        age: patient.age,
-        natureOfVisit: patient.natureOfVisit,
-        visitType: patient.visitType,
-        gender: patient.sex,
-        diagnosis: patient.diagnosis || 'N/A', // Include diagnosis if available
-      }));
 
-      const csvContent =
-        'data:text/csv;charset=utf-8,' +
-        ['Full Name,Address,Age,Nature of Visit,Visit Type,Gender,Diagnosis']
-          .concat(
-            data.map((row) =>
-              `${row.fullName},${row.address},${row.age},${row.natureOfVisit},${row.visitType},${row.gender},${row.diagnosis}`
-            )
-          )
-          .join('\n');
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'patient_report.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    printRecord(patient) {
+      const printContent = `
+        <h2>Individual Treatment Record</h2>
+        <p><strong>Name:</strong> ${patient.fullName}</p>
+        <p><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
+      `;
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(printContent);
+      newWindow.print();
     },
   },
 };
 </script>
+
 
 
 <style>
