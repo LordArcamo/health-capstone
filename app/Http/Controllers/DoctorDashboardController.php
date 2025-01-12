@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
+use App\Models\PrenatalConsultationDetails;
 
 class DoctorDashboardController extends Controller
 {
@@ -128,8 +129,10 @@ class DoctorDashboardController extends Controller
         $latestGeneralPatients = DB::table('personal_information')
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
-            ->where('consultation_details.status', 'completed')
-            ->whereDate('consultation_details.consultationDate', $today)
+            ->where(function ($query) use ($today) {
+                $query->whereIn('consultation_details.status', ['completed', 'cancelled'])
+                      ->whereDate('consultation_details.consultationDate', $today);
+            })
             ->select(
                 'consultation_details.consultationDetailsID',
                 DB::raw('NULL as prenatalConsultationDetailsID'), // Add NULL for prenatal-specific ID
@@ -197,8 +200,10 @@ class DoctorDashboardController extends Controller
         $latestPrenatalPatients = DB::table('personal_information')
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
             ->leftJoin('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
-            ->where('prenatal_consultation_details.status', 'completed')
-            ->whereDate('prenatal_consultation_details.consultationDate', $today)
+            ->where(function ($query) use ($today) {
+                $query->whereIn('prenatal_consultation_details.status', ['completed', 'cancelled'])
+                      ->whereDate('prenatal_consultation_details.consultationDate', $today);
+            })
             ->select(
                 DB::raw('NULL as consultationDetailsID'), // Add NULL for general-specific ID
                 'prenatal_consultation_details.prenatalConsultationDetailsID',
@@ -276,7 +281,9 @@ class DoctorDashboardController extends Controller
         $totalPatients = PersonalInformation::count();
 
         // Get today's appointments count
-        $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)->count();
+        $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)->count() +
+                      PrenatalConsultationDetails::whereDate('consultationDate', $today)->count();
+
 
         // Get critical cases count (you may need to adjust this based on your criteria)
         $criticalCases = 0;
@@ -324,5 +331,124 @@ class DoctorDashboardController extends Controller
         return Inertia::render('Doctor/DoctorCheckup', [
             'patient' => $nextPatient,
         ]);
+    }
+
+    public function markAsCancelled(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            if ($request->consultationDetailsID) {
+                // Regular consultation
+                $consultation = ConsultationDetails::findOrFail($request->consultationDetailsID);
+                $consultation->status = 'cancelled';
+                $consultation->save();
+
+                // Create or update visit_information with 'None' values
+                $visitInfo = DB::table('visit_information')
+                    ->where('consultationDetailsID', $request->consultationDetailsID)
+                    ->first();
+
+                if ($visitInfo) {
+                    // Update existing record
+                    DB::table('visit_information')
+                        ->where('consultationDetailsID', $request->consultationDetailsID)
+                        ->update([
+                            'chiefComplaints' => 'None',
+                            'diagnosis' => 'None',
+                            'medication' => 'None',
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    // Create new record
+                    DB::table('visit_information')->insert([
+                        'consultationDetailsID' => $request->consultationDetailsID,
+                        'id' => auth()->id(),
+                        'chiefComplaints' => 'None',
+                        'diagnosis' => 'None',
+                        'medication' => 'None',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+            } elseif ($request->prenatalConsultationDetailsID) {
+                // Prenatal consultation
+                $prenatalConsultation = PrenatalConsultationDetails::findOrFail($request->prenatalConsultationDetailsID);
+                $prenatalConsultation->status = 'cancelled';
+                $prenatalConsultation->save();
+
+                // Create or update prenatal_visit_information with 'None' values
+                $visitInfo = DB::table('prenatal_visit_information')
+                    ->where('prenatalConsultationDetailsID', $request->prenatalConsultationDetailsID)
+                    ->first();
+
+                if ($visitInfo) {
+                    // Update existing record
+                    DB::table('prenatal_visit_information')
+                        ->where('prenatalConsultationDetailsID', $request->prenatalConsultationDetailsID)
+                        ->update([
+                            'menarche' => 'None',
+                            'sexualOnset' => 'None',
+                            'periodDuration' => 'None',
+                            'birthControl' => 'None',
+                            'intervalCycle' => 'None',
+                            'menopause' => 'None',
+                            'lmp' => now(),
+                            'edc' => now(),
+                            'gravidity' => 'None',
+                            'parity' => 'None',
+                            'term' => 'None',
+                            'preterm' => 'None',
+                            'abortion' => 'None',
+                            'living' => 'None',
+                            'syphilisResult' => 'None',
+                            'penicillin' => 'None',
+                            'hemoglobin' => 0.00,
+                            'hematocrit' => 0.00,
+                            'urinalysis' => 'None',
+                            'ttStatus' => 'None',
+                            'tdDate' => now(),
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    // Create new record
+                    DB::table('prenatal_visit_information')->insert([
+                        'prenatalConsultationDetailsID' => $request->prenatalConsultationDetailsID,
+                        'id' => auth()->id(),
+                        'menarche' => 'None',
+                        'sexualOnset' => 'None',
+                        'periodDuration' => 'None',
+                        'birthControl' => 'None',
+                        'intervalCycle' => 'None',
+                        'menopause' => 'None',
+                        'lmp' => now(),
+                        'edc' => now(),
+                        'gravidity' => 'None',
+                        'parity' => 'None',
+                        'term' => 'None',
+                        'preterm' => 'None',
+                        'abortion' => 'None',
+                        'living' => 'None',
+                        'syphilisResult' => 'None',
+                        'penicillin' => 'None',
+                        'hemoglobin' => 0.00,
+                        'hematocrit' => 0.00,
+                        'urinalysis' => 'None',
+                        'ttStatus' => 'None',
+                        'tdDate' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+            } else {
+                throw new \Exception('No consultation ID provided');
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Consultation marked as cancelled successfully.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', 'Failed to cancel consultation. Please try again. Error: ' . $e->getMessage());
+        }
     }
 }

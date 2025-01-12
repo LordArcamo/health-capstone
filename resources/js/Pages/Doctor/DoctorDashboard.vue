@@ -185,12 +185,24 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-
 // Handle marking notification as read
 const markAsRead = (notification) => {
   if (!notification.isRead) {
     notification.isRead = true;
   }
+};
+
+const markAsCancelled = (patient) => {
+  const data = patient.visitType === 'Prenatal' 
+    ? { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID }
+    : { consultationDetailsID: patient.consultationDetailsID };
+
+  router.post('/doctor/mark-as-cancelled', data, {
+    onSuccess: () => {
+      // Refresh the data after successful cancellation
+      refreshData();
+    }
+  });
 };
 
 // Dynamic date
@@ -696,7 +708,7 @@ onMounted(() => {
 
               <!-- Empty State -->
               <div v-if="latestPatients.length === 0"
-                class="text-center text-gray-500 py-8 bg-gray-50 rounded-lg shadow">
+                class="text-gray-500 text-center py-8 bg-gray-50 rounded-lg shadow">
                 No completed consultations yet.
               </div>
             </div>

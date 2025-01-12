@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\CheckUp;
 use App\Models\ConsultationDetails;
 use App\Models\VisitInformation;
+use Illuminate\Support\Facades\DB;
 
 
 
