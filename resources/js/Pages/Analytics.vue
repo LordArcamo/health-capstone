@@ -7,7 +7,7 @@ import Vaccinations from '@/Components/Charts/Vaccinations.vue';
 import MentalHealth from '@/Components/Charts/MentalHealth.vue';
 import RiskManagement from '@/Components/Charts/RiskManagement.vue';
 import Cases from '@/Components/Charts/Cases.vue';
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { router } from '@inertiajs/vue3';
 import Prenatal from '@/Components/Charts/Prenatal.vue';
 
@@ -65,10 +65,10 @@ const updateStats = (stats) => {
   summaryStats.value.risk = stats.risk || 0;
 };
 
-const monthlyData = ref(props.barChart || []);
-const monthlyVaccination = ref(props.lineChart && props.lineChart.data ? props.lineChart.data : Array(12).fill(0));
-const monthlyCases = ref(props.casesData || Array(12).fill(0));
-const referredData = ref(props.pieChart);
+const monthlyData = ref(props.barChart ? [...props.barChart] : Array(12).fill(0));
+const monthlyVaccination = ref(props.lineChart?.data ? [...props.lineChart.data] : Array(12).fill(0));
+const monthlyCases = ref(props.casesData ? [...props.casesData] : Array(12).fill(0));
+const referredData = ref(props.pieChart ? {...props.pieChart} : {});
 
 const filters = ref({
   date: '',
@@ -135,16 +135,27 @@ watch(() => props.risk, (newVal) => {
 }, { immediate: true });
 
 watch(() => props.barChart, (newVal) => {
-  monthlyData.value = newVal;
-}, { immediate: true });
+  monthlyData.value = newVal ? [...newVal] : Array(12).fill(0);
+}, { immediate: false, deep: false });
 
 watch(() => props.pieChart, (newVal) => {
-  referredData.value = newVal;
-}, { immediate: true });
+  referredData.value = newVal ? {...newVal} : {};
+}, { immediate: false, deep: false });
 
-watch(() => props.lineChart, (newVal) => {
-  monthlyVaccination.value = newVal.data || Array(12).fill(0);
-}, { immediate: true });
+watch(() => props.lineChart?.data, (newVal) => {
+  monthlyVaccination.value = newVal ? [...newVal] : Array(12).fill(0);
+}, { immediate: false, deep: false });
+
+watch(() => props.casesData, (newVal) => {
+  monthlyCases.value = newVal ? [...newVal] : Array(12).fill(0);
+}, { immediate: false, deep: false });
+
+onBeforeUnmount(() => {
+  monthlyData.value = null;
+  monthlyVaccination.value = null;
+  monthlyCases.value = null;
+  referredData.value = null;
+});
 </script>
 
 <template>
@@ -172,7 +183,7 @@ watch(() => props.lineChart, (newVal) => {
       </div>
       <div v-if="showFilters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Datee Range</label>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Date Range</label>
           <select
             v-model="filters.date"
             class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
