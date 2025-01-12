@@ -525,6 +525,19 @@ export default {
         this.postpartumData = null;
       }
     },
+    async fetchTrimesterData(prenatalConsultationDetailsID) {
+        try {
+            const response = await axios.get(`/prenatal/${prenatalConsultationDetailsID}/trimester/{trimester}`);
+            if (response.data.success) {
+            this.localTrimesterData = response.data.data;
+            } else {
+            this.localTrimesterData = null;
+            }
+        } catch (error) {
+            console.error('Error fetching trimester data:', error);
+            this.localTrimesterData = null;
+        }
+    },
 
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -563,6 +576,10 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+    handleTrimesterConfirm(data) {
+        console.log("Trimester data confirmed:", data);
+        this.closeModal();
     },
   },
   mounted() {

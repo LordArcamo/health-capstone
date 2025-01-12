@@ -287,43 +287,95 @@ class SystemAnalyticsController extends Controller
         $currentYear = date('Y');
 
         for ($month = 1; $month <= 12; $month++) {
-            $query = PersonalInformation::whereYear('created_at', $currentYear)
-                ->whereMonth('created_at', $month);
+            // Query for consultation_details
+            $consultationQuery = DB::table('consultation_details')
+                ->join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
+                ->whereYear('consultation_details.consultationDate', $currentYear)
+                ->whereMonth('consultation_details.consultationDate', $month);
 
+            // Query for prenatal_consultation_details
+            $prenatalQuery = DB::table('prenatal_consultation_details')
+                ->join('personal_information', 'prenatal_consultation_details.personalId', '=', 'personal_information.personalId')
+                ->whereYear('prenatal_consultation_details.consultationDate', $currentYear)
+                ->whereMonth('prenatal_consultation_details.consultationDate', $month);
+
+            // Query for national_immunization_program
+            $immunizationQuery = DB::table('national_immunization_programs')
+                ->join('personal_information', 'national_immunization_programs.personalId', '=', 'personal_information.personalId')
+                ->whereYear('national_immunization_programs.created_at', $currentYear)
+                ->whereMonth('national_immunization_programs.created_at', $month);
+
+            // Query for vaccination_records
+            $vaccinationQuery = DB::table('vaccination_records')
+                ->join('personal_information', 'vaccination_records.personalId', '=', 'personal_information.personalId')
+                ->whereYear('vaccination_records.dateOfvisit', $currentYear)
+                ->whereMonth('vaccination_records.dateOfvisit', $month);
+
+            // Apply gender filter if provided
             if ($request->gender) {
-                $query->where('sex', $request->gender);
+                $consultationQuery->where('personal_information.sex', $request->gender);
+                $prenatalQuery->where('personal_information.sex', $request->gender);
+                $immunizationQuery->where('personal_information.sex', $request->gender);
+                $vaccinationQuery->where('personal_information.sex', $request->gender);
             }
 
+            // Apply age range filter if provided
             if ($request->ageRange) {
                 $ages = explode('-', $request->ageRange);
                 if (count($ages) === 2) {
-                    $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
-                          ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+                    $consultationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
+                                      ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
+                    $prenatalQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
+                                  ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
+                    $immunizationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
+                                      ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
+                    $vaccinationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
+                                      ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
                 } else {
-                    $query->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+                    // If no valid age range is given, default to >= 60
+                    $consultationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
+                    $prenatalQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
+                    $immunizationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
+                    $vaccinationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
                 }
             }
 
+            // Apply date filter if provided
             if ($request->date) {
                 $today = now();
                 switch ($request->date) {
                     case '7days':
-                        $query->where('created_at', '>=', $today->subDays(7));
+                        $consultationQuery->where('consultation_details.consultationDate', '>=', $today->subDays(7));
+                        $prenatalQuery->where('prenatal_consultation_details.consultationDate', '>=', $today->subDays(7));
+                        $immunizationQuery->where('national_immunization_programs.created_at', '>=', $today->subDays(7));
+                        $vaccinationQuery->where('vaccination_records.dateOfvisit', '>=', $today->subDays(7));
                         break;
                     case '30days':
-                        $query->where('created_at', '>=', $today->subDays(30));
+                        $consultationQuery->where('consultation_details.consultationDate', '>=', $today->subDays(30));
+                        $prenatalQuery->where('prenatal_consultation_details.consultationDate', '>=', $today->subDays(30));
+                        $immunizationQuery->where('national_immunization_programs.created_at', '>=', $today->subDays(30));
+                        $vaccinationQuery->where('vaccination_records.dateOfvisit', '>=', $today->subDays(30));
                         break;
                     case 'year':
-                        $query->whereYear('created_at', $today->year);
+                        $consultationQuery->whereYear('consultation_details.consultationDate', $today->year);
+                        $prenatalQuery->whereYear('prenatal_consultation_details.consultationDate', $today->year);
+                        $immunizationQuery->whereYear('national_immunization_programs.created_at', $today->year);
+                        $vaccinationQuery->whereYear('vaccination_records.dateOfvisit', $today->year);
                         break;
                 }
             }
 
-            $monthlyStats[] = $query->count();
+            // Combine all counts for the month
+            $monthlyStats[] = $consultationQuery->count()
+                                + $prenatalQuery->count()
+                                + $immunizationQuery->count()
+                                + $vaccinationQuery->count();
         }
 
         return $monthlyStats;
     }
+
+
 
     private function getReferredStats($request)
     {

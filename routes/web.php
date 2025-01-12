@@ -121,7 +121,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/services/patients/itrtable', [CheckUpController::class, 'import'])->name('itr.import');
 });
 
-Route::get('/services/patients', [PatientController::class, 'show'])->name('totalPatients.show');
+Route::get('/services/patients', [PatientController::class, 'show'])->name('totalPatifents.show');
 
 Route::get('/services/patients/referred', [PatientController::class, 'showReferred'])->name('referredPatients.show');
 
