@@ -226,11 +226,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('register.store');
 });
 
-// Route to display the main doctor dashboard with static data
-Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
-    ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
-    ->name('doctor.dashboard');
-
+// Doctor Dashboard Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/doctor-dashboard', [DoctorDashboardController::class, 'index'])
+        ->middleware(RoleMiddleware::class . ':doctor')
+        ->name('doctor.dashboard');
+    Route::post('/doctor/mark-as-cancelled', [DoctorDashboardController::class, 'markAsCancelled'])
+        ->middleware(RoleMiddleware::class . ':doctor')
+        ->name('doctor.mark-as-cancelled');
+});
 
 Route::get('/doctor-checkup/itr', [DoctorCheckupController::class, 'create'])
     ->middleware(RoleMiddleware::class . ':doctor') // Ensure only doctors can access
