@@ -23,9 +23,8 @@ const props = defineProps({
   nonReferredData: { type: Array, default: () => [] },
 });
 
-
 // Reactive states
-const totalPatients = ref(props.totalPatients || 0);  // ✅ Declare this first!
+const totalPatients = ref(props.totalPatients || 0);
 const referredPatients = ref(props.referredPatients || 0);
 const patients = ref(props.patients || []);
 const casesData = ref([]);

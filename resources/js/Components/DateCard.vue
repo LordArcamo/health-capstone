@@ -74,7 +74,6 @@ export default {
     const isDropdownOpen = ref(false);
     const currentFilter = ref('total'); // Set to "total" for default display
     const formattedDateRange = ref('');
-    const totalPatients = ref(props.totalPatients || 0);
 
     const formatDateRange = (startDate, endDate, type) => {
   if (type === 'today') {

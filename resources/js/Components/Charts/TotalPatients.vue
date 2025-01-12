@@ -9,20 +9,17 @@
     </div>
 
     <!-- Chart -->
-    <apexchart
-      v-if="chartSeries[0].data.length"
-      type="line"
-      :options="chartOptions"
-      :series="chartSeries"
+    <apexchart 
+      type="line" 
+      :options="chartOptions" 
+      :series="chartSeries" 
       class="patients-chart"
-      ref="chart"
     ></apexchart>
   </div>
 </template>
 
 <script>
 import VueApexCharts from "vue3-apexcharts";
-import { watch, onBeforeUnmount, ref } from 'vue';
 
 export default {
   name: "TotalPatientsChart",
@@ -32,37 +29,43 @@ export default {
   props: {
     monthlyData: {
       type: Array,
-      required: true,  // ✅ Required since Inertia will pass this
+      required: true,
+      default: () => Array(12).fill(0),
     },
   },
   data() {
     return {
-      chartInstance: null,
       chartOptions: {
         chart: {
           id: "patients-line-chart",
           toolbar: {
-            show: true,
+            show: true, // Enable toolbar for download and zoom
           },
           zoom: {
             enabled: true,
           },
-          background: "#ffffff",
-          animations: {
-            enabled: false
-          }
+          background: "#ffffff", // Card background
         },
         xaxis: {
           categories: [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
           ],
           labels: {
             style: {
               fontSize: "12px",
               fontWeight: "bold",
-              colors: "#333",
-              colors: "#333",
+              colors: "#333", // Darker text for better contrast
             },
             rotate: -30,
           },
@@ -76,9 +79,9 @@ export default {
             },
           },
         },
-        colors: ["#6EC591"],
+        colors: ["#6EC591"], // Green line color to match the theme
         stroke: {
-          curve: "smooth",
+          curve: "smooth", // Smooth lines for better aesthetics
           width: 3,
         },
         grid: {
@@ -94,46 +97,39 @@ export default {
             },
           },
         },
+        title: {
+          text: "",
+        },
+        responsive: [
+          {
+            breakpoint: 768,
+            options: {
+              chart: {
+                height: 300,
+              },
+              xaxis: {
+                labels: {
+                  style: {
+                    fontSize: "10px",
+                  },
+                },
+              },
+            },
+          },
+        ],
       },
     };
   },
   computed: {
     chartSeries() {
-      return [{
-        name: "Total Patients",
-        data: [...this.monthlyData]
-      }];
-    }
+      return [
+        {
+          name: "Total Patients",
+          data: this.monthlyData,
+        },
+      ];
+    },
   },
-  mounted() {
-    this.initChart();
-  },
-  beforeUnmount() {
-    if (this.chartInstance) {
-      this.chartInstance.destroy();
-    }
-  },
-  methods: {
-    initChart() {
-      if (this.chartInstance) {
-        this.chartInstance.destroy();
-      }
-      this.chartInstance = this.$refs.chart.chart;
-    }
-  },
-  watch: {
-    monthlyData: {
-      handler(newVal) {
-        if (this.chartInstance) {
-          this.chartInstance.updateSeries([{
-            name: "Total Patients",
-            data: [...newVal]
-          }]);
-        }
-      },
-      deep: true
-    }
-  }
 };
 </script>
 
@@ -142,7 +138,7 @@ export default {
   max-width: 100%;
   margin: 20px auto;
   padding: 20px;
-  background: #ffffff;
+  background: #ffffff; /* White background for clarity */
   border-radius: 12px;
   border: 1px solid #e5e5e5;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -156,7 +152,7 @@ export default {
 .chart-title {
   font-size: 24px;
   font-weight: bold;
-  color: #4CAF50;
+  color: #4CAF50; /* Green text for alignment with the theme */
   margin: 0;
 }
 

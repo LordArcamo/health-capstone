@@ -24,14 +24,20 @@ const props = defineProps({
       notReferred: 0
     })
   },
-  
+  vaccinenatedPatients: Array,
   totalPatients: Number,
   vaccinations: Number,
   cases: Number,
   risk: Number,
   lineChart: Object,
   lineChart2: Object,
-  casesData: Array,
+  casesData: {
+    type: Object,
+    required: true,
+    default: () => ({
+      cases: Array(12).fill([])
+    })
+  },
   prenatal: Array,
   mentalHealthStats: {
     type: Object,
@@ -42,6 +48,7 @@ const props = defineProps({
     })
   }
 });
+console.log('Vaccine Data', props.vaccinenatedPatients);
 console.log('Prenatal Data', props.prenatal);
 const showFilters = ref(false);
 
@@ -66,7 +73,7 @@ const updateStats = (stats) => {
 
 const monthlyData = ref(props.barChart ? [...props.barChart] : Array(12).fill(0));
 const monthlyVaccination = ref(props.lineChart?.data ? [...props.lineChart.data] : Array(12).fill(0));
-const monthlyCases = ref(props.casesData ? [...props.casesData] : Array(12).fill(0));
+const monthlyCases = ref(props.casesData ? [...props.casesData.cases] : Array(12).fill(0));
 const referredData = ref(props.pieChart ? {...props.pieChart} : {});
 
 const filters = ref({
@@ -146,7 +153,7 @@ watch(() => props.lineChart?.data, (newVal) => {
 }, { immediate: false, deep: false });
 
 watch(() => props.casesData, (newVal) => {
-  monthlyCases.value = newVal ? [...newVal] : Array(12).fill(0);
+  monthlyCases.value = newVal ? [...newVal.cases] : Array(12).fill(0);
 }, { immediate: false, deep: false });
 
 onBeforeUnmount(() => {
@@ -254,6 +261,7 @@ onBeforeUnmount(() => {
         <Vaccinations
           :filters="filters"
           :vaccination-data="monthlyVaccination"
+          :vaccinenatedPatients="vaccinenatedPatients"
         />
       </div>
       <div class="hover:scale-105 transition-transform">

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
-use Carbon\Carbon;
 
 class DoctorDashboardController extends Controller
 {
@@ -18,7 +17,6 @@ class DoctorDashboardController extends Controller
      */
     public function index()
     {
-        $totalPatientsData = $this->getTotalPatients();
         $today = now()->toDateString();
 
         // Fetch patients in queue (not completed)
@@ -271,67 +269,25 @@ class DoctorDashboardController extends Controller
             ->take(5)
             ->get();
 
+
+
+
         // Get total patients count
-        $totalPatients = DB::table('consultation_details')->select('consultationDate as date')
-        ->unionAll(
-            DB::table('prenatal_consultation_details')->select('consultationDate as date')
-        )
-        ->unionAll(
-            DB::table('national_immunization_programs')->select('created_at as date')
-        )
-        ->unionAll(
-            DB::table('vaccination_records')->select('dateOfVisit as date')
-        )
-        ->count();
+        $totalPatients = PersonalInformation::count();
 
-        // Get today's consultations count
-        $todaysConsultation = ConsultationDetails::whereDate('created_at', Carbon::today())
-            ->where('status', '!=', 'Pending')
-            ->count();
+        // Get today's appointments count
+        $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)->count();
 
-        // Get monthly patient counts for all years
-        $monthlyPatients = PersonalInformation::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
-            ->whereNotNull('created_at')
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'asc')
-            ->get();
-
-        // Organize data by year and month
-        $monthlyData = [];
-        $years = [];
-
-        foreach ($monthlyPatients as $record) {
-            $year = $record->year;
-            if (!in_array($year, $years)) {
-                $years[] = $year;
-                $monthlyData[$year] = array_fill(0, 12, 0);
-            }
-            $monthlyData[$year][$record->month - 1] = (int)$record->count;
-        }
-
-        // If no data exists, add current year
-        if (empty($years)) {
-            $currentYear = now()->year;
-            $years[] = $currentYear;
-            $monthlyData[$currentYear] = array_fill(0, 12, 0);
-        }
-
-        // Sort years in descending order
-
+        // Get critical cases count (you may need to adjust this based on your criteria)
         $criticalCases = 0;
 
         return Inertia::render('Doctor/DoctorDashboard', [
             'totalPatients' => $totalPatients,
-            'monthlyData' => $monthlyData,
-            'availableYears' => $years,
             'ITRConsultation' => $ITRConsultation,
             'latestPatients' => $latestPatients,
             'todaysConsultation' => $todaysConsultation,
             'criticalCases' => $criticalCases,
             'notifications' => $notifications,
-            'totalPatient' => $totalPatientsData,
-
         ]);
     }
 
@@ -368,42 +324,5 @@ class DoctorDashboardController extends Controller
         return Inertia::render('Doctor/DoctorCheckup', [
             'patient' => $nextPatient,
         ]);
-    }
-
-    private function getTotalPatients()
-    {
-        // Initialize an array for 12 months (Jan to Dec) with zero
-        $monthlyPatients = array_fill(0, 12, 0);
-
-        // Combine patient counts from multiple tables
-        $consultationData = DB::table('consultation_details')
-            ->select(DB::raw('MONTH(consultationDate) as month'), DB::raw('COUNT(*) as count'))
-            ->groupBy(DB::raw('MONTH(consultationDate)'))
-            ->pluck('count', 'month');
-
-        $prenatalData = DB::table('prenatal_consultation_details')
-            ->select(DB::raw('MONTH(consultationDate) as month'), DB::raw('COUNT(*) as count'))
-            ->groupBy(DB::raw('MONTH(consultationDate)'))
-            ->pluck('count', 'month');
-
-        $nipData = DB::table('national_immunization_programs')
-            ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as count'))
-            ->groupBy(DB::raw('MONTH(created_at)'))
-            ->pluck('count', 'month');
-
-        $vaccinationData = DB::table('vaccination_records')
-            ->select(DB::raw('MONTH(dateOfVisit) as month'), DB::raw('COUNT(*) as count'))
-            ->groupBy(DB::raw('MONTH(dateOfVisit)'))
-            ->pluck('count', 'month');
-
-        // Combine all the data into monthlyPatients array
-        for ($month = 1; $month <= 12; $month++) {
-            $monthlyPatients[$month - 1] += $consultationData[$month] ?? 0;
-            $monthlyPatients[$month - 1] += $prenatalData[$month] ?? 0;
-            $monthlyPatients[$month - 1] += $nipData[$month] ?? 0;
-            $monthlyPatients[$month - 1] += $vaccinationData[$month] ?? 0;
-        }
-
-        return $monthlyPatients;
     }
 }
