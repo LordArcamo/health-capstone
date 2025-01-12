@@ -252,10 +252,6 @@
               <span v-if="errors.medication" class="text-red-600 text-sm">{{ errors.medication }}</span>
             </div>
 
-            <p class="text-orange-700 text-lg">
-              <strong>Status:</strong> {{ form.status }}
-            </p>
-
           </div>
 
           <!-- Navigation Buttons -->
