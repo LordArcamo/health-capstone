@@ -2,7 +2,7 @@
   <div class="chart-container">
     <!-- Header Section -->
     <div class="chart-header">
-      <h2 class="chart-title">Monthly Vaccinations Overviews</h2>
+      <h2 class="chart-title">Monthly Vaccinations Overviewss</h2>
       <p class="chart-subtitle">
         {{ selectedVaccine ? `Showing data for ${selectedVaccine}` : "Showing data for all vaccines" }}
       </p>

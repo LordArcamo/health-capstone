@@ -31,7 +31,13 @@ const props = defineProps({
   risk: Number,
   lineChart: Object,
   lineChart2: Object,
-  casesData: Array,
+  casesData: {
+    type: Object,
+    required: true,
+    default: () => ({
+      cases: Array(12).fill([])
+    })
+  },
   prenatal: Array,
   mentalHealthStats: {
     type: Object,
@@ -67,7 +73,7 @@ const updateStats = (stats) => {
 
 const monthlyData = ref(props.barChart ? [...props.barChart] : Array(12).fill(0));
 const monthlyVaccination = ref(props.lineChart?.data ? [...props.lineChart.data] : Array(12).fill(0));
-const monthlyCases = ref(props.casesData ? [...props.casesData] : Array(12).fill(0));
+const monthlyCases = ref(props.casesData ? [...props.casesData.cases] : Array(12).fill(0));
 const referredData = ref(props.pieChart ? {...props.pieChart} : {});
 
 const filters = ref({
@@ -147,7 +153,7 @@ watch(() => props.lineChart?.data, (newVal) => {
 }, { immediate: false, deep: false });
 
 watch(() => props.casesData, (newVal) => {
-  monthlyCases.value = newVal ? [...newVal] : Array(12).fill(0);
+  monthlyCases.value = newVal ? [...newVal.cases] : Array(12).fill(0);
 }, { immediate: false, deep: false });
 
 onBeforeUnmount(() => {
