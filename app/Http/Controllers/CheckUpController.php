@@ -141,7 +141,7 @@ class CheckUpController extends Controller
                 'consultation_details.providerName',
                 'consultation_details.natureOfVisit',
                 'consultation_details.visitType',
-                'consultation_details.status',
+                'consultation_details.status', //kani
                 'visit_information.chiefComplaints',
                 'visit_information.diagnosis',
                 'visit_information.medication'
