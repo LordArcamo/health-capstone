@@ -19,23 +19,14 @@ class DashboardController extends Controller
         ini_set('memory_limit', '512M'); // Adjust as needed, e.g., 1024M for 1GB or more
 
         // Fetch total patients count in real-time
-        $totalPatients = DB::table('consultation_details')->select('consultationDate as date')
-        ->unionAll(
-            DB::table('prenatal_consultation_details')->select('consultationDate as date')
-        )
-        ->unionAll(
-            DB::table('national_immunization_programs')->select('created_at as date')
-        )
-        ->unionAll(
-            DB::table('vaccination_records')->select('dateOfVisit as date')
-        )
-        ->count();
+        $totalPatients = PersonalInformation::select('consultationDate')->count();
 
 
         // Fetch referred patients count in real-time
         $referredPatientsCount = ConsultationDetails::join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
-        ->where('consultation_details.modeOfTransaction', 'Referral')
-        ->count();
+            ->where('consultation_details.modeOfTransaction', 'Referral')
+            ->distinct('personal_information.personalId')
+            ->count('personal_information.personalId');
 
 
         // Fetch cases data for chart in real-time
@@ -52,31 +43,15 @@ class DashboardController extends Controller
             ->toArray();
 
         // Fetch patients with check-up data in real-time
-        $patientsWithCheckUp = DB::table('personal_information')
-        ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
-        ->select('personal_information.personalId', 'personal_information.created_at', 'consultation_details.modeOfTransaction')
-
-        ->unionAll(
-            DB::table('personal_information')
-                ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
-                ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Prenatal' as modeOfTransaction"))
+        $patientsWithCheckUp = PersonalInformation::leftJoin('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+        ->select(
+            'personal_information.personalId',
+            'personal_information.created_at',
+            'consultation_details.modeOfTransaction'
         )
-
-        ->unionAll(
-            DB::table('personal_information')
-                ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
-                ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Immunization' as modeOfTransaction"))
-        )
-
-        ->unionAll(
-            DB::table('personal_information')
-                ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
-                ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Vaccination' as modeOfTransaction"))
-        )
-
+        ->distinct()
         ->get()
         ->toArray();
-
 
               // Prepare data for chart of non-referred cases by diagnosis
    // Prepare data for chart of non-referred cases by diagnosis, age, gender, and month
@@ -119,6 +94,7 @@ class DashboardController extends Controller
         // Return data to the frontend
         return Inertia::render('Dashboard', [
             'casesData' => $casesData, // Diagnosis and counts
+            'totalPatients' => $totalPatients, // Total patients count
             'nonReferredData' => $nonReferredData ?? [],
             'referredPatients' => $referredPatientsCount, // Referred patients count
             'patients' => $patientsWithCheckUp, // All patients with check-up data
