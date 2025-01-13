@@ -5,7 +5,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faEye, faEyeSlash, faUpload, faTimes, faUserShield, faUserCog } from '@fortawesome/free-solid-svg-icons';
 
@@ -36,9 +36,35 @@ const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const showRoleModal = ref(false);
 const profilePicturePreview = ref(null);
+const permissionError = ref('');
+
+// Define available permissions
+const availablePermissions = {
+    staff: [
+        { value: 'view_patients', label: 'View Patients' },
+        { value: 'create_records', label: 'Create Records' }
+    ],
+    doctor: [
+        { value: 'view_patients', label: 'View Patients' },
+        { value: 'edit_patients', label: 'Edit Patients' },
+        { value: 'create_records', label: 'Create Records' }
+    ],
+    admin: [
+        { value: 'view_patients', label: 'View Patients' },
+        { value: 'edit_patients', label: 'Edit Patients' },
+        { value: 'create_records', label: 'Create Records' },
+        { value: 'manage_users', label: 'Manage Users' }
+    ]
+};
+
+// Computed property for role-specific permissions
+const roleSpecificPermissions = computed(() => {
+    return form.role ? availablePermissions[form.role] : [];
+});
 
 // Role Change Handler
 const handleRoleChange = () => {
+    form.permissions = []; // Reset permissions when role changes
     if (form.role === 'doctor') {
         form.permissions = ['view_patients', 'edit_patients', 'create_records'];
     } else if (form.role === 'staff') {
@@ -46,7 +72,25 @@ const handleRoleChange = () => {
     } else if (form.role === 'admin') {
         form.permissions = ['view_patients', 'edit_patients', 'create_records', 'manage_users'];
     }
+    permissionError.value = ''; // Clear any previous permission errors
 };
+
+// Save permissions
+const savePermissions = () => {
+    if (form.permissions.length === 0) {
+        permissionError.value = 'Please select at least one permission';
+        return;
+    }
+    showRoleModal.value = false;
+    permissionError.value = '';
+};
+
+// Add watcher for role changes
+watch(() => form.role, (newRole) => {
+    if (newRole) {
+        handleRoleChange();
+    }
+});
 
 // Password Visibility Toggles
 const togglePasswordVisibility = () => showPassword.value = !showPassword.value;
@@ -305,7 +349,7 @@ const submit = () => {
 
                     <!-- Permissions Button -->
                     <div class="text-right">
-                        <button @click="showRoleModal = true"
+                        <button type="button" @click.prevent="showRoleModal = true"
                             class="px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 flex items-center">
                             <font-awesome-icon :icon="['fas', 'check-square']" class="mr-2" />
                             Set Permissions
@@ -403,11 +447,11 @@ const submit = () => {
                 <!-- Role Permissions Modal -->
                 <transition name="fade">
                     <div v-if="showRoleModal"
-                        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                         <div class="bg-white p-8 rounded-lg shadow-lg w-96 relative">
 
                             <!-- Close Button -->
-                            <button @click="showRoleModal = false"
+                            <button type="button" @click.prevent="showRoleModal = false"
                                 class="absolute top-3 right-3 text-gray-500 hover:text-red-600">
                                 <font-awesome-icon :icon="['fas', 'times']" />
                             </button>
@@ -415,28 +459,35 @@ const submit = () => {
                             <!-- Modal Header -->
                             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 <font-awesome-icon :icon="['fas', 'user-shield']" class="mr-2 text-indigo-500" />
-                                Assign Permissions for {{ form.role.charAt(0).toUpperCase() + form.role.slice(1) }}
+                                {{ form.role ? `${form.role.charAt(0).toUpperCase() + form.role.slice(1)} Permissions` : 'Select Role First' }}
                             </h3>
 
                             <!-- Permissions Checklist -->
-                            <div class="space-y-3">
-                                <label v-for="permission in roleSpecificPermissions" :key="permission.value"
-                                    class="flex items-center">
-                                    <input type="checkbox" v-model="form.permissions" :value="permission.value"
-                                        class="form-checkbox h-5 w-5 text-indigo-600" />
-                                    <span class="ml-2">{{ permission.label }}</span>
-                                </label>
+                            <div v-if="form.role" class="space-y-3">
+                                <div v-for="permission in roleSpecificPermissions" :key="permission.value"
+                                    class="flex items-center space-x-3">
+                                    <input type="checkbox" 
+                                        :id="permission.value"
+                                        v-model="form.permissions"
+                                        :value="permission.value"
+                                        class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500" />
+                                    <label :for="permission.value" class="text-gray-700">{{ permission.label }}</label>
+                                </div>
+                            </div>
+                            <div v-else class="text-gray-500 italic">
+                                Please select a role first to view available permissions.
                             </div>
 
                             <!-- Error Message -->
                             <p v-if="permissionError" class="text-red-500 text-sm mt-2">
-                                Please select at least one permission.
+                                {{ permissionError }}
                             </p>
 
                             <!-- Save Button -->
                             <div class="flex justify-end mt-6">
-                                <button @click="savePermissions"
-                                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                                <button type="button" @click.prevent="savePermissions"
+                                    class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors duration-200">
+                                    <font-awesome-icon :icon="['fas', 'save']" class="mr-2" />
                                     Save Permissions
                                 </button>
                             </div>
