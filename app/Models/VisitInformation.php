@@ -26,7 +26,9 @@ class VisitInformation extends Model
         'id',
         'chiefComplaints',
         'diagnosis',
-        'medication'
+        'medication',
+        'requireLabTest',
+        'selectedLabTests',
     ];
 
     protected $hidden = ['created_at', 'updated_at'];

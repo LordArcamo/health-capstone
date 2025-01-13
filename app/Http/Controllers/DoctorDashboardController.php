@@ -280,7 +280,17 @@ class DoctorDashboardController extends Controller
 
 
         // Get total patients count
-        $totalPatients = PersonalInformation::count();
+        $totalPatients = DB::table('consultation_details')->select('consultationDate as date')
+        ->unionAll(
+            DB::table('prenatal_consultation_details')->select('consultationDate as date')
+        )
+        ->unionAll(
+            DB::table('national_immunization_programs')->select('created_at as date')
+        )
+        ->unionAll(
+            DB::table('vaccination_records')->select('dateOfVisit as date')
+        )
+        ->count();
 
         // Get today's appointments count
         $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)->count() +
