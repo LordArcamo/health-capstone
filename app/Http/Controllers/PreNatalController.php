@@ -8,8 +8,9 @@ use App\Models\PreNatal;
 use App\Models\PersonalInformation;
 use App\Models\GeneralTrimester;
 use App\Models\PrenatalConsultationDetails;
+use App\Models\PrenatalVisitInformation;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Validator;
 
 class PreNatalController extends Controller
 {
@@ -141,6 +142,8 @@ class PreNatalController extends Controller
 
     public function import(Request $request)
     {
+        set_time_limit(300); // Increase time limit to 5 minutes
+
         // Validate the uploaded file
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
@@ -154,62 +157,122 @@ class PreNatalController extends Controller
             foreach ($data as $row) {
                 $prenatalData = array_combine($header, $row);
 
-                // Insert data in PersonalInformation, excluding personalId
-                $personalInfo = PersonalInformation::create([
-                    'firstName' => $prenatalData['firstName'],
-                    'lastName' => $prenatalData['lastName'],
-                    'middleName' => $prenatalData['middleName'],
-                    'purok' => $prenatalData['purok'],
-                    'barangay' => $prenatalData['barangay'],
-                    'age' => $prenatalData['age'],
-                    'birthdate' => $prenatalData['birthdate'],
-                    'contact' => $prenatalData['contact'],
-                    'sex' => $prenatalData['sex'],
+                // Convert consultationTime to MySQL TIME format
+                $prenatalData['consultationTime'] = date('H:i:s', strtotime($prenatalData['consultationTime']));
+
+                // Convert numeric fields to proper types
+                $prenatalData['temperature'] = (float) $prenatalData['temperature'];
+                $prenatalData['height'] = (float) $prenatalData['height'];
+                $prenatalData['weight'] = (float) $prenatalData['weight'];
+                $prenatalData['age'] = (int) $prenatalData['age'];
+
+                // Validate the row
+                $validator = Validator::make($prenatalData, [
+                    'firstName' => 'required|string|max:100',
+                    'lastName' => 'required|string|max:100',
+                    'middleName' => 'nullable|string|max:100',
+                    'purok' => 'nullable|string|max:100',
+                    'barangay' => 'nullable|string|max:100',
+                    'age' => 'required|integer|min:0|max:150',
+                    'birthdate' => 'required|date',
+                    'contact' => 'nullable|string|max:15',
+                    'sex' => 'required|string|in:Female',
+                    'modeOfTransaction' => 'required|string|max:50',
+                    'consultationDate' => 'required|date',
+                    'consultationTime' => 'required|date_format:H:i:s',
+                    'bloodPressure' => 'nullable|string|max:20',
+                    'temperature' => 'nullable|numeric|between:35,42',
+                    'height' => 'nullable|numeric|between:0,300',
+                    'weight' => 'nullable|numeric|between:0,500',
+                    'providerName' => 'required|string|max:100',
+                    'nameOfSpouse' => 'required|string|max:100',
+                    'emergencyContact' => 'required|string|max:15',
+                    'fourMember' => 'required|string|max:100',
+                    'philhealthStatus' => 'required|string|max:50',
+                    'philhealthNo' => 'nullable|string|max:50',
+                    'menarche' => 'required|string|max:50',
+                    'sexualOnset' => 'required|string|max:50',
+                    'periodDuration' => 'required|string|max:50',
+                    'birthControl' => 'required|string|max:100',
+                    'intervalCycle' => 'required|string|max:50',
+                    'menopause' => 'nullable|string|max:50',
+                    'lmp' => 'required|date',
+                    'edc' => 'required|date',
+                    'gravidity' => 'required|integer|min:0',
+                    'parity' => 'required|integer|min:0',
+                    'term' => 'required|integer|min:0',
+                    'preterm' => 'required|integer|min:0',
+                    'abortion' => 'required|integer|min:0',
+                    'living' => 'required|integer|min:0',
                 ]);
 
-                // Insert data in Prenatal with the auto-incremented personalId
-                Prenatal::create([
-                    'personalId' => $personalInfo->personalId,
-                    'modeOfTransaction' => $prenatalData['modeOfTransaction'],
-                    'consultationDate' => $prenatalData['consultationDate'],
-                    'consultationTime' => $prenatalData['consultationTime'],
-                    'bloodPressure' => $prenatalData['bloodPressure'],
-                    'temperature' => $prenatalData['temperature'],
-                    'height' => $prenatalData['height'],
-                    'weight' => $prenatalData['weight'],
-                    'providerName' => $prenatalData['providerName'],
-                    'nameOfSpouse' => $prenatalData['nameOfSpouse'],
-                    'emergencyContact' => $prenatalData['emergencyContact'],
-                    'fourMember' => $prenatalData['fourMember'],
-                    'philhealthStatus' => $prenatalData['philhealthStatus'],
-                    'philhealthNo' => $prenatalData['philhealthNo'],
-                    'menarche' => $prenatalData['menarche'],
-                    'sexualOnset' => $prenatalData['sexualOnset'],
-                    'periodDuration' => $prenatalData['periodDuration'],
-                    'birthControl' => $prenatalData['birthControl'],
-                    'intervalCycle' => $prenatalData['intervalCycle'],
-                    'menopause' => $prenatalData['menopause'],
-                    'lmp' => $prenatalData['lmp'],
-                    'edc' => $prenatalData['edc'],
-                    'gravidity' => $prenatalData['gravidity'],
-                    'parity' => $prenatalData['parity'],
-                    'term' => $prenatalData['term'],
-                    'preterm' => $prenatalData['preterm'],
-                    'abortion' => $prenatalData['abortion'],
-                    'living' => $prenatalData['living'],
-                    'syphilisResult' => $prenatalData['syphilisResult'],
-                    'penicillin' => $prenatalData['penicillin'],
-                    'hemoglobin' => $prenatalData['hemoglobin'],
-                    'hematocrit' => $prenatalData['hematocrit'],
-                    'urinalysis' => $prenatalData['urinalysis'],
-                    'ttStatus' => substr($prenatalData['ttStatus'], 0, 50), // Truncate to fit the column size
-                    'tdDate' => $prenatalData['tdDate'],
-                ]);
+                if ($validator->fails()) {
+                    \Log::error('Validation failed for row: ' . json_encode($prenatalData));
+                    \Log::error('Validation errors: ' . json_encode($validator->errors()->all()));
+                    throw new \Exception('Validation failed for row: ' . json_encode($prenatalData));
+                }
 
+                try {
+                    // Insert data in PersonalInformation
+                    $personalInfo = PersonalInformation::create([
+                        'firstName' => $prenatalData['firstName'],
+                        'lastName' => $prenatalData['lastName'],
+                        'middleName' => $prenatalData['middleName'],
+                        'purok' => $prenatalData['purok'],
+                        'barangay' => $prenatalData['barangay'],
+                        'age' => $prenatalData['age'],
+                        'birthdate' => $prenatalData['birthdate'],
+                        'contact' => $prenatalData['contact'],
+                        'sex' => $prenatalData['sex'],
+                    ]);
+
+                    // Insert data in PrenatalConsultationDetails
+                    $consultationDetails = PrenatalConsultationDetails::create([
+                        'personalId' => $personalInfo->personalId,
+                        'id' => auth()->id(), // Add authenticated user ID
+                        'modeOfTransaction' => $prenatalData['modeOfTransaction'],
+                        'consultationDate' => $prenatalData['consultationDate'],
+                        'consultationTime' => $prenatalData['consultationTime'],
+                        'bloodPressure' => $prenatalData['bloodPressure'],
+                        'temperature' => $prenatalData['temperature'],
+                        'height' => $prenatalData['height'],
+                        'weight' => $prenatalData['weight'],
+                        'providerName' => $prenatalData['providerName'],
+                        'nameOfSpouse' => $prenatalData['nameOfSpouse'],
+                        'emergencyContact' => $prenatalData['emergencyContact'],
+                        'fourMember' => $prenatalData['fourMember'],
+                        'philhealthStatus' => $prenatalData['philhealthStatus'],
+                        'philhealthNo' => $prenatalData['philhealthNo'],
+                    ]);
+
+                    // Insert data in PrenatalVisitInformation
+                    PrenatalVisitInformation::create([
+                        'prenatalConsultationDetailsID' => $consultationDetails->prenatalConsultationDetailsID,
+                        'id' => auth()->id(), // Add authenticated user ID
+                        'menarche' => $prenatalData['menarche'],
+                        'sexualOnset' => $prenatalData['sexualOnset'],
+                        'periodDuration' => $prenatalData['periodDuration'],
+                        'birthControl' => $prenatalData['birthControl'],
+                        'intervalCycle' => $prenatalData['intervalCycle'],
+                        'menopause' => $prenatalData['menopause'],
+                        'lmp' => $prenatalData['lmp'],
+                        'edc' => $prenatalData['edc'],
+                        'gravidity' => (int)$prenatalData['gravidity'],
+                        'parity' => (int)$prenatalData['parity'],
+                        'term' => (int)$prenatalData['term'],
+                        'preterm' => (int)$prenatalData['preterm'],
+                        'abortion' => (int)$prenatalData['abortion'],
+                        'living' => (int)$prenatalData['living'],
+                    ]);
+
+                } catch (\Exception $e) {
+                    \Log::error('Error creating records: ' . $e->getMessage());
+                    throw $e;
+                }
             }
         });
 
-        return redirect()->back()->with('success', 'Prenatal data imported successfully!');
+        return redirect()->back()->with('success', 'Prenatal records imported successfully!');
     }
 
 
