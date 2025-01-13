@@ -29,19 +29,33 @@ const form = useForm({
     prc_validity: '',
 });
 
-// Form Step Control
+// UI State
 const step = ref(1);
 const maxStep = 4;
-
-// Password Visibility Toggles
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const showRoleModal = ref(false);
+const profilePicturePreview = ref(null);
 
+// Role Change Handler
+const handleRoleChange = () => {
+    if (form.role === 'doctor') {
+        form.permissions = ['view_patients', 'edit_patients', 'create_records'];
+    } else if (form.role === 'staff') {
+        form.permissions = ['view_patients', 'create_records'];
+    } else if (form.role === 'admin') {
+        form.permissions = ['view_patients', 'edit_patients', 'create_records', 'manage_users'];
+    }
+};
+
+// Password Visibility Toggles
 const togglePasswordVisibility = () => showPassword.value = !showPassword.value;
 const toggleConfirmPasswordVisibility = () => showConfirmPassword.value = !showConfirmPassword.value;
+
 // 📞 Phone Number Validation Function
 const validatePhoneNumber = () => {
     const phonePattern = /^\+63\d{10}$/;  // Must start with +63 and followed by exactly 10 digits
+
 
     if (!form.phone) {
         form.setError('phone', 'Mobile number is required.');
@@ -53,7 +67,6 @@ const validatePhoneNumber = () => {
 };
 
 // Profile Picture Upload with Preview
-const profilePicturePreview = ref(null);
 const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
@@ -116,14 +129,32 @@ const prevStep = () => {
 // Submit Form
 const submit = () => {
     if (validateStep()) {
+        // Create FormData object for file upload
+        const formData = new FormData();
+        
+        // Add all form fields to FormData
+        Object.keys(form).forEach(key => {
+            if (key === 'profile_picture' && form[key]) {
+                formData.append(key, form[key]);
+            } else if (key === 'permissions') {
+                formData.append(key, JSON.stringify(form[key]));
+            } else {
+                formData.append(key, form[key] || '');
+            }
+        });
+
         form.post(route('admin.register.store'), {
             preserveScroll: true,
+            forceFormData: true,
             onSuccess: () => {
                 alert('User Registered Successfully!');
                 form.reset();
                 router.visit(route('admin.register.staff'));
             },
-            onError: () => alert('Please check the form for errors.'),
+            onError: (errors) => {
+                console.error('Registration errors:', errors);
+                alert('Please check the form for errors.');
+            },
         });
     }
 };
@@ -376,7 +407,7 @@ const submit = () => {
                         <div class="bg-white p-8 rounded-lg shadow-lg w-96 relative">
 
                             <!-- Close Button -->
-                            <button @click="closeRoleModal"
+                            <button @click="showRoleModal = false"
                                 class="absolute top-3 right-3 text-gray-500 hover:text-red-600">
                                 <font-awesome-icon :icon="['fas', 'times']" />
                             </button>
