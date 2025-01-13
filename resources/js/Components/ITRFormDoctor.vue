@@ -556,7 +556,7 @@ export default {
         requireLabTest: this.form.requireLabTest,
         selectedLabTests: this.form.selectedLabTests,
         diagnosis: this.form.diagnosisTags.join(', '),  // ✅ Submit as comma-separated string
-        medication: this.form.requireLabTest === 'no' ? this.form.medication : '',
+        medication: this.form.requireLabTest === 'no' ? this.form.medication : 'None',
         status: this.form.requireLabTest === 'yes' ? 'Follow-up Required' : 'Completed',
       };
 

@@ -1,17 +1,28 @@
 <script setup>
 import NewLayout from '@/Layouts/MainLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import ITRForm from '@/Components/ITRForm.vue';
 import { Inertia } from '@inertiajs/inertia';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 
-
+const page = usePage();
 const props = defineProps({
   personalInfo: {
-      type: Object,
-      required: false,
-      default: () => ({}), // Default to an empty object
-    },
+    type: Object,
+    required: false,
+    default: () => ({}), // Default to an empty object
+  },
+  natureOfVisit: {
+    type: String,
+    default: ''
+  }
+});
+
+// Log props to verify data
+onMounted(() => {
+  console.log('IndividualTreatmentRecordCheckup mounted');
+  console.log('Page props:', page.props);
+  console.log('natureOfVisit prop:', props.natureOfVisit);
 });
 
 watch(() => props.personalInfo, (newVal) => {
@@ -57,10 +68,13 @@ function submitForm(payload) {
 <template>
   <Head title="Individual Treatment Record" />
   <NewLayout>
-    <ITRForm
+    <div>
+      <ITRForm
         v-if="personalInfo !== undefined" 
         :selectedPatient="personalInfo || {}"
+        :natureOfVisit="natureOfVisit"
         @submitForm="submitForm"
       />
+    </div>
   </NewLayout>
 </template>

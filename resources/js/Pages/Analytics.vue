@@ -29,6 +29,7 @@ const props = defineProps({
   totalPatients: Number,
   vaccinations: Number,
   cases: Number,
+  monthlyStats: Array,
   risk: Number,
   lineChart: Object,
   lineChart2: Object,
@@ -74,7 +75,7 @@ const updateStats = (stats) => {
   summaryStats.value.risk = stats.risk || 0;
 };
 
-const monthlyData = ref(props.barChart ? [...props.barChart] : Array(12).fill(0));
+const monthlyStats = ref(props.barChart ? [...props.barChart] : Array(12).fill(0));
 const monthlyVaccination = ref(props.lineChart?.data ? [...props.lineChart.data] : Array(12).fill(0));
 const monthlyCases = ref(props.casesData ? [...props.casesData.cases] : Array(12).fill(0));
 const referredData = ref(props.pieChart ? {...props.pieChart} : {});
@@ -114,12 +115,16 @@ const toggleFilters = () => {
   showFilters.value = !showFilters.value;
 };
 
+let debounceTimer;
 watch(filters, (newVal) => {
-  router.get('/system-analytics', newVal, {
-    preserveState: true,
-    preserveScroll: true,
-    only: ['totalPatients', 'vaccinations', 'cases', 'risk', 'barChart', 'pieChart', 'lineChart', 'casesData', 'mentalHealthStats']
-  });
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    router.get('/system-analytics', newVal, {
+      preserveState: true,
+      preserveScroll: true,
+      only: ['totalPatients', 'vaccinations', 'cases', 'risk', 'barChart', 'pieChart', 'lineChart', 'casesData', 'mentalHealthStats']
+    });
+  }, 500); // Debounce by 500ms to prevent infinite calls
 }, { deep: true });
 
 // Watch for changes in props and update the summary stats
@@ -144,7 +149,7 @@ watch(() => props.risk, (newVal) => {
 }, { immediate: true });
 
 watch(() => props.barChart, (newVal) => {
-  monthlyData.value = newVal ? [...newVal] : Array(12).fill(0);
+  monthlyStats.value = newVal ? [...newVal] : Array(12).fill(0);
 }, { immediate: false, deep: false });
 
 watch(() => props.pieChart, (newVal) => {
@@ -160,7 +165,7 @@ watch(() => props.casesData, (newVal) => {
 }, { immediate: false, deep: false });
 
 onBeforeUnmount(() => {
-  monthlyData.value = null;
+  monthlyStats.value = null;
   monthlyVaccination.value = null;
   monthlyCases.value = null;
   referredData.value = null;
@@ -251,7 +256,7 @@ onBeforeUnmount(() => {
       <div class="hover:scale-105 transition-transform">
         <TotalPatients
         :filters="filters"
-        :monthly-data="monthlyData"
+        :monthly-data="monthlyStats"
           />
       </div>
       <div class=" hover:scale-105 transition-transform">

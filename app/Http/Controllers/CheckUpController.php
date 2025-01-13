@@ -237,10 +237,18 @@ class CheckUpController extends Controller
     public function create(Request $request)
     {
         $personalId = $request->get('patient_personalId');
+        $natureOfVisit = $request->get('natureOfVisit');
+
+        // Log the request parameters
+        \Log::info('ITR Create Request:', [
+            'personalId' => $personalId,
+            'natureOfVisit' => $natureOfVisit
+        ]);
 
         if ($personalId === 'new') {
             return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup', [
                 'personalInfo' => null, // No existing patient
+                'natureOfVisit' => $natureOfVisit,
             ]);
         }
 
@@ -252,6 +260,7 @@ class CheckUpController extends Controller
 
         return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup', [
             'personalInfo' => $personalInfo,
+            'natureOfVisit' => $natureOfVisit,
         ]);
     }
 
@@ -315,7 +324,7 @@ class CheckUpController extends Controller
                     'sex' => $validatedData['sex'] ?? $personalInfo->sex,
                 ]);
             } else {
-                return back()->withErrors(['error' => 'Patient not found.']);
+                return back()->withErrors(['error' => 'Patient not found']);
             }
         } else {
             // Create new patient

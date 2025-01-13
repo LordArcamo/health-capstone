@@ -47,12 +47,12 @@ class PreNatalController extends Controller
 
             // Updated Status Logic: Pending, Completed, or Cancelled
             DB::raw("
-            CASE
-                WHEN prenatal_consultation_details.status = 'cancelled' THEN 'Cancelled'
-                WHEN prenatal_visit_information.prenatalConsultationDetailsID IS NULL THEN 'Pending'
-                ELSE 'Completed'
-            END AS status
-        "),
+                CASE
+                    WHEN prenatal_consultation_details.status = 'Cancelled' THEN 'Cancelled'
+                    WHEN prenatal_visit_information.prenatalConsultationDetailsID IS NULL THEN 'Pending'
+                    ELSE 'Completed'
+                END AS status
+            "),
 
             'prenatal_visit_information.menarche',
             'prenatal_visit_information.sexualOnset',

@@ -172,9 +172,20 @@ class DoctorCheckupController extends Controller
             $visitInfo = new VisitInformation();
             $visitInfo->consultationDetailsID = $request->input('consultationDetailsID');
             $visitInfo->chiefComplaints = $request->input('chiefComplaints');
-            $visitInfo->diagnosis = $request->input('diagnosis');
-            $visitInfo->medication = $request->input('medication');
-            $visitInfo->id = auth()->id(); // Add the authenticated user's ID
+            $visitInfo->requireLabTest = $request->input('requireLabTest');
+            $visitInfo->selectedLabTests = json_encode($request->input('selectedLabTests', []));
+
+            // Set diagnosis and medication to 'None' if requireLabTest is 'Yes'
+            if ($request->input('requireLabTest') === 'yes') {
+                $visitInfo->diagnosis = 'None';
+                $visitInfo->medication = 'None';
+            } else {
+                $diagnosisData = $request->input('diagnosis', []);
+                $visitInfo->diagnosis = !empty($diagnosisData) ? implode(', ', (array) $diagnosisData) : 'None';
+                $visitInfo->medication = $request->input('medication') ?? 'None';
+            }
+
+            $visitInfo->id = auth()->id();
             $visitInfo->save();
 
             // Update consultation status to completed
@@ -184,7 +195,7 @@ class DoctorCheckupController extends Controller
                     ->update([
                         'status' => 'completed',
                         'completed_at' => now(),
-                        'id' => auth()->id() // Add the authenticated user's ID
+                        'id' => auth()->id()
                     ]);
             } else {
                 DB::table('consultation_details')
@@ -192,7 +203,7 @@ class DoctorCheckupController extends Controller
                     ->update([
                         'status' => 'completed',
                         'completed_at' => now(),
-                        'id' => auth()->id() // Add the authenticated user's ID
+                        'id' => auth()->id()
                     ]);
             }
 

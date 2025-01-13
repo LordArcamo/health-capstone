@@ -179,10 +179,10 @@
             <div>
               <label class="block">Nature of Visit:</label>
               <select v-model="form.natureOfVisit" class="input" required>
-                <option value="" disabled selected>Select a Nature of Visit</option>
-                <option>New Consultation/Case</option>
-                <option>New Admission</option>
-                <option>Follow-up Visit</option>
+                <option value="" disabled>Select a Nature of Visit</option>
+                <option value="New Consultation/Case">New Consultation/Case</option>
+                <option value="New Admission">New Admission</option>
+                <option value="Follow-Up Visit">Follow-Up Visit</option>
               </select>
               <span v-if="errors.natureOfVisit" class="text-red-600 text-sm">{{ errors.natureOfVisit }}</span>
             </div>
@@ -352,20 +352,23 @@ export default {
   props: {
     selectedPatient: {
       type: Object,
-      required: false,
-      default: () => ({}),
+      default() {
+        return {};
+      }
     },
     onSubmit: Function,
+    natureOfVisit: {
+      type: String,
+      default: ''
+    }
   },
   data() {
     return {
-      alertMessage: '',
-      showModal: false, // Tracks modal visibility
-      stepTitles: ['Patient Information',
-        'Consultation Details',
-        'Review Information'
-      ],
       step: 1,
+      stepTitles: ['Patient Information', 'Consultation Details', 'Review Information'],
+      showModal: false,
+      alertMessage: '',
+      errors: {},
       form: {
         firstName: '',
         lastName: '',
@@ -384,22 +387,14 @@ export default {
         temperature: '',
         height: '',
         weight: '',
+        natureOfVisit: this.natureOfVisit || '', 
+        visitType: '',
+        providerName: '',
         referredFrom: '',
         referredTo: '',
         reasonsForReferral: '',
         referredBy: '',
-        providerName: '',
-        natureOfVisit: '',
-        visitType: '',
-        // chiefComplaints: '',
-        // diagnosis: '',
-        // medication: '',
       },
-      errors: {
-        contact: '',
-        birthdate: '',
-      },
-      successMessage: '',
     };
   },
   computed: {
@@ -436,6 +431,14 @@ export default {
           this.populateForm(newPatient);
         }
       },
+    },
+    natureOfVisit: {
+      immediate: true,
+      handler(newValue) {
+        if (newValue) {
+          this.form.natureOfVisit = newValue;
+        }
+      }
     },
     // Watch for changes in birthdate and update the age field
     computedAge(newAge) {
@@ -870,6 +873,13 @@ export default {
     },
   },
   mounted() {
+    console.log('Component mounted with natureOfVisit:', this.natureOfVisit);
+    if (this.natureOfVisit) {
+      this.$nextTick(() => {
+        this.form.natureOfVisit = this.natureOfVisit;
+        console.log('Set natureOfVisit to:', this.form.natureOfVisit);
+      });
+    }
     this.setAutoDateTime();
     setInterval(this.setAutoDateTime, 0); // Updates every 60 seconds
     console.log('Received personalInfo:', this.personalInfo);
