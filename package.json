@@ -34,6 +34,8 @@
         "chartjs-plugin-datalabels": "^2.2.0",
         "date-fns": "^4.1.0",
         "flatpickr": "^4.6.13",
+        "jspdf": "^2.5.2",
+        "jspdf-autotable": "^3.8.4",
         "lodash": "^4.17.21",
         "pinia": "^2.2.6",
         "primevue": "^4.0.6",

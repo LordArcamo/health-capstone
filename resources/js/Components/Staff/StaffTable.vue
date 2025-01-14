@@ -81,9 +81,9 @@
               <!-- Delete Button -->
               <button
                 @click.stop="deleteStaff(staff)"
-                class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition ml-2"
+                class="bg-orange-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition ml-2"
               >
-                Delete
+              Deactivate
               </button>
             </td>
           </tr>
