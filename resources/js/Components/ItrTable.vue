@@ -678,7 +678,7 @@ export default {
     printPatientRecord(patient) {
       const printWindow = window.open('', '_blank');
 
-      const logoUrl = '/images/RHU_Logo.png'; // Correct logo path
+      const logoUrl = '/images/RHU%20Logo.png'; // Correct logo path
 
       const content = `
     <html>

@@ -205,8 +205,8 @@
           </div>
         </div>
 
-          <!-- Patient Status Section -->
-          <div class="mb-6">
+        <!-- Patient Status Section -->
+        <div class="mb-6">
           <h3 class="text-lg font-semibold text-gray-700">Patient Status:</h3>
           <span :class="statusBadgeClass(selectedPatient.status)"
             class="inline-block px-3 py-1 text-sm font-medium rounded-full">
@@ -276,8 +276,8 @@
             class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
             Close
           </button>
-            <!-- Edit Button -->
-            <button @click="editPatient(selectedPatient)"
+          <!-- Edit Button -->
+          <button @click="editPatient(selectedPatient)"
             class="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition">
             Edit Record
           </button>
@@ -305,6 +305,9 @@ import PostpartumModal from "./PostpartumForm.vue";
 import TrimesterModal from "@/Components/TrimesterModal.vue";
 import { Inertia } from '@inertiajs/inertia';
 import axios from 'axios';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 
 export default {
   components: {
@@ -428,12 +431,149 @@ export default {
   },
 
   methods: {
-     // Open Edit Page
-     editPatient(patient) {
+    // Open Edit Page
+    editPatient(patient) {
       Inertia.get(`/patients/edit/${patient.personalId}`);
     },
-       // Status Badge Styling
-       statusBadgeClass(status) {
+    printRecord(patient) {
+      const doc = new jsPDF('portrait', 'mm', 'a4');
+      const dateGenerated = new Date().toLocaleDateString();
+      const logoUrl = "/images/RHU%20Logo.png"; // Ensure this path is correct
+
+      const img = new Image();
+      img.src = logoUrl;
+
+      img.onload = function () {
+        // RHU Logo
+        doc.addImage(img, 'PNG', 10, 10, 25, 25);
+
+        // Header
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(0, 102, 0);
+        doc.text('Republic of the Philippines', 40, 15);
+        doc.text('Department of Health', 40, 23);
+        doc.text('Initao Rural Health Unit', 40, 31);
+        doc.setFontSize(10);
+        doc.setTextColor(50);
+        doc.text(`Generated on: ${dateGenerated}`, 150, 15);
+
+        // Title
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('Prenatal and Health Record', 105, 50, { align: 'center' });
+
+        // Basic Information
+        doc.setFontSize(12);
+        doc.setTextColor(0, 102, 0);
+        doc.text('Basic Information', 14, 60);
+        doc.setTextColor(0);
+
+        const basicInfo = [
+          ['Full Name:', `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`],
+          ['Address:', `${patient.purok}, ${patient.barangay}`],
+          ['Age:', patient.age],
+          ['Birthday:', patient.birthdate],
+          ['Mode of Transaction:', patient.modeOfTransaction],
+          ['Consultation Date:', patient.consultationDate],
+          ['Consultation Time:', patient.consultationTime],
+        ];
+
+        doc.autoTable({
+          startY: 65,
+          body: basicInfo,
+          theme: 'plain',
+          styles: { fontSize: 10, textColor: 50 },
+          columnStyles: {
+            0: { fontStyle: 'bold', halign: 'left', cellWidth: 50 },
+            1: { halign: 'left' }
+          }
+        });
+
+        // Health Details
+        doc.setFontSize(12);
+        doc.setTextColor(0, 102, 0);
+        doc.text('Health Details', 14, doc.lastAutoTable.finalY + 10);
+        doc.setTextColor(0);
+
+        const healthInfo = [
+          ['Blood Pressure:', patient.bloodPressure],
+          ['Temperature:', patient.temperature],
+          ['Height:', patient.height],
+          ['Weight:', patient.weight],
+          ['Attending Provider:', patient.providerName],
+          ['Name of Spouse:', patient.nameOfSpouse],
+          ['Emergency Contact:', patient.emergencyContact],
+        ];
+
+        doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 15,
+          body: healthInfo,
+          theme: 'plain',
+          styles: { fontSize: 10, textColor: 50 },
+          columnStyles: {
+            0: { fontStyle: 'bold', halign: 'left', cellWidth: 50 },
+            1: { halign: 'left' }
+          }
+        });
+
+        // Reproductive History
+        doc.setFontSize(12);
+        doc.setTextColor(0, 102, 0);
+        doc.text('Reproductive History', 14, doc.lastAutoTable.finalY + 10);
+        doc.setTextColor(0);
+
+        const reproductiveInfo = [
+          ['4Ps Member:', patient.fourMember],
+          ['Philhealth Status:', patient.philhealthStatus],
+          ['Philhealth ID Number:', patient.philhealthNo],
+          ['Menarche:', patient.menarche],
+          ['Onset of Sexual Intercourse:', patient.sexualOnset],
+          ['Period/Duration:', patient.periodDuration],
+          ['Birth Control Method:', patient.birthControl],
+          ['Interval/Cycle:', patient.intervalCycle],
+          ['Menopause:', patient.menopause],
+          ['LMP:', patient.lmp],
+          ['EDC:', patient.edc],
+          ['Gravidity:', patient.gravidity],
+          ['Parity:', patient.parity],
+          ['Term:', patient.term],
+          ['Preterm:', patient.preterm],
+          ['Abortion:', patient.abortion],
+          ['Living:', patient.living],
+        ];
+
+        doc.autoTable({
+          startY: doc.lastAutoTable.finalY + 15,
+          body: reproductiveInfo,
+          theme: 'plain',
+          styles: { fontSize: 10, textColor: 50 },
+          columnStyles: {
+            0: { fontStyle: 'bold', halign: 'left', cellWidth: 70 },
+            1: { halign: 'left' }
+          }
+        });
+
+        // Footer with Two Columns for Signatures
+        doc.setFontSize(10);
+        const finalY = doc.lastAutoTable.finalY + 30;
+
+        doc.line(20, finalY, 80, finalY);  // Provider Signature Line
+        doc.line(130, finalY, 190, finalY);  // Patient/Guardian Signature Line
+
+        doc.text('Attending Physician Signature', 20, finalY + 5);
+        doc.text('Patient/Guardian Signature', 130, finalY + 5);
+
+        // Save the PDF
+        doc.save(`Prenatal_Record_${patient.firstName}_${patient.lastName}.pdf`);
+      };
+
+      img.onerror = function () {
+        alert('Failed to load the RHU logo. Please check the image path.');
+      };
+    },
+    // Status Badge Styling
+    statusBadgeClass(status) {
       switch (status) {
         case 'Completed':
           return 'bg-green-100 text-green-800';
@@ -506,10 +646,10 @@ export default {
 
     // ✅ Click Outside to Close Modal
     handleClickOutside(event) {
-        const modal = document.querySelector(".modal-content"); // Changed this.$el to document
-        if (this.isModalOpen && modal && !modal.contains(event.target)) {
-            this.closeModal();
-        }
+      const modal = document.querySelector(".modal-content"); // Changed this.$el to document
+      if (this.isModalOpen && modal && !modal.contains(event.target)) {
+        this.closeModal();
+      }
     },
 
     async fetchPostpartumData(prenatalConsultationDetailsID) {
@@ -526,17 +666,17 @@ export default {
       }
     },
     async fetchTrimesterData(prenatalConsultationDetailsID) {
-        try {
-            const response = await axios.get(`/prenatal/${prenatalConsultationDetailsID}/trimester/{trimester}`);
-            if (response.data.success) {
-            this.localTrimesterData = response.data.data;
-            } else {
-            this.localTrimesterData = null;
-            }
-        } catch (error) {
-            console.error('Error fetching trimester data:', error);
-            this.localTrimesterData = null;
+      try {
+        const response = await axios.get(`/prenatal/${prenatalConsultationDetailsID}/trimester/{trimester}`);
+        if (response.data.success) {
+          this.localTrimesterData = response.data.data;
+        } else {
+          this.localTrimesterData = null;
         }
+      } catch (error) {
+        console.error('Error fetching trimester data:', error);
+        this.localTrimesterData = null;
+      }
     },
 
     nextPage() {
@@ -552,44 +692,106 @@ export default {
     },
 
     generateReport() {
-      const data = this.filteredPatients.map((patient) => ({
-        fullName: patient.fullName,
-        address: patient.address,
-        age: patient.age,
-        contact: patient.contact,
-      }));
+      const doc = new jsPDF('landscape');
+      const date = new Date().toLocaleDateString();
 
-      const csvContent =
-        'data:text/csv;charset=utf-8,' +
-        ['Full Name,Address,Age,Contact']
-          .concat(
-            data.map((row) =>
-              `${row.fullName},${row.address},${row.age},${row.contact}`
-            )
-          )
-          .join('\n');
+      // Header: RHU Logo and Title
+      const logoUrl = "/images/RHU%20Logo.png"; // Ensure the path is correct
 
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'patient_report.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const img = new Image();
+      img.src = logoUrl;
+
+      img.onload = () => {
+        // Add RHU Logo
+        doc.addImage(img, 'PNG', 10, 10, 25, 25);
+
+        // Add Header
+        doc.setFontSize(16);
+        doc.setTextColor(220, 20, 60); // Pink Color
+        doc.text('Republic of the Philippines', 40, 15);
+        doc.setFontSize(14);
+        doc.text('Department of Health', 40, 22);
+        doc.setFontSize(14);
+        doc.text('Initao Rural Health Unit', 40, 29);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${date}`, 250, 15);
+
+        // Title
+        doc.setFontSize(18);
+        doc.setTextColor(199, 21, 133); // Darker Pink
+        doc.text('Prenatal and Postpartum Records', 140, 45, { align: 'center' });
+
+        // Table Columns
+        const columns = [
+          'Full Name',
+          'Address',
+          'Age',
+          'Emergency Contact',
+          'Consultation Date',
+          'Status'
+        ];
+
+        // Table Rows
+        const rows = this.filteredPatients.map((patient) => [
+          `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
+          `${patient.purok}, ${patient.barangay}`,
+          patient.age,
+          patient.emergencyContact,
+          patient.consultationDate,
+          patient.status || 'Pending',
+        ]);
+
+        // Auto Table for Patient Records
+        doc.autoTable({
+          startY: 50,
+          head: [columns],
+          body: rows,
+          styles: {
+            fontSize: 10,
+            cellPadding: 3,
+            textColor: 50,
+            lineColor: [199, 21, 133],
+            lineWidth: 0.1,
+          },
+          headStyles: {
+            fillColor: [255, 182, 193], // Light Pink Header
+            textColor: 255,
+            fontSize: 12,
+            halign: 'center',
+          },
+          alternateRowStyles: {
+            fillColor: [255, 240, 245], // Soft Pink Alternate Rows
+          },
+          margin: { top: 50 },
+        });
+
+        // Footer (Two Columns)
+        doc.setFontSize(10);
+        doc.setTextColor(0);
+        doc.text('_____________________________', 20, doc.lastAutoTable.finalY + 20);
+        doc.text('_____________________________', 200, doc.lastAutoTable.finalY + 20);
+        doc.text('Attending Physician Signature', 20, doc.lastAutoTable.finalY + 25);
+        doc.text('Patient/Guardian Signature', 200, doc.lastAutoTable.finalY + 25);
+
+        // Save PDF
+        doc.save(`Prenatal_Postpartum_Report_${date}.pdf`);
+      };
     },
     handleTrimesterConfirm(data) {
-        console.log("Trimester data confirmed:", data);
-        this.closeModal();
+      console.log("Trimester data confirmed:", data);
+      this.closeModal();
     },
   },
   mounted() {
     window.addEventListener('keydown', this.handleEscKey);
     window.addEventListener('click', this.handleClickOutside.bind(this)); // Bind this context
-    },
-    beforeDestroy() {
-        window.removeEventListener('keydown', this.handleEscKey);
-        window.removeEventListener('click', this.handleClickOutside.bind(this)); // Unbind properly
-    },
+  },
+  beforeDestroy() {
+    window.removeEventListener('keydown', this.handleEscKey);
+    window.removeEventListener('click', this.handleClickOutside.bind(this)); // Unbind properly
+  },
 };
 </script>
 
