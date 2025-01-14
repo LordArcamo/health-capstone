@@ -52,33 +52,73 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Validate the request
-        $request->validate([
-            'name' => 'required|string|max:255',
+        // Base validation rules
+        $validationRules = [
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|string|in:staff,doctor',
-        ]);
+            'role' => 'required|string|in:staff,doctor,admin',
+            'phone' => 'required|string|max:13',
+            'purok' => 'required|string|max:255',
+            'barangay' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'profile_picture' => 'nullable|image|max:2048',
+            'permissions' => 'array',
+        ];
 
-        // Ensure unauthorized role manipulation is avoided
-        if ($request->role === 'admin') {
-            abort(403, 'Unauthorized role assignment.');
+        // Add doctor-specific validation rules only if role is doctor
+        if ($request->role === 'doctor') {
+            $validationRules['prc_number'] = 'required|string|max:255';
+            $validationRules['specialization'] = 'required|string|max:255';
+            $validationRules['prc_validity'] = 'required|date';
         }
 
-        // Create the user with the specified role
-        $user = User::create([
-            'name' => $request->name,
+        // Validate the request
+        $request->validate($validationRules);
+
+        // Handle profile picture upload
+        $profilePicturePath = null;
+        if ($request->hasFile('profile_picture')) {
+            $profilePicturePath = $request->file('profile_picture')->store('profile-pictures', 'public');
+        }
+
+        // Prepare user data
+        $userData = [
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-        ]);
+            'phone' => $request->phone,
+            'purok' => $request->purok,
+            'barangay' => $request->barangay,
+            'city' => $request->city,
+            'profile_picture' => $profilePicturePath,
+            'permissions' => $request->permissions,
+            'prc_number' => 'None',
+            'specialization' => 'None',
+            'prc_validity' => null,
+        ];
+
+        // Override with doctor-specific data if role is doctor
+        if ($request->role === 'doctor') {
+            $userData['prc_number'] = $request->prc_number;
+            $userData['specialization'] = $request->specialization;
+            $userData['prc_validity'] = $request->prc_validity;
+        }
+
+        // Create the user
+        $user = User::create($userData);
 
         // Trigger the registered event
         event(new Registered($user));
 
         // Redirect to staff page with success message
         return redirect()->route('admin.register.staff')
-            ->with('message', 'Successfully registered!');
+            ->with('message', 'User registered successfully!');
     }
 
     /**

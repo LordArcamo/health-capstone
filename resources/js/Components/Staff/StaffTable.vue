@@ -68,7 +68,7 @@
             class="hover:bg-gray-50 cursor-pointer"
             @click="openModal(staff)"
           >
-            <td class="py-3 px-6">{{ staff.name }}</td>
+            <td class="py-3 px-6">{{ staff.first_name }}</td>
             <td class="py-3 px-6">{{ capitalize(staff.role) }}</td>
             <td class="py-3 px-6">
               <!-- Edit Button -->
@@ -216,13 +216,13 @@ export default {
   computed: {
     filteredStaff() {
       if (!this.staffList) return [];
-      
+
       const query = this.searchQuery ? this.searchQuery.toLowerCase() : '';
 
       return this.staffList.filter((staff) => {
         if (!staff) return false;
 
-        const matchesQuery = !query || 
+        const matchesQuery = !query ||
           staff.name?.toLowerCase().includes(query) ||
           staff.role?.toLowerCase().includes(query) ||
           staff.email?.toLowerCase().includes(query);

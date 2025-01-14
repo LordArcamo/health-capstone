@@ -10,6 +10,7 @@ use App\Models\CheckUp;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
 use App\Models\User;
+use App\Models\VisitInformation;
 
 class CheckUpController extends Controller
 {
@@ -34,8 +35,9 @@ class CheckUpController extends Controller
 
                 // Convert numeric fields to proper types
                 $patientData['temperature'] = (float) $patientData['temperature'];
-                $patientData['height'] = (int) $patientData['height'];
-                $patientData['weight'] = (int) $patientData['weight'];
+                $patientData['height'] = (float) $patientData['height'];
+                $patientData['weight'] = (float) $patientData['weight'];
+                $patientData['age'] = (int) $patientData['age'];
 
                 // Validate the row
                 $validator = Validator::make($patientData, [
@@ -45,23 +47,29 @@ class CheckUpController extends Controller
                     'suffix' => 'nullable|string|max:10',
                     'purok' => 'nullable|string|max:100',
                     'barangay' => 'nullable|string|max:100',
-                    'age' => 'nullable|numeric',
+                    'age' => 'nullable|integer|min:0|max:150',
                     'birthdate' => 'nullable|date',
                     'contact' => 'nullable|string|max:15',
-                    'sex' => 'nullable|string|max:10',
+                    'sex' => 'required|string|in:Male,Female',
                     'consultationDate' => 'required|date',
-                    'consultationTime' => 'required|date_format:H:i:s', // Validate in HH:MM:SS format
+                    'consultationTime' => 'required|date_format:H:i:s',
                     'modeOfTransaction' => 'required|string|max:50',
                     'bloodPressure' => 'nullable|string|max:20',
-                    'temperature' => 'nullable|numeric|between:0,100',
+                    'temperature' => 'nullable|numeric|between:35,42',
                     'height' => 'nullable|numeric|between:0,300',
                     'weight' => 'nullable|numeric|between:0,500',
                     'providerName' => 'required|string|max:100',
                     'natureOfVisit' => 'required|string|max:100',
                     'visitType' => 'required|string|max:50',
-                    'chiefComplaints' => 'required|string|max:255',
-                    'diagnosis' => 'required|string|max:255',
-                    'medication' => 'required|string|max:255',
+                    'referredFrom' => 'nullable|string|max:100',
+                    'referredTo' => 'nullable|string|max:100',
+                    'reasonsForReferral' => 'nullable|string|max:255',
+                    'referredBy' => 'nullable|string|max:100',
+                    'chiefComplaints' => 'required|string',
+                    'diagnosis' => 'required|string',
+                    'medication' => 'required|string',
+                    'requireLabTest' => 'nullable|string',
+                    'selectedLabTests' => 'nullable|string',
                 ]);
 
                 if ($validator->fails()) {
@@ -70,40 +78,56 @@ class CheckUpController extends Controller
                     throw new \Exception('Validation failed for row: ' . json_encode($patientData));
                 }
 
-                // Create or update records in the database
-                $personalInfo = PersonalInformation::create([
-                    'firstName' => $patientData['firstName'],
-                    'lastName' => $patientData['lastName'],
-                    'middleName' => $patientData['middleName'],
-                    'suffix' => $patientData['suffix'],
-                    'purok' => $patientData['purok'],
-                    'barangay' => $patientData['barangay'],
-                    'age' => $patientData['age'],
-                    'birthdate' => $patientData['birthdate'],
-                    'contact' => $patientData['contact'],
-                    'sex' => $patientData['sex'],
-                ]);
+                try {
+                    // Create PersonalInformation record
+                    $personalInfo = PersonalInformation::create([
+                        'firstName' => $patientData['firstName'],
+                        'lastName' => $patientData['lastName'],
+                        'middleName' => $patientData['middleName'],
+                        'suffix' => $patientData['suffix'] ?? null,
+                        'purok' => $patientData['purok'],
+                        'barangay' => $patientData['barangay'],
+                        'age' => $patientData['age'],
+                        'birthdate' => $patientData['birthdate'],
+                        'contact' => $patientData['contact'],
+                        'sex' => $patientData['sex'],
+                    ]);
 
-                CheckUp::create([
-                    'personalId' => $personalInfo->personalId,
-                    'consultationDate' => $patientData['consultationDate'],
-                    'consultationTime' => $patientData['consultationTime'], // Insert in HH:MM:SS format
-                    'modeOfTransaction' => $patientData['modeOfTransaction'],
-                    'bloodPressure' => $patientData['bloodPressure'],
-                    'temperature' => $patientData['temperature'],
-                    'height' => $patientData['height'],
-                    'weight' => $patientData['weight'],
-                    'providerName' => $patientData['providerName'],
-                    'natureOfVisit' => $patientData['natureOfVisit'],
-                    'visitType' => $patientData['visitType'],
-                    'chiefComplaints' => $patientData['chiefComplaints'],
-                    'diagnosis' => $patientData['diagnosis'],
-                    'medication' => $patientData['medication'],
-                    'referredFrom' => $patientData['referredFrom'] ?? 'None',
-                    'referredTo' => $patientData['referredTo'] ?? 'None',
-                    'reasonsForReferral' => $patientData['reasonsForReferral'] ?? 'None',
-                    'referredBy' => $patientData['referredBy'] ?? 'None',
-                ]);
+                    // Create ConsultationDetails record
+                    $consultationDetails = ConsultationDetails::create([
+                        'personalId' => $personalInfo->personalId,
+                        'id' => auth()->id(), // Add authenticated user ID
+                        'consultationDate' => $patientData['consultationDate'],
+                        'consultationTime' => $patientData['consultationTime'],
+                        'modeOfTransaction' => $patientData['modeOfTransaction'],
+                        'bloodPressure' => $patientData['bloodPressure'],
+                        'temperature' => $patientData['temperature'],
+                        'height' => $patientData['height'],
+                        'weight' => $patientData['weight'],
+                        'providerName' => $patientData['providerName'],
+                        'natureOfVisit' => $patientData['natureOfVisit'],
+                        'visitType' => $patientData['visitType'],
+                        'referredFrom' => $patientData['referredFrom'] ?? 'None',
+                        'referredTo' => $patientData['referredTo'] ?? 'None',
+                        'reasonsForReferral' => $patientData['reasonsForReferral'] ?? 'None',
+                        'referredBy' => $patientData['referredBy'] ?? 'None',
+                    ]);
+
+                    // Create VisitInformation record
+                    VisitInformation::create([
+                        'consultationDetailsID' => $consultationDetails->consultationDetailsID,
+                        'id' => auth()->id(), // Add authenticated user ID
+                        'chiefComplaints' => $patientData['chiefComplaints'],
+                        'diagnosis' => $patientData['diagnosis'],
+                        'medication' => $patientData['medication'],
+                        'requireLabTest' => $patientData['requireLabTest'] ?? null,
+                        'selectedLabTests' => $patientData['selectedLabTests'] ?? null,
+                    ]);
+
+                } catch (\Exception $e) {
+                    \Log::error('Error creating records: ' . $e->getMessage());
+                    throw $e;
+                }
             }
         });
 
