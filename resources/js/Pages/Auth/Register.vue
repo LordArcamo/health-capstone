@@ -479,15 +479,4 @@ input:invalid+.floating-label {
     color: #ef4444;
 }
 
-.input-field {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400;
-}
-
-button {
-    @apply bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition;
-}
-
-button:disabled {
-    @apply bg-gray-400 cursor-not-allowed;
-}
 </style>
