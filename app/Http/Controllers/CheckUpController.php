@@ -68,8 +68,9 @@ class CheckUpController extends Controller
                     'chiefComplaints' => 'required|string',
                     'diagnosis' => 'required|string',
                     'medication' => 'required|string',
-                    'requireLabTest' => 'nullable|string',
-                    'selectedLabTests' => 'nullable|string',
+                    // 'requireLabTest' => 'nullable|string',
+                    'status' => 'nullable|string',
+
                 ]);
 
                 if ($validator->fails()) {
@@ -111,6 +112,7 @@ class CheckUpController extends Controller
                         'referredTo' => $patientData['referredTo'] ?? 'None',
                         'reasonsForReferral' => $patientData['reasonsForReferral'] ?? 'None',
                         'referredBy' => $patientData['referredBy'] ?? 'None',
+                        'status' => $patientData['status'] ?? 'None',
                     ]);
 
                     // Create VisitInformation record
@@ -120,8 +122,8 @@ class CheckUpController extends Controller
                         'chiefComplaints' => $patientData['chiefComplaints'],
                         'diagnosis' => $patientData['diagnosis'],
                         'medication' => $patientData['medication'],
-                        'requireLabTest' => $patientData['requireLabTest'] ?? null,
-                        'selectedLabTests' => $patientData['selectedLabTests'] ?? null,
+                        // 'requireLabTest' => $patientData['requireLabTest'] ?? null,
+                        // 'selectedLabTests' => $patientData['selectedLabTests'] ?? null,
                     ]);
 
                 } catch (\Exception $e) {

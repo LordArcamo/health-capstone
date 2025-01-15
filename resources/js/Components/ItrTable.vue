@@ -421,7 +421,7 @@ export default {
       return this.patients
         .map((patient) => ({
           ...patient,
-          fullName: `${patient.firstName} ${patient.lastName}`,
+          fullName: `${patient.firstName} ${patient.middleName} ${patient.lastName}`,
           address: `${patient.purok}, ${patient.barangay}`,
         }))
         .filter((patient) => {

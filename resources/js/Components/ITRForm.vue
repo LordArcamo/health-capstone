@@ -521,29 +521,29 @@ export default {
           .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
       }
     },
-    validateConsultationDate() {
-      const today = new Date();
-      const inputDate = new Date(this.form.consultationDate);
+    // validateConsultationDate() {
+    //   const today = new Date();
+    //   const inputDate = new Date(this.form.consultationDate);
 
-      if (!this.form.consultationDate) {
-        this.errors.consultationDate = "Consultation date is required.";
-        return false;
-      }
+    //   if (!this.form.consultationDate) {
+    //     this.errors.consultationDate = "Consultation date is required.";
+    //     return false;
+    //   }
 
-      if (isNaN(inputDate.getTime())) {
-        this.errors.consultationDate = "Please enter a valid date.";
-        return false;
-      }
+    //   if (isNaN(inputDate.getTime())) {
+    //     this.errors.consultationDate = "Please enter a valid date.";
+    //     return false;
+    //   }
 
-      if (inputDate > today) {
-        this.errors.consultationDate = "Consultation date cannot be in the future.";
-        return false;
-      }
+    //   if (inputDate > today) {
+    //     this.errors.consultationDate = "Consultation date cannot be in the future.";
+    //     return false;
+    //   }
 
-      // Clear error if validation passes
-      this.errors.consultationDate = "";
-      return true;
-    },
+    //   // Clear error if validation passes
+    //   this.errors.consultationDate = "";
+    //   return true;
+    // },
     setAutoDateTime() {
       const now = new Date();
 
@@ -711,9 +711,6 @@ export default {
         valid = false;
       } else if (isNaN(consultationDate.getTime())) {
         this.errors.consultationDate = "Please enter a valid date.";
-        valid = false;
-      } else if (consultationDate > today) {
-        this.errors.consultationDate = "Consultation date cannot be in the future.";
         valid = false;
       }
 
