@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('phone', 13);
             
             // Add profile picture
-            $table->string('profile_picture')->nullable();
+            $table->longText('profile_picture')->nullable();
             
             // Add permissions
             $table->json('permissions')->nullable();

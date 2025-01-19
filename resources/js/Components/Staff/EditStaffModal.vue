@@ -21,10 +21,10 @@
         <form @submit.prevent="submitForm" class="space-y-4">
           <!-- Name Input -->
           <div>
-            <label class="block text-sm font-medium text-gray-700">Name</label>
+            <label class="block text-sm font-medium text-gray-700">First Name</label>
             <input
               type="text"
-              v-model="form.name"
+              v-model="form.first_name"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
               required
             />
@@ -95,7 +95,7 @@ export default {
     return {
       form: {
         id: this.staff?.id || null,
-        name: this.staff?.name || '',
+        first_name: this.staff?.first_name || '',
         email: this.staff?.email || '',
         role: this.staff?.role || 'staff'
       }
@@ -107,7 +107,7 @@ export default {
       if (newStaff) {
         this.form = {
           id: newStaff.id,
-          name: newStaff.name,
+          first_name: newStaff.first_name,
           email: newStaff.email,
           role: newStaff.role
         }
