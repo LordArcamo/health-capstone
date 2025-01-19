@@ -19,7 +19,7 @@
     </div>
     <!-- Search and Filter Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <!-- Search Bar-->
+      <!-- Search Bar-->
       <div class="w-full md:w-2/3 flex flex-col gap-4">
 
         <!-- Search Input with Add Button -->
@@ -265,6 +265,8 @@
 
 <script>
 import { Inertia } from '@inertiajs/inertia';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default {
   props: {
@@ -463,33 +465,110 @@ export default {
     },
 
     generateReport() {
-      const data = this.filteredPatients.map((patient) => ({
-        fullName: patient.fullName,
-        address: patient.address,
-        age: patient.age,
-        natureOfVisit: patient.natureOfVisit,
-        visitType: patient.visitType,
-        gender: patient.sex,
-      }));
+      const doc = new jsPDF('portrait', 'mm', 'a4');
 
-      const csvContent =
-        'data:text/csv;charset=utf-8,' +
-        ['Full Name,Address,Age,Nature of Visit,Visit Type,Gender']
-          .concat(
-            data.map((row) =>
-              `${row.fullName},${row.address},${row.age},${row.natureOfVisit},${row.visitType},${row.gender}`
-            )
-          )
-          .join('\n');
+      // RHU Logo Path
+      const logoUrl = "/images/RHU%20Logo.png"; // Ensure the path is correct
 
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'patient_report.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const dateGenerated = new Date().toLocaleDateString();
+
+      // Load Logo
+      const img = new Image();
+      img.src = logoUrl;
+
+      img.onload = () => {
+        // 🏥 RHU Header
+        doc.addImage(img, 'PNG', 14, 10, 30, 30); // Logo Position
+
+        // Header Text
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("Republic of the Philippines", 105, 15, { align: "center" });
+        doc.text("Department of Health", 105, 22, { align: "center" });
+        doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
+
+        // Subheader
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
+        doc.text("Contact: +63 918 811 1213 | Email: rhu.initao@gmail.com", 105, 42, { align: "center" });
+
+        // Divider
+        doc.setLineWidth(0.5);
+        doc.line(14, 48, 196, 48);
+
+        // 📋 Report Title
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("National Immunization Records", 105, 58, { align: "center" });
+
+        // 📆 Date Generated
+        doc.setFontSize(10);
+        doc.text(`Date Generated: ${dateGenerated}`, 14, 66);
+
+        // 📊 Table Columns
+        const columns = [
+          "Full Name",
+          "Address",
+          "Age",
+          "Gender",
+          "Consultation Date",
+          "Status"
+        ];
+
+        // 📑 Table Rows (Filtered Data)
+        const rows = this.filteredPatients.map((patient) => [
+          `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
+          `${patient.purok}, ${patient.barangay}`,
+          patient.age,
+          patient.sex,
+          this.formatDate(patient.consultationDate),
+          patient.status || "Pending"
+        ]);
+
+        // 📄 Table with AutoTable Plugin
+        doc.autoTable({
+          head: [columns],
+          body: rows,
+          startY: 72,
+          styles: {
+            fontSize: 9,
+            cellPadding: 3,
+            valign: "middle",
+          },
+          headStyles: {
+            fillColor: [0, 150, 136],  // Teal Header
+            textColor: 255,
+            fontStyle: "bold",
+          },
+          alternateRowStyles: {
+            fillColor: [240, 240, 240],  // Alternate Row Color
+          },
+          margin: { top: 70 },
+        });
+
+        // 🖊️ Footer - Signature Block
+        const finalY = doc.lastAutoTable.finalY + 20;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("Prepared by:", 14, finalY);
+        doc.text("__________________________", 14, finalY + 8);
+        doc.text("RHU Officer", 14, finalY + 15);
+
+        doc.text("Reviewed by:", 130, finalY);
+        doc.text("__________________________", 130, finalY + 8);
+        doc.text("Municipal Health Officer", 130, finalY + 15);
+
+        // 📥 Save the PDF
+        doc.save(`Immunization_Report_${dateGenerated}.pdf`);
+      };
+
+      img.onerror = () => {
+        alert("Failed to load the RHU logo. Please check the image path.");
+      };
     },
+
   },
 };
 </script>

@@ -321,7 +321,7 @@
             Edit Record
           </button>
 
-          <button @click="printRecord(selectedPatient)"
+          <button @click="printPatientRecord(selectedPatient)"
             class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
             Print Record
           </button>
@@ -337,6 +337,8 @@
 
 <script>
 import { Inertia } from '@inertiajs/inertia';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default {
   props: {
@@ -419,7 +421,7 @@ export default {
       return this.patients
         .map((patient) => ({
           ...patient,
-          fullName: `${patient.firstName} ${patient.lastName}`,
+          fullName: `${patient.firstName} ${patient.middleName} ${patient.lastName}`,
           address: `${patient.purok}, ${patient.barangay}`,
         }))
         .filter((patient) => {
@@ -474,6 +476,97 @@ export default {
   },
 
   methods: {
+    generateReport() {
+      const doc = new jsPDF();
+
+      // Load the RHU Logo
+      const logo = "/images/RHU%20Logo.png"; // Path to the RHU logo you uploaded
+
+      // Add the Logo
+      doc.addImage(logo, 'PNG', 14, 10, 30, 30); // (image, format, x, y, width, height)
+
+      // Header Information
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Republic of the Philippines", 105, 15, { align: "center" });
+      doc.text("Department of Health", 105, 22, { align: "center" });
+      doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
+
+      // Subheader
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
+      doc.text("Contact: +63 918 811 1213,+63 920 276 6740  | Email: rhu.initao@gmail.com", 105, 42, { align: "center" });
+
+      // Line Separator
+      doc.setLineWidth(0.5);
+      doc.line(14, 45, 196, 45);
+
+      // Report Title
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Individual Treatment Records", 105, 55, { align: "center" });
+
+      // Report Date
+      const date = new Date().toLocaleDateString();
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Date Generated: ${date}`, 14, 65);
+
+      // Define Table Columns
+      const columns = [
+        "Full Name",
+        "Address",
+        "Age",
+        "Visit Type",
+        "Consultation Date",
+        "Diagnosis",
+        "Gender",
+        "Status"
+      ];
+
+      // Define Table Rows (Filtered Patients)
+      const rows = this.filteredPatients.map((patient) => [
+        `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
+        `${patient.purok}, ${patient.barangay}`,
+        patient.age,
+        patient.visitType,
+        this.formatDate(patient.consultationDate),
+        patient.diagnosis,
+        patient.sex,
+        patient.status || "Pending"
+      ]);
+
+      // Generate the Table
+      doc.autoTable({
+        head: [columns],
+        body: rows,
+        startY: 70,
+        styles: {
+          fontSize: 9,
+          cellPadding: 2,
+          valign: "middle",
+        },
+        headStyles: {
+          fillColor: [46, 204, 113], // Green Header
+          textColor: 255,
+          fontStyle: "bold",
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245], // Light Gray for Alternate Rows
+        },
+        margin: { top: 70 },
+      });
+
+      // Footer - Signature Area
+      doc.setFontSize(11);
+      doc.text("Prepared by:", 14, doc.autoTable.previous.finalY + 20);
+      doc.text("__________________________", 14, doc.autoTable.previous.finalY + 30);
+      doc.text("RHU Officer", 14, doc.autoTable.previous.finalY + 37);
+
+      // Save the PDF
+      doc.save(`Patient_Report_${date}.pdf`);
+    },
     // Open Edit Page
     editPatient(patient) {
       Inertia.get(`/patients/edit/${patient.personalId}`);
@@ -484,10 +577,8 @@ export default {
       switch (status) {
         case 'Completed':
           return 'bg-green-100 text-green-800';
-        case 'In Progress':
-          return 'bg-yellow-100 text-yellow-800';
         case 'Pending':
-          return 'bg-gray-100 text-gray-800';
+          return 'bg-yellow-100 text-yellow-800';
         case 'Cancelled':
           return 'bg-red-100 text-red-800';
         case 'Follow-up Required':
@@ -584,17 +675,145 @@ export default {
       this.showModal = false;
       this.selectedPatient = null;
     },
+    printPatientRecord(patient) {
+      const printWindow = window.open('', '_blank');
 
-    printRecord(patient) {
-      const printContent = `
-        <h2>Individual Treatment Record</h2>
-        <p><strong>Name:</strong> ${patient.fullName}</p>
-        <p><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
-      `;
-      const newWindow = window.open('', '_blank');
-      newWindow.document.write(printContent);
-      newWindow.print();
-    },
+      const logoUrl = '/images/RHU%20Logo.png'; // Correct logo path
+
+      const content = `
+    <html>
+      <head>
+        <title>Individual Treatment Record</title>
+        <style>
+          body {
+            font-family: 'Helvetica', sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px solid #006400;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+          }
+          .header img {
+            width: 100px;
+            height: 100px;
+          }
+          .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #006400;
+            margin-top: 5px;
+          }
+          .sub-title {
+            font-size: 16px;
+            color: #555;
+          }
+          .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+          .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #006400;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+          }
+          .info {
+            margin-bottom: 6px;
+            font-size: 14px;
+          }
+          .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+          }
+          .signature {
+            width: 45%;
+          }
+          .vital-signs {
+            margin-top: 20px;
+            font-size: 14px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="${logoUrl}" alt="RHU Logo" />
+          <div class="title">Republic of the Philippines</div>
+          <div class="sub-title">Department of Health</div>
+          <div class="sub-title">Initao Rural Health Unit</div>
+          <p><strong>Address:</strong> Poblacion, Initao, Misamis Oriental | <strong>Contact:</strong> +63 XXX XXX XXXX</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Patient Information</div>
+          <p class="info"><strong>Full Name:</strong> ${patient.firstName} ${patient.middleName || ''} ${patient.lastName}</p>
+          <p class="info"><strong>Suffix:</strong> ${patient.suffix || 'N/A'}</p>
+          <p class="info"><strong>Address:</strong> ${patient.purok}, ${patient.barangay}</p>
+          <p class="info"><strong>Age:</strong> ${patient.age}</p>
+          <p class="info"><strong>Birthday:</strong> ${patient.birthdate}</p>
+          <p class="info"><strong>Contact:</strong> ${patient.contact}</p>
+          <p class="info"><strong>Gender:</strong> ${patient.sex}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Consultation Details</div>
+          <p class="info"><strong>Date:</strong> ${patient.consultationDate}</p>
+          <p class="info"><strong>Time:</strong> ${patient.consultationTime}</p>
+          <p class="info"><strong>Mode of Transaction:</strong> ${patient.modeOfTransaction}</p>
+        </div>
+
+        <div class="section vital-signs">
+          <div class="section-title">Vital Signs</div>
+          <p class="info"><strong>Blood Pressure:</strong> ${patient.bloodPressure}</p>
+          <p class="info"><strong>Temperature:</strong> ${patient.temperature}</p>
+          <p class="info"><strong>Height:</strong> ${patient.height}</p>
+          <p class="info"><strong>Weight:</strong> ${patient.weight}</p>
+          <p class="info"><strong>Waistline:</strong> ${patient.waistline || 'N/A'}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Medical Details</div>
+          <p class="info"><strong>Attending Provider:</strong> ${patient.providerName}</p>
+          <p class="info"><strong>Nature of Visit:</strong> ${patient.natureOfVisit}</p>
+          <p class="info"><strong>Consultation Type:</strong> ${patient.visitType}</p>
+          <p class="info"><strong>Chief Complaints:</strong> ${patient.chiefComplaints}</p>
+          <p class="info"><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
+          <p class="info"><strong>Treatment/Medication:</strong> ${patient.medication}</p>
+        </div>
+
+        <div class="footer">
+          <div class="signature">
+            <p><strong>Attending Physician Signature:</strong> ________________________</p>
+            <p><strong>Date:</strong> ________________________</p>
+          </div>
+          <div class="signature">
+            <p><strong>Patient/Guardian Signature:</strong> ________________________</p>
+            <p><strong>Date:</strong> ________________________</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+      printWindow.document.open();
+      printWindow.document.write(content);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+
+
+
   },
 };
 </script>
