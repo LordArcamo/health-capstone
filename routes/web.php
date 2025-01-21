@@ -123,6 +123,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/services/patients', [PatientController::class, 'show'])->name('totalPatients.show');
 
+Route::get('/services/queue', [PatientController::class, 'show'])->name('totalPatients.show');
+
+Route::get('/services/consultation', [PatientController::class, 'show'])->name('totalPatients.show');
+
+
+
 Route::get('/services/patients/referred', [PatientController::class, 'showReferred'])->name('referredPatients.show');
 
 

@@ -246,11 +246,11 @@
 
 
             <!-- Medication/Treatment (Hidden if "Yes" is Selected) -->
-            <div v-if="form.requireLabTest === 'no'">
+            <!-- <div v-if="form.requireLabTest === 'no'">
               <label class="block">Medication/Treatment:</label>
               <textarea v-model="form.medication" placeholder="Example: Loperamide" class="input"></textarea>
               <span v-if="errors.medication" class="text-red-600 text-sm">{{ errors.medication }}</span>
-            </div>
+            </div> -->
 
           </div>
 
@@ -261,9 +261,60 @@
           </div>
         </div>
 
+        <!-- Prescription Step -->
+        <div v-if="step === 3">
+          <h3 class="text-2xl font-semibold mb-6 text-gray-800">Prescription</h3>
+
+          <!-- Medication Name -->
+          <div class="mb-6">
+            <label for="medication" class="block text-sm font-medium text-gray-700 mb-2">Medication Name</label>
+            <input id="medication" type="text" v-model="form.prescription.medication" class="input"
+              placeholder="Enter the medication name" />
+            <span v-if="errors.prescriptionMedication" class="text-red-600 text-sm">{{ errors.prescriptionMedication
+              }}</span>
+          </div>
+
+          <!-- Dosage -->
+          <div class="mb-6">
+            <label for="dosage" class="block text-sm font-medium text-gray-700 mb-2">Dosage</label>
+            <input id="dosage" type="text" v-model="form.prescription.dosage" class="input" placeholder="e.g., 500mg" />
+            <span v-if="errors.prescriptionDosage" class="text-red-600 text-sm">{{ errors.prescriptionDosage }}</span>
+          </div>
+
+          <!-- Frequency -->
+          <div class="mb-6">
+            <label for="frequency" class="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
+            <input id="frequency" type="text" v-model="form.prescription.frequency" class="input"
+              placeholder="e.g., 2 times a day" />
+            <span v-if="errors.prescriptionFrequency" class="text-red-600 text-sm">{{ errors.prescriptionFrequency
+              }}</span>
+          </div>
+
+          <!-- Duration -->
+          <div class="mb-6">
+            <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+            <input id="duration" type="text" v-model="form.prescription.duration" class="input"
+              placeholder="e.g., 7 days" />
+            <span v-if="errors.prescriptionDuration" class="text-red-600 text-sm">{{ errors.prescriptionDuration
+              }}</span>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-6">
+            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+            <textarea id="notes" v-model="form.prescription.notes" class="input"
+              placeholder="Enter any additional instructions for the patient"></textarea>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="mt-6 flex justify-between">
+            <button @click="prevStep" class="btn">Back</button>
+            <button @click="nextStep" class="btn">Next</button>          
+          </div>
+        </div>
 
         <!-- Step 4: Review Submitted Data -->
-        <div v-if="step === 3">
+        <div v-if="step === 4">
           <h3 class="text-lg font-semibold mb-4">Review Your Information</h3>
           <div class="grid grid-cols-2 gap-4">
             <!-- Loop through form fields to display data -->
@@ -274,9 +325,60 @@
           </div>
           <div class="mt-6 flex justify-between">
             <button @click="prevStep" class="btn">Back</button>
-            <button type="submit" class="btn">Submit</button>
+            <button @click="nextStep" class="btn">Next</button>          
           </div>
         </div>
+
+        <!-- Step 5: Prescription Generation -->
+<div v-if="step === 5">
+  <h3 class="text-lg font-semibold mb-4">Prescription</h3>
+  
+  <!-- Prescription Details -->
+  <div class="bg-white shadow-md rounded-lg p-6">
+    <div class="border-b pb-4 mb-4">
+      <h4 class="text-2xl font-bold text-center mb-2">Prescription</h4>
+      <p class="text-center text-gray-600">Issued by: {{ doctorName }}</p>
+      <p class="text-center text-gray-600">{{ doctorSpecialization }}</p>
+    </div>
+
+    <!-- Patient Information -->
+    <div class="mb-4">
+      <h5 class="text-lg font-semibold text-gray-800 mb-2">Patient Information</h5>
+      <p><strong>Name:</strong> {{ consultationDetails.firstName }} {{ consultationDetails.middleName }} {{ consultationDetails.lastName }}</p>
+      <p><strong>Age:</strong> {{ consultationDetails.age || 'Not Provided' }}</p>
+      <p><strong>Sex:</strong> {{ consultationDetails.sex || 'Not Provided' }}</p>
+      <p><strong>Contact:</strong> {{ consultationDetails.contact || 'Not Provided' }}</p>
+    </div>
+
+    <!-- Prescription -->
+    <div class="mb-4">
+      <h5 class="text-lg font-semibold text-gray-800 mb-2">Medication</h5>
+      <p><strong>Medication Name:</strong> {{ form.prescription.medication }}</p>
+      <p><strong>Dosage:</strong> {{ form.prescription.dosage }}</p>
+      <p><strong>Frequency:</strong> {{ form.prescription.frequency }}</p>
+      <p><strong>Duration:</strong> {{ form.prescription.duration }}</p>
+      <p><strong>Notes:</strong> {{ form.prescription.notes || 'None' }}</p>
+    </div>
+
+    <!-- Doctor's Signature -->
+    <div class="flex justify-between items-center border-t pt-4 mt-4">
+      <div>
+        <p class="text-gray-600 text-sm">Date: {{ new Date().toLocaleDateString() }}</p>
+      </div>
+      <div>
+        <p class="text-gray-600 text-sm">Doctor's Signature:</p>
+        <div class="h-12 border-t border-dashed border-gray-500"></div>
+        <p class="text-gray-800 text-center">{{ doctorName }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="mt-6 flex justify-between">
+    <button @click="prevStep" class="btn">Back</button>
+    <button @click="printPrescription" class="btn">Print Prescription</button>
+  </div>
+</div>
       </form>
     </div>
 
@@ -325,7 +427,9 @@ export default {
       stepTitles: [
         'Medical Record',
         'Visit Information',
-        'Review Information'
+        'Prescription',
+        'Review Information',
+        'Print Prescription'
       ],
       step: 1,
       form: {
@@ -358,7 +462,14 @@ export default {
         medication: '',
         requireLabTest: '',
         selectedLabTests: [],
-        diagnosisTags: [],  // ✅ Properly initialized diagnosisTags
+        diagnosisTags: [],
+        prescription: {
+          medication: '',
+          dosage: '',
+          frequency: '',
+          duration: '',
+          notes: '',
+        },  // ✅ Properly initialized diagnosisTags
       },
       labTests: [
         'Complete Blood Count (CBC)',
@@ -396,6 +507,102 @@ export default {
   },
 
   methods: {
+    printPrescription() {
+      const { prescription, firstName, lastName, middleName, age, sex, contact } = this.form;
+      const { doctorName, doctorSpecialization } = this.consultationDetails;
+
+      const documentContent = `
+        <html>
+          <head>
+            <title>Prescription</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background: #f9fafb;
+              }
+              .container {
+                max-width: 600px;
+                margin: auto;
+                background: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              }
+              h4 {
+                text-align: center;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 10px;
+              }
+              h5 {
+                font-size: 18px;
+                margin-bottom: 10px;
+              }
+              p {
+                margin: 5px 0;
+                font-size: 16px;
+              }
+              .footer {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 1px dashed #ccc;
+              }
+              .signature {
+                text-align: center;
+                margin-top: 40px;
+              }
+              .signature p {
+                margin: 5px 0;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h4>Prescription</h4>
+              <p class="text-center text-gray-600">Issued by: ${doctorName || 'Dr. Unknown'}</p>
+              <p class="text-center text-gray-600">${doctorSpecialization || 'Specialization Not Provided'}</p>
+              <div>
+                <h5>Patient Information</h5>
+                <p><strong>Name:</strong> ${firstName} ${middleName} ${lastName}</p>
+                <p><strong>Age:</strong> ${age || 'Not Provided'}</p>
+                <p><strong>Sex:</strong> ${sex || 'Not Provided'}</p>
+                <p><strong>Contact:</strong> ${contact || 'Not Provided'}</p>
+              </div>
+              <div>
+                <h5>Medication</h5>
+                <p><strong>Medication Name:</strong> ${prescription.medication || 'Not Provided'}</p>
+                <p><strong>Dosage:</strong> ${prescription.dosage || 'Not Provided'}</p>
+                <p><strong>Frequency:</strong> ${prescription.frequency || 'Not Provided'}</p>
+                <p><strong>Duration:</strong> ${prescription.duration || 'Not Provided'}</p>
+                <p><strong>Notes:</strong> ${prescription.notes || 'None'}</p>
+              </div>
+              <div class="footer">
+                <p>Date: ${new Date().toLocaleDateString()}</p>
+                <div class="signature">
+                  <p>________________________</p>
+                  <p>Doctor's Signature</p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+    // Open a new window
+    const printWindow = window.open('', '_blank');
+
+if (printWindow) {
+  printWindow.document.open();
+  printWindow.document.write(documentContent);
+  printWindow.document.close();
+} else {
+  alert('Pop-up blocker is preventing the print window from opening.');
+}
+    },
     navigateToStep(targetStep) {
       if (targetStep > this.step) {
         // Validate the current step before proceeding
@@ -522,15 +729,36 @@ export default {
 
       return valid;
     },
+    validateStep3() {
+      this.errors = {};
+      let valid = true;
+
+      if (this.step === 4) {
+        const { medication, dosage, frequency, duration } = this.form.prescription;
+        if (!medication) this.errors.prescriptionMedication = 'Medication name is required.';
+        if (!dosage) this.errors.prescriptionDosage = 'Dosage is required.';
+        if (!frequency) this.errors.prescriptionFrequency = 'Frequency is required.';
+        if (!duration) this.errors.prescriptionDuration = 'Duration is required.';
+        return Object.keys(this.errors).length === 0;
+      }
+      return valid;
+    },
 
     nextStep() {
-      if (this.step === 1 || (this.step === 2 && this.validateStep2())) {
-        this.step++;
-      } else {
-        this.alertMessage = 'Please fill in the required fields before proceeding.';
-        setTimeout(() => (this.alertMessage = ''), 2000);
-      }
-    },
+  if (this.step === 1 && this.validateStep1()) {
+    this.step++;
+  } else if (this.step === 2 && this.validateStep2()) {
+    this.step++;
+  } else if (this.step === 3 && this.validateStep3()) {
+    this.step++;
+  } else if (this.step === 4) {
+    // No validation needed for Step 4 (Review Information) - Go to Print Prescription
+    this.step++;
+  } else {
+    this.alertMessage = 'Please fill in the required fields before proceeding.';
+    setTimeout(() => (this.alertMessage = ''), 2000);
+  }
+},
 
     prevStep() {
       this.step--;
@@ -541,7 +769,7 @@ export default {
     },
 
     triggerSubmit() {
-      if (this.validateStep2()) {
+      if (this.validateStep3()) {
         this.showModal = true;
       } else {
         this.successMessage = 'Please complete all required fields before submitting.';
