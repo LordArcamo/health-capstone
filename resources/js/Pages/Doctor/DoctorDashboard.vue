@@ -204,6 +204,10 @@ const markAsRead = (notification) => {
   }
 };
 
+console.log('ITRConsultation:', props.ITRConsultation);
+console.log('Latest Patients:', props.latestPatients);
+
+
 const markAsCancelled = (patient) => {
   const data = patient.visitType === 'Prenatal' 
     ? { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID }
