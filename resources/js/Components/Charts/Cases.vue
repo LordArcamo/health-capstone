@@ -168,12 +168,22 @@ const chartOptions = ref({
     curve: "smooth",
     width: 3,
   },
-  colors: ["#FF9F40"],
+  colors: ["#FF9F40"], // Primary line color
   markers: {
     size: 5,
     colors: "#ffffff",
     strokeColors: "#FF9F40",
     strokeWidth: 2,
+  },
+  fill: {
+    type: "gradient", // Use gradient for mountain-like background
+    gradient: {
+      shade: "#1C64F2",
+      gradientToColors: ["#FFD8B5"], // Gradient transition to a lighter orange
+      stops: [0, 100], // Gradient from bottom to top
+      opacityFrom: 0.7, // More visible at the top
+      opacityTo: 0.1, // Fades at the bottom
+    },
   },
   grid: {
     borderColor: "#e7e7e7",
@@ -187,6 +197,7 @@ const chartOptions = ref({
     },
   },
 });
+
 
 // Chart series
 const chartSeries = computed(() => [
