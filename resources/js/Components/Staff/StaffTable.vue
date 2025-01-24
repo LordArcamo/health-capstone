@@ -165,7 +165,7 @@
           <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Profile Picture</h3>
             <div>
-              <img src="{{ selectedStaff.profile_picture }}" alt="Profile Picture"
+              <img :src="selectedStaff.profile_picture" alt="Profile Picture"
                 class="w-32 h-32 rounded-full border">
             </div>
           </div>
