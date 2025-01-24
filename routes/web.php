@@ -87,6 +87,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.staff');
 
+        Route::get('/doctor-checkup/itr', [RegisteredUserController::class, 'getItrDoctorCheckup'])
+        ->middleware([RoleMiddleware::class . ':doctor'])
+        ->name('doctor.itr-checkup');
+
         Route::put('/admin/staff/{id}', [RegisteredUserController::class, 'update'])
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.update');

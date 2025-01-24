@@ -20,15 +20,28 @@ class RegisteredUserController extends Controller
      */
     public function getStaff()
     {
+        $user = Auth::user(); // Fetch the logged-in user
         $data = User::where('role', '!=', 'admin')->get();
     
         return Inertia::render('Admin/Staff', [
+            'loggedInUser' => $user, // Make sure this is set
             'USERS' => $data,
         ]);
     }
+    public function getItrDoctorCheckup()
+    {
+        $user = Auth::user(); // Fetch the logged-in user
     
+        if (!$user) {
+            \Log::error('No authenticated user found.');
+        } else {
+            \Log::info('Authenticated user:', ['user' => $user]);
+        }
     
-    
+        return Inertia::render('Doctor/ItrDoctorCheckup', [
+            'loggedInUser' => $user, // Pass the logged-in user to the ItrDoctorCheckup component
+        ]);
+    }
 
     // public function index()
     // {
@@ -118,8 +131,12 @@ class RegisteredUserController extends Controller
 
         $request->validate([
             'first_name' => 'required|string|max:255',
+            'middle_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'role' => 'required|string|in:staff,doctor',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string|in:view_patients,create_records,edit_records,delete_records', // Adjust permission options as needed
         ]);
 
         // Prevent updating to admin role
@@ -127,14 +144,24 @@ class RegisteredUserController extends Controller
             return response()->json(['message' => 'Unauthorized role assignment.'], 403);
         }
 
+        // Update user fields
         $user->update([
             'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'role' => $request->role,
         ]);
 
+        // Update permissions if provided
+        if ($request->has('permissions')) {
+            $user->permissions = $request->permissions; // Assuming 'permissions' is a JSON column in the 'users' table
+            $user->save();
+        }
+
         return redirect()->back();
     }
+
 
     /**
      * Delete the specified user.

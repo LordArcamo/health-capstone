@@ -171,7 +171,7 @@ class CheckUpController extends Controller
             DB::raw("
                 CASE
                     WHEN consultation_details.status = 'cancelled' THEN 'Cancelled'
-                    WHEN visit_information.consultationDetailsID IS NULL THEN 'Pending'
+                    WHEN visit_information.consultationDetailsID IS NULL THEN 'In Queue'
                     ELSE 'Completed'
                 END AS status
             "),

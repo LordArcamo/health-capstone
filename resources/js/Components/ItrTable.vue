@@ -201,12 +201,12 @@
             <td class="text-base py-3 px-6">
               <span :class="{
                 'bg-green-100 text-green-800': patient.status === 'Completed',
-                'bg-yellow-100 text-yellow-800': patient.status === 'Pending',
+                'bg-yellow-100 text-yellow-800': patient.status === 'In Queue',
                 'bg-red-100 text-red-800': patient.status === 'Cancelled',
                 'bg-orange-100 text-orange-800': patient.status === 'Follow-up Required',
                 'bg-gray-100 text-gray-800': !patient.status || !['Completed', 'in queued', 'Cancelled', 'Follow-up Required'].includes(patient.status)
               }" class="px-3 py-1 rounded-full text-sm font-semibold shadow-sm capitalize">
-                {{ patient.status || 'Pending' }}
+                {{ patient.status || 'In Queue' }}
               </span>
             </td>
 
@@ -258,7 +258,7 @@
           <h3 class="text-lg font-semibold text-gray-700">Patient Status:</h3>
           <span :class="statusBadgeClass(selectedPatient.status)"
             class="inline-block px-3 py-1 text-sm font-medium rounded-full">
-            {{ selectedPatient.status || 'Pending' }}
+            {{ selectedPatient.status || 'In Queue' }}
           </span>
         </div>
 
@@ -534,7 +534,7 @@ export default {
         this.formatDate(patient.consultationDate),
         patient.diagnosis,
         patient.sex,
-        patient.status || "Pending"
+        patient.status || "In Queue"
       ]);
 
       // Generate the Table

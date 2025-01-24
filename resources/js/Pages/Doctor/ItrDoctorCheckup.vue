@@ -11,7 +11,12 @@ const props = defineProps({
     required: false,
     default: () => ({}),
   },
+  loggedInUser: { // Define the loggedInUser prop
+    type: Object,
+    required: true,
+  },
 });
+
 
 watch(() => props.consultationDetails, (newVal) => {
   if (!newVal || Object.keys(newVal).length === 0) {
@@ -32,6 +37,7 @@ function submitForm(payload) {
     },
   });
 }
+console.log('Parent Component - LoggedInUser:', props.loggedInUser);
 </script>
 
 <template>
@@ -40,6 +46,7 @@ function submitForm(payload) {
     <ITRFormDoctor
       v-if="consultationDetails !== undefined"
       :consultationDetails="consultationDetails || {}"
+      :loggedInUser="loggedInUser "
       @submitForm="submitForm"
     />
   </NewLayout>

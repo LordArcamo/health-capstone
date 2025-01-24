@@ -27,7 +27,7 @@ class DoctorDashboardController extends Controller
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->whereDate('consultation_details.consultationDate', $today)
             ->where(function($query) {
-                $query->where('consultation_details.status', 'pending')
+                $query->where('consultation_details.status', 'in queue')
                       ->orWhereNull('consultation_details.status');
             })
             ->select(
@@ -67,7 +67,7 @@ class DoctorDashboardController extends Controller
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
             ->whereDate('prenatal_consultation_details.consultationDate', $today)
             ->where(function($query) {
-                $query->where('prenatal_consultation_details.status', 'pending')
+                $query->where('prenatal_consultation_details.status', 'in queue')
                       ->orWhereNull('prenatal_consultation_details.status');
             })
             ->select(
