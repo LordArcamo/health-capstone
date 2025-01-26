@@ -388,14 +388,20 @@
             <!-- Prescription Header -->
             <div class="border-b pb-6 mb-6 text-center">
               <h4 class="text-3xl font-extrabold text-gray-900 mb-2">Prescription</h4>
-              <p class="text-gray-600 text-lg">Issued by: 
-                <span class="font-medium">
-                  {{ loggedInUser?.first_name || 'N/A' }} 
-                  {{ loggedInUser?.middle_name || '' }} 
-                  {{ loggedInUser?.last_name || '' }}
-                </span>
-              </p>
-              <p class="text-gray-600 text-lg">{{ loggedInUser?.specialization || 'Specialization Not Provided' }}</p>
+              <div class="space-y-2">
+                <p class="text-gray-600 text-lg">
+                  Issued by: 
+                  <span class="font-medium">
+                    {{ loggedInUser.full_name || 'N/A' }}
+                  </span>
+                </p>
+                <p class="text-gray-600 text-lg">
+                  {{ loggedInUser.specialization || 'Specialization Not Provided' }}
+                </p>
+                <p v-if="loggedInUser.prc_number" class="text-sm text-gray-500">
+                  PRC: {{ loggedInUser.prc_number }}
+                </p>
+              </div>
             </div>
 
             <!-- Patient Information -->
@@ -440,7 +446,11 @@
               <div>
                 <p class="text-gray-600 text-sm mb-2">Doctor's Signature:</p>
                 <div class="h-12 border-t border-dashed border-gray-500 mb-1"></div>
-                <p class="text-gray-900 text-center font-medium">{{ first_name }} {{ middle_name }} {{ last_name }}</p>
+                <p class="text-gray-900 text-center font-medium">
+                  {{ loggedInUser?.first_name || '' }} 
+                  {{ loggedInUser?.middle_name || '' }} 
+                  {{ loggedInUser?.last_name || '' }}
+                </p>
               </div>
             </div>
           </div>
@@ -496,15 +506,22 @@ export default {
       default: () => ({}),
     },
     onSubmit: Function,
-    loggedInUser: { // Accept logged-in user data
+    loggedInUser: {
       type: Object,
       required: true,
+      default: () => ({
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        specialization: '',
+        prc_number: '',
+      }),
     },
   },
 
   data() {
     return {
-      newDiagnosis: '',  // ✅ Initialize input for new diagnosis
+      newDiagnosis: '',  // Initialize input for new diagnosis
       alertMessage: '',
       showModal: false,  // Tracks modal visibility
       stepTitles: [
@@ -552,7 +569,7 @@ export default {
           frequency: '',
           duration: '',
           notes: '',
-        },  // ✅ Properly initialized diagnosisTags
+        },  // Properly initialized diagnosisTags
       },
       labTests: [
         'Complete Blood Count (CBC)',
@@ -634,7 +651,7 @@ export default {
     },
     printPrescription() {
       const { firstName, lastName, middleName, age, sex, contact } = this.consultationDetails;
-      const { first_name, middle_name, last_name, specialization } = this.consultationDetails;
+      const { first_name, middle_name, last_name, specialization } = this.loggedInUser;
 
       const medicationsList = this.medications
         .map((medication) => `
@@ -765,9 +782,9 @@ export default {
       // If validation passes or moving backward, update the step
       this.step = targetStep;
     },
-    // ✅ Add Diagnosis Tag without submitting form
+    // Add Diagnosis Tag without submitting form
     addDiagnosisTag(event) {
-      event.preventDefault();  // 🔥 Prevent form submission
+      event.preventDefault();  // Prevent form submission
       const trimmedDiagnosis = this.newDiagnosis.trim();
 
       if (trimmedDiagnosis && !this.form.diagnosisTags.includes(trimmedDiagnosis)) {
@@ -776,7 +793,7 @@ export default {
       this.newDiagnosis = '';  // Clear input after adding
     },
 
-    // ✅ Remove Diagnosis Tag
+    // Remove Diagnosis Tag
     removeDiagnosisTag(index) {
       this.form.diagnosisTags.splice(index, 1);
     },
@@ -804,7 +821,7 @@ export default {
         medication: '',
         requireLabTest: '',
         selectedLabTests: [],
-        diagnosisTags: [],  // ✅ Reset diagnosisTags
+        diagnosisTags: [],  // Reset diagnosisTags
       };
       this.errors = {};
       this.newDiagnosis = '';
@@ -946,9 +963,16 @@ export default {
         chiefComplaints: this.form.chiefComplaints,
         requireLabTest: this.form.requireLabTest,
         selectedLabTests: this.form.selectedLabTests,
-        diagnosis: this.form.diagnosisTags.join(', '),  // ✅ Submit as comma-separated string
+        diagnosis: this.form.diagnosisTags.join(', '),  // Submit as comma-separated string
         medication: this.form.requireLabTest === 'no' ? this.form.medication : 'None',
         status: this.form.requireLabTest === 'yes' ? 'Follow-up Required' : 'Completed',
+        prescriptions: this.medications.map(med => ({
+          medication: med.name,
+          dosage: med.dosage,
+          frequency: med.frequency,
+          duration: med.duration,
+          notes: med.notes
+        }))
       };
 
       console.log('Submitting form with payload:', payload);
@@ -965,6 +989,7 @@ export default {
     if (Object.keys(this.consultationDetails).length > 0) {
       this.populateForm(this.consultationDetails);
     }
+    console.log('ITRFormDoctor - Received loggedInUser:', this.loggedInUser);
     if (!this.loggedInUser || Object.keys(this.loggedInUser).length === 0) {
       console.error('LoggedInUser prop is missing or empty');
     }

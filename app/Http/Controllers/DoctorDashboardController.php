@@ -165,7 +165,6 @@ class DoctorDashboardController extends Controller
                 'consultation_details.providerName',
                 'visit_information.chiefComplaints',
                 'visit_information.diagnosis',
-                'visit_information.medication',
                 DB::raw('NULL as nameOfSpouse'), // Add NULL for prenatal-specific fields
                 DB::raw('NULL as emergencyContact'),
                 DB::raw('NULL as fourMember'),
@@ -236,7 +235,6 @@ class DoctorDashboardController extends Controller
                 'prenatal_consultation_details.providerName',
                 DB::raw('NULL as chiefComplaints'), // Add NULL for general-specific fields
                 DB::raw('NULL as diagnosis'),
-                DB::raw('NULL as medication'),
                 'prenatal_consultation_details.nameOfSpouse',
                 'prenatal_consultation_details.emergencyContact',
                 'prenatal_consultation_details.fourMember',
@@ -416,7 +414,7 @@ class DoctorDashboardController extends Controller
                         ->update([
                             'chiefComplaints' => 'None',
                             'diagnosis' => 'None',
-                            'medication' => 'None',
+
                             'updated_at' => now()
                         ]);
                 } else {
@@ -426,7 +424,6 @@ class DoctorDashboardController extends Controller
                         'id' => auth()->id(),
                         'chiefComplaints' => 'None',
                         'diagnosis' => 'None',
-                        'medication' => 'None',
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);

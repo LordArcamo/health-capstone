@@ -295,6 +295,27 @@
           </div>
         </div>
 
+        <!-- Prescription Details -->
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Prescription Details</h3>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div v-if="selectedPatient.medications" class="space-y-4">
+              <template v-for="(medication, index) in selectedPatient.medications.split(';;')" :key="index">
+                <div v-if="medication" class="p-3 bg-white rounded-md shadow-sm">
+                  <ul class="space-y-2">
+                    <li><strong>Medication:</strong> {{ medication || 'N/A' }}</li>
+                    <li><strong>Dosage:</strong> {{ selectedPatient.dosages?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Frequency:</strong> {{ selectedPatient.frequencies?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Duration:</strong> {{ selectedPatient.durations?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Notes:</strong> {{ selectedPatient.prescription_notes?.split(';;')[index] || 'N/A' }}</li>
+                  </ul>
+                </div>
+              </template>
+            </div>
+            <div v-else class="text-gray-500 italic">No prescriptions available</div>
+          </div>
+        </div>
+
         <!-- Additional Details -->
         <div class="mt-8">
           <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
@@ -304,7 +325,6 @@
             <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
             <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
             <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
-            <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
           </ul>
         </div>
 

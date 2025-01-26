@@ -26,7 +26,6 @@ class VisitInformation extends Model
         'id',
         'chiefComplaints',
         'diagnosis',
-        'medication',
         'requireLabTest',
         'selectedLabTests',
     ];

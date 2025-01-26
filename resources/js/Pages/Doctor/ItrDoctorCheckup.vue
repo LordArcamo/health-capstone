@@ -1,9 +1,9 @@
 <script setup>
-import NewLayout from '@/Layouts/MainLayout.vue';
+import { ref, computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
+import NewLayout from '@/Layouts/MainLayout.vue';
 import ITRFormDoctor from '@/Components/ITRFormDoctor.vue';
 import { Inertia } from '@inertiajs/inertia';
-import { ref, watch } from 'vue';
 
 const props = defineProps({
   consultationDetails: {
@@ -11,18 +11,27 @@ const props = defineProps({
     required: false,
     default: () => ({}),
   },
-  loggedInUser: { // Define the loggedInUser prop
+  auth: {
     type: Object,
-    required: true,
-  },
-});
-
-
-watch(() => props.consultationDetails, (newVal) => {
-  if (!newVal || Object.keys(newVal).length === 0) {
-    console.error('No valid personalInfo provided.');
+    required: true
   }
 });
+
+// Simply pass through the user data
+const loggedInUser = computed(() => {
+  const user = props.auth?.user;
+  if (!user) return null;
+
+  return {
+    first_name: user.first_name || '',
+    middle_name: user.middle_name || '',
+    last_name: user.last_name || '',
+    specialization: user.specialization || '',
+    prc_number: user.prc_number || '',
+  };
+});
+
+console.log('Auth user:', props.auth?.user);
 
 function submitForm(payload) {
   console.log("Submitting from parent:", payload);
@@ -37,17 +46,21 @@ function submitForm(payload) {
     },
   });
 }
-console.log('Parent Component - LoggedInUser:', props.loggedInUser);
 </script>
 
 <template>
   <Head title="Individual Treatment Record" />
   <NewLayout>
-    <ITRFormDoctor
-      v-if="consultationDetails !== undefined"
-      :consultationDetails="consultationDetails || {}"
-      :loggedInUser="loggedInUser "
-      @submitForm="submitForm"
-    />
+    <div v-if="loggedInUser">
+      <ITRFormDoctor
+        :consultationDetails="consultationDetails || {}"
+        :loggedInUser="loggedInUser"
+        @submitForm="submitForm"
+      />
+    </div>
+    <div v-else class="p-4 text-red-500 bg-red-50 rounded">
+      <p class="font-medium">Error: User data not available</p>
+      <p class="text-sm">Please ensure you are logged in with a doctor account.</p>
+    </div>
   </NewLayout>
 </template>

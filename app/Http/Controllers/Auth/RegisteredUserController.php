@@ -8,7 +8,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,28 +22,53 @@ class RegisteredUserController extends Controller
      */
     public function getStaff()
     {
-        $user = Auth::user(); // Fetch the logged-in user
         $data = User::where('role', '!=', 'admin')->get();
     
         return Inertia::render('Admin/Staff', [
-            'loggedInUser' => $user, // Make sure this is set
             'USERS' => $data,
         ]);
     }
     public function getItrDoctorCheckup()
     {
-        $user = Auth::user(); // Fetch the logged-in user
-    
-        if (!$user) {
-            \Log::error('No authenticated user found.');
-        } else {
-            \Log::info('Authenticated user:', ['user' => $user]);
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return redirect()->route('login');
+            }
+
+            // Get fresh user data from database
+            $freshUser = DB::table('users')->where('id', $user->id)->first();
+            if (!$freshUser) {
+                \Log::error('User not found in database', ['id' => $user->id]);
+                return redirect()->route('login');
+            }
+
+            \Log::info('Fresh user data:', ['user' => $freshUser]);
+
+            // Pass necessary fields explicitly
+            return Inertia::render('Doctor/ItrDoctorCheckup', [
+                'auth' => [
+                    'user' => [
+                        'id' => $freshUser->id,
+                        'email' => $freshUser->email,
+                        'first_name' => $freshUser->first_name ?? '',
+                        'middle_name' => $freshUser->middle_name ?? '',
+                        'last_name' => $freshUser->last_name ?? '',
+                        'specialization' => $freshUser->specialization ?? '',
+                        'prc_number' => $freshUser->prc_number ?? '',
+                        'role' => $freshUser->role ?? 'user'
+                    ]
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error in getItrDoctorCheckup:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
         }
-    
-        return Inertia::render('Doctor/ItrDoctorCheckup', [
-            'loggedInUser' => $user, // Pass the logged-in user to the ItrDoctorCheckup component
-        ]);
     }
+    
 
     // public function index()
     // {

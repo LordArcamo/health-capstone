@@ -11,6 +11,7 @@ use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
 use App\Models\User;
 use App\Models\VisitInformation;
+use App\Models\Prescription;
 
 class CheckUpController extends Controller
 {
@@ -144,6 +145,7 @@ class CheckUpController extends Controller
     {
         $data = PersonalInformation::join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
         ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+        ->leftJoin('prescriptions', 'visit_information.visitInformationID', '=', 'prescriptions.visitInformationID')
         ->select(
             'personal_information.personalId',
             'personal_information.firstName',
@@ -176,11 +178,68 @@ class CheckUpController extends Controller
                 END AS status
             "),
 
+            'visit_information.consultationDetailsID',
             'visit_information.chiefComplaints',
             'visit_information.diagnosis',
-            'visit_information.medication'
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.medication IS NOT NULL 
+                THEN prescriptions.medication 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as medications'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.dosage IS NOT NULL 
+                THEN prescriptions.dosage 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as dosages'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.frequency IS NOT NULL 
+                THEN prescriptions.frequency 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as frequencies'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.duration IS NOT NULL 
+                THEN prescriptions.duration 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as durations'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.notes IS NOT NULL 
+                THEN prescriptions.notes 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as prescription_notes')
         )
-        ->distinct()
+        ->groupBy(
+            'personal_information.personalId',
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.suffix',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.contact',
+            'personal_information.sex',
+            'consultation_details.consultationDate',
+            'consultation_details.consultationTime',
+            'consultation_details.modeOfTransaction',
+            'consultation_details.bloodPressure',
+            'consultation_details.temperature',
+            'consultation_details.height',
+            'consultation_details.weight',
+            'consultation_details.providerName',
+            'consultation_details.natureOfVisit',
+            'consultation_details.visitType',
+            'consultation_details.status',
+            'visit_information.consultationDetailsID',
+            'visit_information.chiefComplaints',
+            'visit_information.diagnosis',
+            'visit_information.visitInformationID'
+        )
         ->get();
 
     return Inertia::render('Table/IndividualTreatmentRecord', [
@@ -249,7 +308,6 @@ class CheckUpController extends Controller
              'itr.diagnosis',
              'itr.medication'
          )
-         ->distinct() // Ensure no duplicate entries
          ->get();
 
      // Pass the joined data to the view
