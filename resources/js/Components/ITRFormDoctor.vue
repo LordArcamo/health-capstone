@@ -392,7 +392,7 @@
                 <p class="text-gray-600 text-lg">
                   Issued by: 
                   <span class="font-medium">
-                    {{ loggedInUser.full_name || 'N/A' }}
+                    {{ loggedInUser.first_name || 'N/A' }} {{ loggedInUser.middle_name || 'N/A' }} {{ loggedInUser.last_name || 'N/A' }}
                   </span>
                 </p>
                 <p class="text-gray-600 text-lg">
@@ -515,6 +515,7 @@ export default {
         last_name: '',
         specialization: '',
         prc_number: '',
+        role: '',
       }),
     },
   },

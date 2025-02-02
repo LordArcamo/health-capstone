@@ -13,7 +13,8 @@ const props = defineProps({
   },
   auth: {
     type: Object,
-    required: true
+    required: true,
+    default: () => ({}),
   }
 });
 
@@ -22,14 +23,19 @@ const loggedInUser = computed(() => {
   const user = props.auth?.user;
   if (!user) return null;
 
+  // Access the raw data if it's a Proxy
+  const rawUser = user.hasOwnProperty('id') ? user : user?.__v_raw || user;
+
   return {
-    first_name: user.first_name || '',
-    middle_name: user.middle_name || '',
-    last_name: user.last_name || '',
-    specialization: user.specialization || '',
-    prc_number: user.prc_number || '',
+    first_name: rawUser.first_name || '',
+    middle_name: rawUser.middle_name || '',
+    last_name: rawUser.last_name || '',
+    specialization: rawUser.specialization || '',
+    prc_number: rawUser.prc_number || '',
+    role: rawUser.role || '',
   };
 });
+
 
 console.log('Auth user:', props.auth?.user);
 
@@ -53,10 +59,10 @@ function submitForm(payload) {
   <NewLayout>
     <div v-if="loggedInUser">
       <ITRFormDoctor
-        :consultationDetails="consultationDetails || {}"
-        :loggedInUser="loggedInUser"
-        @submitForm="submitForm"
-      />
+      :consultationDetails="consultationDetails || {}"
+      :loggedInUser="loggedInUser"
+      @submitForm="submitForm"
+    />
     </div>
     <div v-else class="p-4 text-red-500 bg-red-50 rounded">
       <p class="font-medium">Error: User data not available</p>

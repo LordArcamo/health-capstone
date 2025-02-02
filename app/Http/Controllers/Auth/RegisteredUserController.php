@@ -35,16 +35,28 @@ class RegisteredUserController extends Controller
             if (!$user) {
                 return redirect()->route('login');
             }
-
-            // Get fresh user data from database
-            $freshUser = DB::table('users')->where('id', $user->id)->first();
+    
+            // Get fresh user data from the database
+            $freshUser = DB::table('users')
+            ->select('id', 'email', 'first_name', 'middle_name', 'last_name', 'specialization', 'prc_number', 'role')
+            ->where('id', $user->id)
+            ->first();
             if (!$freshUser) {
                 \Log::error('User not found in database', ['id' => $user->id]);
                 return redirect()->route('login');
             }
-
+    
+            // Check if the user has the role of 'doctor'
+            if ($freshUser->role !== 'doctor') {
+                \Log::warning('Unauthorized access attempt', [
+                    'id' => $freshUser->id, 
+                    'role' => $freshUser->role
+                ]);
+                return redirect()->route('unauthorized');
+            }
+    
             \Log::info('Fresh user data:', ['user' => $freshUser]);
-
+    
             // Pass necessary fields explicitly
             return Inertia::render('Doctor/ItrDoctorCheckup', [
                 'auth' => [
@@ -56,7 +68,7 @@ class RegisteredUserController extends Controller
                         'last_name' => $freshUser->last_name ?? '',
                         'specialization' => $freshUser->specialization ?? '',
                         'prc_number' => $freshUser->prc_number ?? '',
-                        'role' => $freshUser->role ?? 'user'
+                        'role' => $freshUser->role ?? 'doctor'
                     ]
                 ]
             ]);
@@ -68,6 +80,7 @@ class RegisteredUserController extends Controller
             throw $e;
         }
     }
+    
     
 
     // public function index()
