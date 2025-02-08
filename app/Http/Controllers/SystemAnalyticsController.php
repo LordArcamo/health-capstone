@@ -11,7 +11,7 @@ use App\Models\ConsultationDetails;
 use App\Models\NationalImmunizationProgram;
 use App\Models\PrenatalConsultationDetails;
 use App\Models\VisitInformation;
-use App\Models\RiskManagement;
+// use App\Models\RiskManagement;
 use Illuminate\Support\Facades\DB;
 
 class SystemAnalyticsController extends Controller
@@ -114,7 +114,7 @@ class SystemAnalyticsController extends Controller
         $monthly = ConsultationDetails::with(['personalInformation', 'visitInformation'])->get();
 
         $totalPatients = $this->totalPatients($request);
-        $risk = $this->risk($request);
+        // $risk_management = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
         $cases = $this->cases($request);
 
@@ -127,7 +127,7 @@ class SystemAnalyticsController extends Controller
         return Inertia::render('Analytics', [
             'vaccinenatedPatients' => $vaccinenatedPatients,
             'totalPatients' => $totalPatients,
-            'risk' => $risk,
+            // 'risk' => $risk,
             'vaccinations' => $vaccinations,
             'cases' => $cases,
             'barChart' => $monthlyStats,

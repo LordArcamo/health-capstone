@@ -225,7 +225,6 @@ Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
     ->name('admin.dashboard');
 
 
-
 // Admin Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/register', [RegisteredUserController::class, 'create'])
