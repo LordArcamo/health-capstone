@@ -544,7 +544,7 @@ onMounted(() => {
           <div class="flex flex-col items-start gap-4">
             <div class="flex justify-between w-full">
               <h2 class="font-semibold text-lg">Today's Consultation</h2>
-              <Link href="/services/appointments"
+              <Link href="/services/consultation"
                 class="bg-blue-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
                 aria-label="View today's consultations">
               View
