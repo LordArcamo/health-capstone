@@ -1,60 +1,77 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 
-// Register all Chart.js components so they can be used
 Chart.register(...registerables);
 
 const props = defineProps({
-  onLeaveData: {
+  countUsers: {
     type: Array,
-    default: () => [],
+    default: () => [], 
   },
 });
-
-// We’ll override the props with test data if it’s empty or just to demonstrate
-// so you see a chart immediately
-const testData = [
-  { month: 'Jan', count: 3 },
-  { month: 'Feb', count: 5 },
-  { month: 'Mar', count: 2 },
-  { month: 'Apr', count: 6 },
-  { month: 'May', count: 10 },
-  { month: 'Jun', count: 7 },
-];
 
 const chartCanvas = ref(null);
 let staffChartInstance = null;
 
 onMounted(() => {
-  initStaffChart();
+  if (props.countUsers.length > 0) { 
+    initStaffChart(); // Only initialize if data exists
+  }
 });
 
-function initStaffChart() {
-  if (!chartCanvas.value) return;
+// ✅ Watch for data changes and only update if data is different
+watch(
+  () => props.countUsers,
+  (newVal, oldVal) => {
+    if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+      initStaffChart();
+    }
+  },
+  { deep: true, immediate: true } // Trigger on first load
+);
 
-  // If there’s an existing chart instance, destroy it before re-init
+function initStaffChart() {
+  if (!chartCanvas.value) {
+    return;
+  }
+
+  if (!Array.isArray(props.countUsers) || props.countUsers.length === 0) {
+    return;
+  }
+
   if (staffChartInstance) {
     staffChartInstance.destroy();
   }
 
   const ctx = chartCanvas.value.getContext('2d');
 
-  // Build dataset using either prop data or fallback to testData
-  const chartData = props.onLeaveData.length ? props.onLeaveData : testData;
+  const allMonths = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+
+  const dataMap = props.countUsers.reduce((acc, item) => {
+    acc[item.month] = item.count;
+    return acc;
+  }, {});
+
+  const data = allMonths.map(month => dataMap[month] || 0);
+
+  console.log('Chart Data:', data); // ✅ Debugging output
 
   staffChartInstance = new Chart(ctx, {
-    type: 'bar', // You can change to 'line' if you prefer
+    type: 'bar',
     data: {
-      labels: chartData.map((item) => item.month),
+      labels: allMonths,
       datasets: [
         {
-          label: 'Users',
-          data: chartData.map((item) => item.count),
+          label: 'Total Users',
+          data: data,
           backgroundColor: 'rgba(75, 192, 192, 0.4)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 2,
-          borderRadius: 4, // bar border radius
+          borderRadius: 4,
         },
       ],
     },
@@ -63,10 +80,10 @@ function initStaffChart() {
       maintainAspectRatio: false,
       scales: {
         y: {
+          beginAtZero: true,
           ticks: {
             precision: 0,
           },
-          beginAtZero: true,
         },
       },
     },
@@ -76,14 +93,9 @@ function initStaffChart() {
 
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-4">Total Users</h2>
-    <!-- Set a fixed height or use a CSS class so you can see the chart properly -->
+    <h2 class="text-lg font-semibold mb-4">Total Users (Monthly)</h2>
     <div class="h-64">
       <canvas ref="chartCanvas"></canvas>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Adjust chart container styling as needed */
-</style>

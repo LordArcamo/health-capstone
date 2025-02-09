@@ -1,10 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watchEffect } from 'vue';
 import { Chart, registerables } from 'chart.js';
 
-// Register all Chart.js components
+// Register Chart.js components
 Chart.register(...registerables);
 
+// Define props
 const props = defineProps({
   distributionData: {
     type: Array,
@@ -12,50 +13,34 @@ const props = defineProps({
   },
 });
 
-// Test data for immediate visualization
-const testDonutData = [
-  { department: 'Administration', count: 5 },
-  { department: 'Nursing', count: 12 },
-  { department: 'Laboratory', count: 3 },
-  { department: 'Pharmacy', count: 4 },
-];
-
+// Canvas reference
 const donutCanvas = ref(null);
 let donutChartInstance = null;
 
-onMounted(() => {
-  initDonutChart();
-});
-
+// Function to initialize the chart
 function initDonutChart() {
-  if (!donutCanvas.value) return;
+  if (!donutCanvas.value || props.distributionData.length === 0) return;
 
-  // Destroy old instance if any
   if (donutChartInstance) {
     donutChartInstance.destroy();
   }
 
   const ctx = donutCanvas.value.getContext('2d');
 
-  // Use prop data or fallback to testDonutData
-  const dataArr = props.distributionData.length
-    ? props.distributionData
-    : testDonutData;
+  const labels = props.distributionData.map((item) => item.role || "Unknown");
+  const dataValues = props.distributionData.map((item) => item.count || 0);
+
+  console.log("Chart Labels:", labels);
+  console.log("Chart Data:", dataValues);
 
   donutChartInstance = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: dataArr.map((item) => item.department),
+      labels: labels, // Ensure department names exist
       datasets: [
         {
-          data: dataArr.map((item) => item.count),
-          backgroundColor: [
-            '#FF6384', // pink
-            '#36A2EB', // sky
-            '#FFCE56', // yellow
-            '#4BC0C0', // teal
-            '#9966FF', // purple
-          ],
+          data: dataValues, // Ensure count values exist
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
           hoverOffset: 8,
           borderColor: '#fff',
           borderWidth: 2,
@@ -73,11 +58,26 @@ function initDonutChart() {
     },
   });
 }
+
+
+// Watch for prop updates and refresh the chart
+watchEffect(() => {
+  console.log("Distribution Data:", props.distributionData);
+  if (props.distributionData.length) {
+    initDonutChart();
+  }
+});
+
+
+// Initialize the chart on mount
+onMounted(() => {
+  initDonutChart();
+});
 </script>
 
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-4">Distribution of Users by Department</h2>
+    <h2 class="text-lg font-semibold mb-4">Distribution of Users by Roles</h2>
     <div class="h-64">
       <canvas ref="donutCanvas"></canvas>
     </div>

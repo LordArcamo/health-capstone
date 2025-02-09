@@ -15,36 +15,66 @@ import StaffDonutChart from '@/Components/Staff/StaffDonutChart.vue';
 
 // Props from backend
 const props = defineProps({
+  pageTitle: String,
+  user: Object,
   totalUsers: Number,
-  totalPatients: Number,      // if you still want to show total patients
-  staffList: Array,           // Detailed staff data
-  staffDistributionData: { type: Array, default: () => [] },
-  onLeaveStaffData: { type: Array, default: () => [] }, // Example for staff on leave
+  countUsers: Array,
+  staffDistributionData: {
+    type: Array,
+    required: true
+  }
+});
+
+// Debug: Log received props
+console.log('AdminDashboard Props:', {
+  pageTitle: props.pageTitle,
+  user: props.user,
+  totalUsers: props.totalUsers,
+  countUsers: props.countUsers,
+  staffDistributionData: props.staffDistributionData
 });
 
 // Reactive states
 const totalUsers = ref(props.totalUsers || 0);
 console.log('Total Users:', totalUsers.value);
 const totalPatients = ref(props.totalPatients || 0);
-const staffOnLeave = ref(0);
+const countUsers = ref(props.countUsers || []);
 const activeUsers = ref(props.activeUsers || 0);
 const distributionData = ref([]);
 
 // Normalized distribution data
 const normalizedDistributionData = computed(() => {
+  console.log('Computing normalizedDistributionData with:', props.staffDistributionData);
+  
+  if (!props.staffDistributionData) {
+    console.warn('staffDistributionData is undefined');
+    return [
+      { role: 'Doctor', count: 0 },
+      { role: 'Staff', count: 0 }
+    ];
+  }
+
   if (Array.isArray(props.staffDistributionData)) {
+    console.log('staffDistributionData is array:', props.staffDistributionData);
     return props.staffDistributionData;
   }
+
   if (typeof props.staffDistributionData === 'object') {
+    console.log('staffDistributionData is object, converting to array');
     return Object.values(props.staffDistributionData);
   }
-  return [];
+
+  console.warn('Invalid staffDistributionData type:', typeof props.staffDistributionData);
+  return [
+    { role: 'Doctor', count: 0 },
+    { role: 'Staff', count: 0 }
+  ];
 });
 
 // Update stats from DateCard
 const updateStats = (stats) => {
   // totalUsers.value = stats.totalUsers || 0;
-  staffOnLeave.value = stats.staffOnLeave || 0;
+  countUsers.value = stats.countUsers || [];
   distributionData.value = stats.distributionData || [];
 };
 
@@ -98,7 +128,7 @@ watch(
           <div class="flex flex-col items-start gap-2">
             <div class="flex justify-between w-full">
               <h2 class="font-bold text-lg">Total Users</h2>
-              <Link href="/services/patients" class="bg-green-500 text-white rounded px-3 py-1 shadow hover:opacity-90">
+              <Link href="/staff" class="bg-green-500 text-white rounded px-3 py-1 shadow hover:opacity-90">
               View
               </Link>
             </div>
@@ -150,14 +180,17 @@ watch(
 
       <!-- Staff Distribution -->
       <section class="w-full px-10 mb-10">
-        <StaffDistributionCard class="z-30" :distributionData="normalizedDistributionData" />
+        <StaffDistributionCard 
+          :distribution-data="normalizedDistributionData" 
+          class="z-30"
+        />
       </section>
 
       <!-- Charts Section -->
       <section class="flex flex-wrap lg:flex-nowrap gap-8 px-10 pb-10">
         <!-- Staff Chart -->
         <div class="flex-1 bg-white rounded p-6 shadow hover:shadow-lg transition-shadow border-l-4 border-green-500">
-          <StaffChart :onLeaveData="onLeaveStaffData" />
+          <StaffChart :countUsers="countUsers" />
         </div>
 
         <!-- Donut Chart -->

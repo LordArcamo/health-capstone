@@ -1,16 +1,45 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 
 const props = defineProps({
   distributionData: {
     type: Array,
-    default: () => [],
+    required: true,
+    default: () => [
+      { role: 'Doctor', count: 0 },
+      { role: 'Staff', count: 0 }
+    ]
   },
 });
 
-// Optional computed for any sorting, grouping, etc.
+// Debug: Log when component mounts
+onMounted(() => {
+  console.log('StaffDistributionCard mounted with data:', props.distributionData);
+});
+
+// Debug: Watch for changes in distributionData
+watch(() => props.distributionData, (newVal, oldVal) => {
+  console.log('StaffDistributionCard distributionData changed:', {
+    from: oldVal,
+    to: newVal
+  });
+}, { deep: true });
+
+// Sort distribution data by count (highest first)
 const sortedDistribution = computed(() => {
-  return [...props.distributionData].sort((a, b) => b.count - a.count);
+  console.log('Computing sortedDistribution with:', props.distributionData);
+  
+  if (!Array.isArray(props.distributionData)) {
+    console.warn('distributionData is not an array:', props.distributionData);
+    return [
+      { role: 'Doctor', count: 0 },
+      { role: 'Staff', count: 0 }
+    ];
+  }
+  
+  const sorted = [...props.distributionData].sort((a, b) => b.count - a.count);
+  console.log('Sorted distribution:', sorted);
+  return sorted;
 });
 </script>
 
@@ -30,7 +59,7 @@ const sortedDistribution = computed(() => {
           :key="index"
           class="border-b border-gray-100 hover:bg-gray-50"
         >
-          <td class="p-2">{{ item.department }}</td>
+          <td class="p-2">{{ item.role }}</td>
           <td class="p-2 text-right">{{ item.count }}</td>
         </tr>
       </tbody>
