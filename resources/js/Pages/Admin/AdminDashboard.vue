@@ -117,7 +117,7 @@ watch(
       </header>
 
       <!-- Stats Section -->
-      <section class="gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+      <section class="gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3">
 
         <!-- Total Staff -->
         <ShortBox
@@ -137,7 +137,7 @@ watch(
         </ShortBox>
 
         <!-- Date/Filter Card -->
-        <DateCard class="z-30" :totalPatients="totalPatients" @updateStats="updateStats" />
+    
 
         <!-- Active Users -->
         <ShortBox class="bg-gradient-to-br from-orange-100 to-orange-300 text-orange-800">
