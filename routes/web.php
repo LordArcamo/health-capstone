@@ -29,17 +29,6 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 
 use App\Http\Middleware\RoleMiddleware;
 
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     // Resourceful routes for sessions (this includes index, create, store, show, edit, update, destroy)
-//     Route::resource('/mental-health', SessionController::class);
-
-//     // Optionally, you can add custom routes if needed, though it's usually unnecessary if using resourceful routes
-//     // Custom route for storing a session (can be used for custom logic if necessary)
-//     // Route::post('/mental-health/sessions/store', [SessionController::class, 'store'])->name('mental-health.sessions.store');
-
-//     // If you want to show a session list for a specific page (usually the 'index' is already handled by resource route)
-//     // Route::get('/services/mental-health/session', [SessionController::class, 'index'])->name('mental-health.sessions.index');
-// });
 
 
 Route::get('/checkup/thank-you/itr', function () {
@@ -79,35 +68,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register');
 
+    Route::get('/admin-dashboard', [RegisteredUserController::class, 'getTotalPatients'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.totalPatients');
+
     Route::post('/admin/register', [RegisteredUserController::class, 'store'])
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.store');
 
-        Route::get('/staff', [RegisteredUserController::class, 'getStaff'])
+    Route::get('/staff', [RegisteredUserController::class, 'getStaff'])
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.staff');
 
-        Route::get('/doctor-checkup/itr', [RegisteredUserController::class, 'getItrDoctorCheckup'])
+    Route::get('/doctor-checkup/itr', [RegisteredUserController::class, 'getItrDoctorCheckup'])
         ->middleware([RoleMiddleware::class . ':doctor'])
         ->name('doctor.itr-checkup');
 
-        Route::put('/admin/staff/{id}', [RegisteredUserController::class, 'update'])
+    Route::put('/admin/staff/{id}', [RegisteredUserController::class, 'update'])
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.update');
 
-        Route::delete('/admin/staff/{id}', [RegisteredUserController::class, 'destroy'])
+    Route::delete('/admin/staff/{id}', [RegisteredUserController::class, 'destroy'])
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.destroy');
 
-        // Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'index'])
-        // ->middleware([RoleMiddleware::class . ':admin'])
-        // ->name('admin.index');
 });
 
 
-// Route::get('/', function () {
-//     return Inertia::render('Home');
-// })->name('home');
+
 
 
 Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');
@@ -171,7 +159,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/trimester1/store', [Trimester1Controller::class, 'store'])->name('trimester1.store');
-    // Route::get('/trimester-data/{prenatalConsultationDetailsID}/{trimester}', [Trimester1Controller::class, 'fetchTrimesterData']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -208,7 +195,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
-// Route::get('/api/personal-information/search', [PersonalInformationController::class, 'search'])->name('personal-information.search');
 
 Route::get('/checkup', function () {
     // Retrieve all patients from the database
@@ -225,7 +211,6 @@ Route::get('/patients/{personalId}', [PatientController::class, 'show'])->name('
 Route::get('/admin-dashboard', [AuthorizationRolesController::class, 'admin'])
     ->middleware(['auth', 'verified', RoleMiddleware::class . ':admin'])
     ->name('admin.dashboard');
-
 
 // Admin Routes
 Route::middleware(['auth', 'verified'])->group(function () {

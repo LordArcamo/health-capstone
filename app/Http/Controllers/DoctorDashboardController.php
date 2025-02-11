@@ -22,6 +22,25 @@ class DoctorDashboardController extends Controller
     {
         $today = now()->toDateString();
 
+        // Auto-cancel consultations that were not completed
+        if (now()->format('H:i') === '00:00') {
+            DB::table('consultation_details')
+                ->whereDate('consultationDate', '<', $today)
+                ->where(function ($query) {
+                    $query->where('status', 'in queue')
+                        ->orWhereNull('status');
+                })
+                ->update(['status' => 'cancelled', 'updated_at' => now()]);
+    
+            DB::table('prenatal_consultation_details')
+                ->whereDate('consultationDate', '<', $today)
+                ->where(function ($query) {
+                    $query->where('status', 'in queue')
+                        ->orWhereNull('status');
+                })
+                ->update(['status' => 'cancelled', 'updated_at' => now()]);
+        }
+
         // Fetch patients in queue (not completed)
         $generalConsultations = DB::table('personal_information')
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')

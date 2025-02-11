@@ -10,14 +10,13 @@ import StaffDistributionCard from '@/Components/Staff/StaffDistributionCard.vue'
 import StaffChart from '@/Components/Staff/StaffChart.vue';
 import StaffDonutChart from '@/Components/Staff/StaffDonutChart.vue';
 
-// Example logo import if needed
-// import Logo from "@/Images/RHU Logo.png";
 
 // Props from backend
 const props = defineProps({
   pageTitle: String,
   user: Object,
   totalUsers: Number,
+  totalPatients: Number,
   countUsers: Array,
   staffDistributionData: {
     type: Array,
@@ -36,7 +35,6 @@ console.log('AdminDashboard Props:', {
 
 // Reactive states
 const totalUsers = ref(props.totalUsers || 0);
-console.log('Total Users:', totalUsers.value);
 const totalPatients = ref(props.totalPatients || 0);
 const countUsers = ref(props.countUsers || []);
 const activeUsers = ref(props.activeUsers || 0);
@@ -73,7 +71,6 @@ const normalizedDistributionData = computed(() => {
 
 // Update stats from DateCard
 const updateStats = (stats) => {
-  // totalUsers.value = stats.totalUsers || 0;
   countUsers.value = stats.countUsers || [];
   distributionData.value = stats.distributionData || [];
 };

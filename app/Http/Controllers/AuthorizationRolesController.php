@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
 
 class AuthorizationRolesController extends Controller
 {
@@ -16,6 +18,19 @@ class AuthorizationRolesController extends Controller
      */
     public function admin()
     {
+
+        $totalPatients = DB::table('consultation_details')->select('consultationDate as date')
+        ->unionAll(
+            DB::table('prenatal_consultation_details')->select('consultationDate as date')
+        )
+        ->unionAll(
+            DB::table('national_immunization_programs')->select('created_at as date')
+        )
+        ->unionAll(
+            DB::table('vaccination_records')->select('dateOfVisit as date')
+        )
+        ->count();
+
         // Debug: Check if we have any users
         $allUsers = User::all();
         \Log::info('All users count: ' . $allUsers->count());
@@ -111,6 +126,7 @@ class AuthorizationRolesController extends Controller
             'pageTitle' => 'Admin Dashboard',
             'user' => auth()->user(),
             'totalUsers' => $totalUsers,
+            'totalPatients' => $totalPatients,
             'countUsers' => $allMonths->toArray(),
             'staffDistributionData' => $formattedDistributionData
         ];

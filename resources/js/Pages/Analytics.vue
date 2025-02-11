@@ -217,7 +217,7 @@ onBeforeUnmount(() => {
           <Vaccinations :filters="filters" :vaccination-data="monthlyVaccination" :vaccinenatedPatients="vaccinenatedPatients" />
         </div>
         <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-red-500 hover:shadow-xl hover:-translate-y-1 transition">
-          <h3 class="text-lg font-bold text-gray-700">Mental Health Cases</h3>
+          <h3 class="text-lg font-bold text-gray-700">Cases</h3>
           <Cases :filters="filters" :monthly="monthly" />
         </div>
         <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-purple-500 hover:shadow-xl hover:-translate-y-1 transition">
