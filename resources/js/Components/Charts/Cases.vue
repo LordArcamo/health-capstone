@@ -118,7 +118,7 @@ const filteredData = computed(() => {
 });
 
 // Chart Data
-const casesData = computed(() => {
+const monthlyData = computed(() => {
   const data = Array(12).fill(0); // Initialize an array for 12 months
   filteredData.value.forEach((item) => {
     const month = new Date(item.consultationDate).getMonth();
@@ -203,7 +203,7 @@ const chartOptions = ref({
 const chartSeries = computed(() => [
   {
     name: "Monthly Cases",
-    data: casesData.value, // Use the filtered data
+    data: monthlyData.value, // Use the filtered data
   },
 ]);
 

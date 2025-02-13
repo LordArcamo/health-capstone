@@ -297,7 +297,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analytics-lineChart', [SystemAnalyticsController::class, 'getVaccinationStatistics'])->name('analytics.lineChart');
     Route::get('/analytics-line2Chart', [SystemAnalyticsController::class, 'getCasesStatistics'])->name('analytics.lineChart2');
     Route::get('/analytics-radarChart', [SystemAnalyticsController::class, 'getMentalHealthStatistics'])->name('analytics.radarChart');
-
+    Route::get('/total-patients-data', [SystemAnalyticsController::class, 'getTotalPatientsData'])->name('total-patients.data');
 });
 
     Route::get('/mental-health', function () {

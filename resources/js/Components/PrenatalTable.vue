@@ -431,6 +431,11 @@ export default {
   },
 
   methods: {
+    handlePostpartumSubmit(data) {
+      console.log("Postpartum data submitted:", data);
+      // Process the submitted data, for example, send it to an API
+      this.closeModal(); // Close the modal after submission
+    },
     // Open Edit Page
     editPatient(patient) {
       Inertia.get(`/patients/edit/${patient.personalId}`);

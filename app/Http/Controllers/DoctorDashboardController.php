@@ -22,24 +22,22 @@ class DoctorDashboardController extends Controller
     {
         $today = now()->toDateString();
 
-        // Auto-cancel consultations that were not completed
-        if (now()->format('H:i') === '00:00') {
-            DB::table('consultation_details')
-                ->whereDate('consultationDate', '<', $today)
-                ->where(function ($query) {
-                    $query->where('status', 'in queue')
-                        ->orWhereNull('status');
-                })
-                ->update(['status' => 'cancelled', 'updated_at' => now()]);
-    
-            DB::table('prenatal_consultation_details')
-                ->whereDate('consultationDate', '<', $today)
-                ->where(function ($query) {
-                    $query->where('status', 'in queue')
-                        ->orWhereNull('status');
-                })
-                ->update(['status' => 'cancelled', 'updated_at' => now()]);
-        }
+        // Auto-cancel consultations that were not completed from previous days
+        DB::table('consultation_details')
+            ->whereDate('consultationDate', '<', $today)
+            ->where(function ($query) {
+                $query->where('status', 'in queue')
+                    ->orWhereNull('status');
+            })
+            ->update(['status' => 'cancelled', 'updated_at' => now()]);
+
+        DB::table('prenatal_consultation_details')
+            ->whereDate('consultationDate', '<', $today)
+            ->where(function ($query) {
+                $query->where('status', 'in queue')
+                    ->orWhereNull('status');
+            })
+            ->update(['status' => 'cancelled', 'updated_at' => now()]);
 
         // Fetch patients in queue (not completed)
         $generalConsultations = DB::table('personal_information')
@@ -363,6 +361,85 @@ class DoctorDashboardController extends Controller
                     ->merge($immunizationDates)
                     ->merge($vaccinationDates);
 
+                $genders = PersonalInformation::select('sex', DB::raw('count(*) as total'))
+                    ->groupBy('sex')
+                    ->pluck('total', 'sex');
+
+                // Ensure the response contains counts for both Male and Female
+                $maleCount = $genders['Male'] ?? 0;
+                $femaleCount = $genders['Female'] ?? 0;
+
+                $ITRConsultations = ConsultationDetails::select(
+                    DB::raw("MONTH(consultationDate) as month"), 
+                    DB::raw("COUNT(*) as count")
+                )
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('count', 'month');
+            
+                // Get prenatal consultations per month
+                $PREConsultations = PrenatalConsultationDetails::select(
+                    DB::raw("MONTH(consultationDate) as month"), 
+                    DB::raw("COUNT(*) as count")
+                )
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('count', 'month');
+            
+                // Convert results to an array with default values
+                $generalData = array_fill(1, 12, 0);
+                $prenatalData = array_fill(1, 12, 0);
+            
+                foreach ($ITRConsultations as $month => $count) {
+                    $generalData[$month] = $count;
+                }
+            
+                foreach ($PREConsultations as $month => $count) {
+                    $prenatalData[$month] = $count;
+                }
+
+                $diagnosisCounts = DB::table('visit_information')
+                    ->select(DB::raw("MONTH(created_at) as month"), 'diagnosis', DB::raw('COUNT(*) as count'))
+                    ->groupBy('month', 'diagnosis')
+                    ->orderBy('month')
+                    ->get();
+
+                // Process data: Group by month and get the top 3 diseases per month
+                $chartData = [];
+                $groupedData = [];
+
+                foreach ($diagnosisCounts as $case) {
+                    $groupedData[$case->month][] = [
+                        'diagnosis' => $case->diagnosis,
+                        'count' => $case->count
+                    ];
+                }
+
+                foreach ($groupedData as $month => $diseases) {
+                    // Sort diseases by count (highest first)
+                    usort($diseases, function ($a, $b) {
+                        return $b['count'] - $a['count'];
+                    });
+
+                    // Get the top 3 diseases for the month
+                    $topDiseases = array_slice($diseases, 0, 3);
+
+                    foreach ($topDiseases as $disease) {
+                        $severity = 'low'; // Default
+
+                        if ($disease['count'] >= 10) {
+                            $severity = 'high'; // High critical (Emergency)
+                        } elseif ($disease['count'] >= 5) {
+                            $severity = 'moderate'; // Moderately critical
+                        }
+
+                        $criticalChartData[$disease['diagnosis']][$month] = [
+                            'count' => $disease['count'],
+                            'severity' => $severity
+                        ];
+                    }
+                }
+
 
         return Inertia::render('Doctor/DoctorDashboard', [
             'allDates' => $allDates,
@@ -372,6 +449,11 @@ class DoctorDashboardController extends Controller
             'todaysConsultation' => $todaysConsultation,
             'criticalCases' => $criticalCases,
             'notifications' => $notifications,
+            'maleCount' => $maleCount,
+            'femaleCount' => $femaleCount,
+            'generalConsultations' => array_values($generalData),
+            'prenatalConsultations' => array_values($prenatalData),
+            'criticalChartData' => $criticalChartData,
         ]);
     }
 

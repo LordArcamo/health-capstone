@@ -86,9 +86,7 @@ class DashboardController extends Controller
                   DB::raw('YEAR(consultation_details.consultationDate) as year'), // Extract year from consultationDate
                   DB::raw('COUNT(visit_information.visitInformationID) as case_count') // Count cases
               )
-              ->when(request('selectedYear'), function ($query) {
-                  return $query->whereYear('consultation_details.consultationDate', request('selectedYear'));
-              })
+              ->whereYear('consultation_details.consultationDate', request('selectedYear', now()->year)) // Default to current year
               ->when(request('selectedMonth'), function ($query) {
                   return $query->whereMonth('consultation_details.consultationDate', request('selectedMonth'));
               })

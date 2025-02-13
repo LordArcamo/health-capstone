@@ -25,22 +25,23 @@
         <label for="year-filter" class="filter-label">Year:</label>
         <select id="year-filter" v-model="selectedYear" class="filter-select">
           <option value="all">All Years</option>
-          <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+          <option v-for="year in availableYears" :key="year" :value="year.toString()">
+            {{ year }}
+          </option>
         </select>
       </div>
       <!-- Age Group Filter -->
       <div class="filter flex flex-col items-start">
-      <label for="age-group" class="filter-label">Age Group:</label>
-      <select id="age-group" v-model="selectedAgeGroup" class="filter-select">
-        <option value="all">All Ages</option>
-        <option value="0-18">0-18</option>
-        <option value="19-35">19-35</option>
-        <option value="36-50">36-50</option>
-        <option value="50+">50+</option>
-      </select>
+        <label for="age-group" class="filter-label">Age Group:</label>
+        <select id="age-group" v-model="selectedAgeGroup" class="filter-select">
+          <option value="all">All Ages</option>
+          <option value="0-18">0-18</option>
+          <option value="19-35">19-35</option>
+          <option value="36-50">36-50</option>
+          <option value="50+">50+</option>
+        </select>
+      </div>
     </div>
-
-  </div>
 
     <!-- Chart Section -->
     <apexchart
@@ -58,7 +59,7 @@
 
 <script setup>
 import apexchart from "vue3-apexcharts";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
 // Define props
 const props = defineProps({
@@ -68,19 +69,21 @@ const props = defineProps({
 });
 
 // Helper functions
-const uniquePrenatal = props.prenatal.reduce((acc, current) => {
-  const exists = acc.find(
-    (person) =>
-      person.firstName === current.firstName &&
-      person.lastName === current.lastName &&
-      person.middleName === current.middleName
-  );
+const uniquePrenatal = computed(() => {
+  return props.prenatal.reduce((acc, current) => {
+    const exists = acc.find(
+      (person) =>
+        person.firstName === current.firstName &&
+        person.lastName === current.lastName &&
+        person.middleName === current.middleName
+    );
 
-  if (!exists) {
-    acc.push(current);
-  }
-  return acc;
-}, []);
+    if (!exists) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+});
 
 const formatDate = (dateString) => {
   const months = [
@@ -119,34 +122,46 @@ const ageRanges = {
 
 // Get all available years from data
 const availableYears = computed(() => {
-  const years = props.prenatal.map((record) =>
-    new Date(record.consultationDate).getFullYear()
-  );
+  const years = props.prenatal
+    .map((record) => {
+      const date = new Date(record.visit_date);
+      return isNaN(date.getFullYear()) ? null : date.getFullYear();
+    })
+    .filter(year => year !== null);
   return [...new Set(years)].sort((a, b) => a - b);
 });
 
 // Compute filtered prenatal data
 const filteredPrenatal = computed(() => {
-  let data = uniquePrenatal;
+  let data = [...props.prenatal];
+
+  console.log('Filtering data with:', {
+    selectedPeriod: selectedPeriod.value,
+    availablePeriods: [...new Set(data.map(r => r.period_type))]
+  });
+
+  // Exclude "trimester_unknown" from valid filters
+  if (selectedPeriod.value !== "all") {
+    data = data.filter(record => record.period_type === selectedPeriod.value);
+  }
 
   // Apply age group filter
   if (selectedAgeGroup.value !== "all") {
     const [minAge, maxAge] = ageRanges[selectedAgeGroup.value];
-    data = data.filter(
-      (person) => person.age >= minAge && person.age <= maxAge
-    );
+    data = data.filter(person => person.age >= minAge && person.age <= maxAge);
   }
 
   // Apply year filter
   if (selectedYear.value !== "all") {
-    data = data.filter((record) => {
-      const recordYear = new Date(record.consultationDate).getFullYear();
-      return recordYear === selectedYear.value;
+    data = data.filter(record => {
+      const date = new Date(record.visit_date);
+      return date.getFullYear() === parseInt(selectedYear.value);
     });
   }
 
   return data;
 });
+
 
 // Monthly counts based on filtered data
 const monthlyCounts = computed(() => {
@@ -165,39 +180,27 @@ const monthlyCounts = computed(() => {
     December: 0,
   };
 
+  console.log('Computing monthly counts for filtered data:', filteredPrenatal.value.length, 'records');
+
   // Iterate through the filtered prenatal data and count occurrences per month
   filteredPrenatal.value.forEach((record) => {
-    const date = new Date(record.consultationDate);
-    const month = date.toLocaleString("default", { month: "long" }); // Get month name
-    if (counts[month] !== undefined) {
-      counts[month]++;
+    if (record.visit_date) {
+      const date = new Date(record.visit_date);
+      if (!isNaN(date.getTime())) {
+        const month = date.toLocaleString("default", { month: "long" });
+        if (counts[month] !== undefined) {
+          counts[month]++;
+          console.log(`Added count for ${month}:`, {
+            id: record.prenatalConsultationDetailsID,
+            period_type: record.period_type,
+            visit_date: record.visit_date
+          });
+        }
+      }
     }
   });
 
   return counts;
-});
-
-// Create chart data based on monthly counts
-const allData = computed(() => {
-  // Extract monthly counts in order
-  const countsArray = [
-    monthlyCounts.value.January,
-    monthlyCounts.value.February,
-    monthlyCounts.value.March,
-    monthlyCounts.value.April,
-    monthlyCounts.value.May,
-    monthlyCounts.value.June,
-    monthlyCounts.value.July,
-    monthlyCounts.value.August,
-    monthlyCounts.value.September,
-    monthlyCounts.value.October,
-    monthlyCounts.value.November,
-    monthlyCounts.value.December,
-  ];
-
-  return {
-    all: countsArray, // Dynamically populate the chart data
-  };
 });
 
 // Chart Options
@@ -209,18 +212,8 @@ const chartOptions = ref({
   },
   xaxis: {
     categories: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
     ],
     labels: {
       style: {
@@ -247,28 +240,56 @@ const chartOptions = ref({
 
 // Chart Series
 const chartSeries = computed(() => {
-  // Get base data or fallback to empty array
-  const baseData = allData.value[selectedPeriod.value] || allData.value.all || [];
-
-  return [
-    {
-      name: "Patients",
-      data: baseData,
-    },
-  ];
+  return [{
+    name: "Patients",
+    data: Object.values(monthlyCounts.value),
+  }];
 });
 
+// Display filters
 const selectedFilters = computed(() => {
   const filters = [];
-  if (selectedPeriod.value !== "all")
-    filters.push(`Period: ${selectedPeriod.value}`);
+  if (selectedPeriod.value !== "all") {
+    if (selectedPeriod.value === "postpartum") {
+      filters.push("Period: Postpartum");
+    } else if (selectedPeriod.value.startsWith("trimester")) {
+      // Extract numeric part safely
+      const trimesterNumber = selectedPeriod.value.match(/\d+/)?.[0] || "";
+      if (trimesterNumber) {
+        filters.push(`Period: ${trimesterNumber}${getOrdinalSuffix(trimesterNumber)} Trimester`);
+      } else {
+        filters.push(`Period: ${selectedPeriod.value}`); // Fallback if extraction fails
+      }
+    } else {
+      filters.push(`Period: ${selectedPeriod.value}`); // Catch unexpected values
+    }
+  }
   if (selectedAgeGroup.value !== "all")
     filters.push(`Age: ${selectedAgeGroup.value}`);
-  if (selectedYear.value !== "all") filters.push(`Year: ${selectedYear.value}`);
+  if (selectedYear.value !== "all") 
+    filters.push(`Year: ${selectedYear.value}`);
   return filters.length ? filters.join(" | ") : "No filters applied";
 });
-</script>
 
+// Helper function for ordinal suffixes
+const getOrdinalSuffix = (num) => {
+  const n = parseInt(num);
+  return ["st", "nd", "rd"][((n + 90) % 100 - 10) % 10 - 1] || "th";
+};
+
+// Watch filters for debugging
+watch([selectedPeriod, selectedAgeGroup, selectedYear], ([period, age, year], [oldPeriod]) => {
+  if (period !== oldPeriod) {
+    console.log('Period filter changed:', {
+      from: oldPeriod,
+      to: period,
+      totalRecords: props.prenatal.length,
+      postpartumRecords: props.prenatal.filter(r => r.period_type === 'postpartum').length,
+      trimesterRecords: props.prenatal.filter(r => r.trimester).length
+    });
+  }
+});
+</script>
 
 <style scoped>
 .chart-container {
@@ -336,9 +357,7 @@ const selectedFilters = computed(() => {
   }
 }
 
-
 .prenatal-chart {
   height: 350px;
 }
-
 </style>

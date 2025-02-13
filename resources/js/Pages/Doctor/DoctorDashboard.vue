@@ -16,6 +16,11 @@ const props = defineProps({
   todaysConsultation: Number,
   notifications: Array,
   allDates: Array,
+  maleCount: Number,
+  femaleCount: Number,
+  generalConsultations: Array,
+  prenatalConsultations: Array,
+  criticalChartData: Object,
 });
 
 // Reactive states
@@ -235,11 +240,11 @@ const initCharts = () => {
   new Chart(demographicsCtx, {
     type: 'bar',
     data: {
-      labels: ['Male', 'Female', 'Other'],
+      labels: ['Male', 'Female'],
       datasets: [
         {
           label: 'Number of Patients',
-          data: [50, 70, 10], // Replace with actual data
+          data: [props.maleCount, props.femaleCount],
           backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726'],
         },
       ],
@@ -272,14 +277,21 @@ const initCharts = () => {
   new Chart(appointmentsCtx, {
     type: 'line',
     data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      , // Replace with actual months
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 
       datasets: [
         {
-          label: 'Appointments',
-          data: [30, 50, 70, 60, 90], // Replace with actual data
+          label: 'General Consultations',
+          data: props.generalConsultations, // Replace with actual data
           borderColor: '#42A5F5',
           backgroundColor: 'rgba(66, 165, 245, 0.2)',
+          borderWidth: 2,
+          tension: 0.3, // Smooth curve
+        },
+        {
+          label: 'Prenatal Consultations', // New line graph
+          data: props.prenatalConsultations, // Replace with actual data
+          borderColor: '#FF5252', // Different color for distinction
+          backgroundColor: 'rgba(255, 82, 82, 0.2)',
           borderWidth: 2,
           tension: 0.3, // Smooth curve
         },
@@ -307,6 +319,7 @@ const initCharts = () => {
       },
     },
   });
+
 
   // Critical Cases (Line Chart)
   const criticalCasesCtx = document.getElementById('criticalCasesLineChart').getContext('2d');
