@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
 use App\Models\NationalImmunizationProgram;
 use App\Models\PrenatalConsultationDetails;
 use App\Models\VaccinationRecord;
+use App\Models\VisitInformation;
 
 class DoctorDashboardController extends Controller
 {
@@ -398,64 +400,69 @@ class DoctorDashboardController extends Controller
                     $prenatalData[$month] = $count;
                 }
 
-                $diagnosisCounts = DB::table('visit_information')
-                    ->select(DB::raw("MONTH(created_at) as month"), 'diagnosis', DB::raw('COUNT(*) as count'))
+                $monthlyTopDiagnoses = VisitInformation::selectRaw('MONTH(consultation_details.consultationDate) as month, diagnosis, COUNT(*) as count')
+                    ->join('consultation_details', 'visit_information.consultationDetailsID', '=', 'consultation_details.consultationDetailsID')
+                    ->whereBetween('consultation_details.consultationDate', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])
                     ->groupBy('month', 'diagnosis')
                     ->orderBy('month')
+                    ->orderByDesc('count')
                     ->get();
 
-                // Process data: Group by month and get the top 3 diseases per month
-                $chartData = [];
-                $groupedData = [];
+                $formattedData = [];
+                $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                $colors = ['#FF5252', '#FF9800', '#FFD700'];
 
-                foreach ($diagnosisCounts as $case) {
-                    $groupedData[$case->month][] = [
-                        'diagnosis' => $case->diagnosis,
-                        'count' => $case->count
+                $datasets = [
+                    ['data' => array_fill(0, 12, 0), 'backgroundColor' => $colors[0], 'borderColor' => $colors[0], 'borderWidth' => 1, 'diagnosis' => []],
+                    ['data' => array_fill(0, 12, 0), 'backgroundColor' => $colors[1], 'borderColor' => $colors[1], 'borderWidth' => 1, 'diagnosis' => []],
+                    ['data' => array_fill(0, 12, 0), 'backgroundColor' => $colors[2], 'borderColor' => $colors[2], 'borderWidth' => 1, 'diagnosis' => []]
+                ];
+
+                foreach ($monthlyTopDiagnoses as $diagnosisData) {
+                    $monthIndex = $diagnosisData->month - 1;
+                    $formattedData[$monthIndex][] = [
+                        'diagnosis' => ucfirst($diagnosisData->diagnosis),
+                        'count' => $diagnosisData->count
                     ];
                 }
 
-                foreach ($groupedData as $month => $diseases) {
-                    // Sort diseases by count (highest first)
-                    usort($diseases, function ($a, $b) {
-                        return $b['count'] - $a['count'];
-                    });
+                foreach ($formattedData as $month => $cases) {
+                    usort($cases, fn($a, $b) => $b['count'] <=> $a['count']);
+                    $topCases = array_slice($cases, 0, 3);
 
-                    // Get the top 3 diseases for the month
-                    $topDiseases = array_slice($diseases, 0, 3);
+                    while (count($topCases) < 3) {
+                        $topCases[] = ['diagnosis' => 'N/A', 'count' => 0];
+                    }
 
-                    foreach ($topDiseases as $disease) {
-                        $severity = 'low'; // Default
-
-                        if ($disease['count'] >= 10) {
-                            $severity = 'high'; // High critical (Emergency)
-                        } elseif ($disease['count'] >= 5) {
-                            $severity = 'moderate'; // Moderately critical
-                        }
-
-                        $criticalChartData[$disease['diagnosis']][$month] = [
-                            'count' => $disease['count'],
-                            'severity' => $severity
-                        ];
+                    foreach ($topCases as $rank => $case) {
+                        $datasets[$rank]['data'][$month] = $case['count'];
+                        $datasets[$rank]['diagnosis'][$month] = $case['diagnosis'];
                     }
                 }
 
+                // Convert diagnosis array to JSON
+                foreach ($datasets as &$dataset) {
+                    $dataset['diagnosis'] = array_map(fn($label) => $label ?? 'N/A', $dataset['diagnosis']);
+                }
 
-        return Inertia::render('Doctor/DoctorDashboard', [
-            'allDates' => $allDates,
-            'totalPatients' => $totalPatients,
-            'ITRConsultation' => $ITRConsultation,
-            'latestPatients' => $latestPatients,
-            'todaysConsultation' => $todaysConsultation,
-            'criticalCases' => $criticalCases,
-            'notifications' => $notifications,
-            'maleCount' => $maleCount,
-            'femaleCount' => $femaleCount,
-            'generalConsultations' => array_values($generalData),
-            'prenatalConsultations' => array_values($prenatalData),
-            'criticalChartData' => $criticalChartData,
-        ]);
-    }
+            return Inertia::render('Doctor/DoctorDashboard', [
+                'allDates' => $allDates,
+                'totalPatients' => $totalPatients,
+                'ITRConsultation' => $ITRConsultation,
+                'latestPatients' => $latestPatients,
+                'todaysConsultation' => $todaysConsultation,
+                'criticalCases' => $criticalCases,
+                'notifications' => $notifications,
+                'maleCount' => $maleCount,
+                'femaleCount' => $femaleCount,
+                'generalConsultations' => array_values($generalData),
+                'prenatalConsultations' => array_values($prenatalData),
+                'chartData' => [
+                    'labels' => $labels,
+                    'datasets' => array_values($datasets)
+                ]
+            ]);
+        }
 
     /**
      * Display a tailored doctor dashboard with user data.

@@ -23,7 +23,7 @@ class Prescription extends Model
     // Define fillable properties, including the foreign key
     protected $fillable = [
         'visitInformationID',
-        'medication_name',
+        'medication',
         'dosage',
         'frequency',
         'duration',
