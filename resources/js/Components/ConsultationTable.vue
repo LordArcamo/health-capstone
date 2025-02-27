@@ -142,7 +142,7 @@
           Generate Report
         </button>
   
-        <h1 class="text-2xl font-bold text-start mt-6 mb-4">Total Patients</h1>
+        <h1 class="text-2xl font-bold text-start mt-6 mb-4">Today's Consultation Patients</h1>
       </div>
   
   <!-- Responsive Table -->
