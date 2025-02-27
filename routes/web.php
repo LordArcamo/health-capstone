@@ -92,6 +92,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.destroy');
 
+    Route::get('/staff/active', [RegisteredUserController::class, 'getActiveUsers'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register.getActiveUsers');
+
 });
 
 

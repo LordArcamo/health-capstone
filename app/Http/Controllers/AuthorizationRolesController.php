@@ -122,13 +122,21 @@ class AuthorizationRolesController extends Controller
             ];
         });
 
+        $loggedInUsers = DB::table('sessions')
+        ->join('users', 'sessions.user_id', '=', 'users.id')
+        ->whereNotNull('sessions.user_id') // Ensure user is logged in
+        ->where('users.role', '!=', 'admin') // Exclude admins
+        ->distinct('sessions.user_id') // Count unique users
+        ->count('sessions.user_id');
+
         $responseData = [
             'pageTitle' => 'Admin Dashboard',
             'user' => auth()->user(),
             'totalUsers' => $totalUsers,
             'totalPatients' => $totalPatients,
             'countUsers' => $allMonths->toArray(),
-            'staffDistributionData' => $formattedDistributionData
+            'staffDistributionData' => $formattedDistributionData,
+            'loggedInUsers' => $loggedInUsers
         ];
 
         \Log::info('Response data:', $responseData);

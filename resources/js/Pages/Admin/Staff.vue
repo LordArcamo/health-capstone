@@ -1,5 +1,5 @@
 <template>
-    <Head title="Mental Health Records" />
+    <Head title="User Table" />
 
     <NewLayout>
         <StaffTable :staffList="props.USERS" />

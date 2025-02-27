@@ -1,5 +1,5 @@
 <template>
-    <Head title="Latest Patient Records" />
+    <Head title="Today's Consultation Patient Records" />
     <NewLayout>
       <ConsultationTable :patients="props.latestConsultation" />
     </NewLayout>
