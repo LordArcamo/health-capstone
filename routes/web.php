@@ -117,7 +117,7 @@ Route::get('/services/patients', [PatientController::class, 'show'])->name('tota
 
 Route::get('/services/queue', [PatientController::class, 'show'])->name('totalPatients.showQueu');
 
-Route::get('/services/consultation', [PatientController::class, 'show'])->name('totalPatients.showTodayConsultation');
+// Route::get('/services/consultation', [PatientController::class, 'show'])->name('totalPatients.showTodayConsultation');
 Route::get('/services/critical', [PatientController::class, 'show'])->name('totalPatients.showCritical');
 
 
@@ -230,6 +230,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/doctor/mark-as-cancelled', [DoctorDashboardController::class, 'markAsCancelled'])
         ->middleware(RoleMiddleware::class . ':doctor')
         ->name('doctor.mark-as-cancelled');
+    Route::get('/services/consultation', [DoctorDashboardController::class, 'getConsultation'])
+        ->middleware(RoleMiddleware::class . ':doctor')
+        ->name('doctor.getConsultation');
 });
 
 Route::get('/doctor-checkup/itr', [DoctorCheckupController::class, 'create'])

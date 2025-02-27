@@ -24,7 +24,6 @@ const props = defineProps({
 });
 
 // Reactive states
-const chartInstance = ref(null);
 const totalPatients = ref(props.totalPatients || 0);
 const ITRConsultation = ref(props.ITRConsultation || []);
 const latestPatients = ref(props.latestPatients || []);
@@ -609,10 +608,6 @@ onMounted(() => {
           <div class="flex flex-col items-start gap-4">
             <div class="flex justify-between w-full">
               <h2 class="font-semibold text-lg">Patients in Queue</h2>
-              <Link href="/services/queue" class="bg-yellow-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
-                aria-label="View all patients in queue">
-              View
-              </Link>
             </div>
             <div class="flex items-center">
               <font-awesome-icon :icon="['fas', 'users']" class="mr-2 text-2xl text-yellow-600" />
