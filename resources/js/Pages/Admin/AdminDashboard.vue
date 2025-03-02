@@ -17,6 +17,7 @@ const props = defineProps({
   user: Object,
   totalUsers: Number,
   totalPatients: Number,
+  loggedInUsers: Number,
   countUsers: Array,
   staffDistributionData: {
     type: Array,
@@ -30,6 +31,7 @@ console.log('AdminDashboard Props:', {
   user: props.user,
   totalUsers: props.totalUsers,
   countUsers: props.countUsers,
+  loggedInUsers: props.loggedInUsers,
   staffDistributionData: props.staffDistributionData
 });
 
@@ -150,7 +152,7 @@ watch(
             </div>
             <div class="flex items-center">
               <i class="fas fa-users text-orange-600 mr-2 text-lg"></i>
-              <p class="text-2xl font-semibold">{{ activeUsers }}</p>
+              <p class="text-2xl font-semibold">{{ loggedInUsers }}</p>
             </div>
           </div>
         </ShortBox>
