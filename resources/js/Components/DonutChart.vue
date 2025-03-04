@@ -1,7 +1,7 @@
 <template>
 <div>
   <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-    Most Common Diagnoses
+    Most Common Diagnoses ({{ new Date().getFullYear() }})
   </h2>
 
   <!-- Chart -->
@@ -31,15 +31,20 @@ export default defineComponent({
     },
   },
   setup(props) {
-    // Process data to get the most common diagnoses
+    const currentYear = new Date().getFullYear();
+
+    // Process data to get the most common diagnoses for the current year
     const topDiagnoses = computed(() => {
       const diagnosisCounts = {};
 
-      props.nonReferredData.forEach((item) => {
-        if (item.diagnosis) {
-          diagnosisCounts[item.diagnosis] = (diagnosisCounts[item.diagnosis] || 0) + item.case_count;
-        }
-      });
+      // Filter for current year before processing
+      props.nonReferredData
+        .filter(item => item.year === currentYear)
+        .forEach((item) => {
+          if (item.diagnosis) {
+            diagnosisCounts[item.diagnosis] = (diagnosisCounts[item.diagnosis] || 0) + item.case_count;
+          }
+        });
 
       // Sort and take the top 5 diagnoses
       return Object.entries(diagnosisCounts)

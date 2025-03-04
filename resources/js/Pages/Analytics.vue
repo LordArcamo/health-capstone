@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
       <h2 class="text-3xl font-bold text-gray-800 mb-8">Analytics Overview</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
         <div class="hover:-translate-y-1 transition">
-          <TotalPatients :filters="filters" :monthly-data="monthlyStats" />
+          <TotalPatients :filters="filters" :monthly-stats="monthlyStats" />
         </div>
         <div class="hover:-translate-y-1 transition">
           <ReferedPatients :filters="filters" :pie-chart="referredData" />
@@ -217,7 +217,7 @@ onBeforeUnmount(() => {
           <Vaccinations :filters="filters" :vaccination-data="monthlyVaccination" :vaccinenatedPatients="vaccinenatedPatients" />
         </div>
         <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-red-500 hover:shadow-xl hover:-translate-y-1 transition">
-          <h3 class="text-lg font-bold text-gray-700">Mental Health Cases</h3>
+          <h3 class="text-lg font-bold text-gray-700">Cases</h3>
           <Cases :filters="filters" :monthly="monthly" />
         </div>
         <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-purple-500 hover:shadow-xl hover:-translate-y-1 transition">

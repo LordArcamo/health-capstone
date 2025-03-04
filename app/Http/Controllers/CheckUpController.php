@@ -11,35 +11,48 @@ use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
 use App\Models\User;
 use App\Models\VisitInformation;
+use App\Models\Prescription;
 
 class CheckUpController extends Controller
 {
     public function import(Request $request)
     {
-        set_time_limit(300); // Increase time limit to 5 minutes
-
+        set_time_limit(300); // Increase execution time
+    
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
         ]);
-
+    
         $file = $request->file('file');
         $data = array_map('str_getcsv', file($file->getRealPath()));
-        $header = array_shift($data); // Extract the header row
-
+        $header = array_shift($data);
+    
         DB::transaction(function () use ($data, $header) {
             foreach ($data as $row) {
                 $patientData = array_combine($header, $row);
-
+    
                 // Convert consultationTime to MySQL TIME format
-                $patientData['consultationTime'] = date('H:i:s', strtotime($patientData['consultationTime']));
-
-                // Convert numeric fields to proper types
-                $patientData['temperature'] = (float) $patientData['temperature'];
-                $patientData['height'] = (float) $patientData['height'];
-                $patientData['weight'] = (float) $patientData['weight'];
-                $patientData['age'] = (int) $patientData['age'];
-
-                // Validate the row
+                if (!empty($patientData['consultationTime'])) {
+                    $patientData['consultationTime'] = date('H:i:s', strtotime($patientData['consultationTime']));
+                }
+    
+                // Ensure numeric fields have the correct format
+                $patientData['temperature'] = isset($patientData['temperature']) ? number_format((float)$patientData['temperature'], 2, '.', '') : null;
+                $patientData['height'] = isset($patientData['height']) ? number_format((float)$patientData['height'], 2, '.', '') : null;
+                $patientData['weight'] = isset($patientData['weight']) ? number_format((float)$patientData['weight'], 2, '.', '') : null;
+                $patientData['age'] = isset($patientData['age']) ? (int)$patientData['age'] : null;
+    
+                // Convert `selectedLabTests` to JSON format
+                $patientData['selectedLabTests'] = isset($patientData['selectedLabTests']) && !empty($patientData['selectedLabTests'])
+                    ? json_encode(array_map('trim', explode(',', $patientData['selectedLabTests']))) // Convert CSV string to JSON array
+                    : json_encode([]); // Default to empty JSON array
+    
+                // Ensure `bloodPressure` has valid format (digits and `/`)
+                $patientData['bloodPressure'] = isset($patientData['bloodPressure']) 
+                    ? preg_replace('/[^0-9\/]/', '', $patientData['bloodPressure']) 
+                    : null;
+    
+                // Validation
                 $validator = Validator::make($patientData, [
                     'firstName' => 'required|string|max:100',
                     'lastName' => 'required|string|max:100',
@@ -61,50 +74,53 @@ class CheckUpController extends Controller
                     'providerName' => 'required|string|max:100',
                     'natureOfVisit' => 'required|string|max:100',
                     'visitType' => 'required|string|max:50',
-                    'referredFrom' => 'nullable|string|max:100',
-                    'referredTo' => 'nullable|string|max:100',
+                    'referredFrom' => 'nullable|string|max:255',
+                    'referredTo' => 'nullable|string|max:255',
                     'reasonsForReferral' => 'nullable|string|max:255',
-                    'referredBy' => 'nullable|string|max:100',
-                    'chiefComplaints' => 'required|string',
-                    'diagnosis' => 'required|string',
+                    'referredBy' => 'nullable|string|max:255',
+                    'chiefComplaints' => 'required|string|max:255',
+                    'diagnosis' => 'required|string|max:255',
                     'medication' => 'required|string',
-                    'requireLabTest' => 'nullable|string',
-                    'status' => 'nullable|string',
-
+                    'requireLabTest' => 'nullable|string|max:3',
+                    'selectedLabTests' => 'nullable|json',  // Ensure JSON format
+                    'status' => 'nullable|string|max:50',
+                    'dosage' => 'nullable|string|max:50',
+                    'frequency' => 'nullable|string|max:50',
+                    'duration' => 'nullable|string|max:50',
+                    'notes' => 'nullable|string',
                 ]);
-
+    
                 if ($validator->fails()) {
-                    \Log::error('Validation failed for row: ' . json_encode($patientData));
-                    \Log::error('Validation errors: ' . json_encode($validator->errors()->all()));
+                    \Log::error('Validation failed: ' . json_encode($validator->errors()->all()));
                     throw new \Exception('Validation failed for row: ' . json_encode($patientData));
                 }
-
+    
                 try {
                     // Create PersonalInformation record
                     $personalInfo = PersonalInformation::create([
                         'firstName' => $patientData['firstName'],
                         'lastName' => $patientData['lastName'],
-                        'middleName' => $patientData['middleName'],
+                        'middleName' => $patientData['middleName'] ?? null,
                         'suffix' => $patientData['suffix'] ?? null,
-                        'purok' => $patientData['purok'],
-                        'barangay' => $patientData['barangay'],
+                        'purok' => $patientData['purok'] ?? null,
+                        'barangay' => $patientData['barangay'] ?? null,
                         'age' => $patientData['age'],
-                        'birthdate' => $patientData['birthdate'],
-                        'contact' => $patientData['contact'],
+                        'birthdate' => $patientData['birthdate'] ?? null,
+                        'contact' => $patientData['contact'] ?? null,
                         'sex' => $patientData['sex'],
                     ]);
-
+    
                     // Create ConsultationDetails record
                     $consultationDetails = ConsultationDetails::create([
                         'personalId' => $personalInfo->personalId,
-                        'id' => auth()->id(), // Add authenticated user ID
+                        'id' => auth()->id(),
                         'consultationDate' => $patientData['consultationDate'],
                         'consultationTime' => $patientData['consultationTime'],
                         'modeOfTransaction' => $patientData['modeOfTransaction'],
-                        'bloodPressure' => $patientData['bloodPressure'],
-                        'temperature' => $patientData['temperature'],
-                        'height' => $patientData['height'],
-                        'weight' => $patientData['weight'],
+                        'bloodPressure' => $patientData['bloodPressure'] ?? null,
+                        'temperature' => $patientData['temperature'] ?? null,
+                        'height' => $patientData['height'] ?? null,
+                        'weight' => $patientData['weight'] ?? null,
                         'providerName' => $patientData['providerName'],
                         'natureOfVisit' => $patientData['natureOfVisit'],
                         'visitType' => $patientData['visitType'],
@@ -114,27 +130,40 @@ class CheckUpController extends Controller
                         'referredBy' => $patientData['referredBy'] ?? 'None',
                         'status' => $patientData['status'] ?? 'None',
                     ]);
-
+    
                     // Create VisitInformation record
-                    VisitInformation::create([
+                    $visitInfo = VisitInformation::create([
                         'consultationDetailsID' => $consultationDetails->consultationDetailsID,
-                        'id' => auth()->id(), // Add authenticated user ID
+                        'id' => auth()->id(),
                         'chiefComplaints' => $patientData['chiefComplaints'],
                         'diagnosis' => $patientData['diagnosis'],
-                        'medication' => $patientData['medication'],
-                        'requireLabTest' => $patientData['requireLabTest'] ?? null,
-                        'selectedLabTests' => $patientData['selectedLabTests'] ?? null,
+                        'requireLabTest' => $patientData['requireLabTest'] ?? 'No',
+                        'selectedLabTests' => $patientData['selectedLabTests'],  // Now properly formatted JSON
                     ]);
-
+    
+                    // Create Prescription record
+                    Prescription::create([
+                        'visitInformationID' => $visitInfo->visitInformationID,
+                        'medication' => $patientData['medication'],
+                        'dosage' => $patientData['dosage'] ?? '',
+                        'frequency' => $patientData['frequency'] ?? '',
+                        'duration' => $patientData['duration'] ?? '',
+                        'notes' => $patientData['notes'] ?? '',
+                    ]);
+    
                 } catch (\Exception $e) {
-                    \Log::error('Error creating records: ' . $e->getMessage());
+                    \Log::error('Error inserting data: ' . $e->getMessage());
                     throw $e;
                 }
             }
         });
-
+    
         return redirect()->back()->with('success', 'Patients imported successfully!');
     }
+    
+
+    
+    
 
 
     /**
@@ -144,6 +173,7 @@ class CheckUpController extends Controller
     {
         $data = PersonalInformation::join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
         ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+        ->leftJoin('prescriptions', 'visit_information.visitInformationID', '=', 'prescriptions.visitInformationID')
         ->select(
             'personal_information.personalId',
             'personal_information.firstName',
@@ -171,16 +201,73 @@ class CheckUpController extends Controller
             DB::raw("
                 CASE
                     WHEN consultation_details.status = 'cancelled' THEN 'Cancelled'
-                    WHEN visit_information.consultationDetailsID IS NULL THEN 'Pending'
+                    WHEN visit_information.consultationDetailsID IS NULL THEN 'In Queue'
                     ELSE 'Completed'
                 END AS status
             "),
 
+            'visit_information.consultationDetailsID',
             'visit_information.chiefComplaints',
             'visit_information.diagnosis',
-            'visit_information.medication'
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.medication IS NOT NULL 
+                THEN prescriptions.medication 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as medications'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.dosage IS NOT NULL 
+                THEN prescriptions.dosage 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as dosages'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.frequency IS NOT NULL 
+                THEN prescriptions.frequency 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as frequencies'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.duration IS NOT NULL 
+                THEN prescriptions.duration 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as durations'),
+            DB::raw('GROUP_CONCAT(
+                CASE WHEN prescriptions.notes IS NOT NULL 
+                THEN prescriptions.notes 
+                ELSE "" 
+                END
+                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as prescription_notes')
         )
-        ->distinct()
+        ->groupBy(
+            'personal_information.personalId',
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.suffix',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.contact',
+            'personal_information.sex',
+            'consultation_details.consultationDate',
+            'consultation_details.consultationTime',
+            'consultation_details.modeOfTransaction',
+            'consultation_details.bloodPressure',
+            'consultation_details.temperature',
+            'consultation_details.height',
+            'consultation_details.weight',
+            'consultation_details.providerName',
+            'consultation_details.natureOfVisit',
+            'consultation_details.visitType',
+            'consultation_details.status',
+            'visit_information.consultationDetailsID',
+            'visit_information.chiefComplaints',
+            'visit_information.diagnosis',
+            'visit_information.visitInformationID'
+        )
         ->get();
 
     return Inertia::render('Table/IndividualTreatmentRecord', [
@@ -249,7 +336,6 @@ class CheckUpController extends Controller
              'itr.diagnosis',
              'itr.medication'
          )
-         ->distinct() // Ensure no duplicate entries
          ->get();
 
      // Pass the joined data to the view

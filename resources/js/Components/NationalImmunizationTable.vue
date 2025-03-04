@@ -523,7 +523,7 @@ export default {
           patient.age,
           patient.sex,
           this.formatDate(patient.consultationDate),
-          patient.status || "Pending"
+          patient.status || "In Queue"
         ]);
 
         // 📄 Table with AutoTable Plugin

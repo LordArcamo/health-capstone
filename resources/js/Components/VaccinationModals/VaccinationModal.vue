@@ -6,7 +6,7 @@
       <!-- Modal Content -->
       <div class="flex justify-between items-center border-b pb-4 mb-4">
         <h2 class="text-xl font-semibold">Vaccination Details</h2>
-        <button @click="closeModal" class="text-gray-500 hover:text-gray-800">
+        <button @click="$emit('close')" class="text-gray-500 hover:text-gray-800">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -39,7 +39,7 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end space-x-4 mt-6">
-          <button @click="closeModal" class="bg-red-500 text-white py-2 px-4 rounded-md">Cancel</button>
+          <button @click="$emit('close')" class="bg-red-500 text-white py-2 px-4 rounded-md">Cancel</button>
           <button :disabled="!selectedPatient && !allowAddNewPatient" @click="addOrNextStep"
             class="bg-blue-500 text-white py-2 px-4 rounded-md disabled:bg-gray-400">
             {{ selectedPatient ? "Next" : "Add New Patient" }}
@@ -350,7 +350,7 @@
 </template>
 
 <script>
-import { Inertia } from '@inertiajs/inertia';
+import { router } from '@inertiajs/vue3';
 import AlertMessage from '../AlertMessage.vue';
 import { debounce } from 'lodash';
 
@@ -748,7 +748,7 @@ export default {
       this.form.weight = value;
     },
     closeModal() {
-      this.showModal = false;
+      this.$emit('close');
     },
     nextStep() {
       if (this.step === 1 && this.selectedPatient) {
@@ -970,7 +970,7 @@ export default {
       this.showConfirmationModal = false;
 
       // Submit using Inertia with proper options
-      Inertia.post('/vaccination/store', vaccinationData, {
+      router.post('/vaccination/store', vaccinationData, {
         preserveState: true,
         preserveScroll: true,
         onSuccess: () => {
@@ -978,18 +978,14 @@ export default {
           this.showAlert = true;
           this.alertMessage = "Vaccination record saved successfully!";
           
-          // Visit the current page again to refresh data
-          Inertia.visit(window.location.pathname, {
-            preserveState: false,
-            preserveScroll: true,
-            only: ['vaccinatedPatients']
-          });
+          // Close modal immediately
+          this.$emit('close');
+          this.showModal = false;
           
-          // Close modal after a short delay
+          // Reload the page after a short delay
           setTimeout(() => {
-            this.resetForm();
-            this.closeModal();
-          }, 1000);
+            router.reload({ preserveScroll: true });
+          }, 500);
         },
         onError: (errors) => {
           console.error("Submission failed:", errors);

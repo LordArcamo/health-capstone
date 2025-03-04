@@ -1,31 +1,31 @@
 <template>
   <div class="chart-container">
-    <!-- Header Section -->
-    <div class="chart-header">
-      <h2 class="chart-title">Referred Patients Overview</h2>
-      <p class="chart-subtitle">
-        Analyze total referred patients with comparisons for referred and not referred.
-      </p>
-    </div>
+      <!-- Header Section -->
+      <div class="chart-header">
+          <h2 class="chart-title">Referred Patients Overview</h2>
+          <p class="chart-subtitle">
+              Analyze total referred patients with comparisons for referred and not referred.
+          </p>
+      </div>
 
-    <!-- Filter Section -->
-    <div class="filter-container">
-      <label for="reason-filter" class="filter-label">Reason for Referral:</label>
-      <select id="reason-filter" v-model="selectedReason" @change="updateChart">
-        <option value="">All Reasons</option>
-        <option v-for="reason in reasons" :key="reason" :value="reason">
-          {{ reason }}
-        </option>
-      </select>
-    </div>
+      <!-- Filter Section -->
+      <div class="filter-container">
+          <label for="reason-filter" class="filter-label">Reason for Referral:</label>
+          <select id="reason-filter" v-model="selectedReason">
+              <option value="">All Reasons</option>
+              <option v-for="reason in reasons" :key="reason" :value="reason">
+                  {{ reason }}
+              </option>
+          </select>
+      </div>
 
-    <!-- Chart -->
-    <apexchart 
-      type="bar" 
-      :options="chartOptions" 
-      :series="chartSeries" 
-      class="patients-chart"
-    ></apexchart>
+      <!-- Chart -->
+      <apexchart 
+          type="bar" 
+          :options="chartOptions" 
+          :series="filteredChartSeries"
+          class="patients-chart"
+      ></apexchart>
   </div>
 </template>
 
@@ -35,102 +35,100 @@ import VueApexCharts from "vue3-apexcharts";
 export default {
   name: "ReferredPatientsChart",
   components: {
-    apexchart: VueApexCharts,
+      apexchart: VueApexCharts,
   },
   props: {
-    pieChart: {
-      type: Object,
-      required: true,
-    },
+      pieChart: {
+          type: Object,
+          required: true,
+      },
   },
   data() {
-    return {
-      selectedReason: "", // Default filter is "All Reasons"
-      reasons: ["Cardiology", "Neurology", "Orthopedics", "Pediatrics"], // Example reasons for referral
-      chartOptions: {
-        chart: {
-          id: "referred-patients-bar-chart",
-          toolbar: {
-            show: true,
+      return {
+          selectedReason: "",
+          reasons: Object.keys(this.pieChart.reasons || {}).filter(reason => reason !== "None"), // Get all unique reasons
+          chartOptions: {
+              chart: {
+                  id: "referred-patients-bar-chart",
+                  toolbar: { show: true },
+                  zoom: { enabled: false },
+                  background: "#ffffff",
+              },
+              xaxis: {
+                  categories: ["Referred", "Not Referred"],
+                  labels: {
+                      style: {
+                          fontSize: "14px",
+                          fontWeight: "bold",
+                          colors: "#333",
+                      },
+                  },
+              },
+              colors: ["#6EC591", "#A4D7A0"],
+              plotOptions: {
+                  bar: {
+                      borderRadius: 6,
+                      horizontal: false,
+                      columnWidth: "50%",
+                  },
+              },
+              dataLabels: { enabled: false },
+              grid: {
+                  borderColor: "#e5e5e5",
+                  strokeDashArray: 4,
+              },
+              tooltip: {
+                  enabled: true,
+                  theme: "light",
+                  y: {
+                      formatter: (val) => `${val} patients`,
+                  },
+              },
           },
-          zoom: {
-            enabled: false,
-          },
-          background: "#ffffff",
-        },
-        xaxis: {
-          categories: ["Referred", "Not Referred"],
-          labels: {
-            style: {
-              fontSize: "14px",
-              fontWeight: "bold",
-              colors: "#333",
-            },
-          },
-        },
-        colors: ["#6EC591", "#A4D7A0"], // Different shades of green
-        plotOptions: {
-          bar: {
-            borderRadius: 6,
-            horizontal: false,
-            columnWidth: "50%",
-          },
-        },
-        dataLabels: {
-          enabled: false,
-        },
-        grid: {
-          borderColor: "#e5e5e5",
-          strokeDashArray: 4,
-        },
-        tooltip: {
-          enabled: true,
-          theme: "light",
-          y: {
-            formatter: function (val) {
-              return val + " patients";
-            },
-          },
-        },
-      },
-    };
+      };
   },
   computed: {
-    chartSeries() {
-      // Update chart data based on the selected reason
-      const referred = this.selectedReason
-        ? this.pieChart.reasons[this.selectedReason]?.referred || 0
-        : this.pieChart.referred || 0;
+    filteredChartSeries() {
+        if (!this.selectedReason || this.selectedReason === "") {
+            // ✅ Default state: Show total referred and not referred
+            return [
+                {
+                    name: "Patients",
+                    data: [
+                        this.pieChart.referred || 0, // Ensure "Referred" is shown
+                        this.pieChart.notReferred || 0 // Ensure "Not Referred" is shown
+                    ]
+                }
+            ];
+        }
 
-      const notReferred = this.selectedReason
-        ? this.pieChart.reasons[this.selectedReason]?.notReferred || 0
-        : this.pieChart.notReferred || 0;
+        // ✅ If a specific reason is selected, show data for that reason
+        const referred = this.pieChart.reasons[this.selectedReason]?.referred || 0;
+        const notReferred = this.pieChart.reasons[this.selectedReason]?.notReferred || this.pieChart.notReferred || 0;
 
-      return [
-        {
-          name: "Patients",
-          data: [referred, notReferred],
-        },
-      ];
-    },
-  },
-  methods: {
-    updateChart() {
-      // Trigger reactivity when the filter changes
-    },
-  },
+        return [
+            {
+                name: "Patients",
+                data: [referred, notReferred]
+            }
+        ];
+    }
+}
+
 };
 </script>
+
+
 
 <style scoped>
 .chart-container {
   max-width: 100%;
   margin: 20px auto;
   padding: 20px;
-  background: #f9fdf9; /* Slight green tint for the background */
-  border-radius: 12px; /* Rounded corners */
-  border: 1px solid #e5e5e5; /* Subtle border */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Light shadow */
+  background: #f9fdf9;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .chart-header {
@@ -141,13 +139,13 @@ export default {
 .chart-title {
   font-size: 24px;
   font-weight: bold;
-  color: #4CAF50; /* Green color for the title */
+  color: #4CAF50;
   margin: 0;
 }
 
 .chart-subtitle {
   font-size: 14px;
-  color: #666; /* Subtle gray for the subtitle */
+  color: #666;
   margin: 5px 0 0;
 }
 
@@ -184,12 +182,12 @@ select:focus {
 
 @media (max-width: 768px) {
   .patients-chart {
-    height: 250px;
+      height: 250px;
   }
 
   .filter-container {
-    flex-direction: column;
-    gap: 10px;
+      flex-direction: column;
+      gap: 10px;
   }
 }
 </style>

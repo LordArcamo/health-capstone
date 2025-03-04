@@ -11,7 +11,7 @@ use App\Models\ConsultationDetails;
 use App\Models\NationalImmunizationProgram;
 use App\Models\PrenatalConsultationDetails;
 use App\Models\VisitInformation;
-use App\Models\RiskManagement;
+// use App\Models\RiskManagement;
 use Illuminate\Support\Facades\DB;
 
 class SystemAnalyticsController extends Controller
@@ -19,57 +19,73 @@ class SystemAnalyticsController extends Controller
     public function index(Request $request)
     {
         $prenatal = PersonalInformation::join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
-            ->join('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
             ->leftJoin('general_trimester', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'general_trimester.prenatalConsultationDetailsID')
+            ->leftJoin('postpartum', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'postpartum.prenatalConsultationDetailsID')
             ->select(
                 'personal_information.personalId',
-                'personal_information.firstName',
-                'personal_information.lastName',
-                'personal_information.middleName',
-                'personal_information.purok',
-                'personal_information.barangay',
-                'personal_information.age',
-                'personal_information.birthdate',
-                'personal_information.contact',
                 'prenatal_consultation_details.prenatalConsultationDetailsID',
-                'prenatal_consultation_details.modeOfTransaction',
-                'prenatal_consultation_details.consultationDate',
-                'prenatal_consultation_details.consultationTime',
-                'prenatal_consultation_details.bloodPressure',
-                'prenatal_consultation_details.temperature',
-                'prenatal_consultation_details.height',
-                'prenatal_consultation_details.weight',
-                'prenatal_consultation_details.providerName',
-                'prenatal_consultation_details.nameOfSpouse',
-                'prenatal_consultation_details.emergencyContact',
-                'prenatal_consultation_details.fourMember',
-                'prenatal_consultation_details.philhealthStatus',
-                'prenatal_consultation_details.philhealthNo',
-                'prenatal_visit_information.menarche',
-                'prenatal_visit_information.sexualOnset',
-                'prenatal_visit_information.periodDuration',
-                'prenatal_visit_information.birthControl',
-                'prenatal_visit_information.intervalCycle',
-                'prenatal_visit_information.menopause',
-                'prenatal_visit_information.lmp',
-                'prenatal_visit_information.edc',
-                'prenatal_visit_information.gravidity',
-                'prenatal_visit_information.parity',
-                'prenatal_visit_information.term',
-                'prenatal_visit_information.preterm',
-                'prenatal_visit_information.abortion',
-                'prenatal_visit_information.living',
-                'prenatal_visit_information.syphilisResult',
-                'prenatal_visit_information.penicillin',
-                'prenatal_visit_information.hemoglobin',
-                'prenatal_visit_information.hematocrit',
-                'prenatal_visit_information.urinalysis',
-                'prenatal_visit_information.ttStatus',
-                'prenatal_visit_information.tdDate',
-                'general_trimester.trimester',
+                'personal_information.age',
+                DB::raw('
+                    CASE 
+                        WHEN postpartum.prenatalConsultationDetailsID IS NOT NULL THEN "postpartum"
+                        WHEN general_trimester.trimester IS NOT NULL AND general_trimester.trimester IN (1,2,3,4,5) 
+                            THEN CONCAT("trimester", general_trimester.trimester)
+                        ELSE "trimester_unknown"
+                    END as period_type
+                '),
+                DB::raw('COALESCE(
+                    postpartum.deliveryDate, 
+                    general_trimester.date_of_visit, 
+                    prenatal_consultation_details.consultationDate
+                ) as visit_date')
             )
-            ->distinct()
-        ->get();
+            ->where(function ($query) {
+                $query->whereNotNull('postpartum.prenatalConsultationDetailsID')
+                    ->orWhereNotNull('general_trimester.trimester');  // Ensure trimester is not null
+            })
+            ->when($request->input('selectedPeriod') && $request->input('selectedPeriod') !== 'all', function ($query) use ($request) {
+                if ($request->input('selectedPeriod') === 'postpartum') {
+                    $query->whereNotNull('postpartum.prenatalConsultationDetailsID');
+                } else {
+                    $trimester = intval(str_replace('trimester', '', $request->input('selectedPeriod')));
+                    $query->where('general_trimester.trimester', $trimester);
+                }
+            })
+            ->orderBy('visit_date', 'asc')
+            ->havingRaw('visit_date IS NOT NULL')
+            ->get();
+
+        // Debugging Output
+        \Log::info('Transformed prenatal records:', [
+            'total' => $prenatal->count(),
+            'postpartum' => $prenatal->where('period_type', 'postpartum')->count(),
+            'trimester_counts' => [
+                '1' => $prenatal->where('period_type', '1')->count(),
+                '2' => $prenatal->where('period_type', '2')->count(),
+                '3' => $prenatal->where('period_type', '3')->count(),
+                '4' => $prenatal->where('period_type', '4')->count(),
+                '5' => $prenatal->where('period_type', '5')->count(),
+            ],
+            'unique_period_types' => $prenatal->pluck('period_type')->unique()->values()->toArray()
+        ]);
+ 
+
+        // Ensure we have unique records based on personalId and visit_date
+        $prenatal = $prenatal->unique(function ($item) {
+            return $item->personalId . '_' . $item->visit_date;
+        })->values();
+
+        // Debug the data after transformation
+        \Log::info('Transformed prenatal records:', [
+            'total' => $prenatal->count(),
+            'postpartum' => $prenatal->where('period_type', 'postpartum')->count(),
+            'trimester_counts' => [
+                '1' => $prenatal->where('trimester', '1')->count(),
+                '2' => $prenatal->where('trimester', '2')->count(),
+                '3' => $prenatal->where('trimester', '3')->count(),
+            ],
+            'unique_trimester_values' => $prenatal->pluck('trimester')->unique()->values()->toArray()
+        ]);
 
         // Get vaccinated patients with their history
         $vaccinenatedPatients = PersonalInformation::with(['vaccinationRecords' => function($query) {
@@ -111,10 +127,13 @@ class SystemAnalyticsController extends Controller
         });
 
 
-        $monthly = ConsultationDetails::with(['personalInformation', 'visitInformation'])->get();
+        $monthly = ConsultationDetails::with(['personalInformation', 'visitInformation'])
+        ->whereHas('visitInformation') // Ensures only records with visitInformation are fetched
+        ->get();
+
 
         $totalPatients = $this->totalPatients($request);
-        $risk = $this->risk($request);
+        // $risk_management = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
         $cases = $this->cases($request);
 
@@ -127,11 +146,11 @@ class SystemAnalyticsController extends Controller
         return Inertia::render('Analytics', [
             'vaccinenatedPatients' => $vaccinenatedPatients,
             'totalPatients' => $totalPatients,
-            'risk' => $risk,
+            // 'risk' => $risk,
             'vaccinations' => $vaccinations,
             'cases' => $cases,
             'barChart' => $monthlyStats,
-            'pieChart' => $referredStats,
+            'pieChart' => $this->getReferredStats(),
             'lineChart' => [
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 'data' => $lineChart,
@@ -143,50 +162,85 @@ class SystemAnalyticsController extends Controller
         ]);
     }
 
+    public function getTotalPatientsData(Request $request)
+    {
+        $year = $request->input('year');
+        $gender = $request->input('gender');
+
+        $query = DB::table('personal_information')
+            ->select(
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('COUNT(*) as count')
+            );
+
+        if ($year) {
+            $query->whereYear('created_at', $year);
+        }
+
+        if ($gender) {
+            $query->where('sex', $gender);
+        }
+
+        $monthlyData = $query->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Initialize array with zeros for all months
+        $data = array_fill(0, 12, 0);
+
+        // Fill in actual counts
+        foreach ($monthlyData as $item) {
+            $data[$item->month - 1] = $item->count;
+        }
+
+        // Get available years
+        $years = DB::table('personal_information')
+            ->select(DB::raw('DISTINCT YEAR(created_at) as year'))
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        return response()->json([
+            'monthlyData' => $data,
+            'years' => $years,
+            'filters' => [
+                'selectedYear' => $year,
+                'selectedGender' => $gender
+            ]
+        ]);
+    }
+
     private function totalPatients($request)
     {
-        // Gender, Age, and Date Filters
+        // Apply filters using closures
         $applyFilters = function ($query) use ($request) {
-            // Filter by gender
+            if ($request->year) {
+                $query->whereYear('consultation_details.consultationDate', $request->year);
+            }
+    
             if ($request->gender) {
                 $query->where('personal_information.sex', $request->gender);
             }
-
-            // Filter by age range
-            if ($request->ageRange) {
-                $ages = explode('-', $request->ageRange);
-                if (count($ages) === 2) {
-                    $query->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthDate, CURDATE()) >= ?', [$ages[0]])
-                          ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthDate, CURDATE()) <= ?', [$ages[1]]);
-                } else {
-                    // Default to 60+ if age range is incorrect
-                    $query->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthDate, CURDATE()) >= ?', [60]);
-                }
-            }
         };
-
-        // Apply filters and join with PersonalInformation
+    
         $consultationCount = ConsultationDetails::join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-
+    
         $prenatalCount = PrenatalConsultationDetails::join('personal_information', 'prenatal_consultation_details.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-
+    
         $nipCount = NationalImmunizationProgram::join('personal_information', 'national_immunization_programs.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-
+    
         $vaccinationCount = VaccinationRecord::join('personal_information', 'vaccination_records.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-
-        // Sum up all the counts
-        $totalPatients = $consultationCount + $prenatalCount + $nipCount + $vaccinationCount;
-
-        return $totalPatients;
+    
+        return $consultationCount + $prenatalCount + $nipCount + $vaccinationCount;
     }
+    
 
 
     private function risk($request)
@@ -364,23 +418,14 @@ class SystemAnalyticsController extends Controller
 
             // Apply age range filter if provided
             if ($request->ageRange) {
-                $ages = explode('-', $request->ageRange);
-                if (count($ages) === 2) {
-                    $consultationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
-                                      ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
-                    $prenatalQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
-                                  ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
-                    $immunizationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
-                                      ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
-                    $vaccinationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]])
-                                      ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$ages[1]]);
-                } else {
-                    // If no valid age range is given, default to >= 60
-                    $consultationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
-                    $prenatalQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
-                    $immunizationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
-                    $vaccinationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [60]);
-                }
+                $consultationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$request->ageRange[0]])
+                                  ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$request->ageRange[1]]);
+                $prenatalQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$request->ageRange[0]])
+                              ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$request->ageRange[1]]);
+                $immunizationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$request->ageRange[0]])
+                                  ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$request->ageRange[1]]);
+                $vaccinationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$request->ageRange[0]])
+                                  ->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) <= ?', [$request->ageRange[1]]);
             }
 
             // Apply date filter if provided
@@ -420,60 +465,38 @@ class SystemAnalyticsController extends Controller
 
 
 
-    private function getReferredStats($request)
+    private function getReferredStats()
     {
-        $query = ConsultationDetails::query();
-
-        if ($request->gender) {
-            $query->whereHas('personalInformation', function($q) use ($request) {
-                $q->where('sex', $request->gender);
-            });
-        }
-
-        if ($request->date) {
-            $today = now();
-            switch ($request->date) {
-                case '7days':
-                    $query->where('consultationDate', '>=', now()->subDays(7))
-                          ->where('consultationDate', '<=', now());
-                    break;
-                case '30days':
-                    $query->where('consultationDate', '>=', now()->subDays(30))
-                          ->where('consultationDate', '<=', now());
-                    break;
-                case 'year':
-                    $query->whereYear('consultationDate', now()->year);
-                    break;
-            }
-        }
-
-        if ($request->ageRange) {
-            $query->whereHas('personalInformation', function($q) use ($request) {
-                $ages = explode('-', $request->ageRange);
-                if (count($ages) === 2) {
-                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
-                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
-                } else {
-                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
-                }
-            });
-        }
-
-        // Clone the query before adding the Referral condition
-        $baseQuery = clone $query;
-
-        // Get referred count
-        $referredCount = $query->where('modeOfTransaction', 'Referral')->count();
-
-        // Get total count from the base query
-        $totalCount = $baseQuery->count();
-
+        // Count total referred and not referred
+        $totalReferred = ConsultationDetails::where('modeOfTransaction', 'Referral')->count();
+        $totalNotReferred = ConsultationDetails::where('modeOfTransaction', '!=', 'Referral')->count();
+    
+        // Get breakdown of referrals by reason
+        $reasonsBreakdown = ConsultationDetails::select(
+            'reasonsForReferral', // Ensure correct column name
+            DB::raw('SUM(CASE WHEN modeOfTransaction = "Referral" THEN 1 ELSE 0 END) as referred'),
+            DB::raw('SUM(CASE WHEN modeOfTransaction != "Referral" THEN 1 ELSE 0 END) as notReferred')
+        )
+        ->groupBy('reasonsForReferral')
+        ->get()
+        ->mapWithKeys(function ($item) {
+            return [
+                $item->reasonsForReferral => [
+                    'referred' => $item->referred ?? 0, 
+                    'notReferred' => $item->notReferred ?? 0 
+                ]
+            ];
+        })
+        ->toArray();
+    
+        // Ensure the structure always includes total counts
         return [
-            'referred' => $referredCount,
-            'notReferred' => $totalCount - $referredCount
+            'referred' => $totalReferred ?? 0,
+            'notReferred' => $totalNotReferred ?? 0,
+            'reasons' => $reasonsBreakdown
         ];
-    }
-
+    }    
+    
     private function getVaccinationStatistics($request)
     {
         $monthlyVaccinations = [];
@@ -525,42 +548,49 @@ class SystemAnalyticsController extends Controller
 
     private function getCasesStatistics($request)
     {
-        $monthlyStats = [];
+        $monthlyStats = array_fill(0, 12, 0); // Initialize all months to zero
         $currentYear = date('Y');
 
-        for ($month = 1; $month <= 12; $month++) {
-            $query = VisitInformation::with(['consultationDetails.personalInformation'])
-                ->whereHas('consultationDetails', function($q) use ($currentYear, $month) {
-                    $q->whereYear('consultationDate', $currentYear)
-                      ->whereMonth('consultationDate', $month);
-                })
-                ->whereNotNull('diagnosis');
+        // Fetch only records where `visit_information` exists and join necessary tables
+        $cases = VisitInformation::join('consultation_details', 'visit_information.consultationDetailsID', '=', 'consultation_details.consultationDetailsID')
+            ->join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
+            ->whereYear('consultation_details.consultationDate', $currentYear)
+            ->select(
+                'visit_information.diagnosis',
+                'consultation_details.consultationDate',
+                'personal_information.sex',
+                DB::raw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) as age')
+            );
 
-            // Get all cases for this month with their related data
-            $cases = $query->get();
+        // ✅ Apply Filters
+        if ($request->gender) {
+            $cases->where('personal_information.sex', $request->gender);
+        }
 
-            // Map the data to include only what we need
-            $monthlyStats[] = $cases->map(function($visit) {
-                if (!$visit->consultationDetails || !$visit->consultationDetails->personalInformation) {
-                    return null;
-                }
+        if ($request->ageRange) {
+            $ages = explode('-', $request->ageRange);
+            if (count($ages) === 2) {
+                $cases->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) BETWEEN ? AND ?', [$ages[0], $ages[1]]);
+            } else {
+                $cases->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) >= ?', [$ages[0]]);
+            }
+        }
 
-                return [
-                    'diagnosis' => $visit->diagnosis,
-                    'personalInformation' => [
-                        'sex' => $visit->consultationDetails->personalInformation->sex,
-                        'birthdate' => $visit->consultationDetails->personalInformation->birthdate,
-                    ]
-                ];
-            })->filter()->values()->all();
+        // Fetch Only Valid Data
+        $cases = $cases->get();
+
+        // ✅ Group by Month
+        foreach ($cases as $case) {
+            $monthIndex = date('n', strtotime($case->consultationDate)) - 1;
+            $monthlyStats[$monthIndex]++;
         }
 
         return [
-            'cases' => $monthlyStats
+            'cases' => array_values($monthlyStats),
         ];
     }
 
-
+    
 
     private function getMentalHealthStatistics()
     {

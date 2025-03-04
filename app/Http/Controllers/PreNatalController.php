@@ -50,7 +50,7 @@ class PreNatalController extends Controller
             DB::raw("
                 CASE
                     WHEN prenatal_consultation_details.status = 'Cancelled' THEN 'Cancelled'
-                    WHEN prenatal_visit_information.prenatalConsultationDetailsID IS NULL THEN 'Pending'
+                    WHEN prenatal_visit_information.prenatalConsultationDetailsID IS NULL THEN 'In Queue'
                     ELSE 'Completed'
                 END AS status
             "),

@@ -18,7 +18,6 @@ return new class extends Migration
                 $table->unsignedBigInteger('id');
                 $table->string('chiefComplaints', 255);
                 $table->string('diagnosis', 255);
-                $table->string('medication', 255);
 
                 // New attributes
                 $table->string('requireLabTest', 3)->default('No');  // Indicates if a lab test is required

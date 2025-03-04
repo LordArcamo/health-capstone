@@ -150,11 +150,11 @@
   <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
     <thead>
       <tr class="bg-gradient-to-r from-green-500 to-yellow-500 text-white uppercase text-sm font-bold">
-        <th class="py-4 px-6 text-left border-b border-indigo-200">Patient ID</th>
         <th class="py-4 px-6 text-left border-b border-indigo-200">Full Name</th>
         <th class="py-4 px-6 text-left border-b border-indigo-200">Address</th>
         <th class="py-4 px-6 text-left border-b border-indigo-200">Age</th>
         <th class="py-4 px-6 text-left border-b border-indigo-200">Gender</th>
+        <th class="py-4 px-6 text-left border-b border-indigo-200">Type of Visit</th>
       </tr>
     </thead>
     <tbody class="text-gray-600 text-sm">
@@ -164,11 +164,11 @@
         class="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
         @click="openModal(patient)"
       >
-        <td class="py-3 px-6">{{ patient.personalId }}</td>
         <td class="py-3 px-6">{{ patient.fullName }}</td>
         <td class="py-3 px-6">{{ patient.address }}</td>
         <td class="py-3 px-6">{{ patient.age }}</td>
         <td class="py-3 px-6">{{ patient.sex }}</td>
+        <td class="py-3 px-6">{{ patient.visitType }}</td>
       </tr>
     </tbody>
   </table>

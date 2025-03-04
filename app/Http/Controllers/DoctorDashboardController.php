@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
 use App\Models\NationalImmunizationProgram;
 use App\Models\PrenatalConsultationDetails;
 use App\Models\VaccinationRecord;
+use App\Models\VisitInformation;
 
 class DoctorDashboardController extends Controller
 {
@@ -22,12 +24,29 @@ class DoctorDashboardController extends Controller
     {
         $today = now()->toDateString();
 
+        // Auto-cancel consultations that were not completed from previous days
+        DB::table('consultation_details')
+            ->whereDate('consultationDate', '<', $today)
+            ->where(function ($query) {
+                $query->where('status', 'in queue')
+                    ->orWhereNull('status');
+            })
+            ->update(['status' => 'cancelled', 'updated_at' => now()]);
+
+        DB::table('prenatal_consultation_details')
+            ->whereDate('consultationDate', '<', $today)
+            ->where(function ($query) {
+                $query->where('status', 'in queue')
+                    ->orWhereNull('status');
+            })
+            ->update(['status' => 'cancelled', 'updated_at' => now()]);
+
         // Fetch patients in queue (not completed)
         $generalConsultations = DB::table('personal_information')
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->whereDate('consultation_details.consultationDate', $today)
             ->where(function($query) {
-                $query->where('consultation_details.status', 'pending')
+                $query->where('consultation_details.status', 'in queue')
                       ->orWhereNull('consultation_details.status');
             })
             ->select(
@@ -67,7 +86,7 @@ class DoctorDashboardController extends Controller
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
             ->whereDate('prenatal_consultation_details.consultationDate', $today)
             ->where(function($query) {
-                $query->where('prenatal_consultation_details.status', 'pending')
+                $query->where('prenatal_consultation_details.status', 'in queue')
                       ->orWhereNull('prenatal_consultation_details.status');
             })
             ->select(
@@ -165,7 +184,6 @@ class DoctorDashboardController extends Controller
                 'consultation_details.providerName',
                 'visit_information.chiefComplaints',
                 'visit_information.diagnosis',
-                'visit_information.medication',
                 DB::raw('NULL as nameOfSpouse'), // Add NULL for prenatal-specific fields
                 DB::raw('NULL as emergencyContact'),
                 DB::raw('NULL as fourMember'),
@@ -236,7 +254,6 @@ class DoctorDashboardController extends Controller
                 'prenatal_consultation_details.providerName',
                 DB::raw('NULL as chiefComplaints'), // Add NULL for general-specific fields
                 DB::raw('NULL as diagnosis'),
-                DB::raw('NULL as medication'),
                 'prenatal_consultation_details.nameOfSpouse',
                 'prenatal_consultation_details.emergencyContact',
                 'prenatal_consultation_details.fourMember',
@@ -293,8 +310,12 @@ class DoctorDashboardController extends Controller
         ->count();
 
         // Get today's appointments count
-        $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)->count() +
-                      PrenatalConsultationDetails::whereDate('consultationDate', $today)->count();
+        $todaysConsultation = ConsultationDetails::whereDate('consultationDate', $today)
+            ->whereIn('status', ['completed', 'cancelled']) // Filter by status
+            ->count() +
+        PrenatalConsultationDetails::whereDate('consultationDate', $today)
+            ->whereIn('status', ['completed', 'cancelled']) // Filter by status
+            ->count();
 
 
         // Get critical cases count (you may need to adjust this based on your criteria)
@@ -346,17 +367,106 @@ class DoctorDashboardController extends Controller
                     ->merge($immunizationDates)
                     ->merge($vaccinationDates);
 
+                $genders = PersonalInformation::select('sex', DB::raw('count(*) as total'))
+                    ->groupBy('sex')
+                    ->pluck('total', 'sex');
 
-        return Inertia::render('Doctor/DoctorDashboard', [
-            'allDates' => $allDates,
-            'totalPatients' => $totalPatients,
-            'ITRConsultation' => $ITRConsultation,
-            'latestPatients' => $latestPatients,
-            'todaysConsultation' => $todaysConsultation,
-            'criticalCases' => $criticalCases,
-            'notifications' => $notifications,
-        ]);
-    }
+                // Ensure the response contains counts for both Male and Female
+                $maleCount = $genders['Male'] ?? 0;
+                $femaleCount = $genders['Female'] ?? 0;
+
+                $ITRConsultations = ConsultationDetails::select(
+                    DB::raw("MONTH(consultationDate) as month"), 
+                    DB::raw("COUNT(*) as count")
+                )
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('count', 'month');
+            
+                // Get prenatal consultations per month
+                $PREConsultations = PrenatalConsultationDetails::select(
+                    DB::raw("MONTH(consultationDate) as month"), 
+                    DB::raw("COUNT(*) as count")
+                )
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('count', 'month');
+            
+                // Convert results to an array with default values
+                $generalData = array_fill(1, 12, 0);
+                $prenatalData = array_fill(1, 12, 0);
+            
+                foreach ($ITRConsultations as $month => $count) {
+                    $generalData[$month] = $count;
+                }
+            
+                foreach ($PREConsultations as $month => $count) {
+                    $prenatalData[$month] = $count;
+                }
+
+                $monthlyTopDiagnoses = VisitInformation::selectRaw('MONTH(consultation_details.consultationDate) as month, diagnosis, COUNT(*) as count')
+                    ->join('consultation_details', 'visit_information.consultationDetailsID', '=', 'consultation_details.consultationDetailsID')
+                    ->whereBetween('consultation_details.consultationDate', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])
+                    ->groupBy('month', 'diagnosis')
+                    ->orderBy('month')
+                    ->orderByDesc('count')
+                    ->get();
+
+                $formattedData = [];
+                $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                $colors = ['#FF5252', '#FF9800', '#FFD700'];
+
+                $datasets = [
+                    ['data' => array_fill(0, 12, 0), 'backgroundColor' => $colors[0], 'borderColor' => $colors[0], 'borderWidth' => 1, 'diagnosis' => []],
+                    ['data' => array_fill(0, 12, 0), 'backgroundColor' => $colors[1], 'borderColor' => $colors[1], 'borderWidth' => 1, 'diagnosis' => []],
+                    ['data' => array_fill(0, 12, 0), 'backgroundColor' => $colors[2], 'borderColor' => $colors[2], 'borderWidth' => 1, 'diagnosis' => []]
+                ];
+
+                foreach ($monthlyTopDiagnoses as $diagnosisData) {
+                    $monthIndex = $diagnosisData->month - 1;
+                    $formattedData[$monthIndex][] = [
+                        'diagnosis' => ucfirst($diagnosisData->diagnosis),
+                        'count' => $diagnosisData->count
+                    ];
+                }
+
+                foreach ($formattedData as $month => $cases) {
+                    usort($cases, fn($a, $b) => $b['count'] <=> $a['count']);
+                    $topCases = array_slice($cases, 0, 3);
+
+                    while (count($topCases) < 3) {
+                        $topCases[] = ['diagnosis' => 'N/A', 'count' => 0];
+                    }
+
+                    foreach ($topCases as $rank => $case) {
+                        $datasets[$rank]['data'][$month] = $case['count'];
+                        $datasets[$rank]['diagnosis'][$month] = $case['diagnosis'];
+                    }
+                }
+
+                // Convert diagnosis array to JSON
+                foreach ($datasets as &$dataset) {
+                    $dataset['diagnosis'] = array_map(fn($label) => $label ?? 'N/A', $dataset['diagnosis']);
+                }
+
+            return Inertia::render('Doctor/DoctorDashboard', [
+                'allDates' => $allDates,
+                'totalPatients' => $totalPatients,
+                'ITRConsultation' => $ITRConsultation,
+                'latestPatients' => $latestPatients,
+                'todaysConsultation' => $todaysConsultation,
+                'criticalCases' => $criticalCases,
+                'notifications' => $notifications,
+                'maleCount' => $maleCount,
+                'femaleCount' => $femaleCount,
+                'generalConsultations' => array_values($generalData),
+                'prenatalConsultations' => array_values($prenatalData),
+                'chartData' => [
+                    'labels' => $labels,
+                    'datasets' => array_values($datasets)
+                ]
+            ]);
+        }
 
     /**
      * Display a tailored doctor dashboard with user data.
@@ -416,7 +526,7 @@ class DoctorDashboardController extends Controller
                         ->update([
                             'chiefComplaints' => 'None',
                             'diagnosis' => 'None',
-                            'medication' => 'None',
+
                             'updated_at' => now()
                         ]);
                 } else {
@@ -426,7 +536,6 @@ class DoctorDashboardController extends Controller
                         'id' => auth()->id(),
                         'chiefComplaints' => 'None',
                         'diagnosis' => 'None',
-                        'medication' => 'None',
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
@@ -510,5 +619,162 @@ class DoctorDashboardController extends Controller
             DB::rollback();
             return redirect()->back()->with('error', 'Failed to cancel consultation. Please try again. Error: ' . $e->getMessage());
         }
+    }
+
+    public function getConsultation()
+    {
+        $today = now()->toDateString();
+
+        $latestGeneralPatients = DB::table('personal_information')
+        ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+        ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+        ->where(function ($query) use ($today) {
+            $query->whereIn('consultation_details.status', ['completed', 'cancelled'])
+                  ->whereDate('consultation_details.consultationDate', $today);
+        })
+        ->select(
+            'personal_information.personalId',
+            'consultation_details.consultationDetailsID',
+            DB::raw('NULL as prenatalConsultationDetailsID'), // Add NULL for prenatal-specific ID
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.suffix',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.contact',
+            'personal_information.sex',
+            DB::raw("'General' as visitType"), // Set "General" as visit type
+            'consultation_details.modeOfTransaction',
+            'consultation_details.consultationDate',
+            'consultation_details.consultationTime',
+            'consultation_details.bloodPressure',
+            'consultation_details.temperature',
+            'consultation_details.height',
+            'consultation_details.weight',
+            'consultation_details.referredFrom',
+            'consultation_details.referredTo',
+            'consultation_details.reasonsForReferral',
+            'consultation_details.referredBy',
+            'consultation_details.natureOfVisit',
+            'consultation_details.visitType as specificVisitType', // Preserve specific visit type
+            'consultation_details.providerName',
+            'visit_information.chiefComplaints',
+            'visit_information.diagnosis',
+            DB::raw('NULL as nameOfSpouse'), // Add NULL for prenatal-specific fields
+            DB::raw('NULL as emergencyContact'),
+            DB::raw('NULL as fourMember'),
+            DB::raw('NULL as philhealthStatus'),
+            DB::raw('NULL as philhealthNo'),
+            DB::raw('NULL as menarche'),
+            DB::raw('NULL as sexualOnset'),
+            DB::raw('NULL as periodDuration'),
+            DB::raw('NULL as birthControl'),
+            DB::raw('NULL as intervalCycle'),
+            DB::raw('NULL as menopause'),
+            DB::raw('NULL as lmp'),
+            DB::raw('NULL as edc'),
+            DB::raw('NULL as gravidity'),
+            DB::raw('NULL as parity'),
+            DB::raw('NULL as term'),
+            DB::raw('NULL as preterm'),
+            DB::raw('NULL as abortion'),
+            DB::raw('NULL as living'),
+            DB::raw('NULL as syphilisResult'),
+            DB::raw('NULL as penicillin'),
+            DB::raw('NULL as hemoglobin'),
+            DB::raw('NULL as hematocrit'),
+            DB::raw('NULL as urinalysis'),
+            DB::raw('NULL as ttStatus'),
+            DB::raw('NULL as tdDate'),
+            'consultation_details.completed_at',
+            'consultation_details.updated_at'
+        )
+        ->orderBy('consultation_details.completed_at', 'desc')
+        ->orderBy('consultation_details.updated_at', 'desc');
+
+    // Get latest completed prenatal patients
+    $latestPrenatalPatients = DB::table('personal_information')
+        ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+        ->leftJoin('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
+        ->where(function ($query) use ($today) {
+            $query->whereIn('prenatal_consultation_details.status', ['completed', 'cancelled'])
+                  ->whereDate('prenatal_consultation_details.consultationDate', $today);
+        })
+        ->select(
+            'personal_information.personalId',
+            DB::raw('NULL as consultationDetailsID'), // Add NULL for general-specific ID
+            'prenatal_consultation_details.prenatalConsultationDetailsID',
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.suffix',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.contact',
+            'personal_information.sex',
+            DB::raw("'Prenatal' as visitType"), // Set "Prenatal" as visit type
+            'prenatal_consultation_details.modeOfTransaction',
+            'prenatal_consultation_details.consultationDate',
+            'prenatal_consultation_details.consultationTime',
+            'prenatal_consultation_details.bloodPressure',
+            'prenatal_consultation_details.temperature',
+            'prenatal_consultation_details.height',
+            'prenatal_consultation_details.weight',
+            DB::raw('NULL as referredFrom'), // Add NULL for general-specific fields
+            DB::raw('NULL as referredTo'),
+            DB::raw('NULL as reasonsForReferral'),
+            DB::raw('NULL as referredBy'),
+            DB::raw('NULL as natureOfVisit'),
+            DB::raw('NULL as specificVisitType'),
+            'prenatal_consultation_details.providerName',
+            DB::raw('NULL as chiefComplaints'), // Add NULL for general-specific fields
+            DB::raw('NULL as diagnosis'),
+            'prenatal_consultation_details.nameOfSpouse',
+            'prenatal_consultation_details.emergencyContact',
+            'prenatal_consultation_details.fourMember',
+            'prenatal_consultation_details.philhealthStatus',
+            'prenatal_consultation_details.philhealthNo',
+            'prenatal_visit_information.menarche',
+            'prenatal_visit_information.sexualOnset',
+            'prenatal_visit_information.periodDuration',
+            'prenatal_visit_information.birthControl',
+            'prenatal_visit_information.intervalCycle',
+            'prenatal_visit_information.menopause',
+            'prenatal_visit_information.lmp',
+            'prenatal_visit_information.edc',
+            'prenatal_visit_information.gravidity',
+            'prenatal_visit_information.parity',
+            'prenatal_visit_information.term',
+            'prenatal_visit_information.preterm',
+            'prenatal_visit_information.abortion',
+            'prenatal_visit_information.living',
+            'prenatal_visit_information.syphilisResult',
+            'prenatal_visit_information.penicillin',
+            'prenatal_visit_information.hemoglobin',
+            'prenatal_visit_information.hematocrit',
+            'prenatal_visit_information.urinalysis',
+            'prenatal_visit_information.ttStatus',
+            'prenatal_visit_information.tdDate',
+            'prenatal_consultation_details.completed_at',
+            'prenatal_consultation_details.updated_at'
+        )
+        ->orderBy('prenatal_consultation_details.completed_at', 'desc')
+        ->orderBy('prenatal_consultation_details.updated_at', 'desc');
+
+    // Combine and get latest 5 patients
+    $latestConsultation = $latestGeneralPatients->unionAll($latestPrenatalPatients) // Use UNION ALL to avoid column conflicts
+        ->orderBy('completed_at', 'desc')
+        ->orderBy('updated_at', 'desc')
+        ->take(5)
+        ->get();
+
+        return Inertia::render('Table/Consultation', [
+            'latestConsultation' => $latestConsultation,
+        ]);
     }
 }

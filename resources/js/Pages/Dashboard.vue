@@ -71,18 +71,20 @@ watch(() => props.casesData, (newCasesData) => {
   <div class="mb-4 md:mb-0">
     <h1 class="text-2xl font-bold">Initao RHU Dashboard</h1>
     <p class="text-sm">Welcome to the Rural Health Unit of Initao, empowering community health with data-driven insights.</p>
+    <h2 class="text-xl font-bold">Welcome, {{ auth.user.name }}</h2>
   </div>
 
   <!-- Right Section: User Info -->
   <div class="flex flex-col items-start md:items-end">
-    <h2 class="text-xl font-bold">Welcome, {{ auth.user.name }}</h2>
+    <DateCard class="z-100" :patients="patients" @updateStats="updateStats" />
+    <!-- <h2 class="text-xl font-bold">Welcome, {{ auth.user.name }}</h2> -->
   </div>
 </div>
 
 
       <!-- Stats Section -->
    <!-- Stats Section -->
-<div class="w-full gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+<div class="w-full gap-6 my-10 px-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3">
 
   <!-- Total Patients -->
   <ShortBox class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-md transition-shadow">
@@ -101,7 +103,7 @@ watch(() => props.casesData, (newCasesData) => {
   </ShortBox>
 
   <!-- Date Card -->
-  <DateCard class="z-30" :patients="patients" @updateStats="updateStats" />
+
 
   <!-- Referred Patients -->
   <ShortBox class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-md transition-shadow">

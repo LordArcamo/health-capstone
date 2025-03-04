@@ -201,12 +201,12 @@
             <td class="text-base py-3 px-6">
               <span :class="{
                 'bg-green-100 text-green-800': patient.status === 'Completed',
-                'bg-yellow-100 text-yellow-800': patient.status === 'Pending',
+                'bg-yellow-100 text-yellow-800': patient.status === 'In Queue',
                 'bg-red-100 text-red-800': patient.status === 'Cancelled',
                 'bg-orange-100 text-orange-800': patient.status === 'Follow-up Required',
                 'bg-gray-100 text-gray-800': !patient.status || !['Completed', 'in queued', 'Cancelled', 'Follow-up Required'].includes(patient.status)
               }" class="px-3 py-1 rounded-full text-sm font-semibold shadow-sm capitalize">
-                {{ patient.status || 'Pending' }}
+                {{ patient.status || 'In Queue' }}
               </span>
             </td>
 
@@ -258,7 +258,7 @@
           <h3 class="text-lg font-semibold text-gray-700">Patient Status:</h3>
           <span :class="statusBadgeClass(selectedPatient.status)"
             class="inline-block px-3 py-1 text-sm font-medium rounded-full">
-            {{ selectedPatient.status || 'Pending' }}
+            {{ selectedPatient.status || 'In Queue' }}
           </span>
         </div>
 
@@ -295,6 +295,27 @@
           </div>
         </div>
 
+        <!-- Prescription Details -->
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Prescription Details</h3>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div v-if="selectedPatient.medications" class="space-y-4">
+              <template v-for="(medication, index) in selectedPatient.medications.split(';;')" :key="index">
+                <div v-if="medication" class="p-3 bg-white rounded-md shadow-sm">
+                  <ul class="space-y-2">
+                    <li><strong>Medication:</strong> {{ medication || 'N/A' }}</li>
+                    <li><strong>Dosage:</strong> {{ selectedPatient.dosages?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Frequency:</strong> {{ selectedPatient.frequencies?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Duration:</strong> {{ selectedPatient.durations?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Notes:</strong> {{ selectedPatient.prescription_notes?.split(';;')[index] || 'N/A' }}</li>
+                  </ul>
+                </div>
+              </template>
+            </div>
+            <div v-else class="text-gray-500 italic">No prescriptions available</div>
+          </div>
+        </div>
+
         <!-- Additional Details -->
         <div class="mt-8">
           <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
@@ -304,7 +325,6 @@
             <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
             <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
             <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
-            <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
           </ul>
         </div>
 
@@ -534,7 +554,7 @@ export default {
         this.formatDate(patient.consultationDate),
         patient.diagnosis,
         patient.sex,
-        patient.status || "Pending"
+        patient.status || "In Queue"
       ]);
 
       // Generate the Table

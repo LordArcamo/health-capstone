@@ -16,6 +16,11 @@ const props = defineProps({
   todaysConsultation: Number,
   notifications: Array,
   allDates: Array,
+  maleCount: Number,
+  femaleCount: Number,
+  generalConsultations: Array,
+  prenatalConsultations: Array,
+  chartData: Object
 });
 
 // Reactive states
@@ -57,6 +62,7 @@ const formattedDates = props.allDates.map(item => {
 });
 
 console.log(formattedDates);
+
 
 
 // Function to format date
@@ -221,6 +227,71 @@ const markAsCancelled = (patient) => {
   });
 };
 
+onMounted(() => {
+    console.log("Chart Data:", props.chartData);
+
+    if (!props.chartData || !props.chartData.datasets) {
+        console.error("Chart data is missing or incorrectly formatted!");
+        return;
+    }
+
+    const ctx = document.getElementById('criticalCasesBarChart')?.getContext('2d');
+    if (!ctx) {
+        console.error("Canvas not found for chart!");
+        return;
+    }
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: props.chartData.labels,
+            datasets: props.chartData.datasets, 
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false, 
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let dataset = context.dataset;
+                            let monthIndex = context.dataIndex;
+                            let diagnosisName = dataset.diagnosis[monthIndex] || 'N/A'; 
+                            let count = context.raw; 
+
+                            return `${diagnosisName}: ${count}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                    barPercentage: 1.3, 
+                    categoryPercentage: 1.0, 
+                },
+                y: {
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1,
+                        precision: 1.0,
+                    },
+                },
+            },
+            elements: {
+                bar: {
+                    barThickness: 50, 
+                    maxBarThickness: 80, 
+                },
+            },
+        },
+    });
+});
+
 // Dynamic date
 const currentDate = ref('');
 const updateDate = () => {
@@ -235,11 +306,11 @@ const initCharts = () => {
   new Chart(demographicsCtx, {
     type: 'bar',
     data: {
-      labels: ['Male', 'Female', 'Other'],
+      labels: ['Male', 'Female'],
       datasets: [
         {
           label: 'Number of Patients',
-          data: [50, 70, 10], // Replace with actual data
+          data: [props.maleCount, props.femaleCount],
           backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726'],
         },
       ],
@@ -272,14 +343,21 @@ const initCharts = () => {
   new Chart(appointmentsCtx, {
     type: 'line',
     data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      , // Replace with actual months
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 
       datasets: [
         {
-          label: 'Appointments',
-          data: [30, 50, 70, 60, 90], // Replace with actual data
+          label: 'General Consultations',
+          data: props.generalConsultations, // Replace with actual data
           borderColor: '#42A5F5',
           backgroundColor: 'rgba(66, 165, 245, 0.2)',
+          borderWidth: 2,
+          tension: 0.3, // Smooth curve
+        },
+        {
+          label: 'Prenatal Consultations', // New line graph
+          data: props.prenatalConsultations, // Replace with actual data
+          borderColor: '#FF5252', // Different color for distinction
+          backgroundColor: 'rgba(255, 82, 82, 0.2)',
           borderWidth: 2,
           tension: 0.3, // Smooth curve
         },
@@ -302,69 +380,72 @@ const initCharts = () => {
         y: {
           ticks: {
             beginAtZero: true,
+            stepSize: 1,
+            precision: 1.0
           },
         },
       },
     },
   });
 
-  // Critical Cases (Line Chart)
-  const criticalCasesCtx = document.getElementById('criticalCasesLineChart').getContext('2d');
-  new Chart(criticalCasesCtx, {
-    type: 'line',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      , // Replace with actual months or dates
-      datasets: [
-        {
-          label: 'Heart Attack',
-          data: [5, 10, 8, 12, 15], // Replace with actual data for Heart Attack cases
-          borderColor: '#FF5252', // Red color
-          backgroundColor: 'rgba(255, 82, 82, 0.2)',
-          borderWidth: 2,
-          tension: 0.3, // Smooth curve
-        },
-        {
-          label: 'Stroke',
-          data: [3, 5, 7, 6, 9], // Replace with actual data for Stroke cases
-          borderColor: '#FF9800', // Orange color
-          backgroundColor: 'rgba(255, 152, 0, 0.2)',
-          borderWidth: 2,
-          tension: 0.3, // Smooth curve
-        },
-        {
-          label: 'Diabetes',
-          data: [2, 4, 5, 3, 7], // Replace with actual data for Diabetes cases
-          borderColor: '#4CAF50', // Green color
-          backgroundColor: 'rgba(76, 175, 80, 0.2)',
-          borderWidth: 2,
-          tension: 0.3, // Smooth curve
-        },
-        // You can add more datasets for other critical cases as needed
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-        },
-      },
-      scales: {
-        x: {
-          grid: {
-            display: false,
-          },
-        },
-        y: {
-          ticks: {
-            beginAtZero: true,
-          },
-        },
-      },
-    },
-  });
+
+  // // Critical Cases (Line Chart)
+  // const criticalCasesCtx = document.getElementById('criticalCasesLineChart').getContext('2d');
+  // new Chart(criticalCasesCtx, {
+  //   type: 'line',
+  //   data: {
+  //     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  //     , // Replace with actual months or dates
+  //     datasets: [
+  //       {
+  //         label: 'Heart Attack',
+  //         data: [5, 10, 8, 12, 15], // Replace with actual data for Heart Attack cases
+  //         borderColor: '#FF5252', // Red color
+  //         backgroundColor: 'rgba(255, 82, 82, 0.2)',
+  //         borderWidth: 2,
+  //         tension: 0.3, // Smooth curve
+  //       },
+  //       {
+  //         label: 'Stroke',
+  //         data: [3, 5, 7, 6, 9], // Replace with actual data for Stroke cases
+  //         borderColor: '#FF9800', // Orange color
+  //         backgroundColor: 'rgba(255, 152, 0, 0.2)',
+  //         borderWidth: 2,
+  //         tension: 0.3, // Smooth curve
+  //       },
+  //       {
+  //         label: 'Diabetes',
+  //         data: [2, 4, 5, 3, 7], // Replace with actual data for Diabetes cases
+  //         borderColor: '#FFD700', // Green color
+  //         backgroundColor: 'rgba(76, 175, 80, 0.2)',
+  //         borderWidth: 2,
+  //         tension: 0.3, // Smooth curve
+  //       },
+  //       // You can add more datasets for other critical cases as needed
+  //     ],
+  //   },
+  //   options: {
+  //     responsive: true,
+  //     plugins: {
+  //       legend: {
+  //         display: true,
+  //         position: 'top',
+  //       },
+  //     },
+  //     scales: {
+  //       x: {
+  //         grid: {
+  //           display: false,
+  //         },
+  //       },
+  //       y: {
+  //         ticks: {
+  //           beginAtZero: true,
+  //         },
+  //       },
+  //     },
+  //   },
+  // });
 
   //New Patients (Bar Chart)
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -503,7 +584,7 @@ onMounted(() => {
       </div>
 
       <!-- Stats Section -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-10 px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-10 px-8">
         <!-- Total Patients -->
         <div
           class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-lg p-6 rounded-xl shadow-md">
@@ -522,29 +603,25 @@ onMounted(() => {
           </div>
         </div>
 
-        <div
+        <!-- <div
           class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <div class="flex flex-col items-start gap-4">
             <div class="flex justify-between w-full">
               <h2 class="font-semibold text-lg">Patients in Queue</h2>
-              <Link href="/services/queue" class="bg-yellow-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
-                aria-label="View all patients in queue">
-              View
-              </Link>
             </div>
             <div class="flex items-center">
               <font-awesome-icon :icon="['fas', 'users']" class="mr-2 text-2xl text-yellow-600" />
               <p class="text-3xl font-bold">{{ ITRConsultation.length }}</p>
             </div>
           </div>
-        </div>
+        </div> -->
 
 
         <div class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <div class="flex flex-col items-start gap-4">
             <div class="flex justify-between w-full">
               <h2 class="font-semibold text-lg">Today's Consultation</h2>
-              <Link href="/services/appointments"
+              <Link href="/services/consultation"
                 class="bg-blue-500 text-white rounded px-4 py-2 shadow hover:opacity-90"
                 aria-label="View today's consultations">
               View
@@ -771,7 +848,7 @@ onMounted(() => {
           <!-- Critical Cases Line Chart -->
           <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800">Critical Cases Overview</h2>
-            <canvas id="criticalCasesLineChart"></canvas>
+            <canvas id="criticalCasesBarChart"></canvas>
           </div>
 
           <div class="bg-white rounded-xl shadow-lg p-6">

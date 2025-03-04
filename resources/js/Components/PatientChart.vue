@@ -1,7 +1,7 @@
 <template>
   <div class="oten">
     <h2 class="text-xl font-semibold text-gray-700 mb-6">
-      Monthly Trending Cases by Diagnosis
+      Monthly Trending Cases by Diagnosis ({{ new Date().getFullYear() }})
     </h2>
 
     <!-- Chart -->
@@ -41,20 +41,23 @@ export default defineComponent({
 
     const trendingCases = computed(() => {
       const data = props.nonReferredData;
+      const currentYear = new Date().getFullYear();
       const monthlyTrending = Array(12).fill(null);
 
-      data.forEach((item) => {
-        const monthIndex = item.month - 1;
-        if (
-          !monthlyTrending[monthIndex] ||
-          monthlyTrending[monthIndex].case_count < item.case_count
-        ) {
-          monthlyTrending[monthIndex] = {
-            diagnosis: item.diagnosis,
-            case_count: item.case_count,
-          };
-        }
-      });
+      // Filter data for current year and process monthly trends
+      data.filter(item => item.year === currentYear)
+          .forEach((item) => {
+            const monthIndex = item.month - 1;
+            if (
+              !monthlyTrending[monthIndex] ||
+              monthlyTrending[monthIndex].case_count < item.case_count
+            ) {
+              monthlyTrending[monthIndex] = {
+                diagnosis: item.diagnosis,
+                case_count: item.case_count,
+              };
+            }
+          });
 
       return monthlyTrending.map((entry, index) => ({
         month: months[index],
@@ -77,6 +80,7 @@ export default defineComponent({
               show: false,
             },
           },
+
           plotOptions: {
             bar: {
               horizontal: false,

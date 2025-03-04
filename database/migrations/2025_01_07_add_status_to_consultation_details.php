@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('consultation_details', function (Blueprint $table) {
-            $table->string('status')->default('pending');
+            $table->string('status')->default('in queue');
             $table->timestamp('completed_at')->nullable();
         });
 
         Schema::table('prenatal_consultation_details', function (Blueprint $table) {
-            $table->string('status')->default('pending');
+            $table->string('status')->default('in queue');
             $table->timestamp('completed_at')->nullable();
         });
     }

@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
 use App\Models\VisitInformation;
+use App\Models\Prescription;
 
 class DoctorCheckupController extends Controller
 {
@@ -24,7 +25,7 @@ class DoctorCheckupController extends Controller
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->whereDate('consultation_details.consultationDate', $today) // Filter for today's date
             ->where(function($query) {
-                $query->where('consultation_details.status', 'pending')
+                $query->where('consultation_details.status', 'in queue')
                       ->orWhereNull('consultation_details.status');
             })
             ->select(
@@ -64,7 +65,7 @@ class DoctorCheckupController extends Controller
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
             ->whereDate('prenatal_consultation_details.consultationDate', $today) // Filter for today's date
             ->where(function($query) {
-                $query->where('prenatal_consultation_details.status', 'pending')
+                $query->where('prenatal_consultation_details.status', 'in queue')
                       ->orWhereNull('prenatal_consultation_details.status');
             })
             ->select(
@@ -178,15 +179,28 @@ class DoctorCheckupController extends Controller
             // Set diagnosis and medication to 'None' if requireLabTest is 'Yes'
             if ($request->input('requireLabTest') === 'yes') {
                 $visitInfo->diagnosis = 'None';
-                $visitInfo->medication = 'None';
             } else {
                 $diagnosisData = $request->input('diagnosis', []);
                 $visitInfo->diagnosis = !empty($diagnosisData) ? implode(', ', (array) $diagnosisData) : 'None';
-                $visitInfo->medication = $request->input('medication') ?? 'None';
             }
 
             $visitInfo->id = auth()->id();
             $visitInfo->save();
+
+            // Handle prescriptions if provided and lab test is not required
+            if ($request->input('requireLabTest') !== 'yes' && $request->has('prescriptions')) {
+                $prescriptions = $request->input('prescriptions');
+                foreach ($prescriptions as $prescriptionData) {
+                    $prescription = new Prescription();
+                    $prescription->visitInformationID = $visitInfo->visitInformationID;
+                    $prescription->medication = $prescriptionData['medication'] ?? 'None';
+                    $prescription->dosage = $prescriptionData['dosage'] ?? 'None';
+                    $prescription->frequency = $prescriptionData['frequency'] ?? 'None';
+                    $prescription->duration = $prescriptionData['duration'] ?? 'None';
+                    $prescription->notes = $prescriptionData['notes'] ?? null;
+                    $prescription->save();
+                }
+            }
 
             // Update consultation status to completed
             if ($request->input('visitType') === 'Prenatal') {
