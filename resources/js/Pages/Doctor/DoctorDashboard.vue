@@ -584,7 +584,7 @@ onMounted(() => {
       </div>
 
       <!-- Stats Section -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-10 px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 my-10 px-8">
         <!-- Total Patients -->
         <div
           class="bg-gradient-to-br from-green-100 to-green-300 text-green-800 hover:shadow-lg p-6 rounded-xl shadow-md">
@@ -603,7 +603,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div
+        <!-- <div
           class="bg-gradient-to-br from-yellow-100 to-yellow-300 text-yellow-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <div class="flex flex-col items-start gap-4">
             <div class="flex justify-between w-full">
@@ -614,7 +614,7 @@ onMounted(() => {
               <p class="text-3xl font-bold">{{ ITRConsultation.length }}</p>
             </div>
           </div>
-        </div>
+        </div> -->
 
 
         <div class="bg-gradient-to-br from-blue-100 to-blue-300 text-blue-800 hover:shadow-lg p-6 rounded-xl shadow-md">
@@ -636,7 +636,7 @@ onMounted(() => {
 
 
         <!-- Critical Cases -->
-        <div class="bg-gradient-to-br from-red-100 to-red-300 text-red-800 hover:shadow-lg p-6 rounded-xl shadow-md">
+        <!-- <div class="bg-gradient-to-br from-red-100 to-red-300 text-red-800 hover:shadow-lg p-6 rounded-xl shadow-md">
           <div class="flex flex-col items-start gap-4">
             <div class="flex justify-between w-full">
               <h2 class="font-semibold text-lg">Critical Cases</h2>
@@ -650,7 +650,7 @@ onMounted(() => {
               <p class="text-3xl font-bold">{{ criticalCases }}</p>
             </div>
           </div>
-        </div>
+        </div> -->
 
       </div>
 

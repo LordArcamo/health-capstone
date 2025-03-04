@@ -277,10 +277,10 @@
             Close
           </button>
           <!-- Edit Button -->
-          <button @click="editPatient(selectedPatient)"
+          <!-- <button @click="editPatient(selectedPatient)"
             class="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition">
             Edit Record
-          </button>
+          </button> -->
           <button @click="printRecord(selectedPatient)"
             class="px-6 py-2 bg-pink-600 text-white rounded-lg shadow-md hover:bg-pink-700 transition">
             Print Record
