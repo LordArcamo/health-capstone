@@ -114,12 +114,18 @@ const validatePhoneNumber = () => {
 const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
-        form.profile_picture = file;
-        profilePicturePreview.value = URL.createObjectURL(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            form.profile_picture = e.target.result; // Save Base64 string in form.profile_picture
+            profilePicturePreview.value = e.target.result; // Preview the image
+        };
+        reader.readAsDataURL(file);
     } else {
         alert("Please upload a valid image file.");
     }
 };
+
+
 
 const removeProfilePicture = () => {
     form.profile_picture = null;

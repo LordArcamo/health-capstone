@@ -177,110 +177,54 @@ onBeforeUnmount(() => {
 
   <NewLayout>
     <!-- Header Section -->
-    <div class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-6 px-4 lg:px-8 shadow-lg">
-      <h1 class="text-4xl font-extrabold text-center">Medical System Analytics Dashboard</h1>
-      <p class="text-sm lg:text-base text-center mt-2">
-        Monitor, analyze, and understand health trends with real-time insights.
+    <header class="bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-white py-10 px-6 shadow-xl rounded-b-lg">
+      <h1 class="text-5xl font-extrabold text-center tracking-wide drop-shadow-md">
+        Medical System Analytics Dashboard
+      </h1>
+      <p class="text-lg lg:text-xl text-center mt-4 opacity-90">
+        Real-time insights into patient health trends, empowering better decisions.
       </p>
-    </div>
-
-    <!-- Filters Section -->
-    <!-- <div class="bg-white shadow-lg rounded-lg p-6 mt-6">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold text-gray-700">Filters</h2>
-        <button
-          @click="toggleFilters"
-          class="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-6 py-3 rounded-lg shadow hover:scale-105 transition-transform"
-        >
-          Toggle Filters
-        </button>
-      </div>
-      <div v-if="showFilters" class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Date Range</label>
-          <select
-            v-model="filters.date"
-            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="" disabled>Select Date Range</option>
-            <option v-for="option in dateOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Age Range</label>
-          <select
-            v-model="filters.ageRange"
-            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="" disabled>Select Age Range</option>
-            <option v-for="range in ageRanges" :key="range.value" :value="range.value">
-              {{ range.label }}
-            </option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
-          <select
-            v-model="filters.gender"
-            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="" disabled>Select Gender</option>
-            <option v-for="gender in genderOptions" :key="gender.value" :value="gender.value">
-              {{ gender.label }}
-            </option>
-          </select>
-        </div>
-      </div>
-    </div> -->
+    </header>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-      <div class="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-lg shadow-lg">
-        <h2 class="text-lg font-bold text-gray-700">Total Patients</h2>
-        <p class="text-2xl font-semibold">{{ summaryStats.totalPatients }}</p>
+    <section class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+      <div class="bg-gradient-to-br from-green-500 to-green-300 text-white p-8 rounded-lg shadow-xl hover:scale-105 transition-transform">
+        <h2 class="text-xl font-semibold">Total Patients</h2>
+        <p class="text-4xl font-bold mt-3">{{ summaryStats.totalPatients }}</p>
       </div>
-      <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-lg shadow-lg">
-        <h2 class="text-lg font-bold text-gray-700">Vaccinations</h2>
-        <p class="text-2xl font-semibold">{{ summaryStats.vaccinations }}</p>
+      <div class="bg-gradient-to-br from-blue-500 to-blue-300 text-white p-8 rounded-lg shadow-xl hover:scale-105 transition-transform">
+        <h2 class="text-xl font-semibold">Vaccinations</h2>
+        <p class="text-4xl font-bold mt-3">{{ summaryStats.vaccinations }}</p>
       </div>
-      <div class="bg-gradient-to-br from-yellow-100 to-yellow-300 p-6 rounded-lg shadow-lg">
-        <h2 class="text-lg font-bold text-gray-700">Mental Health Cases</h2>
-        <p class="text-2xl font-semibold">{{ summaryStats.cases }}</p>
+      <div class="bg-gradient-to-br from-yellow-500 to-yellow-300 text-white p-8 rounded-lg shadow-xl hover:scale-105 transition-transform">
+        <h2 class="text-xl font-semibold">Mental Health Cases</h2>
+        <p class="text-4xl font-bold mt-3">{{ summaryStats.cases }}</p>
       </div>
-    </div>
+    </section>
 
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 p-10 gap-10 mt-6">
-      <div class="hover:scale-105 transition-transform">
-        <TotalPatients
-        :filters="filters"
-        :monthly-data="monthlyStats"
-          />
-      </div>
-      <div class=" hover:scale-105 transition-transform">
-        <ReferedPatients
-          :filters="filters"
-          :pie-chart="referredData"
-        />
-      </div>
-      <div class="hover:scale-105 transition-transform">
-        <Vaccinations
-          :filters="filters"
-          :vaccination-data="monthlyVaccination"
-          :vaccinenatedPatients="vaccinenatedPatients"
-        />
-      </div>
-      <div class="hover:scale-105 transition-transform">
-        <Cases
-         :filters="filters"
-         :monthly="monthly"
-          />
-      </div>
-      <div class=" hover:scale-105 transition-transform">
-        <Prenatal :prenatal="prenatal"/>
-      </div>
+    <section class="mt-16 px-6">
+      <h2 class="text-3xl font-bold text-gray-800 mb-8">Analytics Overview</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
+        <div class="hover:-translate-y-1 transition">
+          <TotalPatients :filters="filters" :monthly-data="monthlyStats" />
         </div>
+        <div class="hover:-translate-y-1 transition">
+          <ReferedPatients :filters="filters" :pie-chart="referredData" />
+        </div>
+        <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-yellow-500 hover:shadow-xl hover:-translate-y-1 transition">
+          <h3 class="text-lg font-bold text-gray-700">Vaccinations</h3>
+          <Vaccinations :filters="filters" :vaccination-data="monthlyVaccination" :vaccinenatedPatients="vaccinenatedPatients" />
+        </div>
+        <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-red-500 hover:shadow-xl hover:-translate-y-1 transition">
+          <h3 class="text-lg font-bold text-gray-700">Mental Health Cases</h3>
+          <Cases :filters="filters" :monthly="monthly" />
+        </div>
+        <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-purple-500 hover:shadow-xl hover:-translate-y-1 transition">
+          <h3 class="text-lg font-bold text-gray-700">Prenatal Cases</h3>
+          <Prenatal :prenatal="prenatal" />
+        </div>
+      </div>
+    </section>
   </NewLayout>
 </template>

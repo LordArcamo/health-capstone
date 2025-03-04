@@ -146,7 +146,7 @@
             <ul class="space-y-2">
               <li><strong>PRC Number:</strong> {{ selectedStaff.prc_number }}</li>
               <li><strong>Specialization:</strong> {{ selectedStaff.specialization }}</li>
-              <li><strong>PRC Validity:</strong> {{ selectedStaff.prc_validity }}</li>
+              <li><strong>PRC Validity:</strong> {{ formatDateTime(selectedStaff.prc_validity) }}</li>
               <!-- Permissions Cards -->
               <li class="gap-3 flex flex-col">
                <strong>Permissions:</strong>
@@ -165,8 +165,11 @@
           <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-4">Profile Picture</h3>
             <div>
-              <img :src="selectedStaff.profile_picture" alt="Profile Picture"
-                class="w-32 h-32 rounded-full border">
+              <img
+                :src="selectedStaff.profile_picture || '/images/placeholder.jpg'"
+                alt="Profile Picture"
+                class="w-32 h-32 rounded-full border"
+              />
             </div>
           </div>
         </div>
@@ -210,9 +213,11 @@ export default {
       currentPage: 1,
       itemsPerPage: 10,
       showModal: false,
-      selectedStaff: null,
       showEditModal: false,
-      editingStaff: null
+      editingStaff: null,
+      selectedStaff: {
+        profile_picture: '', // Placeholder for base64 string
+      },
     }
   },
   computed: {

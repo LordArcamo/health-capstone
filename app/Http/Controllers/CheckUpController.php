@@ -68,7 +68,7 @@ class CheckUpController extends Controller
                     'chiefComplaints' => 'required|string',
                     'diagnosis' => 'required|string',
                     'medication' => 'required|string',
-                    // 'requireLabTest' => 'nullable|string',
+                    'requireLabTest' => 'nullable|string',
                     'status' => 'nullable|string',
 
                 ]);
@@ -122,8 +122,8 @@ class CheckUpController extends Controller
                         'chiefComplaints' => $patientData['chiefComplaints'],
                         'diagnosis' => $patientData['diagnosis'],
                         'medication' => $patientData['medication'],
-                        // 'requireLabTest' => $patientData['requireLabTest'] ?? null,
-                        // 'selectedLabTests' => $patientData['selectedLabTests'] ?? null,
+                        'requireLabTest' => $patientData['requireLabTest'] ?? null,
+                        'selectedLabTests' => $patientData['selectedLabTests'] ?? null,
                     ]);
 
                 } catch (\Exception $e) {
