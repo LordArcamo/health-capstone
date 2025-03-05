@@ -187,7 +187,7 @@ onBeforeUnmount(() => {
     </header>
 
     <!-- Summary Cards -->
-    <section class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6">
+    <section class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 px-6">
       <div class="bg-gradient-to-br from-green-500 to-green-300 text-white p-8 rounded-lg shadow-xl hover:scale-105 transition-transform">
         <h2 class="text-xl font-semibold">Total Patients</h2>
         <p class="text-4xl font-bold mt-3">{{ summaryStats.totalPatients }}</p>
@@ -196,10 +196,10 @@ onBeforeUnmount(() => {
         <h2 class="text-xl font-semibold">Vaccinations</h2>
         <p class="text-4xl font-bold mt-3">{{ summaryStats.vaccinations }}</p>
       </div>
-      <div class="bg-gradient-to-br from-yellow-500 to-yellow-300 text-white p-8 rounded-lg shadow-xl hover:scale-105 transition-transform">
+      <!-- <div class="bg-gradient-to-br from-yellow-500 to-yellow-300 text-white p-8 rounded-lg shadow-xl hover:scale-105 transition-transform">
         <h2 class="text-xl font-semibold">Mental Health Cases</h2>
         <p class="text-4xl font-bold mt-3">{{ summaryStats.cases }}</p>
-      </div>
+      </div> -->
     </section>
 
     <!-- Charts Section -->
@@ -212,16 +212,14 @@ onBeforeUnmount(() => {
         <div class="hover:-translate-y-1 transition">
           <ReferedPatients :filters="filters" :pie-chart="referredData" />
         </div>
-        <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-yellow-500 hover:shadow-xl hover:-translate-y-1 transition">
-          <h3 class="text-lg font-bold text-gray-700">Vaccinations</h3>
+        <div class=" hover:-translate-y-1 transition">
           <Vaccinations :filters="filters" :vaccination-data="monthlyVaccination" :vaccinenatedPatients="vaccinenatedPatients" />
         </div>
-        <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-red-500 hover:shadow-xl hover:-translate-y-1 transition">
-          <h3 class="text-lg font-bold text-gray-700">Cases</h3>
+        <div class=" hover:-translate-y-1 transition">
+
           <Cases :filters="filters" :monthly="monthly" />
         </div>
-        <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-purple-500 hover:shadow-xl hover:-translate-y-1 transition">
-          <h3 class="text-lg font-bold text-gray-700">Prenatal Cases</h3>
+        <div class="hover:-translate-y-1 transition">
           <Prenatal :prenatal="prenatal" />
         </div>
       </div>
