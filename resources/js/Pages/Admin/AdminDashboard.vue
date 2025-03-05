@@ -39,7 +39,7 @@ console.log('AdminDashboard Props:', {
 const totalUsers = ref(props.totalUsers || 0);
 const totalPatients = ref(props.totalPatients || 0);
 const countUsers = ref(props.countUsers || []);
-const activeUsers = ref(props.activeUsers || 0);
+const loggedInUsers = ref(props.loggedInUsers || 0);
 const distributionData = ref([]);
 
 // Normalized distribution data
