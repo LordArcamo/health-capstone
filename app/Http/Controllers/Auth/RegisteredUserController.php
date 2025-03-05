@@ -222,17 +222,18 @@ class RegisteredUserController extends Controller
     public function getActiveUsers()
     {
         $activeUsers = DB::table('sessions')
-        ->join('users', 'sessions.user_id', '=', 'users.id')
-        ->whereNotNull('sessions.user_id') // Ensure user is logged in
-        ->where('users.role', '!=', 'admin') // Exclude admins
-        ->distinct('sessions.user_id') // Unique users
-        ->select('users.*') // Select all attributes
-        ->get()
-        ->map(function ($user) {
-            $user->permissions = json_decode($user->permissions, true) ?? []; // Ensure it's an array
-            return $user;
-        });
-    
+            ->join('users', 'sessions.user_id', '=', 'users.id')
+            ->whereNotNull('sessions.user_id') 
+            ->where('users.role', '!=', 'admin')
+            ->where('sessions.last_activity', '>=', now()->subMinutes(config('session.lifetime'))->timestamp) 
+            ->distinct() 
+            ->select('users.*')
+            ->get()
+            ->map(function ($user) {
+                $user->permissions = json_decode($user->permissions, true) ?? [];
+                return $user;
+            });
+            
         return Inertia::render('Admin/ActiveUser', [
             'activeUsers' => $activeUsers,
         ]);

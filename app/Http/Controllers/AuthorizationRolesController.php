@@ -124,10 +124,12 @@ class AuthorizationRolesController extends Controller
 
         $loggedInUsers = DB::table('sessions')
         ->join('users', 'sessions.user_id', '=', 'users.id')
-        ->whereNotNull('sessions.user_id') // Ensure user is logged in
+        ->whereNotNull('sessions.user_id')
         ->where('users.role', '!=', 'admin') // Exclude admins
-        ->distinct('sessions.user_id') // Count unique users
-        ->count('sessions.user_id');
+        ->where('sessions.last_activity', '>=', now()->subMinutes(config('session.lifetime'))->timestamp) // Only count active sessions
+        ->groupBy('sessions.user_id') // Ensure unique users are counted
+        ->count();
+
 
         $responseData = [
             'pageTitle' => 'Admin Dashboard',
