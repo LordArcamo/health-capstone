@@ -11,41 +11,32 @@
     <!-- Filters Section -->
     <div class="filters-container">
       <div class="filter-item">
-        <label for="year" class="filter-label">Year</label>
-        <select v-model="selectedYear" id="year" class="filter-select" @change="updateFilters">
-          <option value="">All Years</option>
-          <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+        <label for="timeframe" class="filter-label">Timeframe</label>
+        <select v-model="selectedTimeframe" id="timeframe" class="filter-select">
+          <option value="today">Today</option>
+          <option value="this_week">This Week</option>
+          <option value="this_month">This Month</option>
+          <option value="this_year">This Year</option>
         </select>
       </div>
       <div class="filter-item">
         <label for="gender" class="filter-label">Gender</label>
-        <select v-model="selectedGender" id="gender" class="filter-select" @change="updateFilters">
+        <select v-model="selectedGender" id="gender" class="filter-select">
           <option value="">All Genders</option>
           <option v-for="gender in genders" :key="gender" :value="gender">{{ gender }}</option>
         </select>
       </div>
-      <button @click="resetFilters" class="reset-button">
-        Reset Filters
-      </button>
     </div>
 
     <!-- Chart -->
-    <div v-show="isReady">
-      <apexchart
-        ref="chart"
-        type="line"
-        :options="options"
-        :series="chartSeries"
-        class="patients-chart"
-      />
-    </div>
+    <apexchart ref="chart" type="line" :options="options" :series="chartSeries" class="patients-chart" />
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import VueApexCharts from "vue3-apexcharts";
-// import axios from 'axios';
+import moment from "moment";
 
 export default defineComponent({
   name: "TotalPatientsChart",
@@ -58,83 +49,47 @@ export default defineComponent({
       required: true,
       default: () => Array(12).fill(0),
     },
-    filters: {
-      type: Object,
-      required: true,
-      default: () => ({
-        date: '',
-        ageRange: '',
-        gender: '',
-        casesType: ''
-      }),
-    }
   },
   setup(props) {
-    const chart = ref(null);
-    const isReady = ref(true);
+    const selectedTimeframe = ref("this_year");
+    const selectedGender = ref("");
+    const genders = ["Male", "Female"];
+
     const months = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December",
     ];
 
-    const years = ref([]);
-    const genders = ["Male", "Female"];
-    const selectedYear = ref("");
-    const selectedGender = ref("");
-    const filteredData = ref([...props.monthlyStats]);
+    // Compute filtered data dynamically based on timeframe
+    const filteredData = computed(() => {
+      const now = moment();
 
-    // Watch for changes in filters and update data
-    watch([selectedYear, selectedGender], async () => {
-      try {
-        const response = await axios.get('/total-patients-data', {
-          params: {
-            year: selectedYear.value,
-            gender: selectedGender.value
-          }
-        });
-        filteredData.value = response.data.monthlyData;
-        years.value = response.data.years;
-      } catch (error) {
-        console.error('Error fetching filtered data:', error);
-      }
+      return props.monthlyStats.map((patients, index) => {
+        const monthStart = moment().month(index).startOf("month");
+        const weekStart = moment().month(index).startOf("week");
+
+        switch (selectedTimeframe.value) {
+          case "this_year":
+            return patients; // Show all months
+          case "this_month":
+            return monthStart.isSame(now, "month") ? patients : 0;
+          case "this_week":
+            return weekStart.isSame(now, "week") ? patients : 0;
+          case "today":
+            return index === now.month() ? (now.date() === 1 ? patients : 0) : 0;
+          default:
+            return patients;
+        }
+      });
     });
 
-    // Watch for changes in monthlyStats prop
-    watch(() => props.monthlyStats, (newVal) => {
-      filteredData.value = [...newVal];
-    }, { immediate: true });
-
-    // Initialize years on component mount
-    const initializeYears = async () => {
-      try {
-        const response = await axios.get('/total-patients-data');
-        years.value = response.data.years;
-      } catch (error) {
-        console.error('Error fetching years:', error);
-      }
-    };
-    initializeYears();
-
-    // Compute filtered series based on filtered data
-    const chartSeries = computed(() => [{
-      name: "Total Patients",
-      data: filteredData.value
-    }]);
-
-    const resetFilters = async () => {
-      selectedYear.value = "";
-      selectedGender.value = "";
-      // try {
-      //   const response = await axios.get('/total-patients-data');
-      //   filteredData.value = response.data.monthlyData;
-      // } catch (error) {
-      //   console.error('Error resetting data:', error);
-      // }
-    };
-
-    const updateFilters = () => {
-      // This will trigger the watch handlers
-    };
+    // Chart series based on filtered data
+    const chartSeries = computed(() => [
+      {
+        name: "Total Patients",
+        data: filteredData.value,
+      },
+    ]);
 
     const options = {
       chart: {
@@ -218,16 +173,11 @@ export default defineComponent({
     };
 
     return {
-      chart,
-      isReady,
       options,
       chartSeries,
-      years,
-      genders,
-      selectedYear,
+      selectedTimeframe,
       selectedGender,
-      resetFilters,
-      updateFilters,
+      genders,
     };
   },
 });
@@ -295,22 +245,6 @@ export default defineComponent({
   outline: none;
   border-color: #3182ce;
   box-shadow: 0 0 0 1px #3182ce;
-}
-
-.reset-button {
-  padding: 8px 16px;
-  background-color: #e2e8f0;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4a5568;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.reset-button:hover {
-  background-color: #cbd5e0;
 }
 
 .patients-chart {

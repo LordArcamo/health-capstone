@@ -4,14 +4,18 @@ import { Head } from '@inertiajs/vue3';
 import TotalPatients from '@/Components/Charts/TotalPatients.vue';
 import ReferedPatients from '@/Components/Charts/ReferedPatients.vue';
 import Vaccinations from '@/Components/Charts/Vaccinations.vue';
-import MentalHealth from '@/Components/Charts/MentalHealth.vue';
-import RiskManagement from '@/Components/Charts/RiskManagement.vue';
+import Barangay from '@/Components/Charts/Barangay.vue';
 import Cases from '@/Components/Charts/Cases.vue';
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { router } from '@inertiajs/vue3';
 import Prenatal from '@/Components/Charts/Prenatal.vue';
 
 const props = defineProps({
+  topBarangays: {
+    type: Array,
+    required: true,
+    default: () => []
+  },
   barChart: {
     type: Array,
     default: () => []
@@ -49,7 +53,7 @@ const props = defineProps({
       labels: [],
       data: []
     })
-  }
+  },
 });
 console.log('Dates', props.allDates);
 console.log('Vaccine Data', props.vaccinenatedPatients);
@@ -164,6 +168,10 @@ watch(() => props.casesData, (newVal) => {
   monthlyCases.value = newVal ? [...newVal.cases] : Array(12).fill(0);
 }, { immediate: false, deep: false });
 
+watch(() => props.topBarangays, (newVal) => {
+  console.log("Updated topBarangays:", newVal);
+}, { immediate: true });
+
 onBeforeUnmount(() => {
   monthlyStats.value = null;
   monthlyVaccination.value = null;
@@ -221,6 +229,9 @@ onBeforeUnmount(() => {
         </div>
         <div class="hover:-translate-y-1 transition">
           <Prenatal :prenatal="prenatal" />
+        </div>
+        <div class="hover:-translate-y-1 transition">
+          <Barangay :filters="filters" :topBarangays="topBarangays" />
         </div>
       </div>
     </section>
