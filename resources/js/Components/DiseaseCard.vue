@@ -1,7 +1,7 @@
 <script>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import ShortBox from './ShortBox.vue';
-import { Inertia } from '@inertiajs/inertia';
+import { router } from '@inertiajs/vue3';
 
 export default {
   components: { ShortBox },
@@ -56,7 +56,7 @@ export default {
 
     const viewTableWithFilter = (disease) => {
       selectedDisease.value = disease;
-      Inertia.visit('/patients/disease-table', {
+      router.visit('/patients/disease-table', {
         data: { diagnosis: disease || '' },
       });
     };
