@@ -58,4 +58,9 @@ class VaccinationRecord extends Model
     {
         return $this->belongsTo(User::class, 'id');
     }
+
+    public function vaccineAppointments()
+{
+    return $this->hasMany(VaccineAppointment::class, 'vaccinationId', 'vaccinationId');
+}
 }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('vaccine_appointments', function (Blueprint $table) {
             $table->bigIncrements('vacAppointmentId');
             $table->unsignedBigInteger('vaccinationId');
+            $table->string('vaccineType'); // Added column
             $table->date('dateOfVisit');
             $table->decimal('weight', 5, 2);
             $table->decimal('height', 5, 2);

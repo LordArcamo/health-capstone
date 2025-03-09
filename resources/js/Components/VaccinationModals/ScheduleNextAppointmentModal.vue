@@ -139,7 +139,7 @@
 
 
 <script>
-import { Inertia } from '@inertiajs/inertia';
+import { router } from '@inertiajs/vue3';
 
 export default {
   props: {
@@ -213,9 +213,9 @@ export default {
       this.errors = {};
 
       try {
-        // Convert form values to appropriate types
         const formData = {
           vaccinationId: parseInt(this.form.vaccinationId),
+          vaccineType: this.form.vaccineType,
           dateOfVisit: this.form.dateOfVisit,
           weight: parseFloat(this.form.weight),
           height: parseFloat(this.form.height),
@@ -228,14 +228,17 @@ export default {
 
         console.log('Sending appointment data:', formData);
 
-        await Inertia.post('/appointments/store', formData, {
+        router.post('/appointments/store', formData, {
           onSuccess: (page) => {
-            if (page.props.flash.success) {
-              alert('Appointment saved successfully!');
+            const successMessage = page?.props?.flash?.success;
+            const errorMessage = page?.props?.flash?.error;
+
+            if (successMessage) {
+              alert(successMessage);
               this.resetForm();
               this.$emit('close');
-            } else if (page.props.flash.error) {
-              this.errors = { general: page.props.flash.error };
+            } else if (errorMessage) {
+              this.errors = { general: errorMessage };
             }
           },
           onError: (errors) => {
