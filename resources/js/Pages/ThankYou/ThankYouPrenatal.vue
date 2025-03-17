@@ -10,26 +10,29 @@ const dashboardLink = computed(() => userRole.value === 'doctor' ? '/doctor-dash
 
 <template>
   <NewLayout>
-    <Head title="Thank You General Checkup" />
-    <div class="flex flex-col justify-center items-center bg-gradient-to-br from-indigo-50 via-blue-50 to-green-100 min-h-screen px-6 py-12">
+    <Head title="Thank You Prenatal Check Up" />
+    <div class="flex flex-col justify-center items-center bg-gradient-to-br from-pink-50 via-pink-100 to-pink-200 min-h-screen px-6 py-12">
       <div class="w-full max-w-4xl bg-white shadow-lg rounded-xl overflow-hidden">
         <!-- Header Section -->
-        <div class="bg-gradient-to-r from-green-500 via-green-500 to-green-400 text-white py-10 px-6">
+        <div class="bg-gradient-to-r from-pink-500 via-pink-400 to-pink-300 text-white py-10 px-6">
           <h1 class="text-4xl font-extrabold">🎉 Thank You!</h1>
           <p class="mt-2 text-lg">
-            Your <span class="font-semibold capitalize">General</span> Checkup form has been successfully submitted.
+            Your <span class="font-semibold capitalize">Prenatal</span> Checkup form has been successfully submitted.
           </p>
         </div>
 
         <!-- Content Section -->
         <div class="py-8 px-6 md:px-10 text-center">
           <p class="text-gray-700 text-md mb-6">
-            You can now navigate to your dashboard, submit another checkup form, or view general checkup records.
+            You can now navigate to your dashboard, submit another checkup form, or view prenatal records.
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link :href="dashboardLink" class="btn-gradient">Go to Dashboard</Link>
-            <Link href="/checkup" class="btn-gradient">CheckUp a Patient Again</Link>
-            <Link href="/services/patients/itrtable" class="btn-gradient">View General Checkup</Link>
+            <!-- Dashboard Link -->
+            <Link :href="dashboardLink"  class="btn-pink-gradient">Go to Dashboard</Link>
+            <!-- Check Again Link -->
+            <Link href="/checkup" class="btn-pink-gradient">Submit Another Form</Link>
+            <!-- View Records Link -->
+            <Link href="/services/patients/prenatal-postpartum" class="btn-pink-gradient">View Prenatal Records</Link>
           </div>
         </div>
       </div>
@@ -38,10 +41,10 @@ const dashboardLink = computed(() => userRole.value === 'doctor' ? '/doctor-dash
 </template>
 
 <style scoped>
-/* Reusable Button Styling */
-.btn-gradient {
+/* Buttons with pink gradient */
+.btn-pink-gradient {
   padding: 12px 20px;
-  background: linear-gradient(90deg, #34d399, #10b981, #059669);
+  background: linear-gradient(90deg, #f9a8d4, #f472b6, #ec4899);
   color: white;
   font-weight: bold;
   text-transform: uppercase;
@@ -52,24 +55,35 @@ const dashboardLink = computed(() => userRole.value === 'doctor' ? '/doctor-dash
   font-size: 0.9rem;
 }
 
-.btn-gradient:hover {
+.btn-pink-gradient:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
-/* Layout Adjustments */
+/* Gradient background for main container */
 .bg-gradient-to-br {
   min-height: 100vh;
   text-align: center;
 }
+
+/* Responsive card styling */
+.w-full {
+  width: 100%;
+}
+
+.max-w-4xl {
+  max-width: 64rem; /* Adjust to taste */
+}
+
 .rounded-xl {
   border-radius: 1rem;
 }
+
+/* Content Section */
 .text-gray-700 {
-  color: #4a5568;
+  color: #4a5568; /* Slightly darker gray for better contrast */
 }
 
-/* Grid Layout */
 .grid {
   display: grid;
   gap: 1rem;
