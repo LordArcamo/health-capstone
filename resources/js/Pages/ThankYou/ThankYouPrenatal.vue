@@ -2,10 +2,19 @@
 import NewLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { Link, usePage } from '@inertiajs/vue3';  
-import { computed } from 'vue';  
+import { computed, watchEffect } from 'vue';
 
-const userRole = computed(() => usePage().props?.auth?.role || 'guest');
-const dashboardLink = computed(() => userRole.value === 'doctor' ? '/doctor-dashboard' : '/dashboard');
+// Ensure user role is extracted safely
+const userRole = computed(() => usePage().props?.auth?.user?.role || 'guest');
+
+const dashboardLink = computed(() => 
+    userRole.value === 'doctor' ? '/doctor-dashboard' : '/dashboard'
+);
+
+watchEffect(() => {
+    console.log("User Role:", userRole.value);
+    console.log("Inertia Props:", usePage().props);
+});
 </script>
 
 <template>

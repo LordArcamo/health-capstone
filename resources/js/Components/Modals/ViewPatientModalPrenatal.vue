@@ -86,10 +86,6 @@
             class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
             Close
           </button>
-          <button @click="printRecord(selectedPatient)"
-            class="px-6 py-2 bg-pink-600 text-white rounded-lg shadow-md hover:bg-pink-700 transition">
-            Print Record
-          </button>
         </div>
       </div>
     </div>
@@ -106,12 +102,6 @@ export default {
     selectedPatient: {
       type: Object,
       required: true,
-    },
-  },
-  methods: {
-    printRecord(patient) {
-      console.log("Printing record for:", patient);
-      // Add print logic here
     },
   },
 };
