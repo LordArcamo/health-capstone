@@ -38,7 +38,7 @@ class PreNatalController extends Controller
             'prenatal_consultation_details.bloodPressure',
             'prenatal_consultation_details.temperature',
             'prenatal_consultation_details.height',
-            'prenatal_consultation_details.weight',x
+            'prenatal_consultation_details.weight',
             'prenatal_consultation_details.providerName',
             'prenatal_consultation_details.nameOfSpouse',
             'prenatal_consultation_details.emergencyContact',
