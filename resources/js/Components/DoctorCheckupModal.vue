@@ -45,14 +45,17 @@
 
               <!-- Action Buttons -->
               <div class="flex space-x-3">
-                <button @click="startCheckup(patient)"
-                  class="px-5 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition shadow-sm">
-                  Start Checkup
-                </button>
-                <button @click="cancelCheckup(patient)"
-                  class="px-5 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition shadow-sm">
-                  Cancel
-                </button>
+                <button @click="startCheckup(patient)" :disabled="patient.status === 'Cancelled'" :class="[
+                    'px-5 py-2 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition',
+                    patient.status === 'Cancelled' ? 'bg-gray-400 cursor-not-allowed' :
+                      patient.visitType === 'Prenatal' ? 'bg-pink-500 hover:bg-pink-600' : 'bg-green-500 hover:bg-green-600'
+                  ]">
+                    {{ patient.visitType === 'Prenatal' ? 'Start Prenatal' : 'Start Checkup' }}
+                  </button>
+                  <button @click="markAsCancelled(patient)" :disabled="patient.status === 'Cancelled'"
+                    class="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-red-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Cancel
+                  </button>
               </div>
             </div>
           </div>
@@ -135,6 +138,9 @@ export default {
     },
   },
   methods: {
+    refreshData() {
+        this.$inertia.reload({ only: ['patientsInQueue'] });
+    },
     formatTime(time) {
       return new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     },
@@ -142,17 +148,52 @@ export default {
       this.selectedPatient = patient;
     },
     startCheckup(patient) {
-      router.visit('/doctor-checkup', { method: 'get', data: { consultationDetailsID: patient.consultationDetailsID } });
-    },
-    cancelCheckup(patient) {
-      if (confirm(`Cancel checkup for ${patient.firstName}?`)) {
-        console.log(`Cancelled checkup for ${patient.firstName}`);
+      console.log('Patient Data:', patient); // Debugging: Inspect patient data
+
+      // Check if visitType is Prenatal and prenatalConsultationDetailsID exists
+      if (patient?.visitType === 'Prenatal' && patient?.prenatalConsultationDetailsID) {
+        console.log('Navigating to prenatal route with ID:', patient.prenatalConsultationDetailsID); // Debug
+        this.$inertia.visit('/doctor-checkup/prenatal', {
+          method: 'get',
+          data: { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID },
+        });
+        return; // Exit after handling Prenatal case
       }
+
+      // Check if consultationDetailsID exists (for general case)
+      if (patient?.consultationDetailsID) {
+        console.log('Navigating to ITR route with ID:', patient.consultationDetailsID); // Debug
+        this.$inertia.visit('/doctor-checkup/itr', {
+          method: 'get',
+          data: { consultationDetailsID: patient.consultationDetailsID },
+        });
+        return; // Exit after handling ITR case
+      }
+
+      // If no valid data is found
+      console.warn('Invalid patient data:', patient);
     },
-    previousPage() { if (this.currentPage > 1) this.currentPage--; },
-    nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
+    markAsCancelled(patient) {
+        const data = patient.visitType === 'Prenatal' 
+        ? { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID }
+        : { consultationDetailsID: patient.consultationDetailsID };
+
+        this.$inertia.post('/doctor/mark-as-cancelled', data, {
+        onSuccess: () => {
+            // Refresh the data after successful cancellation
+            this.refreshData();
+        }
+        });
+    },
+    previousPage() {
+      if (this.currentPage > 1) this.currentPage--;
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) this.currentPage++;
+    },
   }
 };
+
 </script>
 
 
