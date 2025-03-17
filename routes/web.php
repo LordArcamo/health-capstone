@@ -35,6 +35,7 @@ Route::get('/checkup/thank-you/itr', function () {
     return Inertia::render('ThankYou/ThankYouItr');
 })->middleware(['auth', 'verified'])->name('thank-you');
 
+
 Route::get('/checkup/thank-you/prenatal', function () {
     return Inertia::render('ThankYou/ThankYouPrenatal');
 })->middleware(['auth', 'verified'])->name('thank-you');

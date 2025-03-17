@@ -1,7 +1,20 @@
 <script setup>
 import NewLayout from '@/Layouts/MainLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed, watchEffect } from 'vue';
+
+// Ensure user role is extracted safely
+const userRole = computed(() => usePage().props?.auth?.user?.role || 'guest');
+
+const dashboardLink = computed(() => 
+    userRole.value === 'doctor' ? '/doctor-dashboard' : '/dashboard'
+);
+
+// Debugging: Log to ensure props are properly set
+watchEffect(() => {
+    console.log("User Role:", userRole.value);
+    console.log("Inertia Props:", usePage().props);
+});
 </script>
 
 <template>
@@ -24,7 +37,7 @@ import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Dashboard Link -->
-            <Link href="/dashboard" class="btn-gradient">Go to Dashboard</Link>
+            <Link :href="dashboardLink" class="btn-gradient">Go to Dashboard</Link>
             <!-- Check Again Link -->
             <Link href="/checkup" class="btn-gradient">CheckUp a Patient Again</Link>
             <!-- View Records Link -->
@@ -68,7 +81,7 @@ import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
 }
 
 .max-w-4xl {
-  max-width: 64rem; /* Adjust to taste */
+  max-width: 64rem;
 }
 
 .rounded-xl {
@@ -77,7 +90,7 @@ import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
 
 /* Content Section */
 .text-gray-700 {
-  color: #4a5568; /* Slightly darker gray for better contrast */
+  color: #4a5568;
 }
 
 .grid {
