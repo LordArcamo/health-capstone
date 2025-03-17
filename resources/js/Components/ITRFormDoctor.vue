@@ -461,10 +461,16 @@
               class="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg shadow hover:bg-gray-400 transition font-medium">
               Back
             </button>
+           <div class="flex gap-2">
             <button @click="printPrescription"
               class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition font-medium">
               Print Prescription
             </button>
+            <button @click="showModal"
+              class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition font-medium">
+              Submit Consultation
+            </button>
+           </div> 
           </div>
         </div>
 
@@ -652,7 +658,7 @@ export default {
     },
     printPrescription() {
       const { firstName, lastName, middleName, age, sex, contact } = this.consultationDetails;
-      const { first_name, middle_name, last_name, specialization } = this.loggedInUser;
+      const { first_name, middle_name, last_name, specialization, prc_number } = this.loggedInUser;
 
       const medicationsList = this.medications
         .map((medication) => `
@@ -725,8 +731,9 @@ export default {
       <body>
         <div class="container">
           <h4>Prescription</h4>
-          <p class="text-center text-gray-600">Issued by: ${first_name, middle_name, last_name || 'Dr. Unknown'}</p>
+          <p class="text-center text-gray-600">Issued by: Dr. ${first_name || 'Dr. Unknown'} ${middle_name}. ${last_name}</p>
           <p class="text-center text-gray-600">${specialization || 'Specialization Not Provided'}</p>
+          <p class="text-center text-gray-600"> PRC: ${ prc_number || 'PRC Number Not provided' }</p>
           <div>
             <h5>Patient Information</h5>
             <p><strong>Name:</strong> ${firstName || ''} ${middleName || ''} ${lastName || ''}</p>

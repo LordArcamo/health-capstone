@@ -19,73 +19,50 @@ class SystemAnalyticsController extends Controller
     public function index(Request $request)
     {
         $prenatal = PersonalInformation::join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
-            ->leftJoin('general_trimester', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'general_trimester.prenatalConsultationDetailsID')
-            ->leftJoin('postpartum', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'postpartum.prenatalConsultationDetailsID')
-            ->select(
-                'personal_information.personalId',
-                'prenatal_consultation_details.prenatalConsultationDetailsID',
-                'personal_information.age',
-                DB::raw('
-                    CASE 
-                        WHEN postpartum.prenatalConsultationDetailsID IS NOT NULL THEN "postpartum"
-                        WHEN general_trimester.trimester IS NOT NULL AND general_trimester.trimester IN (1,2,3,4,5) 
-                            THEN CONCAT("trimester", general_trimester.trimester)
-                        ELSE "trimester_unknown"
-                    END as period_type
-                '),
-                DB::raw('COALESCE(
-                    postpartum.deliveryDate, 
-                    general_trimester.date_of_visit, 
-                    prenatal_consultation_details.consultationDate
-                ) as visit_date')
-            )
-            ->where(function ($query) {
-                $query->whereNotNull('postpartum.prenatalConsultationDetailsID')
-                    ->orWhereNotNull('general_trimester.trimester');  // Ensure trimester is not null
-            })
-            ->when($request->input('selectedPeriod') && $request->input('selectedPeriod') !== 'all', function ($query) use ($request) {
-                if ($request->input('selectedPeriod') === 'postpartum') {
-                    $query->whereNotNull('postpartum.prenatalConsultationDetailsID');
-                } else {
-                    $trimester = intval(str_replace('trimester', '', $request->input('selectedPeriod')));
-                    $query->where('general_trimester.trimester', $trimester);
-                }
-            })
-            ->orderBy('visit_date', 'asc')
-            ->havingRaw('visit_date IS NOT NULL')
-            ->get();
-
-        // Debugging Output
-        \Log::info('Transformed prenatal records:', [
-            'total' => $prenatal->count(),
-            'postpartum' => $prenatal->where('period_type', 'postpartum')->count(),
-            'trimester_counts' => [
-                '1' => $prenatal->where('period_type', '1')->count(),
-                '2' => $prenatal->where('period_type', '2')->count(),
-                '3' => $prenatal->where('period_type', '3')->count(),
-                '4' => $prenatal->where('period_type', '4')->count(),
-                '5' => $prenatal->where('period_type', '5')->count(),
-            ],
-            'unique_period_types' => $prenatal->pluck('period_type')->unique()->values()->toArray()
-        ]);
- 
-
-        // Ensure we have unique records based on personalId and visit_date
-        $prenatal = $prenatal->unique(function ($item) {
-            return $item->personalId . '_' . $item->visit_date;
-        })->values();
-
-        // Debug the data after transformation
-        \Log::info('Transformed prenatal records:', [
-            'total' => $prenatal->count(),
-            'postpartum' => $prenatal->where('period_type', 'postpartum')->count(),
-            'trimester_counts' => [
-                '1' => $prenatal->where('trimester', '1')->count(),
-                '2' => $prenatal->where('trimester', '2')->count(),
-                '3' => $prenatal->where('trimester', '3')->count(),
-            ],
-            'unique_trimester_values' => $prenatal->pluck('trimester')->unique()->values()->toArray()
-        ]);
+    ->leftJoin('general_trimester', function ($join) {
+        $join->on('prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'general_trimester.prenatalConsultationDetailsID')
+            ->whereRaw('CAST(general_trimester.trimester AS UNSIGNED) BETWEEN 1 AND 5');
+    })
+    ->leftJoin('postpartum', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'postpartum.prenatalConsultationDetailsID')
+    ->select(
+        'personal_information.personalId',
+        'prenatal_consultation_details.prenatalConsultationDetailsID',
+        'personal_information.age',
+        DB::raw('
+            CASE 
+                WHEN postpartum.prenatalConsultationDetailsID IS NOT NULL THEN "postpartum"
+                WHEN general_trimester.trimester IS NOT NULL THEN CONCAT("trimester", general_trimester.trimester)
+                ELSE "trimester_unknown"
+            END as period_type
+        '),
+        DB::raw('
+            COALESCE(
+                postpartum.deliveryDate, 
+                general_trimester.date_of_visit, 
+                prenatal_consultation_details.consultationDate
+            ) as visit_date
+        ')
+    )
+    ->where('prenatal_consultation_details.status', 'completed') // Only include completed records
+    ->when($request->input('selectedPeriod') && $request->input('selectedPeriod') !== 'all', function ($query) use ($request) {
+        $selectedPeriod = $request->input('selectedPeriod');
+        
+        if ($selectedPeriod === 'postpartum') {
+            $query->whereNotNull('postpartum.prenatalConsultationDetailsID');
+        } elseif (preg_match('/^trimester[1-5]$/', $selectedPeriod)) {
+            $trimester = intval(str_replace('trimester', '', $selectedPeriod));
+            $query->where('general_trimester.trimester', '=', $trimester);
+        }
+    })
+    ->groupBy(
+        'personal_information.personalId',
+        'prenatal_consultation_details.prenatalConsultationDetailsID',
+        'personal_information.age',
+        'period_type',
+        'visit_date'
+    )
+    ->orderBy('visit_date', 'asc')
+    ->get();
 
         // Get vaccinated patients with their history
         $vaccinenatedPatients = PersonalInformation::with(['vaccinationRecords' => function($query) {
@@ -131,6 +108,14 @@ class SystemAnalyticsController extends Controller
         ->whereHas('visitInformation') // Ensures only records with visitInformation are fetched
         ->get();
 
+        $topBarangays = DB::table('consultation_details')
+        ->join('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+        ->join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
+        ->select('personal_information.barangay', DB::raw('COUNT(visit_information.diagnosis) as total_cases'), 'consultation_details.consultationDate')
+        ->groupBy('personal_information.barangay', 'consultation_details.consultationDate')
+        ->orderByDesc('total_cases')
+        ->get();
+
 
         $totalPatients = $this->totalPatients($request);
         // $risk_management = $this->risk($request);
@@ -158,7 +143,8 @@ class SystemAnalyticsController extends Controller
             'casesData' => $casesStats,
             'mentalHealthStats' => $mentalHealthStats,
             'prenatal' => $prenatal,
-            'monthly' => $monthly
+            'monthly' => $monthly,
+            'topBarangays' => $topBarangays
         ]);
     }
 
@@ -609,4 +595,5 @@ class SystemAnalyticsController extends Controller
             'data' => array_values($stats)
         ];
     }
+
 }

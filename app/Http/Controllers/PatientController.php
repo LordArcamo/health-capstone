@@ -34,35 +34,38 @@ class PatientController extends Controller
         $diagnosis = $request->input('diagnosis', ''); // Retrieve the diagnosis filter from the request, default is empty
 
         // Use LEFT JOIN to fetch cases filtered by diagnosis if provided
-        $cases = PersonalInformation::leftJoin('itr', 'personal_information.personalId', '=', 'itr.personalId')
-            ->select(
-                'personal_information.personalId',
-                'personal_information.created_at',
-                'personal_information.firstName',
-                'personal_information.lastName',
-                'personal_information.middleName',
-                'personal_information.suffix',
-                'personal_information.purok',
-                'personal_information.barangay',
-                'personal_information.age',
-                'personal_information.birthdate',
-                'personal_information.contact',
-                'personal_information.sex',
-                'itr.modeOfTransaction',
-                'itr.consultationDate',
-                'itr.consultationTime',
-                'itr.diagnosis',
-                'itr.chiefComplaints',
-                'itr.medication',
-                'itr.providerName',
-                'itr.natureOfVisit',
-                'itr.visitType'
-            )
-            ->when(!empty($diagnosis), function ($query) use ($diagnosis) {
-                $query->where('itr.diagnosis', 'LIKE', "%$diagnosis%");
-            })
-            ->distinct() // Ensure no duplicate rows
-            ->get();
+        $cases = PersonalInformation::join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+        ->join('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+        ->select(
+            'personal_information.personalId',
+            'personal_information.created_at',
+            'personal_information.firstName',
+            'personal_information.lastName',
+            'personal_information.middleName',
+            'personal_information.suffix',
+            'personal_information.purok',
+            'personal_information.barangay',
+            'personal_information.age',
+            'personal_information.birthdate',
+            'personal_information.contact',
+            'personal_information.sex',
+            'consultation_details.consultationDate',
+            'consultation_details.consultationTime',
+            'consultation_details.modeOfTransaction',
+            'consultation_details.providerName',
+            'consultation_details.natureOfVisit',
+            'consultation_details.visitType',
+            'visit_information.diagnosis',
+            'visit_information.chiefComplaints',
+            'visit_information.requireLabTest',
+            'visit_information.selectedLabTests'
+        )
+        ->when(!empty($diagnosis), function ($query) use ($diagnosis) {
+            return $query->where('visit_information.diagnosis', 'LIKE', "%$diagnosis%");
+        })
+        ->distinct()
+        ->get();
+    
 
         // Return the filtered cases to the frontend
         return Inertia::render('Table/DiseaseCases', [

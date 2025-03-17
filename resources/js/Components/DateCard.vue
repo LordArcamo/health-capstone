@@ -3,7 +3,7 @@
     <!-- Dropdown Toggle -->
     <button
       @click="toggleDropdown"
-      class="w-full bg-blue-500 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-blue-600 transition flex items-center justify-between"
+      class="w-full bg-blue-500 text-white font-semibold gap-5 py-3 px-4 rounded-lg shadow-md hover:bg-blue-600 transition flex items-center justify-between"
     >
       <div class="flex items-center space-x-2">
         <font-awesome-icon :icon="['fas', 'calendar']" class="text-white" />

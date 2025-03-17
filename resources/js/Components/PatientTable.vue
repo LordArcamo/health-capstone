@@ -1,149 +1,173 @@
 <template>
   <div class="mx-auto py-3 px-10">
+   <!-- Header Section -->
+   <div class="mb-6 flex flex-col text-center">
+      <h1 class="text-4xl font-bold text-green-600 mt-5 text-center">Total Patients</h1>
+      <p class="text-gray-700 text-center">Search, filter, and manage patient records efficiently.</p>
+    </div>
+    <!-- In your template (e.g. at the top, above the search bar) -->
+    <div class="flex flex-col md:flex-row md:items-center gap-10 justify-center mb-6">
+      <div class="flex items-center gap-4">
+        <span class="font-semibold text-gray-700">Current Date:</span>
+        <span class="text-gray-900">{{ currentDateText }}</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <label for="filterDate" class="font-semibold text-gray-700">Filter Date:</label>
+        <input type="date" id="filterDate" v-model="filterDate"
+          class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
+      </div>
+    </div>
+
 
     <!-- Search and Filter Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-      <!-- Search Bar -->
-      <div class="w-full md:w-2/3">
-        <input v-model="searchQuery" type="text" placeholder="Search by name, diagnosis, or visit type"
-          class="border border-gray-300 p-3 rounded w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      </div>
+    <div class="flex flex-col md:flex-row md:items-center gap-6 mb-8">
+      <div class="w-full md:w-2/3 flex flex-col gap-4">
+        <!-- Enhanced Input Field -->
+        <div class="relative">
+          <input v-model="searchQuery" @keyup.enter="addFilter" type="text"
+            placeholder="🔍 Search by name, diagnosis, or visit type..."
+            class="w-full px-5 py-3 border border-gray-300 rounded-md shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200" />
+          <button @click="addFilter"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-md hover:bg-green-600 focus:outline-none transition duration-200">
+            Add
+          </button>
+        </div>
 
-      <!-- Filter Panel Toggle -->
-      <button @click="toggleFilterPanel"
-        class="flex items-center px-4 py-3 bg-green-500 text-white font-medium rounded shadow hover:bg-green-600 focus:outline-none w-full md:w-1/3">
-        <span>Filters</span>
-        <svg class="w-4 h-4 ml-2 transform" :class="{ 'rotate-180': isFilterPanelOpen }"
-          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- Collapsible Filter Panel -->
-    <div v-if="isFilterPanelOpen" class="mt-4 mb-4 border border-gray-300 rounded-lg p-6 shadow-md bg-white">
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Gender Filter -->
-    <div>
-      <label class="block text-base font-semibold mb-2">Gender</label>
-      <div class="flex flex-col gap-3">
-        <label class="flex items-center gap-2 cursor-pointer">
-          <div class="w-5 h-5 border-2 border-green-500 rounded-full flex items-center justify-center">
-            <input
-              type="checkbox"
-              value="Male"
-              v-model="filterGender"
-              class="appearance-none w-4 h-4"
-            />
-            <div
-              v-if="filterGender.includes('Male')"
-              class="w-2.5 h-2.5 bg-green-500 rounded-full"
-            ></div>
+        <!-- Dynamic Filter Tags with Modern Style -->
+        <div v-if="filters.length" class="flex flex-wrap gap-3">
+          <div v-for="(filter, index) in filters" :key="index"
+            class="flex items-center gap-2 bg-gradient-to-r from-green-200 to-green-300 text-green-900 px-4 py-1 rounded-md shadow hover:shadow-md transition duration-300">
+            <span class="text-sm font-medium">{{ filter }}</span>
+            <button @click="removeFilter(index)"
+              class="flex items-center justify-center w-5 h-5 bg-green-400 text-white rounded-full hover:bg-red-500 hover:scale-110 transition">
+              &times;
+            </button>
           </div>
-          <span class="text-gray-700">Male</span>
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer">
-          <div class="w-5 h-5 border-2 border-green-500 rounded-full flex items-center justify-center">
-            <input
-              type="checkbox"
-              value="Female"
-              v-model="filterGender"
-              class="appearance-none w-4 h-4"
-            />
-            <div
-              v-if="filterGender.includes('Female')"
-              class="w-2.5 h-2.5 bg-green-500 rounded-full"
-            ></div>
+        </div>
+
+        <!-- Helper Text -->
+        <p v-if="!filters.length" class="text-gray-500 text-sm italic">
+          Type your search and press <strong>Enter</strong> or click <strong>Add</strong> to apply filters.
+        </p>
+      </div>
+
+
+      <!-- Relative container for the Filters button + panel -->
+      <div class="relative flex gap-1 mb-10">
+        <!-- Filters Button -->
+        <button @click="toggleFilterPanel"
+          class="flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition">
+          Filters
+          <span v-if="isFilterPanelOpen">▲</span>
+          <span v-else>▼</span>
+        </button>
+        <button @click="generateReport"
+          class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 transition">
+          <!-- <font-awesome-icon icon="file-import" /> -->
+          Generate Report
+        </button>
+        <button @click="triggerImport"
+          class="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow hover:bg-blue-600 transition">
+          <!-- <font-awesome-icon icon="file-import" /> -->
+          Import CSV
+        </button>
+
+        <!-- Absolute-positioned Filter Panel -->
+        <transition name="slide-vertical">
+          <div v-if="isFilterPanelOpen"
+            class="absolute left-0 top-full mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-md z-50 p-6">
+            <div class="grid grid-cols-2 gap-6 ">
+              <!-- Gender Filter -->
+              <div>
+                <label class="block font-semibold mb-2">Gender</label>
+                <div class="flex items-center gap-4">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <font-awesome-icon icon="mars" class="text-blue-500" />
+                    <input type="checkbox" value="Male" v-model="filterGender"
+                      class="form-checkbox text-blue-500 focus:ring-blue-500" />
+                    <span class="text-gray-700">Male</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <font-awesome-icon icon="venus" class="text-pink-500" />
+                    <input type="checkbox" value="Female" v-model="filterGender"
+                      class="form-checkbox text-pink-500 focus:ring-pink-500" />
+                    <span class="text-gray-700">Female</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Age Range Filter -->
+              <div class="test">
+                <label class="block font-semibold mb-2">Age Range</label>
+                <div class="flex flex-col items-start">
+                  <input type="range" v-model="filterAgeRange" min="0" max="100" step="5"
+                    class="w-full accent-green-500" />
+                  <p class="text-sm text-gray-500 mt-1">Selected: {{ filterAgeRange }}+</p>
+                </div>
+              </div>
+
+              <!-- Purok Filter -->
+              <div>
+                <label class="block font-semibold mb-2">Purok</label>
+                <select v-model="filterPrk"
+                  class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400">
+                  <option value="">All Purok</option>
+                  <option v-for="purok in purokOptions" :key="purok" :value="purok">
+                    {{ purok }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Barangay Filter -->
+              <div>
+                <label class="block font-semibold mb-2">Barangay</label>
+                <select v-model="filterBarangay"
+                  class="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-400">
+                  <option value="">All Barangay</option>
+                  <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
+                    {{ barangay }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Diagnosis Filters -->
+              <div class="col-span-2">
+                <button @click="toggleDiagnosisPanel"
+                  class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 transition font-medium">
+                  Diagnosis Filters
+                  <span v-if="isDiagnosisPanelOpen">▲</span>
+                  <span v-else>▼</span>
+                </button>
+
+                <transition name="fade">
+                  <div v-if="isDiagnosisPanelOpen" class="flex flex-col gap-2 mt-3">
+                    <div v-for="diagnosis in visibleDiagnosisOptions" :key="diagnosis">
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <div class="w-5 h-5 border-2 border-green-500 rounded flex items-center justify-center">
+                          <input type="checkbox" :value="diagnosis" v-model="filterDiagnosis"
+                            class="appearance-none w-4 h-4" />
+                          <div v-if="filterDiagnosis.includes(diagnosis)" class="w-3 h-3 bg-green-500 rounded"></div>
+                        </div>
+                        <span class="text-gray-700">{{ diagnosis }}</span>
+                      </label>
+                    </div>
+                    <button v-if="uniqueDiagnosisOptions.length > maxVisibleDiagnoses" @click="toggleShowAllDiagnosis"
+                      class="text-blue-500 underline font-medium hover:text-blue-700 mt-2">
+                      {{ showAllDiagnosis ? "See Less" : "See More" }}
+                    </button>
+                  </div>
+                </transition>
+              </div>
+            </div>
           </div>
-          <span class="text-gray-700">Female</span>
-        </label>
+        </transition>
+
       </div>
     </div>
 
-    <!-- Age Range Slider -->
-    <div>
-      <label class="block text-base font-semibold mb-2">Age Range</label>
-      <div class="flex items-center gap-4">
-        <span class="text-sm text-gray-500">0</span>
-        <input
-          type="range"
-          v-model="filterAgeRange"
-          min="0"
-          max="100"
-          step="5"
-          class="w-full accent-green-500"
-        />
-        <span class="text-sm text-gray-500">100+</span>
-      </div>
-      <div class="text-sm text-gray-700 mt-1">Selected: {{ filterAgeRange }}+</div>
-    </div>
+    <!-- Buttons -->
 
-    <!-- Purok Filter -->
-    <div>
-      <label class="block text-base font-semibold mb-2">Purok</label>
-      <select
-        v-model="filterPrk"
-        class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-      >
-        <option value="">All Purok</option>
-        <option v-for="purok in purokOptions" :key="purok" :value="purok">
-          {{ purok }}
-        </option>
-      </select>
-    </div>
-
-    <!-- Barangay Filter -->
-    <div>
-      <label class="block text-base font-semibold mb-2">Barangay</label>
-      <select
-        v-model="filterBarangay"
-        class="border border-gray-300 p-3 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-      >
-        <option value="">All Barangay</option>
-        <option v-for="barangay in barangayOptions" :key="barangay" :value="barangay">
-          {{ barangay }}
-        </option>
-      </select>
-    </div>
-
-    <!-- Diagnosis Filter -->
-    <div>
-      <label class="block text-base font-semibold mb-2">Diagnosis</label>
-      <div class="flex flex-wrap gap-3">
-        <label
-          v-for="diagnosis in diagnosisOptions"
-          :key="diagnosis"
-          class="flex items-center gap-2 cursor-pointer"
-        >
-          <div class="w-5 h-5 border-2 border-red-500 rounded flex items-center justify-center">
-            <input
-              type="checkbox"
-              :value="diagnosis"
-              v-model="filterDiagnosis"
-              class="appearance-none w-4 h-4"
-            />
-            <div
-              v-if="filterDiagnosis.includes(diagnosis)"
-              class="w-3 h-3 bg-red-500 rounded"
-            ></div>
-          </div>
-          <span class="text-gray-700">{{ diagnosis }}</span>
-        </label>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-    <!-- Generate Report Button -->
-    <div class="mb-6">
-      <button @click="generateReport"
-        class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 hover:text-black transition-colors">
-        Generate Report
-      </button>
-
-      <h1 class="text-2xl font-bold text-start mt-6 mb-4">Total Patients</h1>
-    </div>
+    <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
 
 <!-- Responsive Table -->
 <div class="overflow-x-auto bg-gray-100 rounded-lg">
@@ -221,6 +245,10 @@
 </template>
 
 <script>
+import { Inertia } from '@inertiajs/inertia';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 export default {
   props: {
     patients: {
@@ -228,19 +256,31 @@ export default {
       default: () => [],
     },
   },
+  mounted() {
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    this.currentDateText = today.toLocaleDateString(undefined, options);
+  },
   data() {
     return {
-      searchQuery: '', // Search query for filtering
-      filterPrk: '', // Filter by purok
-      filterBarangay: '', // Filter by barangay
-      filterGender: [], // Array for selected genders
-      filterAgeRange: '', // Filter by age range
-      filterDiagnosis: [], // Array for selected diagnoses
-      currentPage: 1, // Current page for pagination
-      itemsPerPage: 8, // Number of items per page
-      showModal: false, // Modal visibility flag
-      selectedPatient: null, // Selected patient for modal display
-      isFilterPanelOpen: false, // Toggle filter panel visibility
+      searchQuery: '',            // User input for search
+      filters: [],                // Dynamic search filters
+      filterPrk: '',
+      filterBarangay: '',
+      filterGender: [],
+      filterAgeRange: '',
+      filterDiagnosis: [],
+      currentPage: 1,
+      itemsPerPage: 15,
+      showModal: false,
+      selectedPatient: null,
+      isFilterPanelOpen: false,
+      filterDate: '',
+      currentDateText: '',
+      diagnosisOptions: [],
+      showAllDiagnosis: false,
+      maxVisibleDiagnoses: 5,
+      isDiagnosisPanelOpen: false,
     };
   },
   watch: {
@@ -264,136 +304,425 @@ export default {
     },
   },
   computed: {
-      // Paginated and filtered patients
-  paginatedPatients() {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return this.filteredPatients.slice(start, end);
-  },
+    paginatedPatients() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredPatients.slice(start, end);
+    },
+
+    uniqueDiagnosisOptions() {
+      return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
+    },
+
+    /*
+      2) The subset of diagnoses you actually display (either first 5 or all).
+         We'll rename "filteredDiagnosisOptions" => "visibleDiagnosisOptions"
+         for clarity that these are the ones you physically render in checkboxes.
+    */
+    visibleDiagnosisOptions() {
+      const all = this.uniqueDiagnosisOptions;
+      return this.showAllDiagnosis ? all : all.slice(0, this.maxVisibleDiagnoses);
+    },
 
     filteredPatients() {
-  const query = this.searchQuery.toLowerCase();
-  return this.patients
-    .map((patient) => ({
-      ...patient,
-      fullName: `${patient.firstName} ${patient.lastName}`, // Combine first and last name
-      address: `${patient.purok}, ${patient.barangay}`, // Combine purok and barangay for address
-    }))
-    .filter((patient) => {
-      // Match search query
-      const matchesQuery =
-        patient.fullName.toLowerCase().includes(query) ||
-        patient.address.toLowerCase().includes(query) ||
-        (patient.diagnosis && patient.diagnosis.toLowerCase().includes(query));
+      const queries = this.filters.map(f => f.toLowerCase());
 
-      // Match filters
-      const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
-      const matchesBarangay =
-        !this.filterBarangay || patient.barangay === this.filterBarangay;
-      const matchesGender =
-        this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
-      const matchesDiagnosis =
-        this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
+      return this.patients
+        .map((patient) => ({
+          ...patient,
+          fullName: `${patient.firstName} ${patient.middleName} ${patient.lastName}`,
+          address: `${patient.purok}, ${patient.barangay}`,
+        }))
+        .filter((patient) => {
+          const matchesFilters = queries.every((filter) =>
+            (patient.fullName && patient.fullName.toLowerCase().includes(filter)) ||
+            (patient.natureOfVisit && patient.natureOfVisit.toLowerCase().includes(filter)) ||
+            (patient.visitType && patient.visitType.toLowerCase().includes(filter)) ||
+            (patient.address && patient.address.toLowerCase().includes(filter)) ||
+            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(filter))
+          );
 
-      // Match age range
-      let matchesAgeRange = true;
-      if (this.filterAgeRange) {
-        const patientAge = parseInt(patient.age, 10);
-        matchesAgeRange = patientAge >= parseInt(this.filterAgeRange, 10);
-      }
+          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
+          const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
+          const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
+          const matchesDiagnosis = this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
 
-      return (
-        matchesQuery &&
-        matchesPrk &&
-        matchesBarangay &&
-        matchesGender &&
-        matchesDiagnosis &&
-        matchesAgeRange
-      );
-    });
-},
+          let matchesAgeRange = true;
+          if (this.filterAgeRange) {
+            const patientAge = parseInt(patient.age, 10);
+            matchesAgeRange = patientAge >= parseInt(this.filterAgeRange, 10);
+          }
 
-totalPages() {
-    return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
-  },
-    // Unique purok options
+          let matchesDate = true;
+          if (this.filterDate) {
+            matchesDate = this.sameDay(patient.consultationDate, this.filterDate);
+          }
+
+          return (
+            matchesFilters &&
+            matchesPrk &&
+            matchesBarangay &&
+            matchesGender &&
+            matchesDiagnosis &&
+            matchesAgeRange &&
+            matchesDate
+          );
+        })
+        .sort((a, b) => new Date(b.consultationDate) - new Date(a.consultationDate));
+    },
+
+    totalPages() {
+      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
+    },
+
     purokOptions() {
       return Array.from(new Set(this.patients.map((p) => p.purok)));
     },
-    // Unique barangay options
+
     barangayOptions() {
       return Array.from(new Set(this.patients.map((p) => p.barangay)));
     },
-    // Unique diagnosis options
-    diagnosisOptions() {
-      return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
-    },
   },
+
   methods: {
-    uniquePatients() {
-    const seen = new Set();
-    return this.patients.filter(patient => {
-      if (seen.has(patient.personalId)) return false;
-      seen.add(patient.personalId);
-      return true;
-    });
-  },
-    // Toggle filter panel visibility
+    generateReport() {
+      const doc = new jsPDF();
+
+      // Load the RHU Logo
+      const logo = "/images/RHU%20Logo.png"; // Path to the RHU logo you uploaded
+
+      // Add the Logo
+      doc.addImage(logo, 'PNG', 14, 10, 30, 30); // (image, format, x, y, width, height)
+
+      // Header Information
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Republic of the Philippines", 105, 15, { align: "center" });
+      doc.text("Department of Health", 105, 22, { align: "center" });
+      doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
+
+      // Subheader
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
+      doc.text("Contact: +63 918 811 1213,+63 920 276 6740  | Email: rhu.initao@gmail.com", 105, 42, { align: "center" });
+
+      // Line Separator
+      doc.setLineWidth(0.5);
+      doc.line(14, 45, 196, 45);
+
+      // Report Title
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Individual Treatment Records", 105, 55, { align: "center" });
+
+      // Report Date
+      const date = new Date().toLocaleDateString();
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Date Generated: ${date}`, 14, 65);
+
+      // Define Table Columns
+      const columns = [
+        "Full Name",
+        "Address",
+        "Age",
+        "Visit Type",
+        "Consultation Date",
+        "Diagnosis",
+        "Gender",
+        "Status"
+      ];
+
+      // Define Table Rows (Filtered Patients)
+      const rows = this.filteredPatients.map((patient) => [
+        `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
+        `${patient.purok}, ${patient.barangay}`,
+        patient.age,
+        patient.visitType,
+        this.formatDate(patient.consultationDate),
+        patient.diagnosis,
+        patient.sex,
+        patient.status || "In Queue"
+      ]);
+
+      // Generate the Table
+      doc.autoTable({
+        head: [columns],
+        body: rows,
+        startY: 70,
+        styles: {
+          fontSize: 9,
+          cellPadding: 2,
+          valign: "middle",
+        },
+        headStyles: {
+          fillColor: [46, 204, 113], // Green Header
+          textColor: 255,
+          fontStyle: "bold",
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245], // Light Gray for Alternate Rows
+        },
+        margin: { top: 70 },
+      });
+
+      // Footer - Signature Area
+      doc.setFontSize(11);
+      doc.text("Prepared by:", 14, doc.autoTable.previous.finalY + 20);
+      doc.text("__________________________", 14, doc.autoTable.previous.finalY + 30);
+      doc.text("RHU Officer", 14, doc.autoTable.previous.finalY + 37);
+
+      // Save the PDF
+      doc.save(`Patient_Report_${date}.pdf`);
+    },
+    // Open Edit Page
+    editPatient(patient) {
+      Inertia.get(`/patients/edit/${patient.personalId}`);
+    },
+
+    // Status Badge Styling
+    statusBadgeClass(status) {
+      switch (status) {
+        case 'Completed':
+          return 'bg-green-100 text-green-800';
+        case 'Pending':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'Cancelled':
+          return 'bg-red-100 text-red-800';
+        case 'Follow-up Required':
+          return 'bg-orange-100 text-orange-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    },
+    addFilter() {
+      const words = this.searchQuery.trim().split(/\s+/);
+      words.forEach((word) => {
+        const cleanWord = word.trim().toLowerCase();
+        if (cleanWord && !this.filters.includes(cleanWord)) {
+          this.filters.push(cleanWord);
+        }
+      });
+      this.searchQuery = '';
+    },
+
+    removeFilter(index) {
+      this.filters.splice(index, 1);
+    },
+
     toggleFilterPanel() {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
-    // Open the modal with selected patient details
-    openModal(patient) {
-      this.selectedPatient = patient;
-      this.showModal = true;
+
+    toggleDiagnosisPanel() {
+      this.isDiagnosisPanelOpen = !this.isDiagnosisPanelOpen;
     },
-    // Close the modal
-    closeModal() {
-      this.showModal = false;
-      this.selectedPatient = null;
+
+    formatDate(dateStr) {
+      if (!dateStr) return '';
+      const dateObj = new Date(dateStr);
+      if (isNaN(dateObj)) return dateStr;
+      const options = { year: 'numeric', month: 'long', day: '2-digit' };
+      return dateObj.toLocaleDateString('en-US', options);
     },
-    // Go to the next page
+
+    toggleShowAllDiagnosis() {
+      this.showAllDiagnosis = !this.showAllDiagnosis;
+    },
+
+    sameDay(dateA, dateB) {
+      const dA = new Date(dateA);
+      const dB = new Date(dateB);
+      if (isNaN(dA) || isNaN(dB)) return false;
+      return dA.getFullYear() === dB.getFullYear() &&
+        dA.getMonth() === dB.getMonth() &&
+        dA.getDate() === dB.getDate();
+    },
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
-    // Go to the previous page
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
-    // Generate a CSV report of filtered patients
-    generateReport() {
-      const data = this.filteredPatients.map((patient) => ({
-        fullName: patient.fullName,
-        address: patient.address,
-        age: patient.age,
-        natureOfVisit: patient.natureOfVisit,
-        visitType: patient.visitType,
-        gender: patient.sex,
-        diagnosis: patient.diagnosis || 'N/A', // Include diagnosis if available
-      }));
 
-      const csvContent =
-        'data:text/csv;charset=utf-8,' +
-        ['Full Name,Address,Age,Nature of Visit,Visit Type,Gender,Diagnosis']
-          .concat(
-            data.map((row) =>
-              `${row.fullName},${row.address},${row.age},${row.natureOfVisit},${row.visitType},${row.gender},${row.diagnosis}`
-            )
-          )
-          .join('\n');
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'patient_report.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    triggerImport() {
+      this.$refs.fileInput.click();
     },
+
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        this.uploadCSV(formData);
+      }
+    },
+
+    uploadCSV(formData) {
+      Inertia.post('/services/patients/itrtable', formData, {
+        onSuccess: () => alert('Patients imported successfully!'),
+        onError: (errors) => {
+          console.error('Errors during upload:', errors);
+          alert('Failed to import CSV. Please check the file and try again.');
+        },
+      });
+    },
+
+    openModal(patient) {
+      this.selectedPatient = patient;
+      this.showModal = true;
+    },
+
+    closeModal() {
+      this.showModal = false;
+      this.selectedPatient = null;
+    },
+    printPatientRecord(patient) {
+      const printWindow = window.open('', '_blank');
+
+      const logoUrl = '/images/RHU%20Logo.png'; // Correct logo path
+
+      const content = `
+    <html>
+      <head>
+        <title>Individual Treatment Record</title>
+        <style>
+          body {
+            font-family: 'Helvetica', sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px solid #006400;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+          }
+          .header img {
+            width: 100px;
+            height: 100px;
+          }
+          .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #006400;
+            margin-top: 5px;
+          }
+          .sub-title {
+            font-size: 16px;
+            color: #555;
+          }
+          .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+          .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #006400;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+          }
+          .info {
+            margin-bottom: 6px;
+            font-size: 14px;
+          }
+          .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+          }
+          .signature {
+            width: 45%;
+          }
+          .vital-signs {
+            margin-top: 20px;
+            font-size: 14px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="${logoUrl}" alt="RHU Logo" />
+          <div class="title">Republic of the Philippines</div>
+          <div class="sub-title">Department of Health</div>
+          <div class="sub-title">Initao Rural Health Unit</div>
+          <p><strong>Address:</strong> Poblacion, Initao, Misamis Oriental | <strong>Contact:</strong> +63 XXX XXX XXXX</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Patient Information</div>
+          <p class="info"><strong>Full Name:</strong> ${patient.firstName} ${patient.middleName || ''} ${patient.lastName}</p>
+          <p class="info"><strong>Suffix:</strong> ${patient.suffix || 'N/A'}</p>
+          <p class="info"><strong>Address:</strong> ${patient.purok}, ${patient.barangay}</p>
+          <p class="info"><strong>Age:</strong> ${patient.age}</p>
+          <p class="info"><strong>Birthday:</strong> ${patient.birthdate}</p>
+          <p class="info"><strong>Contact:</strong> ${patient.contact}</p>
+          <p class="info"><strong>Gender:</strong> ${patient.sex}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Consultation Details</div>
+          <p class="info"><strong>Date:</strong> ${patient.consultationDate}</p>
+          <p class="info"><strong>Time:</strong> ${patient.consultationTime}</p>
+          <p class="info"><strong>Mode of Transaction:</strong> ${patient.modeOfTransaction}</p>
+        </div>
+
+        <div class="section vital-signs">
+          <div class="section-title">Vital Signs</div>
+          <p class="info"><strong>Blood Pressure:</strong> ${patient.bloodPressure}</p>
+          <p class="info"><strong>Temperature:</strong> ${patient.temperature}</p>
+          <p class="info"><strong>Height:</strong> ${patient.height}</p>
+          <p class="info"><strong>Weight:</strong> ${patient.weight}</p>
+          <p class="info"><strong>Waistline:</strong> ${patient.waistline || 'N/A'}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Medical Details</div>
+          <p class="info"><strong>Attending Provider:</strong> ${patient.providerName}</p>
+          <p class="info"><strong>Nature of Visit:</strong> ${patient.natureOfVisit}</p>
+          <p class="info"><strong>Consultation Type:</strong> ${patient.visitType}</p>
+          <p class="info"><strong>Chief Complaints:</strong> ${patient.chiefComplaints}</p>
+          <p class="info"><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
+          <p class="info"><strong>Treatment/Medication:</strong> ${patient.medication}</p>
+        </div>
+
+        <div class="footer">
+          <div class="signature">
+            <p><strong>Attending Physician Signature:</strong> ________________________</p>
+            <p><strong>Date:</strong> ________________________</p>
+          </div>
+          <div class="signature">
+            <p><strong>Patient/Guardian Signature:</strong> ________________________</p>
+            <p><strong>Date:</strong> ________________________</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+      printWindow.document.open();
+      printWindow.document.write(content);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+
+
+
   },
 };
 </script>

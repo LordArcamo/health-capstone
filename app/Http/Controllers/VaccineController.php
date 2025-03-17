@@ -30,12 +30,17 @@ class VaccineController extends Controller
         ])->get();
 
         // Get vaccinated patients with their history
-        $data = PersonalInformation::with(['vaccinationRecords' => function($query) {
-            $query->orderBy('dateOfVisit', 'desc');
-        }])
+        $data = PersonalInformation::with([
+            'vaccinationRecords' => function ($query) {
+                $query->orderBy('dateOfVisit', 'desc')
+                      ->with(['vaccineAppointments' => function ($q) {
+                          $q->orderBy('dateOfVisit', 'desc');
+                      }]);
+            }
+        ])
         ->whereHas('vaccinationRecords')
         ->get()
-        ->map(function($patient) {
+        ->map(function ($patient) {
             return [
                 'personalId' => $patient->personalId,
                 'firstName' => $patient->firstName,
@@ -48,22 +53,39 @@ class VaccineController extends Controller
                 'birthdate' => $patient->birthdate,
                 'contact' => $patient->contact,
                 'sex' => $patient->sex,
-                'vaccineCategory' => $patient->vaccinationRecords->first()->vaccineCategory,
-                'vaccineType' => $patient->vaccinationRecords->first()->vaccineType,
-                'nextAppointment' => $patient->vaccinationRecords->first()->nextAppointment,
-                'history' => $patient->vaccinationRecords->map(function($record) {
-                    return [
-                        'id' => $record->vaccinationId,
-                        'dateOfVisit' => $record->dateOfVisit,
-                        'vaccineType' => $record->vaccineType,
-                        'weight' => $record->weight,
-                        'height' => $record->height,
-                        'temperature' => $record->temperature,
-                        'antigenGiven' => $record->antigenGiven,
-                        'injectedBy' => $record->injectedBy,
-                        'exclusivelyBreastfed' => $record->exclusivelyBreastfed,
-                        'nextAppointment' => $record->nextAppointment,
-                    ];
+                'vaccineCategory' => optional($patient->vaccinationRecords->first())->vaccineCategory,
+                'vaccineType' => optional($patient->vaccinationRecords->first())->vaccineType,
+                'nextAppointment' => optional($patient->vaccinationRecords->first())->nextAppointment,
+                'history' => $patient->vaccinationRecords->flatMap(function ($record) {
+                    return collect([
+                        [
+                            'id' => $record->vaccinationId,
+                            'dateOfVisit' => $record->dateOfVisit,
+                            'vaccineType' => $record->vaccineType,
+                            'weight' => $record->weight,
+                            'height' => $record->height,
+                            'temperature' => $record->temperature,
+                            'antigenGiven' => $record->antigenGiven,
+                            'injectedBy' => $record->injectedBy,
+                            'exclusivelyBreastfed' => $record->exclusivelyBreastfed,
+                            'nextAppointment' => $record->nextAppointment,
+                            'type' => 'record'
+                        ]
+                    ])->concat($record->vaccineAppointments->map(function ($appointment) {
+                        return [
+                            'id' => $appointment->vacAppointmentId,
+                            'dateOfVisit' => $appointment->dateOfVisit,
+                            'vaccineType' => $appointment->vaccineType, // Appointments may not have this
+                            'weight' => $appointment->weight,
+                            'height' => $appointment->height,
+                            'temperature' => $appointment->temperature,
+                            'antigenGiven' => $appointment->antigenGiven,
+                            'injectedBy' => $appointment->injectedBy,
+                            'exclusivelyBreastfed' => $appointment->exclusivelyBreastfed,
+                            'nextAppointment' => $appointment->nextAppointment,
+                            'type' => 'appointment'
+                        ];
+                    }));
                 })
             ];
         });

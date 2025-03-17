@@ -16,6 +16,7 @@ class VaccineAppointment extends Model
 
     protected $fillable = [
         'vaccinationId',
+        'vaccineType',
         'dateOfVisit',
         'weight',
         'height',
@@ -39,9 +40,9 @@ class VaccineAppointment extends Model
     /**
      * Get the vaccination record that this appointment belongs to
      */
-    public function vaccinationRecord(): BelongsTo
+    public function vaccinationRecord()
     {
-        return $this->belongsTo(VaccinationRecord::class, 'vaccinationId');
+        return $this->belongsTo(VaccinationRecord::class, 'vaccinationId', 'vaccinationId');
     }
 
     /**
