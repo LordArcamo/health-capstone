@@ -19,13 +19,6 @@
           <option value="this_year">This Year</option>
         </select>
       </div>
-      <div class="filter-item">
-        <label for="gender" class="filter-label">Gender</label>
-        <select v-model="selectedGender" id="gender" class="filter-select">
-          <option value="">All Genders</option>
-          <option v-for="gender in genders" :key="gender" :value="gender">{{ gender }}</option>
-        </select>
-      </div>
     </div>
 
     <!-- Chart -->
@@ -33,154 +26,164 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, ref, computed } from "vue";
-import VueApexCharts from "vue3-apexcharts";
+<script setup>
+import { ref, computed } from "vue";
+import apexchart from "vue3-apexcharts";
 import moment from "moment";
 
-export default defineComponent({
-  name: "TotalPatientsChart",
-  components: {
-    apexchart: VueApexCharts,
-  },
-  props: {
-    monthlyStats: {
-      type: Array,
-      required: true,
-      default: () => Array(12).fill(0),
-    },
-  },
-  setup(props) {
-    const selectedTimeframe = ref("this_year");
-    const selectedGender = ref("");
-    const genders = ["Male", "Female"];
-
-    const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December",
-    ];
-
-    // Compute filtered data dynamically based on timeframe
-    const filteredData = computed(() => {
-      const now = moment();
-
-      return props.monthlyStats.map((patients, index) => {
-        const monthStart = moment().month(index).startOf("month");
-        const weekStart = moment().month(index).startOf("week");
-
-        switch (selectedTimeframe.value) {
-          case "this_year":
-            return patients; // Show all months
-          case "this_month":
-            return monthStart.isSame(now, "month") ? patients : 0;
-          case "this_week":
-            return weekStart.isSame(now, "week") ? patients : 0;
-          case "today":
-            return index === now.month() ? (now.date() === 1 ? patients : 0) : 0;
-          default:
-            return patients;
-        }
-      });
-    });
-
-    // Chart series based on filtered data
-    const chartSeries = computed(() => [
-      {
-        name: "Total Patients",
-        data: filteredData.value,
-      },
-    ]);
-
-    const options = {
-      chart: {
-        type: "area",
-        toolbar: { show: true },
-        zoom: { enabled: true },
-        animations: {
-          enabled: true,
-          easing: "easeinout",
-          speed: 800,
-        },
-      },
-      xaxis: {
-        categories: months,
-        labels: {
-          style: {
-            fontSize: "12px",
-            fontWeight: "bold",
-            colors: "#333",
-          },
-          rotate: -30,
-        },
-        axisBorder: {
-          show: true,
-          color: "#D1D5DB",
-          height: 1,
-        },
-        axisTicks: {
-          show: true,
-          color: "#D1D5DB",
-        },
-      },
-      yaxis: {
-        labels: {
-          style: {
-            fontSize: "12px",
-            fontWeight: "bold",
-            colors: "#333",
-          },
-        },
-        axisBorder: { show: false },
-        axisTicks: { show: false },
-        decimalsInFloat: 0,
-      },
-      colors: ["#1E90FF"],
-      stroke: {
-        curve: "smooth",
-        width: 3,
-      },
-      markers: {
-        size: 5,
-        colors: ["#1E90FF"],
-        strokeColors: "#fff",
-        strokeWidth: 2,
-        hover: { size: 7 },
-      },
-      fill: {
-        type: "gradient",
-        gradient: {
-          shade: "light",
-          gradientToColors: ["#87CEFA"],
-          stops: [0, 100],
-          opacityFrom: 0.7,
-          opacityTo: 0.2,
-        },
-      },
-      grid: {
-        borderColor: "#E5E7EB",
-        strokeDashArray: 4,
-      },
-      tooltip: {
-        enabled: true,
-        theme: "light",
-        style: { fontSize: "14px" },
-        marker: { show: true },
-        y: {
-          formatter: (val) => `${val} patients`,
-          title: { formatter: () => "Patients: " },
-        },
-      },
-    };
-
-    return {
-      options,
-      chartSeries,
-      selectedTimeframe,
-      selectedGender,
-      genders,
-    };
+// Props
+const props = defineProps({
+  monthlyStats: {
+    type: Array,
+    required: true,
+    default: () => Array(12).fill(0),
   },
 });
+
+// Reactive state
+const selectedTimeframe = ref("this_year");
+const selectedGender = ref("");
+const genders = ["Male", "Female"];
+
+const months = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+// Compute filtered data dynamically based on timeframe
+const filteredData = computed(() => {
+  const now = moment();
+
+  return props.monthlyStats.map((patients, index) => {
+    // Determine start of the month and week for filtering
+    const monthStart = moment().month(index).startOf("month");
+    const weekStart = moment().month(index).startOf("isoWeek");
+
+    // Case: `monthlyStats` is an array of numbers (count per month)
+    if (typeof patients === "number") {
+      switch (selectedTimeframe.value) {
+        case "this_year":
+          return patients;
+        case "this_month":
+          return monthStart.isSame(now, "month") ? patients : 0;
+        case "this_week":
+          return weekStart.isSame(now, "week") ? patients : 0;
+        case "today":
+          return index === now.month() && now.date() === 1 ? patients : 0;
+        default:
+          return patients;
+      }
+    }
+
+    // Case: `monthlyStats` is an array of patient objects
+    const filteredPatients = Array.isArray(patients)
+      ? patients.filter(patient => !selectedGender.value || patient.gender === selectedGender.value)
+      : [];
+
+    switch (selectedTimeframe.value) {
+      case "this_year":
+        return filteredPatients.length;
+      case "this_month":
+        return monthStart.isSame(now, "month") ? filteredPatients.length : 0;
+      case "this_week":
+        return weekStart.isSame(now, "week") ? filteredPatients.length : 0;
+      case "today":
+        return monthStart.isSame(now, "month") && now.date() === 1 ? filteredPatients.length : 0;
+      default:
+        return filteredPatients.length;
+    }
+  });
+});
+
+// Chart series
+const chartSeries = computed(() => [
+  {
+    name: selectedGender.value ? `${selectedGender.value} Patients` : "Total Patients",
+    data: filteredData.value,
+  },
+]);
+
+// Chart options
+const options = {
+  chart: {
+    type: "area",
+    toolbar: { show: true },
+    zoom: { enabled: true },
+    animations: {
+      enabled: true,
+      easing: "easeinout",
+      speed: 800,
+    },
+  },
+  xaxis: {
+    categories: months,
+    labels: {
+      style: {
+        fontSize: "12px",
+        fontWeight: "bold",
+        colors: "#333",
+      },
+      rotate: -30,
+    },
+    axisBorder: {
+      show: true,
+      color: "#D1D5DB",
+      height: 1,
+    },
+    axisTicks: {
+      show: true,
+      color: "#D1D5DB",
+    },
+  },
+  yaxis: {
+    labels: {
+      style: {
+        fontSize: "12px",
+        fontWeight: "bold",
+        colors: "#333",
+      },
+    },
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    decimalsInFloat: 0,
+  },
+  colors: ["#1E90FF"],
+  stroke: {
+    curve: "smooth",
+    width: 3,
+  },
+  markers: {
+    size: 5,
+    colors: ["#1E90FF"],
+    strokeColors: "#fff",
+    strokeWidth: 2,
+    hover: { size: 7 },
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "light",
+      gradientToColors: ["#87CEFA"],
+      stops: [0, 100],
+      opacityFrom: 0.7,
+      opacityTo: 0.2,
+    },
+  },
+  grid: {
+    borderColor: "#E5E7EB",
+    strokeDashArray: 4,
+  },
+  tooltip: {
+    enabled: true,
+    theme: "light",
+    style: { fontSize: "14px" },
+    marker: { show: true },
+    y: {
+      formatter: (val) => `${val} patients`,
+      title: { formatter: () => "Patients: " },
+    },
+  },
+};
 </script>
 
 <style scoped>

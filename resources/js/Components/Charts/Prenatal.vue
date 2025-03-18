@@ -7,17 +7,14 @@
     </div>
 
     <div class="filters-container flex items-center gap-6 py-4">
-      <!-- Period Filter -->
+            <!-- Barangay Filter (NEW) -->
       <div class="filter flex flex-col items-start">
-        <label for="period-filter" class="filter-label">Period:</label>
-        <select id="period-filter" v-model="selectedPeriod" class="filter-select">
-          <option value="all">All Periods</option>
-          <option value="trimester1">Trimester 1</option>
-          <option value="trimester2">Trimester 2</option>
-          <option value="trimester3">Trimester 3</option>
-          <option value="trimester4">Trimester 4</option>
-          <option value="trimester5">Trimester 5</option>
-          <option value="postpartum">Postpartum</option>
+        <label for="barangay-filter" class="filter-label">Barangay:</label>
+        <select id="barangay-filter" v-model="selectedBarangay" class="filter-select">
+          <option value="all">All Barangays</option>
+          <option v-for="barangay in uniqueBarangays" :key="barangay" :value="barangay">
+            {{ barangay }}
+          </option>
         </select>
       </div>
       <!-- Timeframe Filter -->
@@ -66,7 +63,7 @@ const props = defineProps({
   },
 });
 
-const selectedPeriod = ref("all");
+const selectedBarangay = ref("all");
 const selectedAgeGroup = ref("all");
 const selectedTimeframe = ref("this_year");
 
@@ -77,6 +74,11 @@ const ageRanges = {
   "50+": [51, Infinity],
 };
 
+const uniqueBarangays = computed(() => {
+  const barangays = props.prenatal.map((record) => record.barangay);
+  return [...new Set(barangays)].sort();
+});
+
 watch(() => props.prenatal, (newValue) => {
   console.log("Prenatal Data from Laravel:", newValue);
 }, { immediate: true });
@@ -85,16 +87,8 @@ watch(() => props.prenatal, (newValue) => {
 const filteredPrenatal = computed(() => {
   let data = [...props.prenatal];
 
-  
-  if (selectedPeriod.value !== "all") {
-    data = data.filter(record => {
-      const recordPeriod = String(record.period_type).trim().toLowerCase();
-      const selectedFilter = String(selectedPeriod.value).trim().toLowerCase();
-
-      console.log(`Checking Record: ${recordPeriod} vs Filter: ${selectedFilter}`); // Debug
-
-      return recordPeriod === selectedFilter;
-    });
+  if (selectedBarangay.value !== "all") {
+    data = data.filter(person => person.barangay === selectedBarangay.value);
   }
 
   if (selectedAgeGroup.value !== "all") {
@@ -158,7 +152,7 @@ const chartSeries = computed(() => [{
 
 const selectedFilters = computed(() => {
   const filters = [];
-  if (selectedPeriod.value !== "all") filters.push(`Period: ${selectedPeriod.value}`);
+  if (selectedBarangay.value !== "all") filters.push(`Barangay: ${selectedBarangay.value}`)
   if (selectedAgeGroup.value !== "all") filters.push(`Age: ${selectedAgeGroup.value}`);
   if (selectedTimeframe.value !== "this_year") filters.push(`Timeframe: ${selectedTimeframe.value.replace('_', ' ')}`);
   return filters.length ? filters.join(" | ") : "No filters applied";

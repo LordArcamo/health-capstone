@@ -1,8 +1,9 @@
 <template>
-  <div v-if="showModal && selectedPatient" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
+  <div v-if="showModal && selectedPatient"
+    class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-8 relative">
       <!-- Close Button -->
-      <button @click="$emit('close')" 
+      <button @click="$emit('close')"
         class="absolute top-4 right-4 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-700 transition">
         &times;
       </button>
@@ -16,17 +17,21 @@
         </div>
         <div>
           <h2 class="text-2xl font-bold text-gray-800">Individual Treatment Records</h2>
-          <p class="text-gray-600">Details for {{ selectedPatient.firstName }} {{ selectedPatient.middleName || '' }} {{ selectedPatient.lastName }}</p>
+          <p class="text-gray-600">Details for {{ selectedPatient.firstName }} {{ selectedPatient.middleName || '' }} {{
+            selectedPatient.lastName }}</p>
         </div>
       </div>
 
       <!-- Patient Details Section -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Column 1 -->
+
+
+        <!-- Column 1: Basic Information -->
         <div>
           <h3 class="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
           <ul class="space-y-2">
-            <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName || '' }} {{ selectedPatient.lastName }}</li>
+            <li><strong>Full Name:</strong> {{ selectedPatient.firstName }} {{ selectedPatient.middleName || '' }} {{
+              selectedPatient.lastName }}</li>
             <li><strong>Suffix:</strong> {{ selectedPatient.suffix || 'N/A' }}</li>
             <li><strong>Address:</strong> {{ selectedPatient.purok }}, {{ selectedPatient.barangay }}</li>
             <li><strong>Age:</strong> {{ selectedPatient.age }}</li>
@@ -36,7 +41,7 @@
           </ul>
         </div>
 
-        <!-- Column 2 -->
+        <!-- Column 2: Consultation Details -->
         <div>
           <h3 class="text-lg font-semibold text-gray-700 mb-4">Consultation Details</h3>
           <ul class="space-y-2">
@@ -49,18 +54,51 @@
             <li><strong>Weight:</strong> {{ selectedPatient.weight }}</li>
           </ul>
         </div>
+
+
+        <!-- Prescription Details -->
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Prescription Details</h3>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div v-if="selectedPatient.medications" class="space-y-4">
+              <template v-for="(medication, index) in selectedPatient.medications.split(';;')" :key="index">
+                <div v-if="medication" class="p-3 bg-white rounded-md shadow-sm">
+                  <ul class="space-y-2">
+                    <li><strong>Medication:</strong> {{ medication || 'N/A' }}</li>
+                    <li><strong>Dosage:</strong> {{ selectedPatient.dosages?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Frequency:</strong> {{ selectedPatient.frequencies?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Duration:</strong> {{ selectedPatient.durations?.split(';;')[index] || 'N/A' }}</li>
+                    <li><strong>Notes:</strong> {{ selectedPatient.prescription_notes?.split(';;')[index] || 'N/A' }}
+                    </li>
+                  </ul>
+                </div>
+              </template>
+            </div>
+            <div v-else class="text-gray-500 italic">No prescriptions available</div>
+          </div>
+        </div>
+
+        <!-- Additional Details -->
+        <div class="mt-8">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
+          <ul class="space-y-2">
+            <li><strong>Name of Attending Provider:</strong> {{ selectedPatient.providerName }}</li>
+            <li><strong>Nature of Visit:</strong> {{ selectedPatient.natureOfVisit }}</li>
+            <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
+            <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
+            <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
+          </ul>
+        </div>
+
       </div>
 
       <!-- Footer Actions -->
       <div class="mt-6 flex justify-end gap-4">
-        <button @click="$emit('close')" 
+        <button @click="$emit('close')"
           class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
           Close
         </button>
-        <button @click="printRecord(selectedPatient)" 
-          class="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
-          Print Record
-        </button>
+
       </div>
     </div>
   </div>
@@ -76,12 +114,6 @@ export default {
     selectedPatient: {
       type: Object,
       required: true,
-    },
-  },
-  methods: {
-    printRecord(patient) {
-      console.log("Printing record for:", patient);
-      // Add your print logic here
     },
   },
 };

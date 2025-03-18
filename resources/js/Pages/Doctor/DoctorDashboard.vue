@@ -6,6 +6,8 @@ import Chart from 'chart.js/auto';
 import { format } from 'date-fns';
 import ViewPatientModalGeneral from '@/Components/Modals/ViewPatientModalGeneral.vue';
 import PrenatalModal from '@/Components/Modals/ViewPatientModalPrenatal.vue';
+import { jsPDF } from "jspdf";
+import 'jspdf-autotable';
 
 // Props from backend
 const props = defineProps({
@@ -191,6 +193,301 @@ const viewPatientDetails = (patient) => {
   console.warn('Invalid patient data for view details:', patient);
 };
 
+const printPatientDetails = (patient) => {
+  console.log('Print Details - Patient Data:', patient);
+
+  if (patient?.visitType === 'Prenatal' && patient?.prenatalConsultationDetailsID) {
+    console.log('Printing Prenatal Checkup Record for ID:', patient.prenatalConsultationDetailsID);
+    printPrenatalRecord(patient); // ✅ Correct function call
+    return;
+  }
+
+  if (patient?.visitType === 'General' && patient?.consultationDetailsID) {
+    console.log('Printing General Patient Record for ID:', patient.consultationDetailsID);
+    printGeneralRecord(patient); // ✅ Correct function call
+    return;
+  }
+
+  console.warn('Invalid patient data for printing:', patient);
+};
+
+
+
+function printGeneralRecord(patient) {
+  const printWindow = window.open('', '_blank');
+
+  const logoUrl = '/images/RHU%20Logo.png'; // Correct logo path
+
+  const content = `
+    <html>
+      <head>
+        <title>Individual Treatment Record</title>
+        <style>
+          body {
+            font-family: 'Helvetica', sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px solid #006400;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+          }
+          .header img {
+            width: 100px;
+            height: 100px;
+          }
+          .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #006400;
+            margin-top: 5px;
+          }
+          .sub-title {
+            font-size: 16px;
+            color: #555;
+          }
+          .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+          .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #006400;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+          }
+          .info {
+            margin-bottom: 6px;
+            font-size: 14px;
+          }
+          .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+          }
+          .signature {
+            width: 45%;
+          }
+          .vital-signs {
+            margin-top: 20px;
+            font-size: 14px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="${logoUrl}" alt="RHU Logo" />
+          <div class="title">Republic of the Philippines</div>
+          <div class="sub-title">Department of Health</div>
+          <div class="sub-title">Initao Rural Health Unit</div>
+          <p><strong>Address:</strong> Poblacion, Initao, Misamis Oriental | <strong>Contact:</strong> +63 XXX XXX XXXX</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Patient Information</div>
+          <p class="info"><strong>Full Name:</strong> ${patient.firstName} ${patient.middleName || ''} ${patient.lastName}</p>
+          <p class="info"><strong>Suffix:</strong> ${patient.suffix || 'N/A'}</p>
+          <p class="info"><strong>Address:</strong> ${patient.purok}, ${patient.barangay}</p>
+          <p class="info"><strong>Age:</strong> ${patient.age}</p>
+          <p class="info"><strong>Birthday:</strong> ${patient.birthdate}</p>
+          <p class="info"><strong>Contact:</strong> ${patient.contact}</p>
+          <p class="info"><strong>Gender:</strong> ${patient.sex}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Consultation Details</div>
+          <p class="info"><strong>Date:</strong> ${patient.consultationDate}</p>
+          <p class="info"><strong>Time:</strong> ${patient.consultationTime}</p>
+          <p class="info"><strong>Mode of Transaction:</strong> ${patient.modeOfTransaction}</p>
+        </div>
+
+        <div class="section vital-signs">
+          <div class="section-title">Vital Signs</div>
+          <p class="info"><strong>Blood Pressure:</strong> ${patient.bloodPressure}</p>
+          <p class="info"><strong>Temperature:</strong> ${patient.temperature}</p>
+          <p class="info"><strong>Height:</strong> ${patient.height}</p>
+          <p class="info"><strong>Weight:</strong> ${patient.weight}</p>
+          <p class="info"><strong>Waistline:</strong> ${patient.waistline || 'N/A'}</p>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Medical Details</div>
+          <p class="info"><strong>Attending Provider:</strong> ${patient.providerName}</p>
+          <p class="info"><strong>Nature of Visit:</strong> ${patient.natureOfVisit}</p>
+          <p class="info"><strong>Consultation Type:</strong> ${patient.visitType}</p>
+          <p class="info"><strong>Chief Complaints:</strong> ${patient.chiefComplaints}</p>
+          <p class="info"><strong>Diagnosis:</strong> ${patient.diagnosis}</p>
+          <p class="info"><strong>Treatment/Medication:</strong> ${patient.medication}</p>
+        </div>
+
+        <div class="footer">
+          <div class="signature">
+            <p><strong>Attending Physician Signature:</strong> ________________________</p>
+            <p><strong>Date:</strong> ________________________</p>
+          </div>
+          <div class="signature">
+            <p><strong>Patient/Guardian Signature:</strong> ________________________</p>
+            <p><strong>Date:</strong> ________________________</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  printWindow.document.open();
+  printWindow.document.write(content);
+  printWindow.document.close();
+  printWindow.print();
+}
+
+function printPrenatalRecord(patient) {
+  const doc = new jsPDF('portrait', 'mm', 'a4');
+  const dateGenerated = new Date().toLocaleDateString();
+  const logoUrl = "/images/RHU%20Logo.png"; // Ensure this path is correct
+
+  const img = new Image();
+  img.src = logoUrl;
+
+  img.onload = function () {
+    // RHU Logo
+    doc.addImage(img, 'PNG', 10, 10, 25, 25);
+
+    // Header
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(0, 102, 0);
+    doc.text('Republic of the Philippines', 40, 15);
+    doc.text('Department of Health', 40, 23);
+    doc.text('Initao Rural Health Unit', 40, 31);
+    doc.setFontSize(10);
+    doc.setTextColor(50);
+    doc.text(`Generated on: ${dateGenerated}`, 150, 15);
+
+    // Title
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Prenatal and Health Record', 105, 50, { align: 'center' });
+
+    // Basic Information
+    doc.setFontSize(12);
+    doc.setTextColor(0, 102, 0);
+    doc.text('Basic Information', 14, 60);
+    doc.setTextColor(0);
+
+    const basicInfo = [
+      ['Full Name:', `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`],
+      ['Address:', `${patient.purok}, ${patient.barangay}`],
+      ['Age:', patient.age],
+      ['Birthday:', patient.birthdate],
+      ['Mode of Transaction:', patient.modeOfTransaction],
+      ['Consultation Date:', patient.consultationDate],
+      ['Consultation Time:', patient.consultationTime],
+    ];
+
+    doc.autoTable({
+      startY: 65,
+      body: basicInfo,
+      theme: 'plain',
+      styles: { fontSize: 10, textColor: 50 },
+      columnStyles: {
+        0: { fontStyle: 'bold', halign: 'left', cellWidth: 50 },
+        1: { halign: 'left' }
+      }
+    });
+
+    // Health Details
+    doc.setFontSize(12);
+    doc.setTextColor(0, 102, 0);
+    doc.text('Health Details', 14, doc.lastAutoTable.finalY + 10);
+    doc.setTextColor(0);
+
+    const healthInfo = [
+      ['Blood Pressure:', patient.bloodPressure],
+      ['Temperature:', patient.temperature],
+      ['Height:', patient.height],
+      ['Weight:', patient.weight],
+      ['Attending Provider:', patient.providerName],
+      ['Name of Spouse:', patient.nameOfSpouse],
+      ['Emergency Contact:', patient.emergencyContact],
+    ];
+
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 15,
+      body: healthInfo,
+      theme: 'plain',
+      styles: { fontSize: 10, textColor: 50 },
+      columnStyles: {
+        0: { fontStyle: 'bold', halign: 'left', cellWidth: 50 },
+        1: { halign: 'left' }
+      }
+    });
+
+    // Reproductive History
+    doc.setFontSize(12);
+    doc.setTextColor(0, 102, 0);
+    doc.text('Reproductive History', 14, doc.lastAutoTable.finalY + 10);
+    doc.setTextColor(0);
+
+    const reproductiveInfo = [
+      ['4Ps Member:', patient.fourMember],
+      ['Philhealth Status:', patient.philhealthStatus],
+      ['Philhealth ID Number:', patient.philhealthNo],
+      ['Menarche:', patient.menarche],
+      ['Onset of Sexual Intercourse:', patient.sexualOnset],
+      ['Period/Duration:', patient.periodDuration],
+      ['Birth Control Method:', patient.birthControl],
+      ['Interval/Cycle:', patient.intervalCycle],
+      ['Menopause:', patient.menopause],
+      ['LMP:', patient.lmp],
+      ['EDC:', patient.edc],
+      ['Gravidity:', patient.gravidity],
+      ['Parity:', patient.parity],
+      ['Term:', patient.term],
+      ['Preterm:', patient.preterm],
+      ['Abortion:', patient.abortion],
+      ['Living:', patient.living],
+    ];
+
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 15,
+      body: reproductiveInfo,
+      theme: 'plain',
+      styles: { fontSize: 10, textColor: 50 },
+      columnStyles: {
+        0: { fontStyle: 'bold', halign: 'left', cellWidth: 70 },
+        1: { halign: 'left' }
+      }
+    });
+
+    // Footer with Two Columns for Signatures
+    doc.setFontSize(10);
+    const finalY = doc.lastAutoTable.finalY + 30;
+
+    doc.line(20, finalY, 80, finalY);  // Provider Signature Line
+    doc.line(130, finalY, 190, finalY);  // Patient/Guardian Signature Line
+
+    doc.text('Attending Physician Signature', 20, finalY + 5);
+    doc.text('Patient/Guardian Signature', 130, finalY + 5);
+
+    // Save the PDF
+    doc.save(`Prenatal_Record_${patient.firstName}_${patient.lastName}.pdf`);
+  };
+
+  img.onerror = function () {
+    alert('Failed to load the RHU logo. Please check the image path.');
+  };
+}
+
+
 const openModal = (modalType, patient) => {
   selectedPatient.value = patient;
   currentModal.value = modalType;
@@ -215,7 +512,7 @@ console.log('Latest Patients:', props.latestPatients);
 
 
 const markAsCancelled = (patient) => {
-  const data = patient.visitType === 'Prenatal' 
+  const data = patient.visitType === 'Prenatal'
     ? { prenatalConsultationDetailsID: patient.prenatalConsultationDetailsID }
     : { consultationDetailsID: patient.consultationDetailsID };
 
@@ -228,68 +525,68 @@ const markAsCancelled = (patient) => {
 };
 
 onMounted(() => {
-    console.log("Chart Data:", props.chartData);
+  console.log("Chart Data:", props.chartData);
 
-    if (!props.chartData || !props.chartData.datasets) {
-        console.error("Chart data is missing or incorrectly formatted!");
-        return;
-    }
+  if (!props.chartData || !props.chartData.datasets) {
+    console.error("Chart data is missing or incorrectly formatted!");
+    return;
+  }
 
-    const ctx = document.getElementById('criticalCasesBarChart')?.getContext('2d');
-    if (!ctx) {
-        console.error("Canvas not found for chart!");
-        return;
-    }
+  const ctx = document.getElementById('criticalCasesBarChart')?.getContext('2d');
+  if (!ctx) {
+    console.error("Canvas not found for chart!");
+    return;
+  }
 
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: props.chartData.labels,
-            datasets: props.chartData.datasets, 
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: props.chartData.labels,
+      datasets: props.chartData.datasets,
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false,
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false, 
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let dataset = context.dataset;
-                            let monthIndex = context.dataIndex;
-                            let diagnosisName = dataset.diagnosis[monthIndex] || 'N/A'; 
-                            let count = context.raw; 
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              let dataset = context.dataset;
+              let monthIndex = context.dataIndex;
+              let diagnosisName = dataset.diagnosis[monthIndex] || 'N/A';
+              let count = context.raw;
 
-                            return `${diagnosisName}: ${count}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false,
-                    },
-                    barPercentage: 1.3, 
-                    categoryPercentage: 1.0, 
-                },
-                y: {
-                    ticks: {
-                        beginAtZero: true,
-                        stepSize: 1,
-                        precision: 1.0,
-                    },
-                },
-            },
-            elements: {
-                bar: {
-                    barThickness: 50, 
-                    maxBarThickness: 80, 
-                },
-            },
+              return `${diagnosisName}: ${count}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+          barPercentage: 1.3,
+          categoryPercentage: 1.0,
         },
-    });
+        y: {
+          ticks: {
+            beginAtZero: true,
+            stepSize: 1,
+            precision: 1.0,
+          },
+        },
+      },
+      elements: {
+        bar: {
+          barThickness: 50,
+          maxBarThickness: 80,
+        },
+      },
+    },
+  });
 });
 
 // Dynamic date
@@ -343,7 +640,7 @@ const initCharts = () => {
   new Chart(appointmentsCtx, {
     type: 'line',
     data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       datasets: [
         {
           label: 'General Consultations',
@@ -823,7 +1120,7 @@ onMounted(() => {
 
               <button @click="nextLatestPage" :disabled="currentLatestPage === totalLatestPages"
                 class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed">
-                Next 
+                Next
               </button>
             </div>
 
