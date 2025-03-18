@@ -32,11 +32,6 @@ const props = defineProps({
   allDates: Array,
   totalPatients: Number,
   vaccinations: Number,
-  cases: Number,
-  monthlyStats: Array,
-  risk: Number,
-  lineChart: Object,
-  lineChart2: Object,
   monthly: Array,
   casesData: {
     type: Object,
@@ -46,14 +41,6 @@ const props = defineProps({
     })
   },
   prenatal: Array,
-  mentalHealthStats: {
-    type: Object,
-    required: true,
-    default: () => ({
-      labels: [],
-      data: []
-    })
-  },
 });
 console.log('Dates', props.allDates);
 console.log('Vaccine Data', props.vaccinenatedPatients);
@@ -62,18 +49,21 @@ const showFilters = ref(false);
 
 const summaryStats = ref({
   totalPatients: props.totalPatients || 0,
+  topBarangays: props.topBarangays || 0,
   vaccinations: props.vaccinations || 0,
   cases: props.cases || 0,
   risk: props.risk || 0
 });
 
 const totalPatients = ref(props.totalPatients || 0);
+const topBarangays = ref(props.topBarangays || 0);
 const vaccinations = ref(props.vaccinations || 0);
 const cases = ref(props.cases || 0);
 const risk = ref(props.risk || 0);
 
 const updateStats = (stats) => {
   summaryStats.value.totalPatients = stats.totalPatients || 0;
+  summaryStats.value.topBarangays = stats.topBarangays || 0;
   summaryStats.value.vaccinations = stats.vaccinations || 0;
   summaryStats.value.cases = stats.cases || 0;
   summaryStats.value.risk = stats.risk || 0;
@@ -126,7 +116,7 @@ watch(filters, (newVal) => {
     router.get('/system-analytics', newVal, {
       preserveState: true,
       preserveScroll: true,
-      only: ['totalPatients', 'vaccinations', 'cases', 'risk', 'barChart', 'pieChart', 'lineChart', 'casesData', 'mentalHealthStats']
+      only: ['totalPatients', 'vaccinations', 'cases', 'risk', 'barChart', 'pieChart', 'lineChart', 'casesData', 'mentalHealthStats', 'topBarangays']
     });
   }, 500); // Debounce by 500ms to prevent infinite calls
 }, { deep: true });
@@ -215,7 +205,7 @@ onBeforeUnmount(() => {
       <h2 class="text-3xl font-bold text-gray-800 mb-8">Analytics Overview</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
         <div class="hover:-translate-y-1 transition">
-          <TotalPatients :filters="filters" :monthly-stats="monthlyStats" />
+          <TotalPatients :filters="filters" :monthlyStats="monthlyStats" />
         </div>
         <div class="hover:-translate-y-1 transition">
           <ReferedPatients :filters="filters" :pie-chart="referredData" />

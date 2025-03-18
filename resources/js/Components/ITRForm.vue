@@ -195,7 +195,6 @@
                 <option value="Child Care">Child Care</option>
                 <option value="Injury">Injury</option>
                 <option value="Adult Immunization">Adult Immunization</option>
-                <option value="Family Planning">Family Planning</option>
                 <option value="Postpartum">Postpartum</option>
                 <option value="Tuberculosis">Tuberculosis</option>
                 <option value="Child Immunization">Child Immunization</option>
