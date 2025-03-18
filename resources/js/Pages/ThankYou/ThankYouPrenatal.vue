@@ -1,7 +1,20 @@
 <script setup>
 import NewLayout from '@/Layouts/MainLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
+import { Link, usePage } from '@inertiajs/vue3';  
+import { computed, watchEffect } from 'vue';
+
+// Ensure user role is extracted safely
+const userRole = computed(() => usePage().props?.auth?.user?.role || 'guest');
+
+const dashboardLink = computed(() => 
+    userRole.value === 'doctor' ? '/doctor-dashboard' : '/dashboard'
+);
+
+watchEffect(() => {
+    console.log("User Role:", userRole.value);
+    console.log("Inertia Props:", usePage().props);
+});
 </script>
 
 <template>
@@ -24,7 +37,7 @@ import { Link } from '@inertiajs/vue3';  // Import Link from Inertia
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Dashboard Link -->
-            <Link href="/dashboard" class="btn-pink-gradient">Go to Dashboard</Link>
+            <Link :href="dashboardLink"  class="btn-pink-gradient">Go to Dashboard</Link>
             <!-- Check Again Link -->
             <Link href="/checkup" class="btn-pink-gradient">Submit Another Form</Link>
             <!-- View Records Link -->

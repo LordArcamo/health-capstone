@@ -222,7 +222,9 @@ class DoctorCheckupController extends Controller
             }
 
             DB::commit();
-            return Inertia::location('/checkup/thank-you/itr');
+            return Inertia::render('ThankYouItr', [
+                'userRole' => auth()->user()->role ?? 'guest', // Pass userRole properly
+            ]);
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;
