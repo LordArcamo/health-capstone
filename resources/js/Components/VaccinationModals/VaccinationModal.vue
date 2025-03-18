@@ -977,11 +977,11 @@ export default {
           // Show success message
           this.showAlert = true;
           this.alertMessage = "Vaccination record saved successfully!";
-          
+
           // Close modal immediately
           this.$emit('close');
           this.showModal = false;
-          
+
           // Reload the page after a short delay
           setTimeout(() => {
             router.reload({ preserveScroll: true });
