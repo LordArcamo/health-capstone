@@ -24,7 +24,7 @@ watchEffect(() => {
       <div class="w-full max-w-4xl bg-white shadow-lg rounded-xl overflow-hidden">
         <!-- Header Section -->
         <div class="bg-gradient-to-r from-green-500 via-green-500 to-green-400 text-white py-10 px-6">
-          <h1 class="text-4xl font-extrabold">🎉 Thank You!</h1>
+          <h1 class="text-4xl font-extrabold">🎉 Thank YYou!</h1>
           <p class="mt-2 text-lg">
             Your <span class="font-semibold capitalize"> General </span> Checkup form has been successfully submitted.
           </p>
