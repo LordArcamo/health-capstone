@@ -11,13 +11,12 @@
     <!-- Filters Section -->
     <div class="filters-container">
       <div class="filter-item">
-        <label for="timeframe" class="filter-label">Timeframe</label>
-        <select v-model="selectedTimeframe" id="timeframe" class="filter-select">
-          <option value="today">Today</option>
-          <option value="this_week">This Week</option>
-          <option value="this_month">This Month</option>
-          <option value="this_year">This Year</option>
-        </select>
+        <label for="startDate" class="filter-label">Start Date</label>
+        <input type="date" v-model="startDate" id="startDate" class="filter-input" />
+      </div>
+      <div class="filter-item">
+        <label for="endDate" class="filter-label">End Date</label>
+        <input type="date" v-model="endDate" id="endDate" class="filter-input" />
       </div>
     </div>
 
@@ -41,7 +40,6 @@ const props = defineProps({
 });
 
 // Reactive state
-const selectedTimeframe = ref("this_year");
 const selectedGender = ref("");
 const genders = ["Male", "Female"];
 
@@ -50,48 +48,34 @@ const months = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-// Compute filtered data dynamically based on timeframe
+const startDate = ref(null);  // Initially null (no filter applied)
+const endDate = ref(null);
+
 const filteredData = computed(() => {
-  const now = moment();
-
   return props.monthlyStats.map((patients, index) => {
-    // Determine start of the month and week for filtering
     const monthStart = moment().month(index).startOf("month");
-    const weekStart = moment().month(index).startOf("isoWeek");
 
-    // Case: `monthlyStats` is an array of numbers (count per month)
     if (typeof patients === "number") {
-      switch (selectedTimeframe.value) {
-        case "this_year":
-          return patients;
-        case "this_month":
-          return monthStart.isSame(now, "month") ? patients : 0;
-        case "this_week":
-          return weekStart.isSame(now, "week") ? patients : 0;
-        case "today":
-          return index === now.month() && now.date() === 1 ? patients : 0;
-        default:
-          return patients;
+      if (
+        (startDate.value && monthStart.isBefore(startDate.value, "day")) ||
+        (endDate.value && monthStart.isAfter(endDate.value, "day"))
+      ) {
+        return 0;
       }
+      return patients;
     }
 
-    // Case: `monthlyStats` is an array of patient objects
     const filteredPatients = Array.isArray(patients)
-      ? patients.filter(patient => !selectedGender.value || patient.gender === selectedGender.value)
+      ? patients.filter(patient => {
+          const consultationDate = moment(patient.consultationDate);
+          return (
+            (!startDate.value || consultationDate.isSameOrAfter(startDate.value, "day")) &&
+            (!endDate.value || consultationDate.isSameOrBefore(endDate.value, "day"))
+          );
+        })
       : [];
 
-    switch (selectedTimeframe.value) {
-      case "this_year":
-        return filteredPatients.length;
-      case "this_month":
-        return monthStart.isSame(now, "month") ? filteredPatients.length : 0;
-      case "this_week":
-        return weekStart.isSame(now, "week") ? filteredPatients.length : 0;
-      case "today":
-        return monthStart.isSame(now, "month") && now.date() === 1 ? filteredPatients.length : 0;
-      default:
-        return filteredPatients.length;
-    }
+    return filteredPatients.length;
   });
 });
 
@@ -264,5 +248,6 @@ const options = {
   .filter-select {
     width: 100%;
   }
+  
 }
 </style>
