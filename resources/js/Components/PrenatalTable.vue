@@ -12,8 +12,12 @@
         <span class="text-gray-900">{{ currentDateText }}</span>
       </div>
       <div class="flex items-center gap-4">
-        <label for="filterDate" class="font-semibold text-gray-700">Filter Date:</label>
-        <input type="date" id="filterDate" v-model="filterDate"
+        <label for="startDate" class="font-semibold text-gray-700">Start Date:</label>
+        <input type="date" id="startDate" v-model="startDate"
+          class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
+
+        <label for="endDate" class="font-semibold text-gray-700">End Date:</label>
+        <input type="date" id="endDate" v-model="endDate"
           class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
       </div>
     </div>
@@ -337,7 +341,8 @@ export default {
       filterGender: [],
       filterAgeRange: '',
       filterDiagnosis: [],
-      filterDate: '',
+      startDate: '',
+      endDate: '',
       currentPage: 1,
       itemsPerPage: 5,
       currentModal: null,
@@ -380,8 +385,16 @@ export default {
           }
 
           let matchesDate = true;
-          if (this.filterDate) {
-            matchesDate = this.sameDay(patient.consultationDate, this.filterDate);
+          const consultationDate = new Date(patient.consultationDate);
+
+          if (this.startDate) {
+            const start = new Date(this.startDate);
+            matchesDate = consultationDate >= start;
+          }
+
+          if (this.endDate) {
+            const end = new Date(this.endDate);
+            matchesDate = matchesDate && consultationDate <= end;
           }
 
           return (
@@ -430,7 +443,7 @@ export default {
     window.removeEventListener('click', this.handleClickOutside);
   },
 
-  methods: {
+  methods: {  
     handlePostpartumSubmit(data) {
       console.log("Postpartum data submitted:", data);
       // Process the submitted data, for example, send it to an API

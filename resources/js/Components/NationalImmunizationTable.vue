@@ -12,8 +12,12 @@
         <span class="text-gray-900">{{ currentDateText }}</span>
       </div>
       <div class="flex items-center gap-4">
-        <label for="filterDate" class="font-semibold text-gray-700">Filter Date:</label>
-        <input type="date" id="filterDate" v-model="filterDate"
+        <label for="startDate" class="font-semibold text-gray-700">Start Date:</label>
+        <input type="date" id="startDate" v-model="startDate"
+          class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
+
+        <label for="endDate" class="font-semibold text-gray-700">End Date:</label>
+        <input type="date" id="endDate" v-model="endDate"
           class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400" />
       </div>
     </div>
@@ -289,7 +293,8 @@ export default {
       showModal: false,
       selectedPatient: null,
       isFilterPanelOpen: false,
-      filterDate: '',
+      startDate: '',
+      endDate: '',
       currentDateText: '',
     };
   },
@@ -324,8 +329,16 @@ export default {
           const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
 
           let matchesDate = true;
-          if (this.filterDate) {
-            matchesDate = this.sameDay(patient.consultationDate, this.filterDate);
+          const dateAssesed = new Date(patient.dateAssesed);
+
+          if (this.startDate) {
+            const start = new Date(this.startDate);
+            matchesDate = dateAssesed >= start;
+          }
+
+          if (this.endDate) {
+            const end = new Date(this.endDate);
+            matchesDate = matchesDate && dateAssesed <= end;
           }
 
           return (
@@ -338,7 +351,7 @@ export default {
           );
         })
         .slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage)
-        .sort((a, b) => new Date(b.consultationDate) - new Date(a.consultationDate));
+        .sort((a, b) => new Date(b.dateAssesed) - new Date(a.dateAssesed));
     },
 
     totalPages() {
@@ -522,7 +535,7 @@ export default {
           `${patient.purok}, ${patient.barangay}`,
           patient.age,
           patient.sex,
-          this.formatDate(patient.consultationDate),
+          this.formatDate(patient.dateAssesed),
           patient.status || "In Queue"
         ]);
 
