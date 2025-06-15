@@ -358,76 +358,69 @@ class SystemAnalyticsController extends Controller
 
     private function getPatientStatistics($request)
     {
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+        $today = now();
+    
+        // Handle custom date range
+        if ($startDate && $endDate) {
+            // Ensure the startDate and endDate are in proper date format
+            $startDate = Carbon::parse($startDate)->startOfDay();
+            $endDate = Carbon::parse($endDate)->endOfDay();
+    
+            // Queries filtered by startDate and endDate
+            $consultationCount = DB::table('consultation_details')
+                ->whereBetween('consultationDate', [$startDate, $endDate])
+                ->count();
+    
+            $prenatalCount = DB::table('prenatal_consultation_details')
+                ->whereBetween('consultationDate', [$startDate, $endDate])
+                ->count();
+    
+            $immunizationCount = DB::table('national_immunization_programs')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->count();
+    
+            $vaccinationCount = DB::table('vaccination_records')
+                ->whereBetween('dateOfvisit', [$startDate, $endDate])
+                ->count();
+    
+            // Return combined count for custom date range (e.g., for "custom" category in chart)
+            return [$consultationCount + $prenatalCount + $immunizationCount + $vaccinationCount];
+        }
+    
+        // Default: Monthly breakdown
         $monthlyStats = [];
         $currentYear = date('Y');
     
         for ($month = 1; $month <= 12; $month++) {
-            // Base query with joins
+            // Handle custom date range filtering if provided
             $consultationQuery = DB::table('consultation_details')
-                ->join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
-                ->whereYear('consultation_details.consultationDate', $currentYear)
-                ->whereMonth('consultation_details.consultationDate', $month);
-    
+                ->whereYear('consultationDate', $currentYear)
+                ->whereMonth('consultationDate', $month);
+        
             $prenatalQuery = DB::table('prenatal_consultation_details')
-                ->join('personal_information', 'prenatal_consultation_details.personalId', '=', 'personal_information.personalId')
-                ->whereYear('prenatal_consultation_details.consultationDate', $currentYear)
-                ->whereMonth('prenatal_consultation_details.consultationDate', $month);
-    
+                ->whereYear('consultationDate', $currentYear)
+                ->whereMonth('consultationDate', $month);
+        
             $immunizationQuery = DB::table('national_immunization_programs')
-                ->join('personal_information', 'national_immunization_programs.personalId', '=', 'personal_information.personalId')
-                ->whereYear('national_immunization_programs.created_at', $currentYear)
-                ->whereMonth('national_immunization_programs.created_at', $month);
-    
+                ->whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $month);
+        
             $vaccinationQuery = DB::table('vaccination_records')
-                ->join('personal_information', 'vaccination_records.personalId', '=', 'personal_information.personalId')
-                ->whereYear('vaccination_records.dateOfvisit', $currentYear)
-                ->whereMonth('vaccination_records.dateOfvisit', $month);
-    
-            // **Apply filters only if values exist**
-            if (!empty($request->gender)) {
-                $consultationQuery->where('personal_information.sex', $request->gender);
-                $prenatalQuery->where('personal_information.sex', $request->gender);
-                $immunizationQuery->where('personal_information.sex', $request->gender);
-                $vaccinationQuery->where('personal_information.sex', $request->gender);
+                ->whereYear('dateOfvisit', $currentYear)
+                ->whereMonth('dateOfvisit', $month);
+        
+            // Apply date range filter if startDate and endDate are provided
+            if ($startDate && $endDate) {
+                $consultationQuery->whereBetween('consultationDate', [$startDate, $endDate]);
+                $prenatalQuery->whereBetween('consultationDate', [$startDate, $endDate]);
+                $immunizationQuery->whereBetween('created_at', [$startDate, $endDate]);
+                $vaccinationQuery->whereBetween('dateOfvisit', [$startDate, $endDate]);
             }
-    
-            if (!empty($request->ageRange) && is_array($request->ageRange)) {
-                $minAge = $request->ageRange[0];
-                $maxAge = $request->ageRange[1];
-    
-                $consultationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) BETWEEN ? AND ?', [$minAge, $maxAge]);
-                $prenatalQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) BETWEEN ? AND ?', [$minAge, $maxAge]);
-                $immunizationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) BETWEEN ? AND ?', [$minAge, $maxAge]);
-                $vaccinationQuery->whereRaw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) BETWEEN ? AND ?', [$minAge, $maxAge]);
-            }
-    
-            // Apply timeframe filters
-            if (!empty($request->date)) {
-                $today = now();
-                switch ($request->date) {
-                    case '7days':
-                        $consultationQuery->where('consultation_details.consultationDate', '>=', $today->subDays(7));
-                        $prenatalQuery->where('prenatal_consultation_details.consultationDate', '>=', $today->subDays(7));
-                        $immunizationQuery->where('national_immunization_programs.created_at', '>=', $today->subDays(7));
-                        $vaccinationQuery->where('vaccination_records.dateOfvisit', '>=', $today->subDays(7));
-                        break;
-                    case '30days':
-                        $consultationQuery->where('consultation_details.consultationDate', '>=', $today->subDays(30));
-                        $prenatalQuery->where('prenatal_consultation_details.consultationDate', '>=', $today->subDays(30));
-                        $immunizationQuery->where('national_immunization_programs.created_at', '>=', $today->subDays(30));
-                        $vaccinationQuery->where('vaccination_records.dateOfvisit', '>=', $today->subDays(30));
-                        break;
-                    case 'year':
-                        $consultationQuery->whereYear('consultation_details.consultationDate', $today->year);
-                        $prenatalQuery->whereYear('prenatal_consultation_details.consultationDate', $today->year);
-                        $immunizationQuery->whereYear('national_immunization_programs.created_at', $today->year);
-                        $vaccinationQuery->whereYear('vaccination_records.dateOfvisit', $today->year);
-                        break;
-                }
-            }
-    
-            // **Count total patients per month**
-            $monthlyStats[] = 
+        
+            // Add monthly stats to the array
+            $monthlyStats[] =
                 $consultationQuery->count() +
                 $prenatalQuery->count() +
                 $immunizationQuery->count() +

@@ -53,29 +53,32 @@ const endDate = ref(null);
 
 const filteredData = computed(() => {
   return props.monthlyStats.map((patients, index) => {
-    const monthStart = moment().month(index).startOf("month");
-
+    // If we are receiving aggregated data, return it as is (this might be your issue)
     if (typeof patients === "number") {
-      if (
-        (startDate.value && monthStart.isBefore(startDate.value, "day")) ||
-        (endDate.value && monthStart.isAfter(endDate.value, "day"))
-      ) {
-        return 0;
+      const currentMonth = moment().month(index);
+      const isAfterStartDate = startDate.value
+        ? currentMonth.isSameOrAfter(startDate.value, "month")
+        : true;
+      const isBeforeEndDate = endDate.value
+        ? currentMonth.isSameOrBefore(endDate.value, "month")
+        : true;
+
+      if (!isAfterStartDate || !isBeforeEndDate) {
+        return 0; // No data if outside the selected range
       }
       return patients;
     }
 
-    const filteredPatients = Array.isArray(patients)
-      ? patients.filter(patient => {
-          const consultationDate = moment(patient.consultationDate);
-          return (
-            (!startDate.value || consultationDate.isSameOrAfter(startDate.value, "day")) &&
-            (!endDate.value || consultationDate.isSameOrBefore(endDate.value, "day"))
-          );
-        })
-      : [];
+    // Handle the case where 'patients' is an array of patient records
+    const filteredPatients = patients.filter(patient => {
+      const consultationDate = moment(patient.consultationDate); // Assuming consultationDate exists on patient
+      return (
+        (!startDate.value || consultationDate.isSameOrAfter(startDate.value, "day")) &&
+        (!endDate.value || consultationDate.isSameOrBefore(endDate.value, "day"))
+      );
+    });
 
-    return filteredPatients.length;
+    return filteredPatients.length; // Return the filtered count for this specific date range
   });
 });
 

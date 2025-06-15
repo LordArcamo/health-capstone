@@ -125,7 +125,7 @@ export default {
       today.setHours(0, 0, 0, 0);
 
       return props.patients.filter((patient) => {
-        const patientDate = new Date(patient.created_at);
+        const patientDate = new Date(patient.consultationDate);
         if (isNaN(patientDate)) return false;
 
         if (currentFilter.value === 'month') {
