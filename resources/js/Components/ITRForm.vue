@@ -200,7 +200,6 @@
                 <option value="Child Immunization">Child Immunization</option>
                 <option value="Sick Children">Sick Children</option>
                 <option value="Firecracker Injury">Firecracker Injury</option>
-                <option value="Mental Health">Psychological Status</option>
               </select>
               <span v-if="errors.visitType" class="text-red-600 text-sm">{{ errors.visitType }}</span>
             </div>
@@ -232,8 +231,13 @@
             </div>
             <div>
               <label class="block">Name of Attending Physician:</label>
-              <input type="text" v-model="form.providerName" @input="capitalizeName('providerName')"
-                placeholder="Example: Dr. Jose Legazpi" class="input" />
+              <input
+     type="text"
+  v-model="form.providerName"
+  @input="autoDoctor"
+  placeholder="Example: Dr. Jose Legazpi"
+  class="input"
+  />
               <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
 
@@ -520,6 +524,13 @@ export default {
           .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
       }
     },
+autoDoctor() {
+  let value = this.form.providerName.trim();
+
+  if (value && !value.toLowerCase().startsWith('dr.')) {
+    this.form.providerName = `Dr. ${value.replace(/^Dr\.?\s*/i, '')}`;
+  }
+},
     
     validateConsultationDate() {
       const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
