@@ -38,11 +38,11 @@ class VaccineAppointmentController extends Controller
     {
         // Log incoming request
         \Log::info('Incoming appointment request:', $request->all());
-    
+
         // Validate the request data
         $validatedData = $request->validate([
             'vaccinationId' => 'required|exists:vaccination_records,vaccinationId',
-            'vaccineType' => 'required|string', // ✅ Added validation for vaccineType
+            'vaccineType' => 'required|string',
             'dateOfVisit' => 'required|date',
             'weight' => 'required|numeric|min:0',
             'height' => 'required|numeric|min:0',
@@ -52,26 +52,27 @@ class VaccineAppointmentController extends Controller
             'nextAppointment' => 'required|date|after:dateOfVisit',
             'exclusivelyBreastfed' => 'required|in:Yes,No,None',
         ]);
-    
+
         try {
-            // Create and save the appointment, including vaccineType
+            // Create and save the appointment
             VaccineAppointment::create($validatedData);
-    
+
             // Log success
             \Log::info('Appointment saved successfully', ['data' => $validatedData]);
-    
-            // Redirect with a success message
-            return redirect()->back()->with('success', 'Appointment scheduled successfully');
+
+            // Force a full page reload with success message
+            return Inertia::location(url()->previous() . '?success=Appointment+scheduled+successfully');
         } catch (\Exception $e) {
             // Log error details
             \Log::error('Failed to schedule appointment', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-    
-            return redirect()->back()->with('error', 'Failed to schedule appointment. Please try again.');
+
+            return Inertia::location('/services/vaccination');
         }
     }
+
     
 
 

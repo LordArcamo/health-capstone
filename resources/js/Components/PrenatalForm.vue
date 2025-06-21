@@ -179,12 +179,12 @@
             </div>
             <div>
               <label class="block">Name of Attending Doctor/Provider:</label>
-              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Aileen Uy" class="input"></input>
+              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Aileen Uy" class="input">
               <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
             <div>
               <label class="block">Name of Spouse:</label>
-              <input type="text" v-model="form.nameOfSpouse" placeholder="Example: Pedro Penduko" class="input"></input>
+              <input type="text" v-model="form.nameOfSpouse" placeholder="Example: Pedro Penduko" class="input">
               <span v-if="errors.nameOfSpouse" class="text-red-600 text-sm">{{ errors.nameOfSpouse }}</span>
             </div>
             <!-- Emergency Contact Number -->

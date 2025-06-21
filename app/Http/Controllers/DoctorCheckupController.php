@@ -9,6 +9,7 @@ use App\Models\PersonalInformation;
 use App\Models\ConsultationDetails;
 use App\Models\VisitInformation;
 use App\Models\Prescription;
+use Illuminate\Support\Facades\Auth;
 
 class DoctorCheckupController extends Controller
 {
@@ -155,6 +156,7 @@ class DoctorCheckupController extends Controller
         // Pass data to Inertia
         return Inertia::render('Doctor/ItrDoctorCheckup', [
             'consultationDetails' => $consultationDetail,
+            'auth' => [ 'user' => Auth::user() ],
         ]);
 
 
@@ -222,9 +224,7 @@ class DoctorCheckupController extends Controller
             }
 
             DB::commit();
-            return Inertia::render('ThankYouItr', [
-                'userRole' => auth()->user()->role ?? 'guest', // Pass userRole properly
-            ]);
+            return Inertia::location('/checkup/thank-you/itr');
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;

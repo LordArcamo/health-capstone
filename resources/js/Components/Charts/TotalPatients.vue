@@ -9,7 +9,7 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="filters-container">
+    <!-- <div class="filters-container">
       <div class="filter-item">
         <label for="startDate" class="filter-label">Start Date</label>
         <input type="date" v-model="startDate" id="startDate" class="filter-input" />
@@ -18,7 +18,7 @@
         <label for="endDate" class="filter-label">End Date</label>
         <input type="date" v-model="endDate" id="endDate" class="filter-input" />
       </div>
-    </div>
+    </div> -->
 
     <!-- Chart -->
     <apexchart ref="chart" type="line" :options="options" :series="chartSeries" class="patients-chart" />

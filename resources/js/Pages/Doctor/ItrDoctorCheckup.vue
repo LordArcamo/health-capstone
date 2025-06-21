@@ -45,6 +45,7 @@ function submitForm(payload) {
   Inertia.post("/store/itr", payload, {
     onSuccess: () => {
       alert("Record saved successfully!");
+      Inertia.visit("/doctor/dashboard");
     },
     onError: (errors) => {
       console.error("Error saving record:", errors);

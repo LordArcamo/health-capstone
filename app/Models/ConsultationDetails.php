@@ -38,6 +38,8 @@ class ConsultationDetails extends Model
         'natureOfVisit',
         'visitType',
         'providerName',
+        'status',
+        'completed_at',
 
     ];
 

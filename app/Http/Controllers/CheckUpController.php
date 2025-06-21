@@ -17,41 +17,73 @@ class CheckUpController extends Controller
 {
     public function import(Request $request)
     {
-        set_time_limit(300); // Increase execution time
-    
+        set_time_limit(300);
+
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
         ]);
-    
+
         $file = $request->file('file');
         $data = array_map('str_getcsv', file($file->getRealPath()));
         $header = array_shift($data);
-    
+
         DB::transaction(function () use ($data, $header) {
             foreach ($data as $row) {
                 $patientData = array_combine($header, $row);
-    
-                // Convert consultationTime to MySQL TIME format
+
+                // Format consultationTime
                 if (!empty($patientData['consultationTime'])) {
                     $patientData['consultationTime'] = date('H:i:s', strtotime($patientData['consultationTime']));
                 }
-    
-                // Ensure numeric fields have the correct format
+
+                // Fix birthdate format
+                if (!empty($patientData['birthdate'])) {
+                    $patientData['birthdate'] = date('Y-m-d', strtotime($patientData['birthdate']));
+                }
+
+                // Fix consultationDate format
+                if (!empty($patientData['consultationDate'])) {
+                    $patientData['consultationDate'] = date('Y-m-d', strtotime($patientData['consultationDate']));
+                }
+
+                // Format numbers
                 $patientData['temperature'] = isset($patientData['temperature']) ? number_format((float)$patientData['temperature'], 2, '.', '') : null;
                 $patientData['height'] = isset($patientData['height']) ? number_format((float)$patientData['height'], 2, '.', '') : null;
                 $patientData['weight'] = isset($patientData['weight']) ? number_format((float)$patientData['weight'], 2, '.', '') : null;
                 $patientData['age'] = isset($patientData['age']) ? (int)$patientData['age'] : null;
-    
-                // Convert `selectedLabTests` to JSON format
+
+                // Format selectedLabTests
                 $patientData['selectedLabTests'] = isset($patientData['selectedLabTests']) && !empty($patientData['selectedLabTests'])
-                    ? json_encode(array_map('trim', explode(',', $patientData['selectedLabTests']))) // Convert CSV string to JSON array
-                    : json_encode([]); // Default to empty JSON array
-    
-                // Ensure `bloodPressure` has valid format (digits and `/`)
+                    ? json_encode(array_map('trim', explode(',', trim($patientData['selectedLabTests'], '[]"'))))
+                    : json_encode([]);
+
+                // Clean bloodPressure
                 $patientData['bloodPressure'] = isset($patientData['bloodPressure']) 
                     ? preg_replace('/[^0-9\/]/', '', $patientData['bloodPressure']) 
                     : null;
-    
+
+                // Normalize status properly
+                $statusRaw = strtolower(trim($patientData['status'] ?? ''));
+                $validStatuses = ['cancelled', 'completed'];
+                $isCancelled = $statusRaw === 'cancelled';
+                $isCompleted = $statusRaw === 'completed';
+
+                $patientData['status'] = in_array($statusRaw, $validStatuses) ? $statusRaw : 'in queue';
+                $completedAt = $isCompleted ? now() : null;
+
+                // If cancelled, wipe sensitive data
+                if ($isCancelled) {
+                    $patientData['chiefComplaints'] = null;
+                    $patientData['diagnosis'] = null;
+                    $patientData['medication'] = null;
+                    $patientData['dosage'] = null;
+                    $patientData['frequency'] = null;
+                    $patientData['duration'] = null;
+                    $patientData['notes'] = null;
+                    $patientData['requireLabTest'] = 'No';
+                    $patientData['selectedLabTests'] = json_encode([]);
+                }
+
                 // Validation
                 $validator = Validator::make($patientData, [
                     'firstName' => 'required|string|max:100',
@@ -78,25 +110,30 @@ class CheckUpController extends Controller
                     'referredTo' => 'nullable|string|max:255',
                     'reasonsForReferral' => 'nullable|string|max:255',
                     'referredBy' => 'nullable|string|max:255',
-                    'chiefComplaints' => 'required|string|max:255',
-                    'diagnosis' => 'required|string|max:255',
-                    'medication' => 'required|string',
                     'requireLabTest' => 'nullable|string|max:3',
-                    'selectedLabTests' => 'nullable|json',  // Ensure JSON format
+                    'selectedLabTests' => 'nullable|json',
                     'status' => 'nullable|string|max:50',
-                    'dosage' => 'nullable|string|max:50',
-                    'frequency' => 'nullable|string|max:50',
-                    'duration' => 'nullable|string|max:50',
-                    'notes' => 'nullable|string',
                 ]);
-    
+
+                if (!$isCancelled) {
+                    $validator->addRules([
+                        'chiefComplaints' => 'required|string|max:255',
+                        'diagnosis' => 'required|string|max:255',
+                        'medication' => 'required|string|max:255',
+                        'dosage' => 'nullable|string|max:50',
+                        'frequency' => 'nullable|string|max:50',
+                        'duration' => 'nullable|string|max:50',
+                        'notes' => 'nullable|string',
+                    ]);
+                }
+
                 if ($validator->fails()) {
                     \Log::error('Validation failed: ' . json_encode($validator->errors()->all()));
                     throw new \Exception('Validation failed for row: ' . json_encode($patientData));
                 }
-    
+
                 try {
-                    // Create PersonalInformation record
+                    // Personal Info
                     $personalInfo = PersonalInformation::create([
                         'firstName' => $patientData['firstName'],
                         'lastName' => $patientData['lastName'],
@@ -109,8 +146,8 @@ class CheckUpController extends Controller
                         'contact' => $patientData['contact'] ?? null,
                         'sex' => $patientData['sex'],
                     ]);
-    
-                    // Create ConsultationDetails record
+
+                    // Consultation Details
                     $consultationDetails = ConsultationDetails::create([
                         'personalId' => $personalInfo->personalId,
                         'id' => auth()->id(),
@@ -128,39 +165,45 @@ class CheckUpController extends Controller
                         'referredTo' => $patientData['referredTo'] ?? 'None',
                         'reasonsForReferral' => $patientData['reasonsForReferral'] ?? 'None',
                         'referredBy' => $patientData['referredBy'] ?? 'None',
-                        'status' => $patientData['status'] ?? 'None',
+                        'status' => $patientData['status'],
+                        'completed_at' => $completedAt,
                     ]);
-    
-                    // Create VisitInformation record
-                    $visitInfo = VisitInformation::create([
-                        'consultationDetailsID' => $consultationDetails->consultationDetailsID,
-                        'id' => auth()->id(),
-                        'chiefComplaints' => $patientData['chiefComplaints'],
-                        'diagnosis' => $patientData['diagnosis'],
-                        'requireLabTest' => $patientData['requireLabTest'] ?? 'No',
-                        'selectedLabTests' => $patientData['selectedLabTests'],  // Now properly formatted JSON
-                    ]);
-    
-                    // Create Prescription record
-                    Prescription::create([
-                        'visitInformationID' => $visitInfo->visitInformationID,
-                        'medication' => $patientData['medication'],
-                        'dosage' => $patientData['dosage'] ?? '',
-                        'frequency' => $patientData['frequency'] ?? '',
-                        'duration' => $patientData['duration'] ?? '',
-                        'notes' => $patientData['notes'] ?? '',
-                    ]);
-    
+
+                    // Visit & Prescription if not cancelled
+                    if (!$isCancelled) {
+                        $visitInfo = VisitInformation::create([
+                            'consultationDetailsID' => $consultationDetails->consultationDetailsID,
+                            'id' => auth()->id(),
+                            'chiefComplaints' => $patientData['chiefComplaints'],
+                            'diagnosis' => $patientData['diagnosis'],
+                            'requireLabTest' => $patientData['requireLabTest'] ?? 'No',
+                            'selectedLabTests' => $patientData['selectedLabTests'],
+                        ]);
+
+                        Prescription::create([
+                            'visitInformationID' => $visitInfo->visitInformationID,
+                            'medication' => $patientData['medication'],
+                            'dosage' => $patientData['dosage'] ?? '',
+                            'frequency' => $patientData['frequency'] ?? '',
+                            'duration' => $patientData['duration'] ?? '',
+                            'notes' => $patientData['notes'] ?? '',
+                        ]);
+                    }
+
                 } catch (\Exception $e) {
                     \Log::error('Error inserting data: ' . $e->getMessage());
                     throw $e;
                 }
             }
         });
-    
+
         return redirect()->back()->with('success', 'Patients imported successfully!');
     }
-    
+
+
+
+
+
 
     
     

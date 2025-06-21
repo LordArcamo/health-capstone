@@ -200,7 +200,6 @@
                 <option value="Child Immunization">Child Immunization</option>
                 <option value="Sick Children">Sick Children</option>
                 <option value="Firecracker Injury">Firecracker Injury</option>
-                <option value="Mental Health">Psychological Status</option>
               </select>
               <span v-if="errors.visitType" class="text-red-600 text-sm">{{ errors.visitType }}</span>
             </div>

@@ -18,16 +18,16 @@
         </select>
       </div>
       <!-- Start Date Filter -->
-      <div class="filter flex flex-col items-start">
+      <!-- <div class="filter flex flex-col items-start">
         <label for="start-date" class="filter-label">Start Date:</label>
         <input type="date" id="start-date" v-model="startDate" class="filter-select" />
-      </div>
+      </div> -->
       
       <!-- End Date Filter -->
-      <div class="filter flex flex-col items-start">
+      <!-- <div class="filter flex flex-col items-start">
         <label for="end-date" class="filter-label">End Date:</label>
         <input type="date" id="end-date" v-model="endDate" class="filter-select" />
-      </div>
+      </div> -->
       <!-- Age Group Filter -->
       <div class="filter flex flex-col items-start">
         <label for="age-group" class="filter-label">Age Group:</label>
