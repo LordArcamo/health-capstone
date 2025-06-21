@@ -44,24 +44,40 @@ class DashboardController extends Controller
 
             $patientsWithCheckUp = DB::table('personal_information')
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
-            ->select('personal_information.personalId', 'personal_information.created_at', 'consultation_details.modeOfTransaction')
+            ->select(
+                'personal_information.personalId',
+                'consultation_details.consultationDate as consultationDate', // ✅ Use correct date
+                'consultation_details.modeOfTransaction'
+            )
 
             ->unionAll(
                 DB::table('personal_information')
                     ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
-                    ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Prenatal' as modeOfTransaction"))
+                    ->select(
+                        'personal_information.personalId',
+                        'prenatal_consultation_details.consultationDate as consultationDate', // ✅ Use correct date
+                        DB::raw("'Prenatal' as modeOfTransaction")
+                    )
             )
 
             ->unionAll(
                 DB::table('personal_information')
                     ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
-                    ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Immunization' as modeOfTransaction"))
+                    ->select(
+                        'personal_information.personalId',
+                        'national_immunization_programs.date as consultationDate', // ✅ Replace with actual date field
+                        DB::raw("'Immunization' as modeOfTransaction")
+                    )
             )
 
             ->unionAll(
                 DB::table('personal_information')
                     ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
-                    ->select('personal_information.personalId', 'personal_information.created_at', DB::raw("'Vaccination' as modeOfTransaction"))
+                    ->select(
+                        'personal_information.personalId',
+                        'vaccination_records.dateOfVisit as consultationDate', // ✅ Replace with actual date field
+                        DB::raw("'Vaccination' as modeOfTransaction")
+                    )
             )
 
             ->get()

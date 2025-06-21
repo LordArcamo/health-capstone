@@ -94,10 +94,11 @@ class PatientController extends Controller
             'personal_information.contact',
             'personal_information.sex',
             'consultation_details.visitType',
-            DB::raw("'consultation_details' as source")  // Tag the source table
+            DB::raw("'consultation_details' as source"),  // Tag the source table
+            DB::raw("consultation_details.consultationDate as consultationDate") // Unified date column
         )
-
         ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+    
         ->unionAll(
             PersonalInformation::select(
                 'personal_information.personalId',
@@ -113,50 +114,56 @@ class PatientController extends Controller
                 'personal_information.contact',
                 'personal_information.sex',
                 DB::raw("'Prenatal' as visitType"),
-                DB::raw("'prenatal_consultation_details' as source")
+                DB::raw("'prenatal_consultation_details' as source"),
+                DB::raw("prenatal_consultation_details.consultationDate as consultationDate") // Unified date column
             )
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
         )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Immunization' as visitType"),
-                    DB::raw("'national_immunization_programs' as source")
-                )
-                ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+    
+        ->unionAll(
+            PersonalInformation::select(
+                'personal_information.personalId',
+                'personal_information.created_at',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                DB::raw("'Immunization' as visitType"),
+                DB::raw("'national_immunization_programs' as source"),
+                DB::raw("national_immunization_programs.dateAssesed as consultationDate") // Unified date column
             )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Vaccination' as visitType"),
-                    DB::raw("'vaccination_records' as source")
-                )
-                ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
+            ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+        )
+    
+        ->unionAll(
+            PersonalInformation::select(
+                'personal_information.personalId',
+                'personal_information.created_at',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                DB::raw("'Vaccination' as visitType"),
+                DB::raw("'vaccination_records' as source"),
+                DB::raw("vaccination_records.dateOfVisit as consultationDate") // Unified date column
             )
-            ->distinct()  // Remove duplicate entries
-            ->get();
+            ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
+        )
+    
+        ->distinct()  // Remove duplicate entries
+        ->get();
 
         // Pass data to the frontend
         return Inertia::render('Table/Patient', [
@@ -181,10 +188,11 @@ class PatientController extends Controller
             'personal_information.contact',
             'personal_information.sex',
             'consultation_details.visitType',
-            DB::raw("'consultation_details' as source")  // Tag the source table
+            DB::raw("'consultation_details' as source"),  // Tag the source table
+            DB::raw("consultation_details.consultationDate as consultationDate") // Unified date column
         )
-
         ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+
         ->unionAll(
             PersonalInformation::select(
                 'personal_information.personalId',
@@ -200,77 +208,12 @@ class PatientController extends Controller
                 'personal_information.contact',
                 'personal_information.sex',
                 DB::raw("'Prenatal' as visitType"),
-                DB::raw("'prenatal_consultation_details' as source")
+                DB::raw("'prenatal_consultation_details' as source"),
+                DB::raw("prenatal_consultation_details.consultationDate as consultationDate") // Unified date column
             )
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
         )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Immunization' as visitType"),
-                    DB::raw("'national_immunization_programs' as source")
-                )
-                ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
-            )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Vaccination' as visitType"),
-                    DB::raw("'vaccination_records' as source")
-                )
-                ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
-            )
-            ->distinct()  // Remove duplicate entries
-            ->get();
 
-        // Pass data to the frontend
-        return Inertia::render('Table/PatientQueu', [
-            'totalPatients' => $patients,
-        ]);
-    }
-    public function showTodayConsultation()
-    {
-        // Combine patients from all four tables with their personal information
-        $patients = PersonalInformation::select(
-            'personal_information.personalId',
-            'personal_information.created_at',
-            'personal_information.firstName',
-            'personal_information.lastName',
-            'personal_information.middleName',
-            'personal_information.suffix',
-            'personal_information.purok',
-            'personal_information.barangay',
-            'personal_information.age',
-            'personal_information.birthdate',
-            'personal_information.contact',
-            'personal_information.sex',
-            'consultation_details.visitType',
-            DB::raw("'consultation_details' as source")  // Tag the source table
-        )
-
-        ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
         ->unionAll(
             PersonalInformation::select(
                 'personal_information.personalId',
@@ -285,57 +228,43 @@ class PatientController extends Controller
                 'personal_information.birthdate',
                 'personal_information.contact',
                 'personal_information.sex',
-                DB::raw("'Prenatal' as visitType"),
-                DB::raw("'prenatal_consultation_details' as source")
+                DB::raw("'Immunization' as visitType"),
+                DB::raw("'national_immunization_programs' as source"),
+                DB::raw("national_immunization_programs.dateAssesed as consultationDate") // Unified date column
             )
-            ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
+            ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
         )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Immunization' as visitType"),
-                    DB::raw("'national_immunization_programs' as source")
-                )
-                ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+
+        ->unionAll(
+            PersonalInformation::select(
+                'personal_information.personalId',
+                'personal_information.created_at',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                DB::raw("'Vaccination' as visitType"),
+                DB::raw("'vaccination_records' as source"),
+                DB::raw("vaccination_records.dateOfVisit as consultationDate") // Unified date column
             )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Vaccination' as visitType"),
-                    DB::raw("'vaccination_records' as source")
-                )
-                ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
-            )
-            ->distinct()  // Remove duplicate entries
-            ->get();
+            ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
+        )
+
+        ->distinct()  // Remove duplicate entries
+        ->get();
 
         // Pass data to the frontend
         return Inertia::render('Table/PatientQueu', [
             'totalPatients' => $patients,
         ]);
     }
+
     public function showCritical()
     {
         // Combine patients from all four tables with their personal information
@@ -353,10 +282,11 @@ class PatientController extends Controller
             'personal_information.contact',
             'personal_information.sex',
             'consultation_details.visitType',
-            DB::raw("'consultation_details' as source")  // Tag the source table
+            DB::raw("'consultation_details' as source"),  // Tag the source table
+            DB::raw("consultation_details.consultationDate as consultationDate") // Unified date column
         )
-
         ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+
         ->unionAll(
             PersonalInformation::select(
                 'personal_information.personalId',
@@ -372,50 +302,56 @@ class PatientController extends Controller
                 'personal_information.contact',
                 'personal_information.sex',
                 DB::raw("'Prenatal' as visitType"),
-                DB::raw("'prenatal_consultation_details' as source")
+                DB::raw("'prenatal_consultation_details' as source"),
+                DB::raw("prenatal_consultation_details.consultationDate as consultationDate") // Unified date column
             )
             ->join('prenatal_consultation_details', 'personal_information.personalId', '=', 'prenatal_consultation_details.personalId')
         )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Immunization' as visitType"),
-                    DB::raw("'national_immunization_programs' as source")
-                )
-                ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+
+        ->unionAll(
+            PersonalInformation::select(
+                'personal_information.personalId',
+                'personal_information.created_at',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                DB::raw("'Immunization' as visitType"),
+                DB::raw("'national_immunization_programs' as source"),
+                DB::raw("national_immunization_programs.dateAssesed as consultationDate") // Unified date column
             )
-            ->unionAll(
-                PersonalInformation::select(
-                    'personal_information.personalId',
-                    'personal_information.created_at',
-                    'personal_information.firstName',
-                    'personal_information.lastName',
-                    'personal_information.middleName',
-                    'personal_information.suffix',
-                    'personal_information.purok',
-                    'personal_information.barangay',
-                    'personal_information.age',
-                    'personal_information.birthdate',
-                    'personal_information.contact',
-                    'personal_information.sex',
-                    DB::raw("'Vaccination' as visitType"),
-                    DB::raw("'vaccination_records' as source")
-                )
-                ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
+            ->join('national_immunization_programs', 'personal_information.personalId', '=', 'national_immunization_programs.personalId')
+        )
+
+        ->unionAll(
+            PersonalInformation::select(
+                'personal_information.personalId',
+                'personal_information.created_at',
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.contact',
+                'personal_information.sex',
+                DB::raw("'Vaccination' as visitType"),
+                DB::raw("'vaccination_records' as source"),
+                DB::raw("vaccination_records.dateOfVisit as consultationDate") // Unified date column
             )
-            ->distinct()  // Remove duplicate entries
-            ->get();
+            ->join('vaccination_records', 'personal_information.personalId', '=', 'vaccination_records.personalId')
+        )
+
+        ->distinct()  // Remove duplicate entries
+        ->get();
 
         // Pass data to the frontend
         return Inertia::render('Table/TodayConsultation', [
@@ -439,6 +375,7 @@ class PatientController extends Controller
             'personal_information.birthdate',
             'personal_information.contact',
             'personal_information.sex',
+            'consultation_details.consultationDate',
             'consultation_details.modeOfTransaction',
             'consultation_details.referredFrom',
             'consultation_details.referredTo',

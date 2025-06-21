@@ -17,15 +17,16 @@
           </option>
         </select>
       </div>
-      <!-- Timeframe Filter -->
+      <!-- Start Date Filter -->
       <div class="filter flex flex-col items-start">
-        <label for="timeframe" class="filter-label">Timeframe:</label>
-        <select id="timeframe" v-model="selectedTimeframe" class="filter-select">
-          <option value="today">Today</option>
-          <option value="this_week">This Week</option>
-          <option value="this_month">This Month</option>
-          <option value="this_year">This Year</option>
-        </select>
+        <label for="start-date" class="filter-label">Start Date:</label>
+        <input type="date" id="start-date" v-model="startDate" class="filter-select" />
+      </div>
+      
+      <!-- End Date Filter -->
+      <div class="filter flex flex-col items-start">
+        <label for="end-date" class="filter-label">End Date:</label>
+        <input type="date" id="end-date" v-model="endDate" class="filter-select" />
       </div>
       <!-- Age Group Filter -->
       <div class="filter flex flex-col items-start">
@@ -65,7 +66,8 @@ const props = defineProps({
 
 const selectedBarangay = ref("all");
 const selectedAgeGroup = ref("all");
-const selectedTimeframe = ref("this_year");
+const startDate = ref("");
+const endDate = ref("");
 
 const ageRanges = {
   "0-18": [0, 18],
@@ -96,29 +98,12 @@ const filteredPrenatal = computed(() => {
     data = data.filter(person => person.age >= minAge && person.age <= maxAge);
   }
 
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  if (startDate.value) {
+    data = data.filter(record => new Date(record.visit_date) >= new Date(startDate.value));
+  }
 
-  if (selectedTimeframe.value !== "all") {
-    let startDate;
-    switch (selectedTimeframe.value) {
-      case "today":
-        startDate = startOfToday;
-        break;
-      case "this_week":
-        startDate = startOfWeek;
-        break;
-      case "this_month":
-        startDate = startOfMonth;
-        break;
-      case "this_year":
-        startDate = startOfYear;
-        break;
-    }
-    data = data.filter(record => new Date(record.visit_date) >= startDate);
+  if (endDate.value) {
+    data = data.filter(record => new Date(record.visit_date) <= new Date(endDate.value));
   }
 
   return data;
@@ -154,7 +139,8 @@ const selectedFilters = computed(() => {
   const filters = [];
   if (selectedBarangay.value !== "all") filters.push(`Barangay: ${selectedBarangay.value}`)
   if (selectedAgeGroup.value !== "all") filters.push(`Age: ${selectedAgeGroup.value}`);
-  if (selectedTimeframe.value !== "this_year") filters.push(`Timeframe: ${selectedTimeframe.value.replace('_', ' ')}`);
+  if (startDate.value) filters.push(`Start Date: ${startDate.value}`);
+  if (endDate.value) filters.push(`End Date: ${endDate.value}`);
   return filters.length ? filters.join(" | ") : "No filters applied";
 });
 
