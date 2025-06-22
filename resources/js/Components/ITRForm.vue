@@ -195,7 +195,6 @@
                 <option value="Child Care">Child Care</option>
                 <option value="Injury">Injury</option>
                 <option value="Adult Immunization">Adult Immunization</option>
-                <option value="Postpartum">Postpartum</option>
                 <option value="Tuberculosis">Tuberculosis</option>
                 <option value="Child Immunization">Child Immunization</option>
                 <option value="Sick Children">Sick Children</option>
@@ -232,12 +231,12 @@
             <div>
               <label class="block">Name of Attending Physician:</label>
               <input
-     type="text"
-  v-model="form.providerName"
-  @input="autoDoctor"
-  placeholder="Example: Dr. Jose Legazpi"
-  class="input"
-  />
+                type="text"
+            v-model="form.providerName"
+            @input="autoDoctor($event); capitalizeName('providerName')"
+            placeholder="Example: Dr. Jose Legazpi"
+            class="input"
+            />
               <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
 
@@ -390,7 +389,7 @@ export default {
         temperature: '',
         height: '',
         weight: '',
-        natureOfVisit: this.natureOfVisit || '', 
+        natureOfVisit: this.natureOfVisit || '',
         visitType: '',
         providerName: '',
         referredFrom: '',
@@ -524,14 +523,14 @@ export default {
           .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
       }
     },
-autoDoctor() {
-  let value = this.form.providerName.trim();
+    autoDoctor() {
+    let value = this.form.providerName.trim();
 
-  if (value && !value.toLowerCase().startsWith('dr.')) {
-    this.form.providerName = `Dr. ${value.replace(/^Dr\.?\s*/i, '')}`;
-  }
-},
-    
+    if (value && !value.toLowerCase().startsWith('dr.')) {
+        this.form.providerName = `Dr. ${value.replace(/^Dr\.?\s*/i, '')}`;
+    }
+    },
+
     validateConsultationDate() {
       const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
       const inputDate = new Date(this.form.consultationDate);

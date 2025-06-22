@@ -87,13 +87,14 @@
 
             <div>
               <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
+              <input type="text" v-model="form.purok" class="input" @input="capitalizeName('purok')"
+                placeholder="Example: Purok 1A" required />
               <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
 
             <div>
               <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input" required />
+              <input type="date" v-model="form.birthdate" class="input"  required />
               <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
 
@@ -179,12 +180,19 @@
             </div>
             <div>
               <label class="block">Name of Attending Doctor/Provider:</label>
-              <input type="text" v-model="form.providerName" placeholder="Example: Dr.Aileen Uy" class="input">
+              <input type="text"
+              v-model="form.providerName"
+              @input="autoDoctor($event); capitalizeName('providerName')"
+              placeholder="Example: Dr.Aileen Uy"
+              class="input">
               <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
             </div>
             <div>
               <label class="block">Name of Spouse:</label>
-              <input type="text" v-model="form.nameOfSpouse" placeholder="Example: Pedro Penduko" class="input">
+              <input type="text" v-model="form.nameOfSpouse"
+              placeholder="Example: Pedro Penduko"
+              @input="capitalizeName('nameOfSpouse')"
+              class="input">
               <span v-if="errors.nameOfSpouse" class="text-red-600 text-sm">{{ errors.nameOfSpouse }}</span>
             </div>
             <!-- Emergency Contact Number -->
@@ -456,6 +464,13 @@ export default {
           .toLowerCase() // Convert entire string to lowercase first
           .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
       }
+    },
+    autoDoctor() {
+        let value = this.form.providerName.trim();
+
+        if (value && !value.toLowerCase().startsWith('dr.')) {
+            this.form.providerName = `Dr. ${value.replace(/^Dr\.?\s*/i, '')}`;
+        }
     },
     formatBloodPressure(event) {
       let value = event.target.value.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
@@ -754,7 +769,7 @@ export default {
   },
   mounted() {
     this.setAutoDateTime();
-    setInterval(this.setAutoDateTime, 0); 
+    setInterval(this.setAutoDateTime, 0);
     console.log('Received personalInfo:', this.personalInfo);
     if (!this.selectedPatient || Object.keys(this.selectedPatient).length === 0) {
       console.log('Rendering empty form for new patient');

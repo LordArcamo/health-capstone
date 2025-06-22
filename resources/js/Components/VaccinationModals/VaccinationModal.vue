@@ -269,7 +269,10 @@
             <label for="antigenGiven" class="block text-sm font-medium text-gray-700">
               Antigen Given
             </label>
-            <input type="text" v-model="form.antigenGiven" id="antigenGiven" class="input"
+            <input type="text" v-model="form.antigenGiven"
+            id="antigenGiven"
+            @input="capitalizeName('antigenGiven')"
+            class="input"
               placeholder="Enter antigen details" required />
             <span v-if="errors.antigenGiven" class="text-red-600 text-sm">{{ errors.antigenGiven }}</span>
           </div>
@@ -279,7 +282,10 @@
             <label for="injectedBy" class="block text-sm font-medium text-gray-700">
               Injected By
             </label>
-            <input type="text" v-model="form.injectedBy" id="injectedBy" class="input"
+            <input type="text" v-model="form.injectedBy"
+            id="injectedBy"
+            @input="capitalizeName('injectedBy')"
+            class="input"
               placeholder="Enter name of injector" required />
             <span v-if="errors.injectedBy" class="text-red-600 text-sm">{{ errors.injectedBy }}</span>
           </div>
@@ -389,7 +395,7 @@ export default {
         sex: '',
         vaccineCategory: "",
         vaccineType: "",
-        dateOfVisit: "",
+        dateOfVisit: this.getTodayDate(),
         ageInMonths: "",
         ageInYears: "",
         weight: "",
@@ -560,6 +566,10 @@ export default {
     },
   },
   methods: {
+    getTodayDate() {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+  },
     validateVaccineCategory: function () {
       if (!this.form.vaccineCategory) {
         this.errors.vaccineCategory = "Vaccine Category is required.";

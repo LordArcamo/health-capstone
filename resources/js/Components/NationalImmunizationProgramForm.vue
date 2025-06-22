@@ -77,7 +77,7 @@
               <!-- Error message if no suffix is selected -->
               <span v-if="errors.suffix" class="text-red-600 text-sm">{{ errors.suffix }}</span>
             </div>
-            
+
             <div>
               <label for="barangay" class="block mb-1">Barangay:</label>
               <select id="barangay" v-model="form.barangay" class="input" required>
@@ -105,7 +105,8 @@
 
             <div>
               <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
+              <input type="text" v-model="form.purok" class="input" @input="capitalizeName('purok')"
+              placeholder="Example: Purok 1A" required />
               <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
 
@@ -155,7 +156,10 @@
             <!-- Birth Place -->
             <div>
               <label class="block">Birth Place:</label>
-              <input type="text" v-model="form.birthplace" class="input" @input="capitalizeName('birthPlace')" placeholder="Example: Initao" required />
+              <input type="text" v-model="form.birthplace"
+              placeholder="Example: Initao"
+              @input="capitalizeName('birthplace')"
+              class="input">
               <span v-if="errors.birthplace" class="text-red-600 text-sm">{{ errors.birthplace }}</span>
             </div>
 
@@ -179,7 +183,10 @@
             <!-- Mother's Name -->
             <div>
               <label class="block">Mother's Name:</label>
-              <input type="text" v-model="form.mothername" class="input" placeholder="Example: Maria Cruz" required />
+              <input type="text" v-model="form.mothername"
+              @input="capitalizeName('mothername')"
+              class="input"
+              placeholder="Example: Maria Cruz" required />
               <span v-if="errors.mothername" class="text-red-600 text-sm">{{ errors.mothername }}</span>
             </div>
 
@@ -241,7 +248,7 @@
               </div>
 
               <!-- Philhealth Member -->
-               
+
               <!-- Philhealth Status -->
               <div class="flex flex-col gap-5">
                 <div>
@@ -290,7 +297,10 @@
               <label class="block text-lg font-semibold">CPAB</label>
               <div>
                 <label class="block">TT Status of Mother:</label>
-                <input type="text" v-model="form.ttstatus" class="input" placeholder="Example: Completed or Pending" />
+                <input type="text" v-model="form.ttstatus"
+                @input="capitalizeName('ttstatus')"
+                class="input"
+                placeholder="Example: Completed or Pending" />
                 <span v-if="errors.ttstatus" class="text-red-600 text-sm">{{ errors.ttstatus }}</span>
 
               </div>
@@ -311,7 +321,10 @@
               </div>
               <div>
                 <label class="block">Place:</label>
-                <input type="text" v-model="form.place" class="input" placeholder="Example: Barangay Health Center" />
+                <input type="text" v-model="form.place"
+                @input="capitalizeName('place')"
+                class="input"
+                placeholder="Example: Barangay Health Center" />
                 <span v-if="errors.place" class="text-red-600 text-sm">{{ errors.place }}</span>
               </div>
             </div>
@@ -320,7 +333,9 @@
           <!-- Guardian Information -->
           <div class="mt-5">
             <label for="guardian" class="block">Guardian</label>
-            <input id="guardian" type="text" v-model="form.guardian" class="input"
+            <input id="guardian" type="text" v-model="form.guardian"
+            @input="capitalizeName('guardian')"
+            class="input"
               placeholder="Example: John Brawl (Father)" />
               <span v-if="errors.guardian" class="text-red-600 text-sm">{{ errors.guardian }}</span>
           </div>
@@ -520,7 +535,7 @@ export default {
         birthdate: this.selectedPatient?.birthdate || '',
         contact: this.selectedPatient?.contact || '',
         sex: this.selectedPatient?.sex || '',
-        
+
       };
       this.form.age = this.computedAge;
 
@@ -566,7 +581,7 @@ export default {
         this.errors.birthdate = 'Please enter a birthdate that is valid.';
       }
     },
-    
+
     handleSubmit(event) {
       event.preventDefault();
       this.triggerSubmit();
@@ -689,7 +704,7 @@ export default {
     // Format the contact field to only allow digits and limit to 10 characters
     formatContact() {
       this.form.contact = this.form.contact.replace(/[^0-9]/g, '').slice(0, 10);
-    },  
+    },
     navigateToStep(targetStep) {
       if (targetStep > this.step) {
         // Validate the current step before proceeding

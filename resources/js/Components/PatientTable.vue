@@ -134,30 +134,30 @@
                 </select>
               </div>
 
-              <!-- Diagnosis Filters -->
+              <!-- Type of Visit Filters -->
               <div class="col-span-2">
-                <button @click="toggleDiagnosisPanel"
+                <button @click="toggleVisitTypePanel"
                   class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 transition font-medium">
-                  Diagnosis Filters
-                  <span v-if="isDiagnosisPanelOpen">▲</span>
+                  Type of Visit Filters
+                  <span v-if="isVisitTypePanelOpen">▲</span>
                   <span v-else>▼</span>
                 </button>
 
                 <transition name="fade">
-                  <div v-if="isDiagnosisPanelOpen" class="flex flex-col gap-2 mt-3">
-                    <div v-for="diagnosis in visibleDiagnosisOptions" :key="diagnosis">
+                  <div v-if="isVisitTypePanelOpen" class="flex flex-col gap-2 mt-3">
+                    <div v-for="visitType in visibleDiagnosisOptions" :key="visitType">
                       <label class="flex items-center gap-2 cursor-pointer">
                         <div class="w-5 h-5 border-2 border-green-500 rounded flex items-center justify-center">
-                          <input type="checkbox" :value="diagnosis" v-model="filterDiagnosis"
+                          <input type="checkbox" :value="visitType" v-model="filterVisitType"
                             class="appearance-none w-4 h-4" />
-                          <div v-if="filterDiagnosis.includes(diagnosis)" class="w-3 h-3 bg-green-500 rounded"></div>
+                          <div v-if="filterVisitType.includes(visitType)" class="w-3 h-3 bg-green-500 rounded"></div>
                         </div>
-                        <span class="text-gray-700">{{ diagnosis }}</span>
+                        <span class="text-gray-700">{{ visitType }}</span>
                       </label>
                     </div>
-                    <button v-if="uniqueDiagnosisOptions.length > maxVisibleDiagnoses" @click="toggleShowAllDiagnosis"
+                    <button v-if="uniqueVisitTypeOptions.length > maxVisibleDiagnoses" @click="toggleShowAllvisitType"
                       class="text-blue-500 underline font-medium hover:text-blue-700 mt-2">
-                      {{ showAllDiagnosis ? "See Less" : "See More" }}
+                      {{ showAllvisitType ? "See Less" : "See More" }}
                     </button>
                   </div>
                 </transition>
@@ -276,7 +276,7 @@ export default {
       filterBarangay: '',
       filterGender: [],
       filterAgeRange: '',
-      filterDiagnosis: [],
+      filterVisitType: [],
       currentPage: 1,
       itemsPerPage: 15,
       showModal: false,
@@ -286,9 +286,9 @@ export default {
       endDate: '',
       currentDateText: '',
       diagnosisOptions: [],
-      showAllDiagnosis: false,
+      showAllvisitType: false,
       maxVisibleDiagnoses: 5,
-      isDiagnosisPanelOpen: false,
+      isVisitTypePanelOpen: false,
     };
   },
   watch: {
@@ -307,7 +307,7 @@ export default {
     filterBarangay() {
       this.currentPage = 1;
     },
-    filterDiagnosis() {
+    filterVisitType() {
       this.currentPage = 1;
     },
   },
@@ -318,8 +318,8 @@ export default {
       return this.filteredPatients.slice(start, end);
     },
 
-    uniqueDiagnosisOptions() {
-      return Array.from(new Set(this.patients.map((p) => p.diagnosis)));
+    uniqueVisitTypeOptions() {
+      return Array.from(new Set(this.patients.map((p) => p.visitType)));
     },
 
     /*
@@ -328,8 +328,8 @@ export default {
          for clarity that these are the ones you physically render in checkboxes.
     */
     visibleDiagnosisOptions() {
-      const all = this.uniqueDiagnosisOptions;
-      return this.showAllDiagnosis ? all : all.slice(0, this.maxVisibleDiagnoses);
+      const all = this.uniqueVisitTypeOptions;
+      return this.showAllvisitType ? all : all.slice(0, this.maxVisibleDiagnoses);
     },
 
     filteredPatients() {
@@ -353,7 +353,7 @@ export default {
           const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
           const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
           const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
-          const matchesDiagnosis = this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
+          const matchesVisitType = this.filterVisitType.length === 0 || this.filterVisitType.includes(patient.visitType);
 
           let matchesAgeRange = true;
           if (this.filterAgeRange) {
@@ -379,7 +379,7 @@ export default {
             matchesPrk &&
             matchesBarangay &&
             matchesGender &&
-            matchesDiagnosis &&
+            matchesVisitType &&
             matchesAgeRange &&
             matchesDate
           );
@@ -531,8 +531,8 @@ export default {
       this.isFilterPanelOpen = !this.isFilterPanelOpen;
     },
 
-    toggleDiagnosisPanel() {
-      this.isDiagnosisPanelOpen = !this.isDiagnosisPanelOpen;
+    toggleVisitTypePanel() {
+      this.isVisitTypePanelOpen = !this.isVisitTypePanelOpen;
     },
 
     formatDate(dateStr) {
@@ -543,8 +543,8 @@ export default {
       return dateObj.toLocaleDateString('en-US', options);
     },
 
-    toggleShowAllDiagnosis() {
-      this.showAllDiagnosis = !this.showAllDiagnosis;
+    toggleShowAllvisitType() {
+      this.showAllvisitType = !this.showAllvisitType;
     },
 
     sameDay(dateA, dateB) {

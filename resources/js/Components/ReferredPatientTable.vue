@@ -135,7 +135,7 @@
               </div>
 
               <!-- Diagnosis Filters -->
-              <div class="col-span-2">
+              <!-- <div class="col-span-2">
                 <button @click="toggleDiagnosisPanel"
                   class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 transition font-medium">
                   Diagnosis Filters
@@ -161,7 +161,7 @@
                     </button>
                   </div>
                 </transition>
-              </div>
+              </div> -->
             </div>
           </div>
         </transition>
@@ -174,7 +174,7 @@
     <input type="file" ref="fileInput" accept=".csv" @change="handleFileUpload" class="hidden" />
 
 
-    
+
 <!-- Responsive Table -->
 <div class="overflow-x-auto bg-gray-100 rounded-lg">
   <table class="min-w-full table-auto bg-white shadow-sm rounded-lg">
@@ -251,7 +251,7 @@
         </ul>
 
       </div>
-    </div> 
+    </div>
   </div>
 </template>
 

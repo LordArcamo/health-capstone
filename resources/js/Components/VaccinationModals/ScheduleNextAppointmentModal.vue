@@ -78,7 +78,9 @@
             <label for="antigenGiven" class="block text-sm font-medium text-gray-700">
               Antigen Given
             </label>
-            <input type="text" v-model="form.antigenGiven" id="antigenGiven" class="input" placeholder="Enter antigen details" required />
+            <input type="text" v-model="form.antigenGiven"
+            @input="capitalizeName('antigenGiven')"
+            id="antigenGiven" class="input" placeholder="Enter antigen details" required />
             <span v-if="errors.antigenGiven" class="text-red-600 text-sm">{{ errors.antigenGiven }}</span>
           </div>
 
@@ -100,7 +102,9 @@
             <label for="injectedBy" class="block text-sm font-medium text-gray-700">
               Injected By
             </label>
-            <input type="text" v-model="form.injectedBy" id="injectedBy" class="input" placeholder="Enter name of injector" required />
+            <input type="text" v-model="form.injectedBy"
+            @input="capitalizeName('injectedBy')"
+            id="injectedBy" class="input" placeholder="Enter name of injector" required />
             <span v-if="errors.injectedBy" class="text-red-600 text-sm">{{ errors.injectedBy }}</span>
           </div>
 
@@ -158,7 +162,7 @@ export default {
         vaccinationId: this.vaccinationId,
         vaccineCategory: this.patient.vaccineCategory || '',
         vaccineType: this.patient.vaccineType || '',
-        dateOfVisit: '',
+        dateOfVisit: this.getTodayDate(),
         weight: '',
         height: '',
         temperature: '',
@@ -192,6 +196,25 @@ export default {
     },
   },
   methods: {
+    getTodayDate() {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+  },
+  capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .split(" ") // Split the input by spaces
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter
+          .join(" "); // Join the words back together
+      }
+    },
+    formatLabel(key) {
+      // Convert camelCase or snake_case keys to readable labels
+      return key
+        .replace(/([A-Z])/g, " $1") // Add space before uppercase letters
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
+    },
     resetForm() {
       this.form = {
         vaccinationId: this.vaccinationId,
