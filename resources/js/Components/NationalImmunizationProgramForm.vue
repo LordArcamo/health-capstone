@@ -819,6 +819,7 @@ export default {
       this.populateForm(this.selectedPatient);
     }
   },
+  
 };
 </script>
 

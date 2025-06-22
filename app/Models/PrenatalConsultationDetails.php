@@ -21,6 +21,8 @@ class PrenatalConsultationDetails extends Model
         'modeOfTransaction', 'consultationDate', 'consultationTime', 'bloodPressure',
         'temperature', 'height', 'weight', 'providerName', 'nameOfSpouse',
         'emergencyContact', 'fourMember', 'philhealthStatus', 'philhealthNo',
+        'status',
+        'completed_at',
     ];
 
     protected $hidden = ['created_at', 'updated_at'];

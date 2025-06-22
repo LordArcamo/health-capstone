@@ -27,7 +27,7 @@ class Prescription extends Model
         'dosage',
         'frequency',
         'duration',
-        'instructions',
+        'notes',
     ];
 
     protected $hidden = ['created_at', 'updated_at'];

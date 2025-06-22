@@ -247,19 +247,27 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label for="fhb" class="block text-sm font-medium text-gray-700">FHB</label>
-          <input v-model="form.fhb" type="text" id="fhb" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.fhb" 
+          @input="capitalizeName('fhb')"
+          type="text" id="fhb" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
         <div>
           <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
-          <input v-model="form.position" type="text" id="position" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.position" 
+          @input="capitalizeName('position')"
+          type="text" id="position" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
         <div>
           <label for="presentation" class="block text-sm font-medium text-gray-700">Presentation</label>
-          <input v-model="form.presentation" type="text" id="presentation" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.presentation" 
+          @input="capitalizeName('presentation')"
+          type="text" id="presentation" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
         <div>
           <label for="fundal_height" class="block text-sm font-medium text-gray-700">Fundal Height</label>
-          <input v-model="form.fundal_height" type="text" id="fundal_height" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+          <input v-model="form.fundal_height" 
+          @input="capitalizeName('fundal_height')"
+          type="text" id="fundal_height" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
         </div>
       </div>
 
@@ -294,7 +302,7 @@ export default {
     return {
       isSubmitting: false,
       form: {
-        date_of_visit: '',
+        date_of_visit: this.getTodayDate(),
         weight: '',
         bp: '',
         heart_rate: '',
@@ -335,6 +343,25 @@ export default {
     },
   },
   methods: {
+        getTodayDate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    },
+        capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .split(" ") // Split the input by spaces
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter
+          .join(" "); // Join the words back together
+      }
+    },
+    formatLabel(key) {
+      // Convert camelCase or snake_case keys to readable labels
+      return key
+        .replace(/([A-Z])/g, " $1") // Add space before uppercase letters
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
+    },
     enableEditing() {
       this.isEditing = true;
     },

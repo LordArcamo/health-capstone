@@ -220,7 +220,7 @@ export default {
     return {
       isSubmitting: false,
       form: {
-        date_of_visit: '',
+        date_of_visit: this.getTodayDate(),
         weight: '',
         bp: '',
         heart_rate: '',
@@ -253,6 +253,25 @@ export default {
     },
   },
   methods: {
+        getTodayDate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    },
+        capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .split(" ") // Split the input by spaces
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter
+          .join(" "); // Join the words back together
+      }
+    },
+    formatLabel(key) {
+      // Convert camelCase or snake_case keys to readable labels
+      return key
+        .replace(/([A-Z])/g, " $1") // Add space before uppercase letters
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
+    },
     enableEditing() {
       this.isEditing = true;
     },

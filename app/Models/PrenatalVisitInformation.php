@@ -17,7 +17,7 @@ class PrenatalVisitInformation extends Model
     protected $keyType = 'int'; // Set the key type
 
     protected $fillable = [
-        'personalId', 'id',
+        'prenatalConsultationDetailsID', 'id',
         'menarche', 'sexualOnset', 'periodDuration', 'birthControl', 'intervalCycle',
         'menopause', 'lmp', 'edc', 'gravidity', 'parity', 'term', 'preterm',
         'abortion', 'living', 'syphilisResult', 'penicillin', 'hemoglobin',

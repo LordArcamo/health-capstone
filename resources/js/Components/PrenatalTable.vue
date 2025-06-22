@@ -134,7 +134,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 text-gray-700">
-          <tr v-for="patient in filteredPatients" :key="patient.id"
+          <tr v-for="patient in paginatedPatients" :key="patient.id"
             class="hover:bg-gray-50 transition-colors cursor-pointer" @click="openModal('inline', patient)">
             <td class="py-3 px-6">{{ patient.fullName }}</td>
             <td class="py-3 px-6">{{ patient.address }}</td>
@@ -340,11 +340,10 @@ export default {
       filterBarangay: '',
       filterGender: [],
       filterAgeRange: '',
-      filterDiagnosis: [],
       startDate: '',
       endDate: '',
       currentPage: 1,
-      itemsPerPage: 5,
+      itemsPerPage: 15,
       currentModal: null,
       selectedPatient: null,
       isFilterPanelOpen: false,
@@ -353,70 +352,88 @@ export default {
       currentDateText: '',
     };
   },
+    watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    filterGender() {
+      this.currentPage = 1;
+    },
+    filterAgeRange() {
+      this.currentPage = 1;
+    },
+    filterPrk() {
+      this.currentPage = 1;
+    },
+    filterBarangay() {
+      this.currentPage = 1;
+    },
+  },
 
   computed: {
-    filteredPatients() {
-      const queryFilters = this.filters.map(f => f.toLowerCase());
+      filteredPatients() {
+    const queryFilters = this.filters.map(f => f.toLowerCase());
 
-      return this.patients
-        .map((patient) => ({
-          ...patient,
-          fullName: `${patient.firstName} ${patient.lastName}`,
-          address: `${patient.purok}, ${patient.barangay}`,
-        }))
-        .filter((patient) => {
-          const matchesFilters = queryFilters.every(filter =>
-            patient.fullName.toLowerCase().includes(filter) ||
-            (patient.natureOfVisit && patient.natureOfVisit.toLowerCase().includes(filter)) ||
-            (patient.visitType && patient.visitType.toLowerCase().includes(filter)) ||
-            patient.address.toLowerCase().includes(filter) ||
-            (patient.diagnosis && patient.diagnosis.toLowerCase().includes(filter))
-          );
+    return this.patients
+      .map((patient) => ({
+        ...patient,
+        fullName: `${patient.firstName} ${patient.lastName}`,
+        address: `${patient.purok}, ${patient.barangay}`,
+      }))
+      .filter((patient) => {
+        const matchesFilters = queryFilters.every(filter =>
+          patient.fullName.toLowerCase().includes(filter) ||
+          (patient.natureOfVisit && patient.natureOfVisit.toLowerCase().includes(filter)) ||
+          (patient.visitType && patient.visitType.toLowerCase().includes(filter)) ||
+          patient.address.toLowerCase().includes(filter) ||
+          (patient.diagnosis && patient.diagnosis.toLowerCase().includes(filter))
+        );
 
-          const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
-          const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
-          const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
-          const matchesDiagnosis = this.filterDiagnosis.length === 0 || this.filterDiagnosis.includes(patient.diagnosis);
+        const matchesPrk = !this.filterPrk || patient.purok === this.filterPrk;
+        const matchesBarangay = !this.filterBarangay || patient.barangay === this.filterBarangay;
+        const matchesGender = this.filterGender.length === 0 || this.filterGender.includes(patient.sex);
 
-          let matchesAgeRange = true;
-          if (this.filterAgeRange) {
-            const patientAge = parseInt(patient.age, 10);
-            matchesAgeRange = patientAge >= parseInt(this.filterAgeRange, 10);
-          }
+        let matchesAgeRange = true;
+        if (this.filterAgeRange) {
+          const patientAge = parseInt(patient.age, 10);
+          matchesAgeRange = patientAge >= parseInt(this.filterAgeRange, 10);
+        }
 
-          let matchesDate = true;
-          const consultationDate = new Date(patient.consultationDate);
+        let matchesDate = true;
+        const consultationDate = new Date(patient.consultationDate);
 
-          if (this.startDate) {
-            const start = new Date(this.startDate);
-            matchesDate = consultationDate >= start;
-          }
+        if (this.startDate) {
+          const start = new Date(this.startDate);
+          matchesDate = consultationDate >= start;
+        }
 
-          if (this.endDate) {
-            const end = new Date(this.endDate);
-            matchesDate = matchesDate && consultationDate <= end;
-          }
+        if (this.endDate) {
+          const end = new Date(this.endDate);
+          matchesDate = matchesDate && consultationDate <= end;
+        }
 
-          return (
-            matchesFilters &&
-            matchesPrk &&
-            matchesBarangay &&
-            matchesGender &&
-            matchesDiagnosis &&
-            matchesAgeRange &&
-            matchesDate
-          );
-        })
-        .slice(
-          (this.currentPage - 1) * this.itemsPerPage,
-          this.currentPage * this.itemsPerPage
-        )
-        .sort((a, b) => new Date(b.consultationDate) - new Date(a.consultationDate));
-    },
+        return (
+          matchesFilters &&
+          matchesPrk &&
+          matchesBarangay &&
+          matchesGender &&
+          matchesAgeRange &&
+          matchesDate
+        );
+      })
+      .sort((a, b) => new Date(b.consultationDate) - new Date(a.consultationDate));
+  },
 
-    totalPages() {
-      return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
-    },
+  // Only paginate here — show 15 per page
+  paginatedPatients() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.filteredPatients.slice(start, end);
+  },
+
+  totalPages() {
+    return Math.ceil(this.filteredPatients.length / this.itemsPerPage);
+  },
 
     purokOptions() {
       return [...new Set(this.patients.map((patient) => patient.purok))];
@@ -444,6 +461,9 @@ export default {
   },
 
   methods: {  
+    toggleFilterPanel() {
+      this.isFilterPanelOpen = !this.isFilterPanelOpen;
+    },
     handlePostpartumSubmit(data) {
       console.log("Postpartum data submitted:", data);
       // Process the submitted data, for example, send it to an API
@@ -707,6 +727,27 @@ export default {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
+    },
+        triggerImport() {
+      this.$refs.fileInput.click();
+    },
+        handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        this.uploadCSV(formData);
+      }
+    },
+
+    uploadCSV(formData) {
+      Inertia.post('/services/patients/prenatal-postpartum', formData, {
+        onSuccess: () => alert('Patients imported successfully!'),
+        onError: (errors) => {
+          console.error('Errors during upload:', errors);
+          alert('Failed to import CSV. Please check the file and try again.');
+        },
+      });
     },
 
     generateReport() {

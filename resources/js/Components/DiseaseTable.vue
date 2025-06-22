@@ -136,7 +136,7 @@
               </div>
 
               <!-- Diagnosis Filters -->
-              <div class="col-span-2">
+              <!-- <div class="col-span-2">
                 <button @click="toggleDiagnosisPanel"
                   class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600 transition font-medium">
                   Diagnosis Filters
@@ -162,7 +162,7 @@
                     </button>
                   </div>
                 </transition>
-              </div>
+              </div> -->
             </div>
           </div>
         </transition>

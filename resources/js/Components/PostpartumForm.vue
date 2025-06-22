@@ -97,19 +97,25 @@
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label for="first_name" class="block text-sm font-medium text-pink-700">First Name</label>
-                  <input v-model="form.firstName" type="text" id="first_name" placeholder="John"
+                  <input v-model="form.firstName" 
+                  @input="capitalizeName('firstName')"
+                  type="text" id="first_name" placeholder="John"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500" />
                   <p v-if="errors.firstName" class="text-red-500 text-sm">{{ errors.firstName }}</p>
                 </div>
                 <div>
                   <label for="last_name" class="block text-sm font-medium text-pink-700">Last Name</label>
-                  <input v-model="form.lastName" type="text" id="last_name" placeholder="Dela Cruz"
+                  <input v-model="form.lastName" 
+                  @input="capitalizeName('lastName')"
+                  type="text" id="last_name" placeholder="Dela Cruz"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500" />
                   <p v-if="errors.lastName" class="text-red-500 text-sm">{{ errors.lastName }}</p>
                 </div>
                 <div>
                   <label for="middle_name" class="block text-sm font-medium text-pink-700">Middle Name</label>
-                  <input v-model="form.middleName" type="text" id="middle_name" placeholder="Delos Santos"
+                  <input v-model="form.middleName" 
+                  @input="capitalizeName('middleName')"
+                  type="text" id="middle_name" placeholder="Delos Santos"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500" />
                 </div>
                 <div>
@@ -132,21 +138,27 @@
                 <div>
                   <label for="prenatal_delivered" class="block text-sm font-medium text-pink-700">Prenatal
                     Delivered</label>
-                  <input v-model="form.prenatalDelivered" type="text" step="0.01" id="prenatal_delivered"
+                  <input v-model="form.prenatalDelivered" 
+                  @input="capitalizeName('prenatalDelivered')"
+                  type="text" step="0.01" id="prenatal_delivered"
                     placeholder="Enter Where Prenatal is Delivered"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500" />
                   <p v-if="errors.prenatalDelivered" class="text-red-500 text-sm">{{ errors.prenatalDelivered }}</p>
                 </div>
                 <div>
                   <label for="place_delivered" class="block text-sm font-medium text-pink-700">Place Delivered</label>
-                  <input v-model="form.placeDelivered" type="text" step="0.01" id="place_delivered"
+                  <input v-model="form.placeDelivered" 
+                  @input="capitalizeName('placeDelivered')"
+                  type="text" step="0.01" id="place_delivered"
                     placeholder="Enter place delivered"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500" />
                   <p v-if="errors.placeDelivered" class="text-red-500 text-sm">{{ errors.placeDelivered }}</p>
                 </div>
                 <div>
                   <label for="mode_of_delivery" class="block text-sm font-medium text-pink-700">Mode of Delivery</label>
-                  <input v-model="form.modeOfDelivery" type="text" step="0.01" id="mode_of_delivery"
+                  <input v-model="form.modeOfDelivery" 
+                  @input="capitalizeName('modeOfDelivery')"
+                  type="text" step="0.01" id="mode_of_delivery"
                     placeholder="Enter Mode of Delivery"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500" />
                   <p v-if="errors.modeOfDelivery" class="text-red-500 text-sm">{{ errors.modeOfDelivery }}</p>
@@ -181,7 +193,9 @@
                 <div>
                   <label for="attendant_birth" class="block text-sm font-medium text-pink-700">Attendant at
                     Birth</label>
-                  <input v-model="form.attendantBirth" type="text" step="0.01" id="attendant_birth"
+                  <input v-model="form.attendantBirth" 
+                  @input="capitalizeName('attendantBirth')"
+                  type="text" step="0.01" id="attendant_birth"
                     placeholder="Example: Josefina Uy"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500" />
                   <p v-if="errors.attendantBirth" class="text-red-500 text-sm">{{ errors.attendantBirth }}</p>
@@ -267,7 +281,9 @@
                 <div>
                   <label for="danger_signs_mother" class="block text-sm font-medium text-pink-700">Danger Signs
                     (Mother)</label>
-                  <textarea v-model="form.dangerSignsMother" id="danger_signs_mother"
+                  <textarea v-model="form.dangerSignsMother" 
+                  @input="capitalizeName('dangerSignsMother')"
+                  id="danger_signs_mother"
                     placeholder="Describe any danger signs for the mother"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"></textarea>
                   <p v-if="errors.dangerSignsMother" class="text-red-500 text-sm">{{ errors.dangerSignsMother }}</p>
@@ -276,7 +292,9 @@
                 <div>
                   <label for="danger_signs_baby" class="block text-sm font-medium text-pink-700">Danger Signs
                     (Baby)</label>
-                  <textarea v-model="form.dangerSignsBaby" id="danger_signs_baby"
+                  <textarea v-model="form.dangerSignsBaby" 
+                  @input="capitalizeName('dangerSignsBaby')"
+                  id="danger_signs_baby"
                     placeholder="Describe any danger signs for the baby"
                     class="mt-1 block w-full border-pink-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"></textarea>
                   <p v-if="errors.dangerSignsBaby" class="text-red-500 text-sm">{{ errors.dangerSignsBaby }}</p>
@@ -375,6 +393,25 @@ export default {
     },
   },
   methods: {
+        getTodayDate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    },
+        capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .split(" ") // Split the input by spaces
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter
+          .join(" "); // Join the words back together
+      }
+    },
+    formatLabel(key) {
+      // Convert camelCase or snake_case keys to readable labels
+      return key
+        .replace(/([A-Z])/g, " $1") // Add space before uppercase letters
+        .replace(/_/g, " ") // Replace underscores with spaces
+        .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
+    },
     enableEdit() {
       this.isEditing = true;
       this.form = { ...this.existingData }; // Pre-fill form with existing data

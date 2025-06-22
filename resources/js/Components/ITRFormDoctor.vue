@@ -183,7 +183,9 @@
             <!-- Chief Complaints -->
             <div>
               <label class="block">Chief Complaints:</label>
-              <textarea v-model="form.chiefComplaints" placeholder="Example: Low Bowel Movements etc."
+              <textarea v-model="form.chiefComplaints" 
+              @input="capitalizeName('chiefComplaints')"
+              placeholder="Example: Low Bowel Movements etc."
                 class="input"></textarea>
               <span v-if="errors.chiefComplaints" class="text-red-600 text-sm">{{ errors.chiefComplaints }}</span>
             </div>
@@ -235,7 +237,9 @@
 
                 <!-- Input for new diagnosis tags -->
                 <input v-model="newDiagnosis" @keydown.enter.prevent="addDiagnosisTag"
-                  @keydown.space.prevent="addDiagnosisTag" placeholder="Type diagnosis and press Enter or Space"
+                  @keydown.space.prevent="addDiagnosisTag" 
+                  @input="newDiagnosis = capitalizeText(newDiagnosis)"
+                  placeholder="Type diagnosis and press Enter or Space"
                   class="flex-grow py-1 px-3 text-sm text-gray-700 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none" />
               </div>
 
@@ -271,19 +275,29 @@
               <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">Add Medicine</h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <!-- Medication Name -->
-                <div>
-                  <label for="medication" class="block text-sm font-medium text-gray-700 mb-2">Medication Name</label>
-                  <input id="medication" type="text" v-model="form.prescription.medication" class="input"
-                    placeholder="Enter the medication name" />
-                  <span v-if="errors.prescriptionMedication" class="text-red-500 text-sm">
-                    {{ errors.prescriptionMedication }}
-                  </span>
-                </div>
+              <div>
+                <label for="medication" class="block text-sm font-medium text-gray-700 mb-2">Medication Name</label>
+                <input
+                  id="medication"
+                  type="text"
+                  v-model="form.prescription.medication"
+                  @input="form.prescription.medication = capitalizeText(form.prescription.medication)"
+                  class="input"
+                  placeholder="Enter the medication name"
+                />
+                <span v-if="errors.prescriptionMedication" class="text-red-500 text-sm">
+                  {{ errors.prescriptionMedication }}
+                </span>
+              </div>
 
                 <!-- Dosage -->
                 <div>
                   <label for="dosage" class="block text-sm font-medium text-gray-700 mb-2">Dosage</label>
-                  <input id="dosage" type="text" v-model="form.prescription.dosage" class="input"
+                  <input id="dosage" 
+                  type="text" 
+                  v-model="form.prescription.dosage" 
+                  @input="form.prescription.dosage = capitalizeText(form.prescription.dosage)"
+                  class="input"
                     placeholder="e.g., 500mg" />
                   <span v-if="errors.prescriptionDosage" class="text-red-500 text-sm">
                     {{ errors.prescriptionDosage }}
@@ -293,7 +307,11 @@
                 <!-- Frequency -->
                 <div>
                   <label for="frequency" class="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
-                  <input id="frequency" type="text" v-model="form.prescription.frequency" class="input"
+                  <input id="frequency" 
+                  type="text" 
+                  v-model="form.prescription.frequency" 
+                  @input="form.prescription.frequency = capitalizeText(form.prescription.frequency)"
+                  class="input"
                     placeholder="e.g., 2 times a day" />
                   <span v-if="errors.prescriptionFrequency" class="text-red-500 text-sm">
                     {{ errors.prescriptionFrequency }}
@@ -303,7 +321,11 @@
                 <!-- Duration -->
                 <div>
                   <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
-                  <input id="duration" type="text" v-model="form.prescription.duration" class="input"
+                  <input id="duration" 
+                  type="text" 
+                  v-model="form.prescription.duration" 
+                  @input="form.prescription.duration = capitalizeText(form.prescription.duration)"
+                  class="input"
                     placeholder="e.g., 7 days" />
                   <span v-if="errors.prescriptionDuration" class="text-red-500 text-sm">
                     {{ errors.prescriptionDuration }}
@@ -313,7 +335,10 @@
                 <!-- Notes -->
                 <div class="col-span-2">
                   <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                  <textarea id="notes" v-model="form.prescription.notes" class="input"
+                  <textarea id="notes" 
+                  v-model="form.prescription.notes" 
+                  @input="form.prescription.notes = capitalizeText(form.prescription.notes)"
+                  class="input"
                     placeholder="Enter additional instructions for the patient"></textarea>
                 </div>
               </div>
@@ -614,6 +639,11 @@ export default {
     },
   },
   methods: {
+      capitalizeText(text) {
+    return text
+      .toLowerCase()
+      .replace(/\b\w/g, char => char.toUpperCase());
+  },
 
     addMedication() {
       // Prevent form submission triggering
@@ -816,10 +846,14 @@ export default {
     },
 
     formatLabel(key) {
-      return key
-        .replace(/([A-Z])/g, ' $1')  // Add space before capital letters
-        .replace(/_/g, ' ')  // Replace underscores with spaces
-        .replace(/^\w/, (c) => c.toUpperCase());  // Capitalize the first letter
+      return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    },
+    capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .toLowerCase() // Convert entire string to lowercase first
+          .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+      }
     },
 
     resetForm() {

@@ -142,38 +142,74 @@ class PreNatalController extends Controller
 
     public function import(Request $request)
     {
-        set_time_limit(300); // Increase time limit to 5 minutes
+        set_time_limit(300);
 
-        // Validate the uploaded file
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
         ]);
 
         $file = $request->file('file');
         $data = array_map('str_getcsv', file($file->getRealPath()));
-        $header = array_shift($data); // Extract the header row
+        $header = array_shift($data);
 
-        DB::transaction(function () use ($data, $header) {
+        $userId = auth()->id();
+
+        DB::transaction(function () use ($data, $header, $userId) {
             foreach ($data as $row) {
                 $prenatalData = array_combine($header, $row);
 
-                // Convert consultationTime to MySQL TIME format
-                $prenatalData['consultationTime'] = date('H:i:s', strtotime($prenatalData['consultationTime']));
+                // Format fields
+                $prenatalData['consultationTime'] = !empty($prenatalData['consultationTime']) ? date('H:i:s', strtotime($prenatalData['consultationTime'])) : null;
+                $prenatalData['birthdate'] = !empty($prenatalData['birthdate']) ? date('Y-m-d', strtotime($prenatalData['birthdate'])) : null;
+                $prenatalData['consultationDate'] = !empty($prenatalData['consultationDate']) ? date('Y-m-d', strtotime($prenatalData['consultationDate'])) : null;
+                $prenatalData['lmp'] = !empty($prenatalData['lmp']) ? date('Y-m-d', strtotime($prenatalData['lmp'])) : null;
+                $prenatalData['edc'] = !empty($prenatalData['edc']) ? date('Y-m-d', strtotime($prenatalData['edc'])) : null;
+                $prenatalData['tdDate'] = !empty($prenatalData['tdDate']) ? date('Y-m-d', strtotime($prenatalData['tdDate'])) : now();
 
-                // Convert numeric fields to proper types
-                $prenatalData['temperature'] = (float) $prenatalData['temperature'];
-                $prenatalData['height'] = (float) $prenatalData['height'];
-                $prenatalData['weight'] = (float) $prenatalData['weight'];
-                $prenatalData['age'] = (int) $prenatalData['age'];
+                // Numeric conversions
+                $prenatalData['temperature'] = isset($prenatalData['temperature']) ? number_format((float)$prenatalData['temperature'], 2, '.', '') : null;
+                $prenatalData['height'] = isset($prenatalData['height']) ? number_format((float)$prenatalData['height'], 2, '.', '') : null;
+                $prenatalData['weight'] = isset($prenatalData['weight']) ? number_format((float)$prenatalData['weight'], 2, '.', '') : null;
+                $prenatalData['hemoglobin'] = isset($prenatalData['hemoglobin']) ? number_format((float)$prenatalData['hemoglobin'], 2, '.', '') : 0;
+                $prenatalData['hematocrit'] = isset($prenatalData['hematocrit']) ? number_format((float)$prenatalData['hematocrit'], 2, '.', '') : 0;
+                $prenatalData['age'] = isset($prenatalData['age']) ? (int)$prenatalData['age'] : null;
 
-                // Validate the row
+                // Defaults
+                $prenatalData['suffix'] = $prenatalData['suffix'] ?? 'None';
+                $prenatalData['syphilisResult'] = $prenatalData['syphilisResult'] ?? 'Unknown';
+                $prenatalData['penicillin'] = $prenatalData['penicillin'] ?? 'No';
+                $prenatalData['urinalysis'] = $prenatalData['urinalysis'] ?? 'N/A';
+                $prenatalData['ttStatus'] = $prenatalData['ttStatus'] ?? 'N/A';
+
+                // Normalize status
+                $statusRaw = strtolower(trim($prenatalData['status'] ?? ''));
+                $isCompleted = $statusRaw === 'completed';
+                $isCancelled = $statusRaw === 'cancelled';
+                $prenatalData['status'] = in_array($statusRaw, ['completed', 'cancelled']) ? $statusRaw : 'in queue';
+                $completedAt = $isCompleted ? now() : null;
+
+                // Wipe sensitive info if cancelled
+                if ($isCancelled) {
+                    $fieldsToNull = [
+                        'menarche', 'sexualOnset', 'periodDuration', 'birthControl', 'intervalCycle',
+                        'menopause', 'lmp', 'edc', 'gravidity', 'parity', 'term', 'preterm',
+                        'abortion', 'living', 'syphilisResult', 'penicillin',
+                        'hemoglobin', 'hematocrit', 'urinalysis', 'ttStatus', 'tdDate',
+                    ];
+                    foreach ($fieldsToNull as $field) {
+                        $prenatalData[$field] = null;
+                    }
+                }
+
+                // Validate
                 $validator = Validator::make($prenatalData, [
                     'firstName' => 'required|string|max:100',
                     'lastName' => 'required|string|max:100',
                     'middleName' => 'nullable|string|max:100',
+                    'suffix' => 'nullable|string|max:10',
                     'purok' => 'nullable|string|max:100',
                     'barangay' => 'nullable|string|max:100',
-                    'age' => 'required|integer|min:0|max:150',
+                    'age' => 'required|integer|min:10|max:50',
                     'birthdate' => 'required|date',
                     'contact' => 'nullable|string|max:15',
                     'sex' => 'required|string|in:Female',
@@ -188,48 +224,61 @@ class PreNatalController extends Controller
                     'nameOfSpouse' => 'required|string|max:100',
                     'emergencyContact' => 'required|string|max:15',
                     'fourMember' => 'required|string|max:100',
-                    'philhealthStatus' => 'required|string|max:50',
+                    'philhealthStatus' => 'required|string|in:Member,Dependent',
                     'philhealthNo' => 'nullable|string|max:50',
-                    'menarche' => 'required|string|max:50',
-                    'sexualOnset' => 'required|string|max:50',
-                    'periodDuration' => 'required|string|max:50',
-                    'birthControl' => 'required|string|max:100',
-                    'intervalCycle' => 'required|string|max:50',
-                    'menopause' => 'nullable|string|max:50',
-                    'lmp' => 'required|date',
-                    'edc' => 'required|date',
-                    'gravidity' => 'required|integer|min:0',
-                    'parity' => 'required|integer|min:0',
-                    'term' => 'required|integer|min:0',
-                    'preterm' => 'required|integer|min:0',
-                    'abortion' => 'required|integer|min:0',
-                    'living' => 'required|integer|min:0',
+                    'status' => 'nullable|string|max:50',
                 ]);
 
+                if (!$isCancelled) {
+                    $validator->addRules([
+                        'menarche' => 'required|string|max:50',
+                        'sexualOnset' => 'required|date',
+                        'periodDuration' => 'required|string|max:50',
+                        'birthControl' => 'required|string|max:100',
+                        'intervalCycle' => 'required|string|max:50',
+                        'menopause' => 'nullable|string|max:50',
+                        'lmp' => 'required|date',
+                        'edc' => 'required|date',
+                        'gravidity' => 'required|integer|min:0',
+                        'parity' => 'required|integer|min:0',
+                        'term' => 'required|integer|min:0',
+                        'preterm' => 'required|integer|min:0',
+                        'abortion' => 'required|integer|min:0',
+                        'living' => 'required|integer|min:0',
+                        'syphilisResult' => 'required|string|max:10',
+                        'penicillin' => 'required|string|max:10',
+                        'hemoglobin' => 'required|numeric',
+                        'hematocrit' => 'required|numeric',
+                        'urinalysis' => 'required|string|max:255',
+                        'ttStatus' => 'required|string|max:10',
+                        'tdDate' => 'required|date',
+                    ]);
+                }
+
                 if ($validator->fails()) {
-                    \Log::error('Validation failed for row: ' . json_encode($prenatalData));
-                    \Log::error('Validation errors: ' . json_encode($validator->errors()->all()));
+                    \Log::error('Validation failed: ' . json_encode($validator->errors()->all()));
                     throw new \Exception('Validation failed for row: ' . json_encode($prenatalData));
                 }
 
                 try {
-                    // Insert data in PersonalInformation
+                    // Personal Info
                     $personalInfo = PersonalInformation::create([
                         'firstName' => $prenatalData['firstName'],
                         'lastName' => $prenatalData['lastName'],
-                        'middleName' => $prenatalData['middleName'],
-                        'purok' => $prenatalData['purok'],
-                        'barangay' => $prenatalData['barangay'],
+                        'middleName' => $prenatalData['middleName'] ?? null,
+                        'suffix' => $prenatalData['suffix'],
+                        'purok' => $prenatalData['purok'] ?? null,
+                        'barangay' => $prenatalData['barangay'] ?? null,
                         'age' => $prenatalData['age'],
                         'birthdate' => $prenatalData['birthdate'],
                         'contact' => $prenatalData['contact'],
                         'sex' => $prenatalData['sex'],
                     ]);
 
-                    // Insert data in PrenatalConsultationDetails
-                    $consultationDetails = PrenatalConsultationDetails::create([
+                    // Consultation
+                    $consultation = PrenatalConsultationDetails::create([
                         'personalId' => $personalInfo->personalId,
-                        'id' => auth()->id(), // Add authenticated user ID
+                        'id' => $userId,
                         'modeOfTransaction' => $prenatalData['modeOfTransaction'],
                         'consultationDate' => $prenatalData['consultationDate'],
                         'consultationTime' => $prenatalData['consultationTime'],
@@ -243,30 +292,40 @@ class PreNatalController extends Controller
                         'fourMember' => $prenatalData['fourMember'],
                         'philhealthStatus' => $prenatalData['philhealthStatus'],
                         'philhealthNo' => $prenatalData['philhealthNo'],
+                        'status' => $prenatalData['status'],
+                        'completed_at' => $completedAt,
                     ]);
 
-                    // Insert data in PrenatalVisitInformation
-                    PrenatalVisitInformation::create([
-                        'prenatalConsultationDetailsID' => $consultationDetails->prenatalConsultationDetailsID,
-                        'id' => auth()->id(), // Add authenticated user ID
-                        'menarche' => $prenatalData['menarche'],
-                        'sexualOnset' => $prenatalData['sexualOnset'],
-                        'periodDuration' => $prenatalData['periodDuration'],
-                        'birthControl' => $prenatalData['birthControl'],
-                        'intervalCycle' => $prenatalData['intervalCycle'],
-                        'menopause' => $prenatalData['menopause'],
-                        'lmp' => $prenatalData['lmp'],
-                        'edc' => $prenatalData['edc'],
-                        'gravidity' => (int)$prenatalData['gravidity'],
-                        'parity' => (int)$prenatalData['parity'],
-                        'term' => (int)$prenatalData['term'],
-                        'preterm' => (int)$prenatalData['preterm'],
-                        'abortion' => (int)$prenatalData['abortion'],
-                        'living' => (int)$prenatalData['living'],
-                    ]);
-
+                    // Visit Information
+                    if (!$isCancelled) {
+                        PrenatalVisitInformation::create([
+                            'prenatalConsultationDetailsID' => $consultation->prenatalConsultationDetailsID,
+                            'id' => $userId,
+                            'menarche' => $prenatalData['menarche'],
+                            'sexualOnset' => $prenatalData['sexualOnset'],
+                            'periodDuration' => $prenatalData['periodDuration'],
+                            'birthControl' => $prenatalData['birthControl'],
+                            'intervalCycle' => $prenatalData['intervalCycle'],
+                            'menopause' => $prenatalData['menopause'],
+                            'lmp' => $prenatalData['lmp'],
+                            'edc' => $prenatalData['edc'],
+                            'gravidity' => $prenatalData['gravidity'],
+                            'parity' => $prenatalData['parity'],
+                            'term' => $prenatalData['term'],
+                            'preterm' => $prenatalData['preterm'],
+                            'abortion' => $prenatalData['abortion'],
+                            'living' => $prenatalData['living'],
+                            'syphilisResult' => $prenatalData['syphilisResult'],
+                            'penicillin' => $prenatalData['penicillin'],
+                            'hemoglobin' => $prenatalData['hemoglobin'],
+                            'hematocrit' => $prenatalData['hematocrit'],
+                            'urinalysis' => $prenatalData['urinalysis'],
+                            'ttStatus' => $prenatalData['ttStatus'],
+                            'tdDate' => $prenatalData['tdDate'],
+                        ]);
+                    }
                 } catch (\Exception $e) {
-                    \Log::error('Error creating records: ' . $e->getMessage());
+                    \Log::error('Error inserting prenatal data: ' . $e->getMessage());
                     throw $e;
                 }
             }
@@ -274,6 +333,9 @@ class PreNatalController extends Controller
 
         return redirect()->back()->with('success', 'Prenatal records imported successfully!');
     }
+
+
+
 
 
     /**

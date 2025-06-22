@@ -150,13 +150,14 @@ class DoctorDashboardController extends Controller
         $latestGeneralPatients = DB::table('personal_information')
             ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
             ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+            ->leftJoin('prescriptions', 'visit_information.visitInformationID', '=', 'prescriptions.visitInformationID') // Join prescriptions
             ->where(function ($query) use ($today) {
                 $query->whereIn('consultation_details.status', ['completed', 'cancelled'])
-                      ->whereDate('consultation_details.consultationDate', $today);
+                    ->whereDate('consultation_details.consultationDate', $today);
             })
             ->select(
                 'consultation_details.consultationDetailsID',
-                DB::raw('NULL as prenatalConsultationDetailsID'), // Add NULL for prenatal-specific ID
+                DB::raw('NULL as prenatalConsultationDetailsID'),
                 'personal_information.firstName',
                 'personal_information.lastName',
                 'personal_information.middleName',
@@ -167,7 +168,7 @@ class DoctorDashboardController extends Controller
                 'personal_information.barangay',
                 'personal_information.contact',
                 'personal_information.sex',
-                DB::raw("'General' as visitType"), // Set "General" as visit type
+                DB::raw("'General' as visitType"),
                 'consultation_details.modeOfTransaction',
                 'consultation_details.consultationDate',
                 'consultation_details.consultationTime',
@@ -180,11 +181,18 @@ class DoctorDashboardController extends Controller
                 'consultation_details.reasonsForReferral',
                 'consultation_details.referredBy',
                 'consultation_details.natureOfVisit',
-                'consultation_details.visitType as specificVisitType', // Preserve specific visit type
+                'consultation_details.visitType as specificVisitType',
                 'consultation_details.providerName',
+                'visit_information.visitInformationID',
                 'visit_information.chiefComplaints',
                 'visit_information.diagnosis',
-                DB::raw('NULL as nameOfSpouse'), // Add NULL for prenatal-specific fields
+                'prescriptions.prescriptionID',
+                'prescriptions.medication',
+                'prescriptions.dosage',
+                'prescriptions.frequency',
+                'prescriptions.duration',
+                'prescriptions.notes',
+                DB::raw('NULL as nameOfSpouse'),
                 DB::raw('NULL as emergencyContact'),
                 DB::raw('NULL as fourMember'),
                 DB::raw('NULL as philhealthStatus'),
@@ -222,10 +230,10 @@ class DoctorDashboardController extends Controller
             ->leftJoin('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
             ->where(function ($query) use ($today) {
                 $query->whereIn('prenatal_consultation_details.status', ['completed', 'cancelled'])
-                      ->whereDate('prenatal_consultation_details.consultationDate', $today);
+                    ->whereDate('prenatal_consultation_details.consultationDate', $today);
             })
             ->select(
-                DB::raw('NULL as consultationDetailsID'), // Add NULL for general-specific ID
+                DB::raw('NULL as consultationDetailsID'),
                 'prenatal_consultation_details.prenatalConsultationDetailsID',
                 'personal_information.firstName',
                 'personal_information.lastName',
@@ -237,7 +245,7 @@ class DoctorDashboardController extends Controller
                 'personal_information.barangay',
                 'personal_information.contact',
                 'personal_information.sex',
-                DB::raw("'Prenatal' as visitType"), // Set "Prenatal" as visit type
+                DB::raw("'Prenatal' as visitType"),
                 'prenatal_consultation_details.modeOfTransaction',
                 'prenatal_consultation_details.consultationDate',
                 'prenatal_consultation_details.consultationTime',
@@ -245,15 +253,22 @@ class DoctorDashboardController extends Controller
                 'prenatal_consultation_details.temperature',
                 'prenatal_consultation_details.height',
                 'prenatal_consultation_details.weight',
-                DB::raw('NULL as referredFrom'), // Add NULL for general-specific fields
+                DB::raw('NULL as referredFrom'),
                 DB::raw('NULL as referredTo'),
                 DB::raw('NULL as reasonsForReferral'),
                 DB::raw('NULL as referredBy'),
                 DB::raw('NULL as natureOfVisit'),
                 DB::raw('NULL as specificVisitType'),
                 'prenatal_consultation_details.providerName',
-                DB::raw('NULL as chiefComplaints'), // Add NULL for general-specific fields
+                DB::raw('NULL as visitInformationID'),
+                DB::raw('NULL as chiefComplaints'),
                 DB::raw('NULL as diagnosis'),
+                DB::raw('NULL as prescriptionID'),
+                DB::raw('NULL as medication'),
+                DB::raw('NULL as dosage'),
+                DB::raw('NULL as frequency'),
+                DB::raw('NULL as duration'),
+                DB::raw('NULL as notes'),
                 'prenatal_consultation_details.nameOfSpouse',
                 'prenatal_consultation_details.emergencyContact',
                 'prenatal_consultation_details.fourMember',
@@ -285,6 +300,7 @@ class DoctorDashboardController extends Controller
             )
             ->orderBy('prenatal_consultation_details.completed_at', 'desc')
             ->orderBy('prenatal_consultation_details.updated_at', 'desc');
+
 
         // Combine and get latest 5 patients
         $latestPatients = $latestGeneralPatients->unionAll($latestPrenatalPatients) // Use UNION ALL to avoid column conflicts
@@ -625,75 +641,83 @@ class DoctorDashboardController extends Controller
     {
         $today = now()->toDateString();
 
+// Get latest completed general patients
         $latestGeneralPatients = DB::table('personal_information')
-        ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
-        ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
-        ->where(function ($query) use ($today) {
-            $query->whereIn('consultation_details.status', ['completed', 'cancelled'])
-                  ->whereDate('consultation_details.consultationDate', $today);
-        })
-        ->select(
-            'personal_information.personalId',
-            'consultation_details.consultationDetailsID',
-            DB::raw('NULL as prenatalConsultationDetailsID'), // Add NULL for prenatal-specific ID
-            'personal_information.firstName',
-            'personal_information.lastName',
-            'personal_information.middleName',
-            'personal_information.suffix',
-            'personal_information.age',
-            'personal_information.birthdate',
-            'personal_information.purok',
-            'personal_information.barangay',
-            'personal_information.contact',
-            'personal_information.sex',
-            DB::raw("'General' as visitType"), // Set "General" as visit type
-            'consultation_details.modeOfTransaction',
-            'consultation_details.consultationDate',
-            'consultation_details.consultationTime',
-            'consultation_details.bloodPressure',
-            'consultation_details.temperature',
-            'consultation_details.height',
-            'consultation_details.weight',
-            'consultation_details.referredFrom',
-            'consultation_details.referredTo',
-            'consultation_details.reasonsForReferral',
-            'consultation_details.referredBy',
-            'consultation_details.natureOfVisit',
-            'consultation_details.visitType as specificVisitType', // Preserve specific visit type
-            'consultation_details.providerName',
-            'visit_information.chiefComplaints',
-            'visit_information.diagnosis',
-            DB::raw('NULL as nameOfSpouse'), // Add NULL for prenatal-specific fields
-            DB::raw('NULL as emergencyContact'),
-            DB::raw('NULL as fourMember'),
-            DB::raw('NULL as philhealthStatus'),
-            DB::raw('NULL as philhealthNo'),
-            DB::raw('NULL as menarche'),
-            DB::raw('NULL as sexualOnset'),
-            DB::raw('NULL as periodDuration'),
-            DB::raw('NULL as birthControl'),
-            DB::raw('NULL as intervalCycle'),
-            DB::raw('NULL as menopause'),
-            DB::raw('NULL as lmp'),
-            DB::raw('NULL as edc'),
-            DB::raw('NULL as gravidity'),
-            DB::raw('NULL as parity'),
-            DB::raw('NULL as term'),
-            DB::raw('NULL as preterm'),
-            DB::raw('NULL as abortion'),
-            DB::raw('NULL as living'),
-            DB::raw('NULL as syphilisResult'),
-            DB::raw('NULL as penicillin'),
-            DB::raw('NULL as hemoglobin'),
-            DB::raw('NULL as hematocrit'),
-            DB::raw('NULL as urinalysis'),
-            DB::raw('NULL as ttStatus'),
-            DB::raw('NULL as tdDate'),
-            'consultation_details.completed_at',
-            'consultation_details.updated_at'
-        )
-        ->orderBy('consultation_details.completed_at', 'desc')
-        ->orderBy('consultation_details.updated_at', 'desc');
+            ->join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
+            ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+            ->leftJoin('prescriptions', 'visit_information.visitInformationID', '=', 'prescriptions.visitInformationID') // Join prescriptions
+            ->where(function ($query) use ($today) {
+                $query->whereIn('consultation_details.status', ['completed', 'cancelled'])
+                    ->whereDate('consultation_details.consultationDate', $today);
+            })
+            ->select(
+                'consultation_details.consultationDetailsID',
+                DB::raw('NULL as prenatalConsultationDetailsID'),
+                'personal_information.firstName',
+                'personal_information.lastName',
+                'personal_information.middleName',
+                'personal_information.suffix',
+                'personal_information.age',
+                'personal_information.birthdate',
+                'personal_information.purok',
+                'personal_information.barangay',
+                'personal_information.contact',
+                'personal_information.sex',
+                DB::raw("'General' as visitType"),
+                'consultation_details.modeOfTransaction',
+                'consultation_details.consultationDate',
+                'consultation_details.consultationTime',
+                'consultation_details.bloodPressure',
+                'consultation_details.temperature',
+                'consultation_details.height',
+                'consultation_details.weight',
+                'consultation_details.referredFrom',
+                'consultation_details.referredTo',
+                'consultation_details.reasonsForReferral',
+                'consultation_details.referredBy',
+                'consultation_details.natureOfVisit',
+                'consultation_details.visitType as specificVisitType',
+                'consultation_details.providerName',
+                'visit_information.visitInformationID',
+                'visit_information.chiefComplaints',
+                'visit_information.diagnosis',
+                'prescriptions.prescriptionID',
+                'prescriptions.medication',
+                'prescriptions.dosage',
+                'prescriptions.frequency',
+                'prescriptions.duration',
+                'prescriptions.notes',
+                DB::raw('NULL as nameOfSpouse'),
+                DB::raw('NULL as emergencyContact'),
+                DB::raw('NULL as fourMember'),
+                DB::raw('NULL as philhealthStatus'),
+                DB::raw('NULL as philhealthNo'),
+                DB::raw('NULL as menarche'),
+                DB::raw('NULL as sexualOnset'),
+                DB::raw('NULL as periodDuration'),
+                DB::raw('NULL as birthControl'),
+                DB::raw('NULL as intervalCycle'),
+                DB::raw('NULL as menopause'),
+                DB::raw('NULL as lmp'),
+                DB::raw('NULL as edc'),
+                DB::raw('NULL as gravidity'),
+                DB::raw('NULL as parity'),
+                DB::raw('NULL as term'),
+                DB::raw('NULL as preterm'),
+                DB::raw('NULL as abortion'),
+                DB::raw('NULL as living'),
+                DB::raw('NULL as syphilisResult'),
+                DB::raw('NULL as penicillin'),
+                DB::raw('NULL as hemoglobin'),
+                DB::raw('NULL as hematocrit'),
+                DB::raw('NULL as urinalysis'),
+                DB::raw('NULL as ttStatus'),
+                DB::raw('NULL as tdDate'),
+                'consultation_details.completed_at',
+                'consultation_details.updated_at'
+            )
+            ->orderBy('consultation_details.completed_at', 'desc')
+            ->orderBy('consultation_details.updated_at', 'desc');
 
     // Get latest completed prenatal patients
     $latestPrenatalPatients = DB::table('personal_information')
@@ -701,11 +725,10 @@ class DoctorDashboardController extends Controller
         ->leftJoin('prenatal_visit_information', 'prenatal_consultation_details.prenatalConsultationDetailsID', '=', 'prenatal_visit_information.prenatalConsultationDetailsID')
         ->where(function ($query) use ($today) {
             $query->whereIn('prenatal_consultation_details.status', ['completed', 'cancelled'])
-                  ->whereDate('prenatal_consultation_details.consultationDate', $today);
+                ->whereDate('prenatal_consultation_details.consultationDate', $today);
         })
         ->select(
-            'personal_information.personalId',
-            DB::raw('NULL as consultationDetailsID'), // Add NULL for general-specific ID
+            DB::raw('NULL as consultationDetailsID'),
             'prenatal_consultation_details.prenatalConsultationDetailsID',
             'personal_information.firstName',
             'personal_information.lastName',
@@ -717,7 +740,7 @@ class DoctorDashboardController extends Controller
             'personal_information.barangay',
             'personal_information.contact',
             'personal_information.sex',
-            DB::raw("'Prenatal' as visitType"), // Set "Prenatal" as visit type
+            DB::raw("'Prenatal' as visitType"),
             'prenatal_consultation_details.modeOfTransaction',
             'prenatal_consultation_details.consultationDate',
             'prenatal_consultation_details.consultationTime',
@@ -725,15 +748,22 @@ class DoctorDashboardController extends Controller
             'prenatal_consultation_details.temperature',
             'prenatal_consultation_details.height',
             'prenatal_consultation_details.weight',
-            DB::raw('NULL as referredFrom'), // Add NULL for general-specific fields
+            DB::raw('NULL as referredFrom'),
             DB::raw('NULL as referredTo'),
             DB::raw('NULL as reasonsForReferral'),
             DB::raw('NULL as referredBy'),
             DB::raw('NULL as natureOfVisit'),
             DB::raw('NULL as specificVisitType'),
             'prenatal_consultation_details.providerName',
-            DB::raw('NULL as chiefComplaints'), // Add NULL for general-specific fields
+            DB::raw('NULL as visitInformationID'),
+            DB::raw('NULL as chiefComplaints'),
             DB::raw('NULL as diagnosis'),
+            DB::raw('NULL as prescriptionID'),
+            DB::raw('NULL as medication'),
+            DB::raw('NULL as dosage'),
+            DB::raw('NULL as frequency'),
+            DB::raw('NULL as duration'),
+            DB::raw('NULL as notes'),
             'prenatal_consultation_details.nameOfSpouse',
             'prenatal_consultation_details.emergencyContact',
             'prenatal_consultation_details.fourMember',
@@ -765,6 +795,7 @@ class DoctorDashboardController extends Controller
         )
         ->orderBy('prenatal_consultation_details.completed_at', 'desc')
         ->orderBy('prenatal_consultation_details.updated_at', 'desc');
+
 
     // Combine and get latest 5 patients
     $latestConsultation = $latestGeneralPatients->unionAll($latestPrenatalPatients) // Use UNION ALL to avoid column conflicts

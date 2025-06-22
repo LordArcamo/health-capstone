@@ -184,7 +184,9 @@
 
             <div>
               <label class="block">Birth Control Method:</label>
-              <input type="text" v-model="form.birthControl" class="input" placeholder="Enter method" />
+              <input type="text" v-model="form.birthControl" 
+              @input="capitalizeName('birthControl')"
+              class="input" placeholder="Enter method" />
               <span v-if="errors.birthControl" class="text-red-600 text-sm">{{ errors.birthControl }}</span>
             </div>
 
@@ -314,12 +316,17 @@
 
             <div>
               <label class="block">Urinalysis:</label>
-              <input type="text" v-model="form.urinalysis" class="input" placeholder="Enter urinalysis result" />
+              <input type="text" v-model="form.urinalysis" 
+              @input="capitalizeName('urinalysis')"
+              class="input" 
+              placeholder="Enter urinalysis result" />
               <span v-if="errors.urinalysis" class="text-red-600 text-sm">{{ errors.urinalysis }}</span>
             </div>
             <div>
               <label class="block">TT Status:</label>
-              <input type="text" v-model="form.ttStatus" class="input" placeholder="Enter TT status" />
+              <input type="text" v-model="form.ttStatus" 
+              @input="capitalizeName('ttStatus')"
+              class="input" placeholder="Enter TT status" />
               <span v-if="errors.ttStatus" class="text-red-600 text-sm">{{ errors.ttStatus }}</span>
             </div>
           </div>
@@ -470,11 +477,15 @@ export default {
     },
   methods: {
     formatLabel(key) {
-        return key
-            .replace(/([A-Z])/g, ' $1') // Add a space before capital letters
-            .replace(/_/g, ' ') // Replace underscores with spaces
-            .replace(/^\w/, (c) => c.toUpperCase()); // Capitalize the first letter
-        },
+      return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    },
+    capitalizeName(field) {
+      if (this.form[field]) {
+        this.form[field] = this.form[field]
+          .toLowerCase() // Convert entire string to lowercase first
+          .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+      }
+    },
     resetForm() {
       this.form = {
         menarche: '',
