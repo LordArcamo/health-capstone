@@ -44,7 +44,7 @@ export default {
       activePatientHistory: [],
       searchQuery: "",
       filterBarangay: "",
-      filterAddress: "",
+      filterPurok: "",
       paginatedPatients: [],
       currentPage: 1,
       itemsPerPage: 5, // Number of items per page
@@ -52,17 +52,22 @@ export default {
     };
   },
   computed: {
+    purokOptions() {
+        return [...new Set(this.patients.map((p) => p.purok).filter(Boolean))];
+    },
     barangayOptions() {
       return [...new Set(this.patients.map((p) => p.barangay))];
     },
     filteredPatients() {
-      return this.patients.filter((patient) => {
-        return (
-          (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
-          (!this.filterAddress || patient.address.toLowerCase().includes(this.filterAddress.toLowerCase())) &&
-          (!this.searchQuery || patient.name.toLowerCase().includes(this.searchQuery.toLowerCase()))
-        );
-      });
+        return this.processedVaccinatedPatients.filter((patient) => {
+            const fullName = `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`.toLowerCase();
+            return (
+            (!this.filterBarangay || patient.barangay === this.filterBarangay) &&
+            (!this.filterPurok || patient.purok === this.filterPurok) &&
+            (!this.filterAddress || (patient.address && patient.address.toLowerCase().includes(this.filterAddress.toLowerCase()))) &&
+            (!this.searchQuery || fullName.includes(this.searchQuery.toLowerCase()))
+            );
+        });
     },
     processedVaccinatedPatients() {
       return this.vaccinatedPatients.map(patient => {
@@ -97,7 +102,8 @@ export default {
     updatePagination() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = this.currentPage * this.itemsPerPage;
-      this.paginatedPatients = this.processedVaccinatedPatients.slice(start, end);
+      this.paginatedPatients = this.filteredPatients.slice(start, end);
+
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
@@ -149,6 +155,7 @@ export default {
     clearFilters() {
       this.searchQuery = "";
       this.filterBarangay = "";
+      this.filterPurok = "";
       this.filterAddress = "";
       this.applyFilters();
     },
@@ -253,6 +260,15 @@ export default {
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- Filter by Barangay -->
             <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Purok</label>
+            <select v-model="filterPurok" @change="applyFilters"
+                class="border rounded-md px-4 py-2 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 text-sm">
+                <option value="">Select Purok</option>
+                <option v-for="purok in purokOptions" :key="purok" :value="purok">{{ purok }}</option>
+            </select>
+            </div>
+            <!-- Filter by Barangay -->
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
               <select v-model="filterBarangay" @change="applyFilters"
                 class="border rounded-md px-4 py-2 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 text-sm">
@@ -262,11 +278,11 @@ export default {
             </div>
 
             <!-- Filter by Address -->
-            <div>
+            <!-- <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
               <input v-model="filterAddress" @input="applyFilters" type="text" placeholder="Enter Address..."
                 class="border rounded-md px-4 py-2 w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-green-600 text-sm" />
-            </div>
+            </div> -->
 
             <!-- Clear Filters Button -->
             <div class="flex items-end">

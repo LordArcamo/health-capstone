@@ -246,20 +246,22 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block">Referred From:</label>
-                <input type="text" v-model="form.referredFrom" class="input" placeholder="Referred From" />
+                <input type="text" v-model="form.referredFrom" @input="capitalizeName('referredFrom')" class="input" placeholder="Referred From" />
               </div>
               <div>
                 <label class="block">Referred To:</label>
-                <input type="text" v-model="form.referredTo" class="input" placeholder="Referred To" />
+                <input type="text" v-model="form.referredTo" @input="capitalizeName('referredTo')" class="input" placeholder="Referred To" />
               </div>
               <div>
                 <label class="block">Reasons for Referral:</label>
-                <textarea v-model="form.reasonsForReferral" class="input"
+                <textarea v-model="form.reasonsForReferral"
+                @input="capitalizeName('reasonsForReferral')"
+                class="input"
                   placeholder="Describe reasons for referral"></textarea>
               </div>
               <div>
                 <label class="block">Referred By:</label>
-                <input type="text" v-model="form.referredBy" class="input" placeholder="Referred By" />
+                <input type="text" v-model="form.referredBy" @input="capitalizeName('referredBy')" class="input" placeholder="Referred By" />
               </div>
             </div>
           </div>

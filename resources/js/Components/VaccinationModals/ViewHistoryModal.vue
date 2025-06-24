@@ -58,8 +58,13 @@ const downloadReport = () => {
 
   // Prepare CSV headers
   const headers = [
+    "Patient Name",
+    "Patient Age",
+    "Vaccine Category",
+    "Purok",
+    "Barangay",
     "Date of Visit",
-    "Age",
+    "Visit Age",
     "Weight",
     "Height",
     "Temperature",
@@ -71,10 +76,15 @@ const downloadReport = () => {
 
   // Prepare rows
   const rows = props.history.map((record) => [
+    `${props.patient.firstName} ${props.patient.middleName || ""} ${props.patient.lastName} ${props.patient.suffix || ""}`.trim(),
+    props.patient.age || "N/A",
+    props.patient.vaccineCategory || "N/A",
+    props.patient.purok || "N/A",
+    props.patient.barangay || "N/A",
     formatDate(record.dateOfVisit),
     props.patient?.vaccineCategory === "Under 1 Year"
-      ? `${record.ageInMonths || "N/A"} months`
-      : `${record.ageInYears || "N/A"} years`,
+      ? `${record.ageInMonths ?? "N/A"} months`
+      : `${record.ageInYears ?? "N/A"} years`,
     record.weight || "N/A",
     record.height || "N/A",
     record.temperature || "N/A",
@@ -88,34 +98,33 @@ const downloadReport = () => {
 
   // Create CSV content
   const csvContent = [
-    headers.join(","),
-    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    headers.join(","), // Add headers
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")), // Add rows
   ].join("\n");
 
-  // Create a blob and download link
+  // Create a blob and download
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.setAttribute(
     "download",
-    `${props.patient.firstName}_${props.patient.lastName}_history_report.csv`
+    `${props.patient.firstName}_${props.patient.lastName}_vaccination_report.csv`
   );
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
-
 // Fetch vaccination history
 const fetchHistory = async () => {
   if (!props.patient.vaccinationId) return;
-  
+
   loading.value = true;
   error.value = null;
-  
+
   try {
     const response = await fetch(`/appointments/history/${props.patient.vaccinationId}`);
     const data = await response.json();
-    
+
     if (response.ok) {
       props.history = data.history;
     } else {
