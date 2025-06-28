@@ -148,7 +148,7 @@
               <li><strong>Specialization:</strong> {{ selectedStaff.specialization }}</li>
               <li><strong>PRC Validity:</strong> {{ formatDateTime(selectedStaff.prc_validity) }}</li>
               <!-- Permissions Cards -->
-              <li class="gap-3 flex flex-col">
+              <!-- <li class="gap-3 flex flex-col">
                <strong>Permissions:</strong>
                 <div class="flex flex-wrap gap-2">
                   <div v-for="permission in selectedStaff.permissions" :key="permission"
@@ -156,7 +156,7 @@
                     {{ permission }}
                   </div>
                 </div>
-              </li>
+              </li> -->
 
             </ul>
           </div>
