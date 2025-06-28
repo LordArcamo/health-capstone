@@ -811,7 +811,6 @@ export default {
           <p class="info"><strong>Temperature:</strong> ${patient.temperature}</p>
           <p class="info"><strong>Height:</strong> ${patient.height}</p>
           <p class="info"><strong>Weight:</strong> ${patient.weight}</p>
-          <p class="info"><strong>Waistline:</strong> ${patient.waistline || 'N/A'}</p>
         </div>
 
         <div class="section">

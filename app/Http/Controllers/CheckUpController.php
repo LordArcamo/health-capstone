@@ -15,6 +15,7 @@ use App\Models\Prescription;
 
 class CheckUpController extends Controller
 {
+
     public function import(Request $request)
     {
         set_time_limit(300);
@@ -36,15 +37,9 @@ class CheckUpController extends Controller
                     $patientData['consultationTime'] = date('H:i:s', strtotime($patientData['consultationTime']));
                 }
 
-                // Fix birthdate format
-                if (!empty($patientData['birthdate'])) {
-                    $patientData['birthdate'] = date('Y-m-d', strtotime($patientData['birthdate']));
-                }
-
-                // Fix consultationDate format
-                if (!empty($patientData['consultationDate'])) {
-                    $patientData['consultationDate'] = date('Y-m-d', strtotime($patientData['consultationDate']));
-                }
+                // Fix dates
+                $patientData['birthdate'] = !empty($patientData['birthdate']) ? date('Y-m-d', strtotime($patientData['birthdate'])) : null;
+                $patientData['consultationDate'] = !empty($patientData['consultationDate']) ? date('Y-m-d', strtotime($patientData['consultationDate'])) : null;
 
                 // Format numbers
                 $patientData['temperature'] = isset($patientData['temperature']) ? number_format((float)$patientData['temperature'], 2, '.', '') : null;
@@ -52,29 +47,33 @@ class CheckUpController extends Controller
                 $patientData['weight'] = isset($patientData['weight']) ? number_format((float)$patientData['weight'], 2, '.', '') : null;
                 $patientData['age'] = isset($patientData['age']) ? (int)$patientData['age'] : null;
 
-                // Format selectedLabTests
-                $patientData['selectedLabTests'] = isset($patientData['selectedLabTests']) && !empty($patientData['selectedLabTests'])
-                    ? json_encode(array_map('trim', explode(',', trim($patientData['selectedLabTests'], '[]"'))))
-                    : json_encode([]);
-
-                // Clean bloodPressure
-                $patientData['bloodPressure'] = isset($patientData['bloodPressure']) 
-                    ? preg_replace('/[^0-9\/]/', '', $patientData['bloodPressure']) 
-                    : null;
-
-                // Normalize status properly
+                // Normalize status
                 $statusRaw = strtolower(trim($patientData['status'] ?? ''));
-                $validStatuses = ['cancelled', 'completed'];
                 $isCancelled = $statusRaw === 'cancelled';
                 $isCompleted = $statusRaw === 'completed';
-
-                $patientData['status'] = in_array($statusRaw, $validStatuses) ? $statusRaw : 'in queue';
+                $patientData['status'] = in_array($statusRaw, ['cancelled', 'completed']) ? $statusRaw : 'in queue';
                 $completedAt = $isCompleted ? now() : null;
 
-                // If cancelled, wipe sensitive data
+                // Clean blood pressure
+                $patientData['bloodPressure'] = isset($patientData['bloodPressure'])
+                    ? preg_replace('/[^0-9\/]/', '', $patientData['bloodPressure'])
+                    : null;
+
+                // Lab test normalization (Yes/No)
+                $patientData['requireLabTest'] = ucfirst(strtolower(trim($patientData['requireLabTest'] ?? 'No')));
+                $requiresLab = $patientData['requireLabTest'] === 'Yes';
+
+                // Parse selectedLabTests into JSON array
+                if (!empty($patientData['selectedLabTests']) && $requiresLab) {
+                    $patientData['selectedLabTests'] = json_encode(array_map('trim', explode(',', trim($patientData['selectedLabTests'], '[]"'))));
+                } else {
+                    $patientData['selectedLabTests'] = json_encode([]);
+                }
+
+                // Conditional logic: cancelled or lab test required
                 if ($isCancelled) {
-                    $patientData['chiefComplaints'] = null;
-                    $patientData['diagnosis'] = null;
+                    $patientData['chiefComplaints'] = 'None';
+                    $patientData['diagnosis'] = 'None';
                     $patientData['medication'] = null;
                     $patientData['dosage'] = null;
                     $patientData['frequency'] = null;
@@ -82,6 +81,13 @@ class CheckUpController extends Controller
                     $patientData['notes'] = null;
                     $patientData['requireLabTest'] = 'No';
                     $patientData['selectedLabTests'] = json_encode([]);
+                } elseif ($requiresLab) {
+                    $patientData['diagnosis'] = 'None';
+                    $patientData['medication'] = null;
+                    $patientData['dosage'] = null;
+                    $patientData['frequency'] = null;
+                    $patientData['duration'] = null;
+                    $patientData['notes'] = null;
                 }
 
                 // Validation
@@ -115,7 +121,7 @@ class CheckUpController extends Controller
                     'status' => 'nullable|string|max:50',
                 ]);
 
-                if (!$isCancelled) {
+                if (!$isCancelled && !$requiresLab) {
                     $validator->addRules([
                         'chiefComplaints' => 'required|string|max:255',
                         'diagnosis' => 'required|string|max:255',
@@ -133,7 +139,7 @@ class CheckUpController extends Controller
                 }
 
                 try {
-                    // Personal Info
+                    // Create Personal Info
                     $personalInfo = PersonalInformation::create([
                         'firstName' => $patientData['firstName'],
                         'lastName' => $patientData['lastName'],
@@ -147,7 +153,7 @@ class CheckUpController extends Controller
                         'sex' => $patientData['sex'],
                     ]);
 
-                    // Consultation Details
+                    // Create Consultation Details
                     $consultationDetails = ConsultationDetails::create([
                         'personalId' => $personalInfo->personalId,
                         'id' => auth()->id(),
@@ -169,17 +175,18 @@ class CheckUpController extends Controller
                         'completed_at' => $completedAt,
                     ]);
 
-                    // Visit & Prescription if not cancelled
-                    if (!$isCancelled) {
-                        $visitInfo = VisitInformation::create([
-                            'consultationDetailsID' => $consultationDetails->consultationDetailsID,
-                            'id' => auth()->id(),
-                            'chiefComplaints' => $patientData['chiefComplaints'],
-                            'diagnosis' => $patientData['diagnosis'],
-                            'requireLabTest' => $patientData['requireLabTest'] ?? 'No',
-                            'selectedLabTests' => $patientData['selectedLabTests'],
-                        ]);
+                    // Always create VisitInformation
+                    $visitInfo = VisitInformation::create([
+                        'consultationDetailsID' => $consultationDetails->consultationDetailsID,
+                        'id' => auth()->id(),
+                        'chiefComplaints' => $patientData['chiefComplaints'],
+                        'diagnosis' => $patientData['diagnosis'],
+                        'requireLabTest' => $patientData['requireLabTest'],
+                        'selectedLabTests' => $patientData['selectedLabTests'],
+                    ]);
 
+                    // Only create prescription if not cancelled and lab not required
+                    if (!$isCancelled && !$requiresLab) {
                         Prescription::create([
                             'visitInformationID' => $visitInfo->visitInformationID,
                             'medication' => $patientData['medication'],
@@ -205,6 +212,8 @@ class CheckUpController extends Controller
 
 
 
+
+
     
     
 
@@ -215,103 +224,100 @@ class CheckUpController extends Controller
     public function index()
     {
         $data = PersonalInformation::join('consultation_details', 'personal_information.personalId', '=', 'consultation_details.personalId')
-        ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
-        ->leftJoin('prescriptions', 'visit_information.visitInformationID', '=', 'prescriptions.visitInformationID')
-        ->select(
-            'personal_information.personalId',
-            'personal_information.firstName',
-            'personal_information.lastName',
-            'personal_information.middleName',
-            'personal_information.suffix',
-            'personal_information.purok',
-            'personal_information.barangay',
-            'personal_information.age',
-            'personal_information.birthdate',
-            'personal_information.contact',
-            'personal_information.sex',
-            'consultation_details.consultationDate',
-            'consultation_details.consultationTime',
-            'consultation_details.modeOfTransaction',
-            'consultation_details.bloodPressure',
-            'consultation_details.temperature',
-            'consultation_details.height',
-            'consultation_details.weight',
-            'consultation_details.providerName',
-            'consultation_details.natureOfVisit',
-            'consultation_details.visitType',
-
-            // Updated Status Logic: Pending, Completed, or Cancelled
-            DB::raw("
-                CASE
-                    WHEN consultation_details.status = 'cancelled' THEN 'Cancelled'
-                    WHEN visit_information.consultationDetailsID IS NULL THEN 'In Queue'
-                    ELSE 'Completed'
-                END AS status
-            "),
-
-            'visit_information.consultationDetailsID',
-            'visit_information.chiefComplaints',
-            'visit_information.diagnosis',
-            DB::raw('GROUP_CONCAT(
-                CASE WHEN prescriptions.medication IS NOT NULL 
-                THEN prescriptions.medication 
-                ELSE "" 
-                END
-                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as medications'),
-            DB::raw('GROUP_CONCAT(
-                CASE WHEN prescriptions.dosage IS NOT NULL 
-                THEN prescriptions.dosage 
-                ELSE "" 
-                END
-                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as dosages'),
-            DB::raw('GROUP_CONCAT(
-                CASE WHEN prescriptions.frequency IS NOT NULL 
-                THEN prescriptions.frequency 
-                ELSE "" 
-                END
-                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as frequencies'),
-            DB::raw('GROUP_CONCAT(
-                CASE WHEN prescriptions.duration IS NOT NULL 
-                THEN prescriptions.duration 
-                ELSE "" 
-                END
-                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as durations'),
-            DB::raw('GROUP_CONCAT(
-                CASE WHEN prescriptions.notes IS NOT NULL 
-                THEN prescriptions.notes 
-                ELSE "" 
-                END
-                ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as prescription_notes')
-        )
-        ->groupBy(
-            'personal_information.personalId',
-            'personal_information.firstName',
-            'personal_information.lastName',
-            'personal_information.middleName',
-            'personal_information.suffix',
-            'personal_information.purok',
-            'personal_information.barangay',
-            'personal_information.age',
-            'personal_information.birthdate',
-            'personal_information.contact',
-            'personal_information.sex',
-            'consultation_details.consultationDate',
-            'consultation_details.consultationTime',
-            'consultation_details.modeOfTransaction',
-            'consultation_details.bloodPressure',
-            'consultation_details.temperature',
-            'consultation_details.height',
-            'consultation_details.weight',
-            'consultation_details.providerName',
-            'consultation_details.natureOfVisit',
-            'consultation_details.visitType',
-            'consultation_details.status',
-            'visit_information.consultationDetailsID',
-            'visit_information.chiefComplaints',
-            'visit_information.diagnosis',
-            'visit_information.visitInformationID'
-        )
-        ->get();
+                ->leftJoin('visit_information', 'consultation_details.consultationDetailsID', '=', 'visit_information.consultationDetailsID')
+                ->leftJoin('prescriptions', 'visit_information.visitInformationID', '=', 'prescriptions.visitInformationID')
+                ->select(
+                    'personal_information.personalId',
+                    'personal_information.firstName',
+                    'personal_information.lastName',
+                    'personal_information.middleName',
+                    'personal_information.suffix',
+                    'personal_information.purok',
+                    'personal_information.barangay',
+                    'personal_information.age',
+                    'personal_information.birthdate',
+                    'personal_information.contact',
+                    'personal_information.sex',
+                    'consultation_details.consultationDate',
+                    'consultation_details.consultationTime',
+                    'consultation_details.modeOfTransaction',
+                    'consultation_details.bloodPressure',
+                    'consultation_details.temperature',
+                    'consultation_details.height',
+                    'consultation_details.weight',
+                    'consultation_details.providerName',
+                    'consultation_details.natureOfVisit',
+                    'consultation_details.visitType',
+                    DB::raw("
+                        CASE
+                            WHEN consultation_details.status = 'cancelled' THEN 'Cancelled'
+                            WHEN visit_information.consultationDetailsID IS NULL THEN 'In Queue'
+                            ELSE 'Completed'
+                        END AS status
+                    "),
+                    'visit_information.consultationDetailsID',
+                    'visit_information.chiefComplaints',
+                    'visit_information.diagnosis',
+                    DB::raw('GROUP_CONCAT(
+                        CASE WHEN prescriptions.medication IS NOT NULL 
+                        THEN prescriptions.medication 
+                        ELSE "" 
+                        END
+                        ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as medications'),
+                    DB::raw('GROUP_CONCAT(
+                        CASE WHEN prescriptions.dosage IS NOT NULL 
+                        THEN prescriptions.dosage 
+                        ELSE "" 
+                        END
+                        ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as dosages'),
+                    DB::raw('GROUP_CONCAT(
+                        CASE WHEN prescriptions.frequency IS NOT NULL 
+                        THEN prescriptions.frequency 
+                        ELSE "" 
+                        END
+                        ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as frequencies'),
+                    DB::raw('GROUP_CONCAT(
+                        CASE WHEN prescriptions.duration IS NOT NULL 
+                        THEN prescriptions.duration 
+                        ELSE "" 
+                        END
+                        ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as durations'),
+                    DB::raw('GROUP_CONCAT(
+                        CASE WHEN prescriptions.notes IS NOT NULL 
+                        THEN prescriptions.notes 
+                        ELSE "" 
+                        END
+                        ORDER BY prescriptions.prescriptionID SEPARATOR ";;") as prescription_notes')
+                )
+                ->groupBy(
+                    'personal_information.personalId',
+                    'personal_information.firstName',
+                    'personal_information.lastName',
+                    'personal_information.middleName',
+                    'personal_information.suffix',
+                    'personal_information.purok',
+                    'personal_information.barangay',
+                    'personal_information.age',
+                    'personal_information.birthdate',
+                    'personal_information.contact',
+                    'personal_information.sex',
+                    'consultation_details.consultationDate',
+                    'consultation_details.consultationTime',
+                    'consultation_details.modeOfTransaction',
+                    'consultation_details.bloodPressure',
+                    'consultation_details.temperature',
+                    'consultation_details.height',
+                    'consultation_details.weight',
+                    'consultation_details.providerName',
+                    'consultation_details.natureOfVisit',
+                    'consultation_details.visitType',
+                    'consultation_details.status',
+                    'visit_information.consultationDetailsID',
+                    'visit_information.chiefComplaints',
+                    'visit_information.diagnosis',
+                    'visit_information.visitInformationID'
+                )
+                ->get();
 
     return Inertia::render('Table/IndividualTreatmentRecord', [
         'ITR' => $data,
