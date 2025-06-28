@@ -183,7 +183,7 @@
             <!-- Chief Complaints -->
             <div>
               <label class="block">Chief Complaints:</label>
-              <textarea v-model="form.chiefComplaints" 
+              <textarea v-model="form.chiefComplaints"
               @input="capitalizeName('chiefComplaints')"
               placeholder="Example: Low Bowel Movements etc."
                 class="input"></textarea>
@@ -237,9 +237,8 @@
 
                 <!-- Input for new diagnosis tags -->
                 <input v-model="newDiagnosis" @keydown.enter.prevent="addDiagnosisTag"
-                  @keydown.space.prevent="addDiagnosisTag" 
                   @input="newDiagnosis = capitalizeText(newDiagnosis)"
-                  placeholder="Type diagnosis and press Enter or Space"
+                  placeholder="Type diagnosis and press Enter"
                   class="flex-grow py-1 px-3 text-sm text-gray-700 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none" />
               </div>
 
@@ -293,9 +292,9 @@
                 <!-- Dosage -->
                 <div>
                   <label for="dosage" class="block text-sm font-medium text-gray-700 mb-2">Dosage</label>
-                  <input id="dosage" 
-                  type="text" 
-                  v-model="form.prescription.dosage" 
+                  <input id="dosage"
+                  type="text"
+                  v-model="form.prescription.dosage"
                   @input="form.prescription.dosage = capitalizeText(form.prescription.dosage)"
                   class="input"
                     placeholder="e.g., 500mg" />
@@ -307,9 +306,9 @@
                 <!-- Frequency -->
                 <div>
                   <label for="frequency" class="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
-                  <input id="frequency" 
-                  type="text" 
-                  v-model="form.prescription.frequency" 
+                  <input id="frequency"
+                  type="text"
+                  v-model="form.prescription.frequency"
                   @input="form.prescription.frequency = capitalizeText(form.prescription.frequency)"
                   class="input"
                     placeholder="e.g., 2 times a day" />
@@ -321,9 +320,9 @@
                 <!-- Duration -->
                 <div>
                   <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
-                  <input id="duration" 
-                  type="text" 
-                  v-model="form.prescription.duration" 
+                  <input id="duration"
+                  type="text"
+                  v-model="form.prescription.duration"
                   @input="form.prescription.duration = capitalizeText(form.prescription.duration)"
                   class="input"
                     placeholder="e.g., 7 days" />
@@ -335,8 +334,8 @@
                 <!-- Notes -->
                 <div class="col-span-2">
                   <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                  <textarea id="notes" 
-                  v-model="form.prescription.notes" 
+                  <textarea id="notes"
+                  v-model="form.prescription.notes"
                   @input="form.prescription.notes = capitalizeText(form.prescription.notes)"
                   class="input"
                     placeholder="Enter additional instructions for the patient"></textarea>
@@ -415,7 +414,7 @@
               <h4 class="text-3xl font-extrabold text-gray-900 mb-2">Prescription</h4>
               <div class="space-y-2">
                 <p class="text-gray-600 text-lg">
-                  Issued by: 
+                  Issued by:
                   <span class="font-medium">
                     {{ loggedInUser.first_name || 'N/A' }} {{ loggedInUser.middle_name || 'N/A' }} {{ loggedInUser.last_name || 'N/A' }}
                   </span>
@@ -472,8 +471,8 @@
                 <p class="text-gray-600 text-sm mb-2">Doctor's Signature:</p>
                 <div class="h-12 border-t border-dashed border-gray-500 mb-1"></div>
                 <p class="text-gray-900 text-center font-medium">
-                  {{ loggedInUser?.first_name || '' }} 
-                  {{ loggedInUser?.middle_name || '' }} 
+                  {{ loggedInUser?.first_name || '' }}
+                  {{ loggedInUser?.middle_name || '' }}
                   {{ loggedInUser?.last_name || '' }}
                 </p>
               </div>
@@ -495,7 +494,7 @@
               class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition font-medium">
               Submit Consultation
             </button>
-           </div> 
+           </div>
           </div>
         </div>
 
