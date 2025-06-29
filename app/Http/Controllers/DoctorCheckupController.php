@@ -180,10 +180,10 @@ class DoctorCheckupController extends Controller
 
             // Set diagnosis and medication to 'None' if requireLabTest is 'Yes'
             if ($request->input('requireLabTest') === 'yes') {
-                $visitInfo->diagnosis = 'None';
+                $visitInfo->diagnosis = '';
             } else {
                 $diagnosisData = $request->input('diagnosis', []);
-                $visitInfo->diagnosis = !empty($diagnosisData) ? implode(', ', (array) $diagnosisData) : 'None';
+                $visitInfo->diagnosis = !empty($diagnosisData) ? implode(', ', (array) $diagnosisData) : '';
             }
 
             $visitInfo->id = auth()->id();

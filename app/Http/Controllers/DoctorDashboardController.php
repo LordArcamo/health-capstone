@@ -392,30 +392,30 @@ class DoctorDashboardController extends Controller
                 $femaleCount = $genders['Female'] ?? 0;
 
                 $ITRConsultations = ConsultationDetails::select(
-                    DB::raw("MONTH(consultationDate) as month"), 
+                    DB::raw("MONTH(consultationDate) as month"),
                     DB::raw("COUNT(*) as count")
                 )
                 ->groupBy('month')
                 ->orderBy('month')
                 ->pluck('count', 'month');
-            
+
                 // Get prenatal consultations per month
                 $PREConsultations = PrenatalConsultationDetails::select(
-                    DB::raw("MONTH(consultationDate) as month"), 
+                    DB::raw("MONTH(consultationDate) as month"),
                     DB::raw("COUNT(*) as count")
                 )
                 ->groupBy('month')
                 ->orderBy('month')
                 ->pluck('count', 'month');
-            
+
                 // Convert results to an array with default values
                 $generalData = array_fill(1, 12, 0);
                 $prenatalData = array_fill(1, 12, 0);
-            
+
                 foreach ($ITRConsultations as $month => $count) {
                     $generalData[$month] = $count;
                 }
-            
+
                 foreach ($PREConsultations as $month => $count) {
                     $prenatalData[$month] = $count;
                 }
@@ -541,7 +541,7 @@ class DoctorDashboardController extends Controller
                         ->where('consultationDetailsID', $request->consultationDetailsID)
                         ->update([
                             'chiefComplaints' => 'None',
-                            'diagnosis' => 'None',
+                            'diagnosis' => '',
 
                             'updated_at' => now()
                         ]);
@@ -551,7 +551,7 @@ class DoctorDashboardController extends Controller
                         'consultationDetailsID' => $request->consultationDetailsID,
                         'id' => auth()->id(),
                         'chiefComplaints' => 'None',
-                        'diagnosis' => 'None',
+                        'diagnosis' => '',
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
