@@ -26,10 +26,19 @@ use App\Http\Controllers\DoctorDashboardController;
 use App\Http\Controllers\DoctorCheckupController;
 use App\Http\Controllers\DoctorPreCheckupController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 
 use App\Http\Middleware\RoleMiddleware;
 
 
+Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.request');
+
+// Handle form submit
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.email');
 
 Route::get('/checkup/thank-you/itr', function () {
     return Inertia::render('ThankYou/ThankYouItr');

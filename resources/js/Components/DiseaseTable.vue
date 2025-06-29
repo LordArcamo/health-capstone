@@ -257,7 +257,6 @@
             <li><strong>Type of Consultation/Purpose of Visit:</strong> {{ selectedPatient.visitType }}</li>
             <li><strong>Chief Complaints:</strong> {{ selectedPatient.chiefComplaints }}</li>
             <li><strong>Diagnosis:</strong> {{ selectedPatient.diagnosis }}</li>
-            <li><strong>Medication/Treatment:</strong> {{ selectedPatient.medication }}</li>
           </div>
         </ul>
 
