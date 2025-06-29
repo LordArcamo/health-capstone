@@ -31,8 +31,8 @@ class SystemAnalyticsController extends Controller
             'personal_information.barangay', // Added Barangay
             DB::raw('
                 COALESCE(
-                    postpartum.deliveryDate, 
-                    general_trimester.date_of_visit, 
+                    postpartum.deliveryDate,
+                    general_trimester.date_of_visit,
                     prenatal_consultation_details.consultationDate
                 ) as visit_date
             ')
@@ -101,7 +101,7 @@ class SystemAnalyticsController extends Controller
         ->select(
             'personal_information.barangay',
             DB::raw('COUNT(visit_information.consultationDetailsID) as total_cases'),
-            DB::raw('GROUP_CONCAT(consultation_details.consultationDate ORDER BY consultation_details.consultationDate ASC SEPARATOR ", ") as all_consultations') 
+            DB::raw('GROUP_CONCAT(consultation_details.consultationDate ORDER BY consultation_details.consultationDate ASC SEPARATOR ", ") as all_consultations')
         )
         ->groupBy('personal_information.barangay')
         ->orderByDesc('total_cases')
@@ -194,31 +194,31 @@ class SystemAnalyticsController extends Controller
             if ($request->year) {
                 $query->whereYear('consultation_details.consultationDate', $request->year);
             }
-    
+
             if ($request->gender) {
                 $query->where('personal_information.sex', $request->gender);
             }
         };
-    
+
         $consultationCount = ConsultationDetails::join('personal_information', 'consultation_details.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-    
+
         $prenatalCount = PrenatalConsultationDetails::join('personal_information', 'prenatal_consultation_details.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-    
+
         $nipCount = NationalImmunizationProgram::join('personal_information', 'national_immunization_programs.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-    
+
         $vaccinationCount = VaccinationRecord::join('personal_information', 'vaccination_records.personalId', '=', 'personal_information.personalId')
             ->when($request, $applyFilters)
             ->count();
-    
+
         return $consultationCount + $prenatalCount + $nipCount + $vaccinationCount;
     }
-    
+
 
 
     private function risk($request)
@@ -361,56 +361,56 @@ class SystemAnalyticsController extends Controller
         $startDate = $request->startDate;
         $endDate = $request->endDate;
         $today = now();
-    
+
         // Handle custom date range
         if ($startDate && $endDate) {
             // Ensure the startDate and endDate are in proper date format
             $startDate = Carbon::parse($startDate)->startOfDay();
             $endDate = Carbon::parse($endDate)->endOfDay();
-    
+
             // Queries filtered by startDate and endDate
             $consultationCount = DB::table('consultation_details')
                 ->whereBetween('consultationDate', [$startDate, $endDate])
                 ->count();
-    
+
             $prenatalCount = DB::table('prenatal_consultation_details')
                 ->whereBetween('consultationDate', [$startDate, $endDate])
                 ->count();
-    
+
             $immunizationCount = DB::table('national_immunization_programs')
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
-    
+
             $vaccinationCount = DB::table('vaccination_records')
                 ->whereBetween('dateOfvisit', [$startDate, $endDate])
                 ->count();
-    
+
             // Return combined count for custom date range (e.g., for "custom" category in chart)
             return [$consultationCount + $prenatalCount + $immunizationCount + $vaccinationCount];
         }
-    
+
         // Default: Monthly breakdown
         $monthlyStats = [];
         $currentYear = date('Y');
-    
+
         for ($month = 1; $month <= 12; $month++) {
             // Handle custom date range filtering if provided
             $consultationQuery = DB::table('consultation_details')
                 ->whereYear('consultationDate', $currentYear)
                 ->whereMonth('consultationDate', $month);
-        
+
             $prenatalQuery = DB::table('prenatal_consultation_details')
                 ->whereYear('consultationDate', $currentYear)
                 ->whereMonth('consultationDate', $month);
-        
+
             $immunizationQuery = DB::table('national_immunization_programs')
                 ->whereYear('created_at', $currentYear)
                 ->whereMonth('created_at', $month);
-        
+
             $vaccinationQuery = DB::table('vaccination_records')
                 ->whereYear('dateOfvisit', $currentYear)
                 ->whereMonth('dateOfvisit', $month);
-        
+
             // Apply date range filter if startDate and endDate are provided
             if ($startDate && $endDate) {
                 $consultationQuery->whereBetween('consultationDate', [$startDate, $endDate]);
@@ -418,7 +418,7 @@ class SystemAnalyticsController extends Controller
                 $immunizationQuery->whereBetween('created_at', [$startDate, $endDate]);
                 $vaccinationQuery->whereBetween('dateOfvisit', [$startDate, $endDate]);
             }
-        
+
             // Add monthly stats to the array
             $monthlyStats[] =
                 $consultationQuery->count() +
@@ -426,10 +426,10 @@ class SystemAnalyticsController extends Controller
                 $immunizationQuery->count() +
                 $vaccinationQuery->count();
         }
-    
+
         return $monthlyStats;
     }
-    
+
 
 
     private function getReferredStats()
@@ -437,7 +437,7 @@ class SystemAnalyticsController extends Controller
         // Count total referred and not referred
         $totalReferred = ConsultationDetails::where('modeOfTransaction', 'Referral')->count();
         $totalNotReferred = ConsultationDetails::where('modeOfTransaction', '!=', 'Referral')->count();
-    
+
         // Get breakdown of referrals by reason
         $reasonsBreakdown = ConsultationDetails::select(
             'reasonsForReferral', // Ensure correct column name
@@ -449,21 +449,21 @@ class SystemAnalyticsController extends Controller
         ->mapWithKeys(function ($item) {
             return [
                 $item->reasonsForReferral => [
-                    'referred' => $item->referred ?? 0, 
-                    'notReferred' => $item->notReferred ?? 0 
+                    'referred' => $item->referred ?? 0,
+                    'notReferred' => $item->notReferred ?? 0
                 ]
             ];
         })
         ->toArray();
-    
+
         // Ensure the structure always includes total counts
         return [
             'referred' => $totalReferred ?? 0,
             'notReferred' => $totalNotReferred ?? 0,
             'reasons' => $reasonsBreakdown
         ];
-    }    
-    
+    }
+
     private function getVaccinationStatistics($request)
     {
         $monthlyVaccinations = [];
@@ -526,6 +526,7 @@ class SystemAnalyticsController extends Controller
                 'visit_information.diagnosis',
                 'consultation_details.consultationDate',
                 'personal_information.sex',
+                'personal_information.barangay',
                 DB::raw('TIMESTAMPDIFF(YEAR, personal_information.birthdate, CURDATE()) as age')
             );
 
@@ -557,7 +558,7 @@ class SystemAnalyticsController extends Controller
         ];
     }
 
-    
+
 
     private function getMentalHealthStatistics()
     {

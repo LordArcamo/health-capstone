@@ -220,9 +220,9 @@ onBeforeUnmount(() => {
         <div class="hover:-translate-y-1 transition">
           <Prenatal :prenatal="prenatal" />
         </div>
-        <div class="hover:-translate-y-1 transition">
+        <!-- <div class="hover:-translate-y-1 transition">
           <Barangay :filters="filters" :topBarangays="topBarangays" />
-        </div>
+        </div> -->
       </div>
     </section>
   </NewLayout>
