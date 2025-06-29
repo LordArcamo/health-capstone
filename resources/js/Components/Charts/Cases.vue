@@ -42,13 +42,24 @@
           </option>
         </select>
       </div>
+
+      <!-- Barangay Filter -->
+       <div class="filter flex flex-col items-start">
+        <label for="barangay-filter" class="filter-label">Barangay:</label>
+        <select id="barangay-filter" v-model="selectedBarangay" class="filter-select">
+          <option value="all">All Barangays</option>
+          <option v-for="barangay in uniqueBarangays" :key="barangay" :value="barangay">
+            {{ barangay }}
+          </option>
+        </select>
+      </div>
     </div>
 
     <!-- Chart -->
-    <apexchart 
-      type="line" 
-      :options="chartOptions" 
-      :series="chartSeries" 
+    <apexchart
+      type="line"
+      :options="chartOptions"
+      :series="chartSeries"
       class="cases-chart"
     ></apexchart>
   </div>
@@ -69,6 +80,7 @@ const props = defineProps({
 console.log("Monthly Cases received", props.monthly);
 
 // Filters
+const selectedBarangay = ref("all");
 const selectedCaseType = ref(""); // Default: All Cases
 const selectedAgeGroup = ref(""); // Default: All Ages
 const selectedGender = ref(""); // Default: All Genders
@@ -84,12 +96,19 @@ const caseTypes = Array.from(
 const ageGroups = ["0-18", "19-35", "36-60", "60+"];
 const genders = ["Male", "Female"];
 
+const uniqueBarangays = computed(() => {
+  const barangays = props.monthly.map((record) =>
+    record.barangay || record.personal_information?.barangay || "Unknown"
+  );
+  return [...new Set(barangays)].sort();
+});
+
 // Helper function to calculate age from birthdate
 const getAge = (birthdate) => {
   if (!birthdate) return null;
   const birth = new Date(birthdate);
   const today = new Date();
-  return today.getFullYear() - birth.getFullYear() - 
+  return today.getFullYear() - birth.getFullYear() -
     (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
 };
 
@@ -113,7 +132,11 @@ const filteredData = computed(() => {
     const genderMatch =
       !selectedGender.value || item.personal_information?.sex === selectedGender.value;
 
-    return caseTypeMatch && ageGroupMatch && genderMatch;
+    const barangayMatch =
+  selectedBarangay.value === "all" ||
+  (item.barangay || item.personal_information?.barangay) === selectedBarangay.value;
+
+    return caseTypeMatch && ageGroupMatch && genderMatch && barangayMatch;
   });
 });
 
@@ -213,6 +236,7 @@ const selectedFilters = computed(() => {
   if (selectedCaseType.value) filters.push(`Case Type: ${selectedCaseType.value}`);
   if (selectedAgeGroup.value) filters.push(`Age Group: ${selectedAgeGroup.value}`);
   if (selectedGender.value) filters.push(`Gender: ${selectedGender.value}`);
+  if (selectedBarangay.value !== "all") filters.push(`Barangay: ${selectedBarangay.value}`)
   return filters.length ? filters.join(" | ") : "No filters applied";
 });
 
