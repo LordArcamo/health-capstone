@@ -509,97 +509,111 @@ export default {
   },
 
   methods: {
-    generateReport() {
-      const doc = new jsPDF();
+generateReport() {
+  // Check if there's any data to print
+  if (!this.filteredPatients || this.filteredPatients.length === 0) {
+    alert("No records available to generate.");
+    return;
+  }
 
-      // Load the RHU Logo
-      const logo = "/images/RHU%20Logo.png"; // Path to the RHU logo you uploaded
+  const doc = new jsPDF();
 
-      // Add the Logo
-      doc.addImage(logo, 'PNG', 14, 10, 30, 30); // (image, format, x, y, width, height)
+  // Load the RHU Logo
+  const logo = "/images/RHU%20Logo.png";
 
-      // Header Information
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Republic of the Philippines", 105, 15, { align: "center" });
-      doc.text("Department of Health", 105, 22, { align: "center" });
-      doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
+  // Add the Logo
+  doc.addImage(logo, 'PNG', 14, 10, 30, 30);
 
-      // Subheader
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
-      doc.text("Contact: +63 918 811 1213,+63 920 276 6740  | Email: rhu.initao@gmail.com", 105, 42, { align: "center" });
+  // Header Information
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Republic of the Philippines", 105, 15, { align: "center" });
+  doc.text("Department of Health", 105, 22, { align: "center" });
+  doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
 
-      // Line Separator
-      doc.setLineWidth(0.5);
-      doc.line(14, 45, 196, 45);
+  // Subheader
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
+  doc.text("Contact: +63 918 811 1213,+63 920 276 6740  | Email: rhu.initao@gmail.com", 105, 42, { align: "center" });
 
-      // Report Title
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.text("Individual Treatment Records", 105, 55, { align: "center" });
+  // Line Separator
+  doc.setLineWidth(0.5);
+  doc.line(14, 45, 196, 45);
 
-      // Report Date
-      const date = new Date().toLocaleDateString();
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.text(`Date Generated: ${date}`, 14, 65);
+  // Report Title
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Individual Treatment Records", 105, 55, { align: "center" });
 
-      // Define Table Columns
-      const columns = [
-        "Full Name",
-        "Address",
-        "Age",
-        "Visit Type",
-        "Consultation Date",
-        "Diagnosis",
-        "Gender",
-        "Status"
-      ];
+  // Report Date
+  const date = new Date().toLocaleDateString();
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Date Generated: ${date}`, 14, 65);
 
-      // Define Table Rows (Filtered Patients)
-      const rows = this.filteredPatients.map((patient) => [
-        `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
-        `${patient.purok}, ${patient.barangay}`,
-        patient.age,
-        patient.visitType,
-        this.formatDate(patient.consultationDate),
-        patient.diagnosis,
-        patient.sex,
-        patient.status || "In Queue"
-      ]);
+  // Define Table Columns
+  const columns = [
+    "Full Name",
+    "Address",
+    "Age",
+    "Visit Type",
+    "Consultation Date",
+    "Diagnosis",
+    "Gender",
+    "Status"
+  ];
 
-      // Generate the Table
-      doc.autoTable({
-        head: [columns],
-        body: rows,
-        startY: 70,
-        styles: {
-          fontSize: 9,
-          cellPadding: 2,
-          valign: "middle",
-        },
-        headStyles: {
-          fillColor: [46, 204, 113], // Green Header
-          textColor: 255,
-          fontStyle: "bold",
-        },
-        alternateRowStyles: {
-          fillColor: [245, 245, 245], // Light Gray for Alternate Rows
-        },
-        margin: { top: 70 },
-      });
+  // Define Table Rows
+  const rows = this.filteredPatients.map((patient) => [
+    `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
+    `${patient.purok}, ${patient.barangay}`,
+    patient.age,
+    patient.visitType,
+    this.formatDate(patient.consultationDate),
+    patient.diagnosis,
+    patient.sex,
+    patient.status || "In Queue"
+  ]);
 
-      // Footer - Signature Area
-      doc.setFontSize(11);
-      doc.text("Prepared by:", 14, doc.autoTable.previous.finalY + 20);
-      doc.text("__________________________", 14, doc.autoTable.previous.finalY + 30);
-      doc.text("RHU Officer", 14, doc.autoTable.previous.finalY + 37);
+  // Another safeguard: just in case filteredPatients exists but rows are empty
+  if (rows.length === 0) {
+    alert("No records available to generate.");
+    return;
+  }
 
-      // Save the PDF
-      doc.save(`Patient_Report_${date}.pdf`);
+  // Generate the Table
+  doc.autoTable({
+    head: [columns],
+    body: rows,
+    startY: 70,
+    styles: {
+      fontSize: 9,
+      cellPadding: 2,
+      valign: "middle",
     },
+    headStyles: {
+      fillColor: [46, 204, 113],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+    alternateRowStyles: {
+      fillColor: [245, 245, 245],
+    },
+    margin: { top: 70 },
+  });
+
+  // Footer - Signature Area
+  const finalY = doc.lastAutoTable.finalY || 100;
+  doc.setFontSize(11);
+  doc.text("Prepared by:", 14, finalY + 20);
+  doc.text("__________________________", 14, finalY + 30);
+  doc.text("RHU Officer", 14, finalY + 37);
+
+  // Save the PDF
+  doc.save(`Patient_Report_${date}.pdf`);
+},
+
     // Open Edit Page
     editPatient(patient) {
       Inertia.get(`/patients/edit/${patient.personalId}`);

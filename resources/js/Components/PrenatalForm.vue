@@ -618,7 +618,7 @@ export default {
         valid = false;
       }
       if (!this.form.bloodPressure) {
-        this.errors.bloodPressure = 'Consultation time is required.';
+        this.errors.bloodPressure = 'Blood Pressure is required.';
         valid = false;
       }
       if (!this.form.providerName) {

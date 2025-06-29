@@ -477,110 +477,114 @@ export default {
       }
     },
 
-    generateReport() {
-      const doc = new jsPDF('portrait', 'mm', 'a4');
+  generateReport() {
+  // ✅ Check if there's any patient to report
+  if (!this.filteredPatients || this.filteredPatients.length === 0) {
+    alert("No immunization records to generate.");
+    return;
+  }
 
-      // RHU Logo Path
-      const logoUrl = "/images/RHU%20Logo.png"; // Ensure the path is correct
+  const doc = new jsPDF('portrait', 'mm', 'a4');
 
-      const dateGenerated = new Date().toLocaleDateString();
+  const logoUrl = "/images/RHU%20Logo.png";
+  const dateGenerated = new Date().toLocaleDateString();
 
-      // Load Logo
-      const img = new Image();
-      img.src = logoUrl;
+  const img = new Image();
+  img.src = logoUrl;
 
-      img.onload = () => {
-        // 🏥 RHU Header
-        doc.addImage(img, 'PNG', 14, 10, 30, 30); // Logo Position
+  img.onload = () => {
+    // 🏥 RHU Header
+    doc.addImage(img, 'PNG', 14, 10, 30, 30);
 
-        // Header Text
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("Republic of the Philippines", 105, 15, { align: "center" });
-        doc.text("Department of Health", 105, 22, { align: "center" });
-        doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
+    // Header Text
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Republic of the Philippines", 105, 15, { align: "center" });
+    doc.text("Department of Health", 105, 22, { align: "center" });
+    doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
 
-        // Subheader
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
-        doc.text("Contact: +63 918 811 1213 | Email: rhu.initao@gmail.com", 105, 42, { align: "center" });
+    // Subheader
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
+    doc.text("Contact: +63 918 811 1213 | Email: rhu.initao@gmail.com", 105, 42, { align: "center" });
 
-        // Divider
-        doc.setLineWidth(0.5);
-        doc.line(14, 48, 196, 48);
+    // Divider
+    doc.setLineWidth(0.5);
+    doc.line(14, 48, 196, 48);
 
-        // 📋 Report Title
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.text("National Immunization Records", 105, 58, { align: "center" });
+    // 📋 Report Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("National Immunization Records", 105, 58, { align: "center" });
 
-        // 📆 Date Generated
-        doc.setFontSize(10);
-        doc.text(`Date Generated: ${dateGenerated}`, 14, 66);
+    // 📆 Date Generated
+    doc.setFontSize(10);
+    doc.text(`Date Generated: ${dateGenerated}`, 14, 66);
 
-        // 📊 Table Columns
-        const columns = [
-          "Full Name",
-          "Address",
-          "Age",
-          "Gender",
-          "Consultation Date",
-          "Status"
-        ];
+    // 📊 Table Columns
+    const columns = [
+      "Full Name",
+      "Address",
+      "Age",
+      "Gender",
+      "Consultation Date",
+      "Status"
+    ];
 
-        // 📑 Table Rows (Filtered Data)
-        const rows = this.filteredPatients.map((patient) => [
-          `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
-          `${patient.purok}, ${patient.barangay}`,
-          patient.age,
-          patient.sex,
-          this.formatDate(patient.dateAssesed),
-          patient.status || "In Queue"
-        ]);
+    // 📑 Table Rows
+    const rows = this.filteredPatients.map((patient) => [
+      `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`,
+      `${patient.purok}, ${patient.barangay}`,
+      patient.age,
+      patient.sex,
+      this.formatDate(patient.dateAssesed),
+      patient.status || "In Queue"
+    ]);
 
-        // 📄 Table with AutoTable Plugin
-        doc.autoTable({
-          head: [columns],
-          body: rows,
-          startY: 72,
-          styles: {
-            fontSize: 9,
-            cellPadding: 3,
-            valign: "middle",
-          },
-          headStyles: {
-            fillColor: [0, 150, 136],  // Teal Header
-            textColor: 255,
-            fontStyle: "bold",
-          },
-          alternateRowStyles: {
-            fillColor: [240, 240, 240],  // Alternate Row Color
-          },
-          margin: { top: 70 },
-        });
+    // 📄 Table with AutoTable
+    doc.autoTable({
+      head: [columns],
+      body: rows,
+      startY: 72,
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+        valign: "middle",
+      },
+      headStyles: {
+        fillColor: [0, 150, 136],
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 240],
+      },
+      margin: { top: 70 },
+    });
 
-        // 🖊️ Footer - Signature Block
-        const finalY = doc.lastAutoTable.finalY + 20;
+    // 🖊️ Footer - Signature Block
+    const finalY = doc.lastAutoTable.finalY + 20;
 
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
-        doc.text("Prepared by:", 14, finalY);
-        doc.text("__________________________", 14, finalY + 8);
-        doc.text("RHU Officer", 14, finalY + 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text("Prepared by:", 14, finalY);
+    doc.text("__________________________", 14, finalY + 8);
+    doc.text("RHU Officer", 14, finalY + 15);
 
-        doc.text("Reviewed by:", 130, finalY);
-        doc.text("__________________________", 130, finalY + 8);
-        doc.text("Municipal Health Officer", 130, finalY + 15);
+    doc.text("Reviewed by:", 130, finalY);
+    doc.text("__________________________", 130, finalY + 8);
+    doc.text("Municipal Health Officer", 130, finalY + 15);
 
-        // 📥 Save the PDF
-        doc.save(`Immunization_Report_${dateGenerated}.pdf`);
-      };
+    // 📥 Save PDF
+    doc.save(`Immunization_Report_${dateGenerated}.pdf`);
+  };
 
-      img.onerror = () => {
-        alert("Failed to load the RHU logo. Please check the image path.");
-      };
-    },
+  img.onerror = () => {
+    alert("Failed to load the RHU logo. Please check the image path.");
+  };
+},
+
 
   },
 };

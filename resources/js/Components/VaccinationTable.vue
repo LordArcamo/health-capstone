@@ -4,6 +4,8 @@ import VaccinationModal from "./VaccinationModals/VaccinationModal.vue";
 import ScheduleNextAppointmentModal from "./VaccinationModals/ScheduleNextAppointmentModal.vue";
 import ViewHistoryModal from "./VaccinationModals/ViewHistoryModal.vue";
 import axios from 'axios';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default {
   props: {
@@ -159,34 +161,100 @@ export default {
       this.filterAddress = "";
       this.applyFilters();
     },
-    generateReport() {
-      if (!this.vaccinatedPatients || this.vaccinatedPatients.length === 0) {
-        alert("No patient data available to generate the report.");
-        return;
-      }
+generateReport() {
+  // Flatten all vaccine records from paginated patients
+  const records = this.paginatedPatients.flatMap(patient =>
+    patient.history.map(record => ({ patient, record }))
+  );
 
-      const headers = ["Name", "Age", "Vaccine Type", "Next Appointment", "Address"];
-      const rows = this.vaccinatedPatients.map((patient) => [
-        patient.firstName,
-        patient.age,
-        patient.vaccineType,
-        this.formatDate(patient.nextAppointment),
-        patient.barangay || "N/A",
-      ]);
+  // Stop if there are no records to print
+  if (records.length === 0) {
+    alert("No vaccination records to generate.");
+    return;
+  }
 
-      const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const doc = new jsPDF();
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.setAttribute("download", "patients_report.csv");
+  // RHU Logo
+  const logo = "/images/RHU%20Logo.png";
+  doc.addImage(logo, 'PNG', 14, 10, 30, 30);
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  // Header
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Republic of the Philippines", 105, 15, { align: "center" });
+  doc.text("Department of Health", 105, 22, { align: "center" });
+  doc.text("Initao Rural Health Unit", 105, 29, { align: "center" });
 
-      alert("Report generated and downloaded successfully!");
+  // Subheader
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text("Poblacion, Initao, Misamis Oriental", 105, 36, { align: "center" });
+  doc.text(
+    "Contact: +63 918 811 1213, +63 920 276 6740 | Email: rhu.initao@gmail.com",
+    105,
+    42,
+    { align: "center" }
+  );
+
+  doc.setLineWidth(0.5);
+  doc.line(14, 45, 196, 45);
+
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Vaccination Records", 105, 55, { align: "center" });
+
+  const date = new Date().toLocaleDateString();
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Date Generated: ${date}`, 14, 65);
+
+  const columns = [
+    "Full Name",
+    "Age",
+    "Vaccine Type",
+    "Next Appointment",
+    "Barangay",
+    "Purok"
+  ];
+
+  const rows = records.map(({ patient, record }) => [
+    `${patient.firstName} ${patient.middleName || ""} ${patient.lastName}`,
+    patient.age || "-",
+    record.vaccineType || "-",
+    this.formatDate(record.nextAppointment),
+    patient.barangay || "N/A",
+    patient.purok || "N/A"
+  ]);
+
+  doc.autoTable({
+    head: [columns],
+    body: rows,
+    startY: 70,
+    styles: {
+      fontSize: 9,
+      cellPadding: 2,
+      valign: "middle",
     },
+    headStyles: {
+      fillColor: [46, 204, 113],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+    alternateRowStyles: {
+      fillColor: [245, 245, 245],
+    },
+    margin: { top: 70 },
+  });
+
+  const finalY = doc.lastAutoTable.finalY || 100;
+  doc.setFontSize(11);
+  doc.text("Prepared by:", 14, finalY + 20);
+  doc.text("__________________________", 14, finalY + 30);
+  doc.text("RHU Officer", 14, finalY + 37);
+
+  doc.save(`Vaccination_Report_${date}.pdf`);
+},
     scheduleAppointment() {
       alert("Appointment scheduled successfully!");
       this.closeAllModals();

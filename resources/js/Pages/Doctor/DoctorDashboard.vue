@@ -1144,7 +1144,7 @@ onMounted(() => {
           </div>
           <!-- Critical Cases Line Chart -->
           <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Critical Cases Overview</h2>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Top 3 Cases Overview (2025)</h2>
             <canvas id="criticalCasesBarChart"></canvas>
           </div>
 
