@@ -15,6 +15,10 @@ const props = defineProps({
   natureOfVisit: {
     type: String,
     default: ''
+  },
+  doctors: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -73,6 +77,7 @@ function submitForm(payload) {
         v-if="personalInfo !== undefined" 
         :selectedPatient="personalInfo || {}"
         :natureOfVisit="natureOfVisit"
+        :doctors="doctors"
         @submitForm="submitForm"
       />
     </div>

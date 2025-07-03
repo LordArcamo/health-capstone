@@ -94,7 +94,7 @@
 
             <div>
               <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input"  required />
+              <input type="date" v-model="form.birthdate" class="input"  required :max="maxBirthdate" />
               <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
 
@@ -343,6 +343,10 @@ export default {
     };
   },
   computed: {
+    maxBirthdate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; // format: YYYY-MM-DD
+    },
     computedAge() {
       if (!this.form.birthdate) return '';
       const birthDate = new Date(this.form.birthdate);
@@ -523,7 +527,14 @@ export default {
       const maxDate = new Date(today.getFullYear() - 200, today.getMonth(), today.getDate());
 
       if (birthDate < maxDate) {
-        this.errors.birthdate = 'Please enter a birthdate that is valid.';
+        this.errors.birthdate = 'Please enter a valid birthdate.';
+        return;
+      }
+
+      if (birthDate > today) {
+        this.errors.birthdate = 'Birthdate cannot be in the future.';
+        this.form.birthdate = ''; // Optional: reset value
+        return;
       }
     },
     validateWeight(event) {
