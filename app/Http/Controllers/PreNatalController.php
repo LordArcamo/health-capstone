@@ -11,6 +11,7 @@ use App\Models\PrenatalConsultationDetails;
 use App\Models\PrenatalVisitInformation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class PreNatalController extends Controller
 {
@@ -357,8 +358,19 @@ class PreNatalController extends Controller
             return back()->withErrors(['error' => 'Patient not found']);
         }
 
+        $doctors = User::where('role', 'doctor')
+        ->select('id', 'first_name', 'middle_name', 'last_name')
+        ->get()
+        ->map(function ($doc) {
+            return [
+                'id' => $doc->id,
+                'fullName' => trim("Dr. {$doc->first_name} {$doc->middle_name} {$doc->last_name}"),
+            ];
+        });
+
         return Inertia::render('CheckUp/PreNatalCheckup', [
             'personalInfo' => $personalInfo,
+            'doctors' => $doctors,
         ]);
     }
 

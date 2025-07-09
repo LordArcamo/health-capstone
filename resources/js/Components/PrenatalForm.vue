@@ -178,14 +178,18 @@
                 @input="validateWeight" />
               <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
             </div>
-            <div>
-              <label class="block">Name of Attending Doctor/Provider:</label>
-              <input type="text"
-              v-model="form.providerName"
-              @input="autoDoctor($event); capitalizeName('providerName')"
-              placeholder="Example: Dr.Aileen Uy"
-              class="input">
-              <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
+          <div>
+              <label class="block">Name of Attending Physician:</label>
+              <select v-model="form.providerName" class="input">
+                <option disabled value="">Select a physician</option>
+                <option
+                  v-for="doctor in doctors"
+                  :key="doctor.id"
+                  :value="doctor.fullName"
+                >
+                  {{ doctor.fullName }}
+                </option>
+              </select>
             </div>
             <div>
               <label class="block">Name of Spouse:</label>
@@ -299,6 +303,10 @@ export default {
       type: Object,
       required: false,
       default: () => ({}),
+    },
+    doctors: {
+      type: Array,
+      default: () => []
     },
     onSubmit: Function,
   },
