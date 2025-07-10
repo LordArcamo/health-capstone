@@ -2,7 +2,7 @@
   <div class="mx-auto py-8 px-10 bg-gradient-to-br from-green-100 to-blue-100 min-h-screen">
     <!-- Header Section -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-green-600 text-center">Users List</h1>
+      <h1 class="text-3xl font-bold text-green-600 text-center">Active Users List</h1>
       <p class="text-gray-700 text-center">Search, filter, and manage staff records efficiently.</p>
     </div>
 
@@ -22,7 +22,7 @@
 
       <button @click="$inertia.visit('/inactiveStaff')"
         class="bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition px-4 py-3 whitespace-nowrap">
-        Inactive Users
+        View Inactive Users
       </button>
     </div>
 
