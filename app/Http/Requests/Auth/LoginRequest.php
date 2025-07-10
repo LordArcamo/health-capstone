@@ -49,6 +49,15 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // ❗ Check if the authenticated user is inactive
+        if (Auth::user()->status !== 'active') {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Your account has been deactivated.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

@@ -359,14 +359,15 @@ class PreNatalController extends Controller
         }
 
         $doctors = User::where('role', 'doctor')
-        ->select('id', 'first_name', 'middle_name', 'last_name')
-        ->get()
-        ->map(function ($doc) {
-            return [
-                'id' => $doc->id,
-                'fullName' => trim("Dr. {$doc->first_name} {$doc->middle_name} {$doc->last_name}"),
-            ];
-        });
+            ->where('status', 'active') // 👈 Only active doctors
+            ->select('id', 'first_name', 'middle_name', 'last_name')
+            ->get()
+            ->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    'fullName' => trim("Dr. {$doc->first_name} {$doc->middle_name} {$doc->last_name}"),
+                ];
+            });
 
         return Inertia::render('CheckUp/PreNatalCheckup', [
             'personalInfo' => $personalInfo,
