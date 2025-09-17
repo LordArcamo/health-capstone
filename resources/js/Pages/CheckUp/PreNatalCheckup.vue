@@ -12,6 +12,10 @@ const props = defineProps({
       required: false,
       default: () => ({}), // Default to an empty object
     },
+    doctors: {
+      type: Array,
+      default: () => []
+    }
 });
 
 watch(() => props.personalInfo, (newVal) => {
@@ -61,6 +65,7 @@ function submitForm(payload) {
     <PrenatalForm 
       v-if="personalInfo !== undefined" 
       :selectedPatient="personalInfo || {}"
+      :doctors="doctors"
       @submitForm="submitForm" 
     />
   </NewLayout>

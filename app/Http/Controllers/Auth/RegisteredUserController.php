@@ -22,12 +22,26 @@ class RegisteredUserController extends Controller
      */
     public function getStaff()
     {
-        $data = User::where('role', '!=', 'admin')->get();
-    
+        $data = User::where('role', '!=', 'admin')
+                    ->where('status', 'active')
+                    ->get();
+
         return Inertia::render('Admin/Staff', [
             'USERS' => $data,
         ]);
     }
+
+        public function getInactiveUsers()
+    {
+        $data = User::where('status', 'inactive')
+                    ->where('role', '!=', 'admin')
+                    ->get();
+
+        return Inertia::render('Admin/InactiveStaff', [
+            'USERS' => $data,
+        ]);
+    }
+
     public function getItrDoctorCheckup()
     {
         try {
@@ -206,19 +220,38 @@ class RegisteredUserController extends Controller
     /**
      * Delete the specified user.
      */
-    public function destroy($id)
+    public function deactivate($id)
     {
         $user = User::findOrFail($id);
 
-        // Prevent deleting admin users
+        // Prevent deactivating admin users
         if ($user->role === 'admin') {
-            return response()->json(['message' => 'Cannot delete admin users.'], 403);
+            return response()->json(['message' => 'Cannot deactivate admin users.'], 403);
         }
 
-        $user->delete();
+        // Deactivate user
+        $user->status = 'inactive';
+        $user->save();
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'User has been deactivated.');
     }
+
+        public function activate($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Prevent deactivating admin users
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Cannot deactivate admin users.'], 403);
+        }
+
+        // Deactivate user
+        $user->status = 'active';
+        $user->save();
+
+        return redirect()->back()->with('success', 'User has been deactivated.');
+    }
+
     public function getActiveUsers()
     {
         $activeUsers = DB::table('sessions')

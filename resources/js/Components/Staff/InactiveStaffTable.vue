@@ -2,7 +2,7 @@
   <div class="mx-auto py-8 px-10 bg-gradient-to-br from-green-100 to-blue-100 min-h-screen">
     <!-- Header Section -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-green-600 text-center">Active Users List</h1>
+      <h1 class="text-3xl font-bold text-green-600 text-center">Inactive Users List</h1>
       <p class="text-gray-700 text-center">Search, filter, and manage staff records efficiently.</p>
     </div>
 
@@ -20,9 +20,9 @@
         Filters
       </button>
 
-      <button @click="$inertia.visit('/inactiveStaff')"
+        <button @click="$inertia.visit('/staff')"
         class="bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition px-4 py-3 whitespace-nowrap">
-        View Inactive Users
+        View Active Users
       </button>
     </div>
 
@@ -65,16 +65,12 @@
             <td class="py-3 px-6">{{ capitalize(staff.phone) }}</td>
             <td class="py-3 px-6">{{ capitalize(staff.role) }}</td>
             <td class="py-3 px-6">
-              <!-- Edit Button -->
-              <button @click.stop="editStaff(staff)"
-                class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition">
-                Edit
-              </button>
+
               <!-- Delete Button -->
-              <button @click.stop="deleteStaff(staff)"
-                class="bg-orange-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition ml-2">
-                Deactivate
-              </button>
+                <button @click.stop="deleteStaff(staff)"
+                class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition ml-2">
+                Activate
+                </button>
             </td>
           </tr>
         </tbody>
@@ -189,25 +185,15 @@
       </div>
     </div>
 
-    <!-- Edit Staff Modal -->
-    <EditStaffModal v-if="showEditModal" :show="showEditModal" :staff="editingStaff" @close="closeEditModal"
-      @updated="refreshData" />
   </div>
 </template>
 
 <script>
 import { router } from '@inertiajs/vue3';
-import EditStaffModal from './EditStaffModal.vue';
-
 
 export default {
-  name: 'ITRStaffTable',
-  components: {
-
-    EditStaffModal
-  },
   props: {
-    staffList: {
+    getInactiveUsers: {
       type: Array,
       required: true
     }
@@ -220,8 +206,6 @@ export default {
       currentPage: 1,
       itemsPerPage: 10,
       showModal: false,
-      showEditModal: false,
-      editingStaff: null,
       selectedStaff: {
         profile_picture: '', // Placeholder for base64 string
       },
@@ -229,11 +213,11 @@ export default {
   },
   computed: {
     filteredStaff() {
-      if (!this.staffList) return [];
+      if (!this.getInactiveUsers) return [];
 
       const query = this.searchQuery ? this.searchQuery.toLowerCase() : '';
 
-      return this.staffList.filter((staff) => {
+      return this.getInactiveUsers.filter((staff) => {
         if (!staff) return false;
 
         const matchesQuery = !query ||
@@ -257,8 +241,8 @@ export default {
     },
 
     positionOptions() {
-      if (!this.staffList) return [];
-      return Array.from(new Set(this.staffList.map(s => s.role))).sort();
+      if (!this.getInactiveUsers) return [];
+      return Array.from(new Set(this.getInactiveUsers.map(s => s.role))).sort();
     }
   },
   methods: {
@@ -273,22 +257,13 @@ export default {
       this.showModal = false;
       this.selectedStaff = null;
     },
-    editStaff(staff) {
-      event.stopPropagation();
-      this.editingStaff = { ...staff };
-      this.showEditModal = true;
-    },
-    closeEditModal() {
-      this.showEditModal = false;
-      this.editingStaff = null;
-    },
     refreshData() {
-      router.reload({ only: ['staffList'] });
+      router.reload({ only: ['getInactiveUsers'] });
     },
     deleteStaff(staff) {
       event.stopPropagation();
       if (confirm('Are you sure you want to deactivate this user?')) {
-        router.delete(`/admin/staff/${staff.id}`);
+        router.delete(`/admin/inactiveStaff/${staff.id}`);
       }
     },
     nextPage() {

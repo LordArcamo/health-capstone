@@ -112,7 +112,7 @@
             </div>
             <div>
               <label class="block">Birthdate:</label>
-              <input type="date" v-model="form.birthdate" class="input" required @input="restrictBirthdateInput"
+              <input type="date" v-model="form.birthdate" class="input" required :max="maxBirthdate" @input="restrictBirthdateInput"
                 @change="validateBirthdate" />
               <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
@@ -228,16 +228,18 @@
                 required />
               <span v-if="errors.weight" class="text-red-600 text-sm">{{ errors.weight }}</span>
             </div>
-            <div>
+          <div>
               <label class="block">Name of Attending Physician:</label>
-              <input
-                type="text"
-            v-model="form.providerName"
-            @input="autoDoctor($event); capitalizeName('providerName')"
-            placeholder="Example: Dr. Jose Legazpi"
-            class="input"
-            />
-              <span v-if="errors.providerName" class="text-red-600 text-sm">{{ errors.providerName }}</span>
+              <select v-model="form.providerName" class="input">
+                <option disabled value="">Select a physician</option>
+                <option
+                  v-for="doctor in doctors"
+                  :key="doctor.id"
+                  :value="doctor.fullName"
+                >
+                  {{ doctor.fullName }}
+                </option>
+              </select>
             </div>
 
           </div>
@@ -364,6 +366,10 @@ export default {
     natureOfVisit: {
       type: String,
       default: ''
+    },
+        doctors: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -402,6 +408,10 @@ export default {
     };
   },
   computed: {
+    maxBirthdate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; // format: YYYY-MM-DD
+    },
     computedAge() {
       if (!this.form.birthdate) return '';
       const birthDate = new Date(this.form.birthdate);
@@ -558,6 +568,10 @@ export default {
       this.errors.consultationDate = "";
       return true;
     },
+    handleProviderNameInput() {
+      this.autoDoctor();        // Add Dr. if needed
+      this.capitalizeName('providerName');  // Capitalize name properly
+    },
     setAutoDateTime() {
       const now = new Date();
 
@@ -653,7 +667,14 @@ export default {
       const maxDate = new Date(today.getFullYear() - 200, today.getMonth(), today.getDate());
 
       if (birthDate < maxDate) {
-        this.errors.birthdate = 'Please enter a birthdate that is valid.';
+        this.errors.birthdate = 'Please enter a valid birthdate.';
+        return;
+      }
+
+      if (birthDate > today) {
+        this.errors.birthdate = 'Birthdate cannot be in the future.';
+        this.form.birthdate = ''; // Optional: reset value
+        return;
       }
     },
     validateWeight(event) {

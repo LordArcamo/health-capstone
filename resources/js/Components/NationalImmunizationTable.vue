@@ -584,6 +584,131 @@ export default {
     alert("Failed to load the RHU logo. Please check the image path.");
   };
 },
+printRecord(patient) {
+  const doc = new jsPDF('portrait', 'mm', 'a4');
+  const dateGenerated = new Date().toLocaleDateString();
+  const logoUrl = "/images/RHU%20Logo.png";
+
+  const img = new Image();
+  img.src = logoUrl;
+
+  img.onload = () => {
+    // RHU Logo
+    doc.addImage(img, 'PNG', 10, 10, 25, 25);
+
+    // Header
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(0, 102, 0);
+    doc.text('Republic of the Philippines', 40, 15);
+    doc.text('Department of Health', 40, 23);
+    doc.text('Initao Rural Health Unit', 40, 31);
+
+    doc.setFontSize(10);
+    doc.setTextColor(50);
+    doc.text(`Generated on: ${dateGenerated}`, 150, 15);
+
+    // Title
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('Patient Health Record Summary', 105, 50, { align: 'center' });
+
+    // Basic Information
+    const basicInfo = [
+      ['Full Name:', `${patient.firstName} ${patient.middleName || ''} ${patient.lastName}`],
+      ['Suffix:', patient.suffix || 'N/A'],
+      ['Address:', patient.address],
+      ['Age:', patient.age],
+      ['Birthday:', patient.birthdate],
+      ['Contact:', patient.contact],
+      ['Gender:', patient.sex],
+      ['Birth Place:', patient.birthplace],
+      ['Blood Type:', patient.bloodtype],
+    ];
+
+    doc.autoTable({
+      startY: 60,
+      body: basicInfo,
+      theme: 'plain',
+      styles: { fontSize: 10, textColor: 50 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 50 },
+        1: { cellWidth: 'auto' }
+      }
+    });
+
+    // Family & Health Information
+    const famHealthStartY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(12);
+    doc.setTextColor(0, 102, 0);
+    doc.text('Family & Health Information', 14, famHealthStartY);
+    doc.setTextColor(0);
+
+    const famHealthInfo = [
+      ["Mother's Name:", patient.mothername],
+      ["DSWD NHTS:", patient.dswdNhts || 'N/A'],
+      ['Facility Household No.:', patient.facilityHouseholdno],
+      ['Household No.:', patient.houseHoldno],
+      ['4Ps Member?:', patient.fourpsmember ? 'Yes' : 'No'],
+      ['PCB Member?:', patient.PCBMember ? 'Yes' : 'No'],
+      ['Philhealth Status:', patient.philhealthStatus],
+      ['Philhealth No.:', patient.philhealthNo],
+      ['TT Status of Mother:', patient.ttStatus],
+    ];
+
+    doc.autoTable({
+      startY: famHealthStartY + 5,
+      body: famHealthInfo,
+      theme: 'plain',
+      styles: { fontSize: 10, textColor: 50 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 60 },
+        1: { cellWidth: 'auto' }
+      }
+    });
+
+    // Additional Details
+    const additionalStartY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(12);
+    doc.setTextColor(0, 102, 0);
+    doc.text('Additional Details', 14, additionalStartY);
+    doc.setTextColor(0);
+
+    const additionalInfo = [
+      ['Date Assessed:', patient.dateAssesed || 'N/A'],
+      ['Date:', patient.date],
+      ['Place:', patient.place],
+      ['Guardian:', patient.guardian],
+    ];
+
+    doc.autoTable({
+      startY: additionalStartY + 5,
+      body: additionalInfo,
+      theme: 'plain',
+      styles: { fontSize: 10, textColor: 50 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 60 },
+        1: { cellWidth: 'auto' }
+      }
+    });
+
+    // Footer
+    const finalY = doc.lastAutoTable.finalY + 30;
+    doc.line(20, finalY, 80, finalY);
+    doc.line(130, finalY, 190, finalY);
+    doc.setFontSize(10);
+    doc.text('Attending Physician Signature', 20, finalY + 5);
+    doc.text('Patient/Guardian Signature', 130, finalY + 5);
+
+    // Save
+    const fileName = `Patient_Record_${patient.firstName}_${patient.lastName}.pdf`;
+    doc.save(fileName);
+  };
+
+  img.onerror = () => {
+    alert('Failed to load RHU logo. Please check the image path.');
+  };
+},
 
 
   },

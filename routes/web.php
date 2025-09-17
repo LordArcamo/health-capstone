@@ -90,6 +90,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.staff');
 
+        Route::get('/inactiveStaff', [RegisteredUserController::class, 'getInactiveUsers'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register.inactiveStaff');
+
     Route::get('/doctor-checkup/itr', [RegisteredUserController::class, 'getItrDoctorCheckup'])
         ->middleware([RoleMiddleware::class . ':doctor'])
         ->name('doctor.itr-checkup');
@@ -98,9 +102,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware([RoleMiddleware::class . ':admin'])
         ->name('admin.register.update');
 
-    Route::delete('/admin/staff/{id}', [RegisteredUserController::class, 'destroy'])
+    Route::delete('/admin/staff/{id}', [RegisteredUserController::class, 'deactivate'])
         ->middleware([RoleMiddleware::class . ':admin'])
-        ->name('admin.register.destroy');
+        ->name('admin.register.deactivate');
+
+    Route::delete('/admin/inactiveStaff/{id}', [RegisteredUserController::class, 'activate'])
+        ->middleware([RoleMiddleware::class . ':admin'])
+        ->name('admin.register.activate');
 
     Route::get('/staff/active', [RegisteredUserController::class, 'getActiveUsers'])
         ->middleware([RoleMiddleware::class . ':admin'])

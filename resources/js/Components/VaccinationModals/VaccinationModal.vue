@@ -136,7 +136,7 @@
             <div>
               <label class="block">Birthdate:</label>
               <input type="date" v-model="form.birthdate" @input="restrictBirthdateInput" @change="validateBirthdate"
-                class="input" required />
+                class="input" required :max="maxBirthdate"/>
               <span v-if="errors.birthdate" class="text-red-600 text-sm">{{ errors.birthdate }}</span>
             </div>
             <div>
@@ -473,6 +473,10 @@ export default {
     },
   },
   computed: {
+    maxBirthdate() {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; // format: YYYY-MM-DD
+    },
     filteredVaccineCategories() {
     const categories = [];
     const patient = this.form;
@@ -566,6 +570,29 @@ export default {
     },
   },
   methods: {
+    validateBirthdate() {
+      this.errors.birthdate = ''; // Reset error message
+
+      if (!this.form.birthdate) {
+        this.errors.birthdate = 'Birthdate is required.';
+        return;
+      }
+
+      const birthDate = new Date(this.form.birthdate);
+      const today = new Date();
+      const maxDate = new Date(today.getFullYear() - 200, today.getMonth(), today.getDate());
+
+      if (birthDate < maxDate) {
+        this.errors.birthdate = 'Please enter a valid birthdate.';
+        return;
+      }
+
+      if (birthDate > today) {
+        this.errors.birthdate = 'Birthdate cannot be in the future.';
+        this.form.birthdate = ''; // Optional: reset value
+        return;
+      }
+    },
     getTodayDate() {
     const today = new Date();
     return today.toISOString().split('T')[0]; // "YYYY-MM-DD"
