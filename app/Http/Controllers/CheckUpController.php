@@ -406,20 +406,7 @@ class CheckUpController extends Controller
             'natureOfVisit' => $natureOfVisit
         ]);
 
-        if ($personalId === 'new') {
-            return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup', [
-                'personalInfo' => null, // No existing patient
-                'natureOfVisit' => $natureOfVisit,
-            ]);
-        }
-
-        $personalInfo = $personalId ? PersonalInformation::find($personalId) : null;
-
-        if (!$personalInfo) {
-            return back()->withErrors(['error' => 'Patient not found']);
-        }
-
-        $doctors = User::where('role', 'doctor')
+                $doctors = User::where('role', 'doctor')
             ->where('status', 'active') // 👈 Only active doctors
             ->select('id', 'first_name', 'middle_name', 'last_name')
             ->get()
@@ -429,6 +416,20 @@ class CheckUpController extends Controller
                     'fullName' => trim("Dr. {$doc->first_name} {$doc->middle_name} {$doc->last_name}"),
                 ];
             });
+
+        if ($personalId === 'new') {
+            return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup', [
+                'personalInfo' => null, // No existing patient
+                'natureOfVisit' => $natureOfVisit,
+                'doctors' => $doctors,
+            ]);
+        }
+
+        $personalInfo = $personalId ? PersonalInformation::find($personalId) : null;
+
+        if (!$personalInfo) {
+            return back()->withErrors(['error' => 'Patient not found']);
+        }
 
         return Inertia::render('CheckUp/IndividualTreatmentRecordCheckup', [
             'personalInfo' => $personalInfo,

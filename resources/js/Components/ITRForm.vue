@@ -368,7 +368,7 @@ export default {
       default: ''
     },
         doctors: {
-      type: String,
+      type: Array,
       default: ''
     }
   },
