@@ -130,7 +130,7 @@
 
             <div>
               <label class="block">Purok:</label>
-              <input type="text" v-model="form.purok" class="input" placeholder="Example: Purok 1A" required />
+              <input type="text" v-model="form.purok" @input="capitalizeName('purok')" class="input" placeholder="Example: Purok 1A" required />
               <span v-if="errors.purok" class="text-red-600 text-sm">{{ errors.purok }}</span>
             </div>
             <div>
