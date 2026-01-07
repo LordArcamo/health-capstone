@@ -33,7 +33,7 @@ watchEffect(() => {
         <!-- Content Section -->
         <div class="py-8 px-6 md:px-10 text-center">
           <p class="text-gray-700 text-md mb-6">
-            You can now navigate to your dashboard, submit another checkup form, or view general checkup records.
+            You can now navigate to your dashboard, submit another checkup forms, or view general checkup records.
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Dashboard Link -->
