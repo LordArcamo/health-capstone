@@ -112,20 +112,20 @@ class SystemAnalyticsController extends Controller
         $totalPatients = $this->totalPatients($request);
         // $risk_management = $this->risk($request);
         $vaccinations = $this->vaccinations($request);
-        $cases = $this->cases($request);
+        // $cases = $this->cases($request);
 
         $monthlyStats = $this->getPatientStatistics($request);
         $referredStats = $this->getReferredStats($request);
         $lineChart = $this->getVaccinationStatistics($request);
         $casesStats = $this->getCasesStatistics($request);
-        $mentalHealthStats = $this->getMentalHealthStatistics($request);
+        // $mentalHealthStats = $this->getMentalHealthStatistics($request);
 
         return Inertia::render('Analytics', [
             'vaccinenatedPatients' => $vaccinenatedPatients,
             'totalPatients' => $totalPatients,
             // 'risk' => $risk,
             'vaccinations' => $vaccinations,
-            'cases' => $cases,
+            // 'cases' => $cases,
             'barChart' => $monthlyStats,
             'pieChart' => $this->getReferredStats(),
             'lineChart' => [
@@ -133,7 +133,7 @@ class SystemAnalyticsController extends Controller
                 'data' => $lineChart,
             ],
             'casesData' => $casesStats,
-            'mentalHealthStats' => $mentalHealthStats,
+            // 'mentalHealthStats' => $mentalHealthStats,
             'prenatal' => $prenatal,
             'monthly' => $monthly,
             'topBarangays' => $topBarangays
@@ -301,60 +301,60 @@ class SystemAnalyticsController extends Controller
         return $query->count();
     }
 
-    private function cases($request)
-    {
-        $query = CheckUp::where('visitType', 'Mental Health');
+    // private function cases($request)
+    // {
+    //     $query = CheckUp::where('visitType', 'Mental Health');
 
-        if ($request->gender) {
-            $query->whereHas('personalInformation', function($q) use ($request) {
-                $q->where('sex', $request->gender);
-            });
-        }
+    //     if ($request->gender) {
+    //         $query->whereHas('personalInformation', function($q) use ($request) {
+    //             $q->where('sex', $request->gender);
+    //         });
+    //     }
 
-        if ($request->date) {
-            $today = now();
-            switch ($request->date) {
-                case '7days':
-                    $query->where('consultationDate', '>=', $today->subDays(7));
-                    break;
-                case '30days':
-                    $query->where('consultationDate', '>=', $today->subDays(30));
-                    break;
-                case 'year':
-                    $query->whereYear('consultationDate', $today->year);
-                    break;
-            }
-        }
+    //     if ($request->date) {
+    //         $today = now();
+    //         switch ($request->date) {
+    //             case '7days':
+    //                 $query->where('consultationDate', '>=', $today->subDays(7));
+    //                 break;
+    //             case '30days':
+    //                 $query->where('consultationDate', '>=', $today->subDays(30));
+    //                 break;
+    //             case 'year':
+    //                 $query->whereYear('consultationDate', $today->year);
+    //                 break;
+    //         }
+    //     }
 
-        if ($request->ageRange) {
-            $query->whereHas('personalInformation', function($q) use ($request) {
-                $ages = explode('-', $request->ageRange);
-                if (count($ages) === 2) {
-                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
-                      ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
-                } else {
-                    $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
-                }
-            });
-        }
+    //     if ($request->ageRange) {
+    //         $query->whereHas('personalInformation', function($q) use ($request) {
+    //             $ages = explode('-', $request->ageRange);
+    //             if (count($ages) === 2) {
+    //                 $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [$ages[0]])
+    //                   ->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) <= ?', [$ages[1]]);
+    //             } else {
+    //                 $q->whereRaw('TIMESTAMPDIFF(YEAR, birthDate, CURDATE()) >= ?', [60]);
+    //             }
+    //         });
+    //     }
 
-        if ($request->casesType) {
-            switch ($request->casesType) {
-                case 'confirmed':
-                    $query->whereNotNull('diagnosis');
-                    break;
-                case 'recovered':
-                    $query->where('natureOfVisit', 'Follow-up')
-                          ->where('diagnosis', 'like', '%Recovered%');
-                    break;
-                case 'deaths':
-                    $query->where('diagnosis', 'like', '%Deceased%');
-                    break;
-            }
-        }
+    //     if ($request->casesType) {
+    //         switch ($request->casesType) {
+    //             case 'confirmed':
+    //                 $query->whereNotNull('diagnosis');
+    //                 break;
+    //             case 'recovered':
+    //                 $query->where('natureOfVisit', 'Follow-up')
+    //                       ->where('diagnosis', 'like', '%Recovered%');
+    //                 break;
+    //             case 'deaths':
+    //                 $query->where('diagnosis', 'like', '%Deceased%');
+    //                 break;
+    //         }
+    //     }
 
-        return $query->count();
-    }
+    //     return $query->count();
+    // }
 
     private function getPatientStatistics($request)
     {
